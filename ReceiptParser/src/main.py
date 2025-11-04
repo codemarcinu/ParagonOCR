@@ -4,17 +4,15 @@ from sqlalchemy.orm import sessionmaker, Session, joinedload
 from typing import Callable
 
 # Lokalne importy z naszego projektu
-from .ocr import extract_text_from_file
 from .database import engine, init_db, Sklep, Paragon, PozycjaParagonu, Produkt, AliasProduktu
-from .parsers import BaseParser, ParsedData
-from .parsers.lidl_parser import LidlParser
+from .data_models import ParsedData
 from .llm import get_llm_suggestion, parse_receipt_with_llm
 
 # --- GŁÓWNA LOGIKA PRZETWARZANIA (NIEZALEŻNA OD UI) ---
 
 def run_processing_pipeline(
     file_path: str,
-    llm_model: str | None,
+    llm_model: str,  # Teraz to jest parametr wymagany
     log_callback: Callable[[str], None],
     prompt_callback: Callable[[str, str, str], str]
 ) -> None:
@@ -22,27 +20,22 @@ def run_processing_pipeline(
     Uruchamia pełny potok przetwarzania paragonu, od odczytu po zapis do bazy.
     Funkcja jest niezależna od UI i przyjmuje callbacki do komunikacji z użytkownikiem.
     """
+    # Krok 1: Parsowanie multimodalne jest teraz domyślnym i jedynym potokiem
     try:
-        if llm_model:
-            log_callback(f"INFO: Używam modelu LLM '{llm_model}' do przetworzenia obrazu.")
-            parsed_data = parse_receipt_with_llm(file_path, llm_model)
-            if not parsed_data:
-                raise Exception("Parsowanie za pomocą LLM nie zwróciło danych.")
-            log_callback("INFO: Dane z paragonu zostały pomyślnie sparsowane przez LLM.")
-        else:
-            log_callback("INFO: Używam klasycznego OCR (Tesseract) i parserów regex.")
-            raw_text = extract_text_from_file(file_path)
-            if not raw_text.strip():
-                raise Exception("OCR nie zwrócił żadnego tekstu.")
-
-            parser = get_parser(raw_text, log_callback)
-            parsed_data = parser.parse(raw_text)
-            log_callback("INFO: Dane z paragonu zostały pomyślnie sparsowane.")
+        log_callback(f"INFO: Używam modelu LLM '{llm_model}' do przetworzenia obrazu.")
+        parsed_data = parse_receipt_with_llm(file_path, llm_model)
+        
+        if not parsed_data:
+            raise Exception("Parsowanie za pomocą LLM nie zwróciło danych.")
+            
+        log_callback("INFO: Dane z paragonu zostały pomyślnie sparsowane przez LLM.")
 
     except Exception as e:
-        log_callback(f"BŁĄD KRYTYCZNY na etapie OCR/Parsowania: {e}")
+        log_callback(f"BŁĄD KRYTYCZNY na etapie parsowania LLM: {e}")
+        log_callback("Upewnij się, że serwer Ollama działa i model jest dostępny.")
         return
 
+    # Krok 2: Zapis do bazy (ta logika jest już dobra i pozostaje bez zmian)
     if parsed_data:
         SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
         session = SessionLocal()
@@ -57,14 +50,6 @@ def run_processing_pipeline(
             session.close()
     else:
         log_callback("BŁĄD: Nie udało się uzyskać danych do zapisu.")
-
-def get_parser(raw_text: str, log_callback: Callable) -> BaseParser:
-    text_lower = raw_text.lower()
-    if 'lidl' in text_lower:
-        log_callback("INFO: Wykryto sklep Lidl, używam dedykowanego parsera.")
-        return LidlParser()
-    else:
-        raise ValueError("Nie udało się zidentyfikować sklepu na podstawie tekstu paragonu.")
 
 def save_to_database(session: Session, parsed_data: ParsedData, file_path: str, log_callback: Callable, prompt_callback: Callable):
     log_callback("INFO: Rozpoczynam zapis do bazy danych...")
@@ -141,7 +126,6 @@ def resolve_product(session: Session, raw_name: str, log_callback: Callable, pro
 
 def cli_log_callback(message: str):
     """Callback do logowania dla trybu CLI."""
-    # Używa secho dla kolorowania, jeśli to błąd/sukces
     if message.startswith("BŁĄD"):
         click.secho(message, fg='red')
     elif message.startswith("--- Sukces!"):
@@ -168,8 +152,8 @@ def init_db_command():
 
 @cli.command()
 @click.option('--file', 'file_path', required=True, type=click.Path(exists=True, dir_okay=False, resolve_path=True), help="Ścieżka do pliku z paragonem (PDF, PNG, JPG).")
-@click.option('--llm', 'llm_model', type=str, help='Użyj modelu LLM (np. llava) do parsowania obrazu.')
-def process(file_path: str, llm_model: str = None):
+@click.option('--llm', 'llm_model', required=True, type=str, help='Nazwa modelu LLM (np. llava:latest) do użycia.')
+def process(file_path: str, llm_model: str):
     """Przetwarza plik z paragonem, parsuje go i zapisuje do bazy danych."""
     click.secho(f"--- Rozpoczynam przetwarzanie pliku: {file_path} ---", bold=True)
     run_processing_pipeline(file_path, llm_model, cli_log_callback, cli_prompt_callback)

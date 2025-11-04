@@ -31,10 +31,6 @@ class App(ctk.CTk):
         self.file_label = ctk.CTkLabel(self.main_frame, text="Nie wybrano pliku", anchor="w")
         self.file_label.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
 
-        self.llm_switch_var = ctk.StringVar(value="off")
-        self.llm_switch = ctk.CTkSwitch(self.main_frame, text="Użyj LLM do parsowania (np. llava)", variable=self.llm_switch_var, onvalue="llava:latest", offvalue="off")
-        self.llm_switch.grid(row=1, column=0, columnspan=2, padx=10, pady=5, sticky="w")
-
         self.process_button = ctk.CTkButton(self.main_frame, text="Przetwórz", command=self.start_processing, state="disabled")
         self.process_button.grid(row=2, column=0, columnspan=2, padx=10, pady=10)
         
@@ -81,7 +77,6 @@ class App(ctk.CTk):
                 self.log_textbox.configure(state="disabled")
                 self.log_textbox.see("end")
             
-            # Sprawdź, czy jest prośba o prompt
             if not self.prompt_queue.empty():
                 prompt_text, default_value, raw_name = self.prompt_queue.get_nowait()
                 self.show_prompt_dialog(prompt_text, default_value, raw_name)
@@ -91,8 +86,6 @@ class App(ctk.CTk):
 
     def show_prompt_dialog(self, prompt_text, default_value, raw_name):
         dialog = ctk.CTkInputDialog(title="Potrzebna informacja", text=f"Nieznany produkt: {raw_name}\n{prompt_text}")
-        # Niestety, CTkInputDialog nie wspiera wartości domyślnej w prosty sposób,
-        # więc musimy obejść to, ustawiając tekst w polu wejściowym po utworzeniu.
         dialog.geometry("400x200")
         dialog._entry.delete(0, "end")
         dialog._entry.insert(0, default_value)
@@ -103,7 +96,6 @@ class App(ctk.CTk):
     def set_ui_state(self, state: str):
         self.process_button.configure(state=state)
         self.file_button.configure(state=state)
-        self.llm_switch.configure(state=state)
         self.init_db_button.configure(state=state)
 
     def initialize_database(self):
@@ -123,9 +115,7 @@ class App(ctk.CTk):
         self.log_textbox.delete("1.0", "end")
         self.log_textbox.configure(state="disabled")
 
-        llm_model = self.llm_switch_var.get()
-        if llm_model == "off":
-            llm_model = None
+        llm_model = "llava:latest"  # Model jest teraz na stałe
 
         thread = threading.Thread(
             target=run_processing_pipeline,
@@ -134,7 +124,6 @@ class App(ctk.CTk):
         thread.daemon = True
         thread.start()
 
-        # Sprawdzaj, czy wątek się zakończył
         self.monitor_thread(thread)
 
     def monitor_thread(self, thread):

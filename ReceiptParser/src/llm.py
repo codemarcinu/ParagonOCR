@@ -144,26 +144,43 @@ def parse_receipt_with_llm(image_path: str, model_name: str = 'llava:latest') ->
     ```json
     {
       "sklep_info": {
-        "nazwa": "string",
-        "lokalizacja": "string or null"
+        "nazwa": "string (np. 'Lidl', 'Biedronka', 'Auchan', 'Kaufland')",
+        "lokalizacja": "string (adres sklepu lub miasto) or null"
       },
       "paragon_info": {
         "data_zakupu": "string w formacie YYYY-MM-DD",
-        "suma_calkowita": "string reprezentujący liczbę (np. '123.45')"
+        "suma_calkowita": "string reprezentujący liczbę (np. '123.45', zawsze suma końcowa po rabatach)"
       },
       "pozycje": [
         {
-          "nazwa_raw": "string",
-          "ilosc": "string reprezentujący liczbę (np. '1.000')",
-          "jednostka": "string (np. 'szt', 'kg')",
-          "cena_jedn": "string reprezentujący liczbę",
-          "cena_calk": "string reprezentujący liczbę",
-          "rabat": "string reprezentujący liczbę or null",
-          "cena_po_rab": "string reprezentujący liczbę"
+          "nazwa_raw": "string (nazwa produktu z paragonu)",
+          "ilosc": "string (np. '1.000')",
+          "jednostka": "string (np. 'szt', 'kg') or null",
+          "cena_jedn": "string (cena za jednostkę)",
+          "cena_calk": "string (cena całkowita PRZED rabatem, jeśli jest podany)",
+          "rabat": "string (wartość rabatu np. '0.80') or null",
+          "cena_po_rab": "string (cena końcowa za pozycję)"
         }
       ]
     }
     ```
+    
+    BARDZO WAŻNE ZASADY:
+    1.  **Nazwa sklepu:** Zidentyfikuj nazwę sieci (np. "Biedronka", "Lidl", "Auchan", "Kaufland").
+    2.  **Suma całkowita:** Zawsze bierz końcową sumę do zapłaty (np. "SUMA PLN", "Razem PLN", "Ogółem").
+    3.  **Pozycje bez ilości (np. Kaufland):** Jeśli paragon pokazuje tylko nazwę i cenę końcową (jak "UHT bezLaktozy1,... 4,29"), ZAWSZE ustaw:
+        - "ilosc": "1.0"
+        - "jednostka": "szt"
+        - "cena_jedn": "4.29" (taka sama jak cena całkowita)
+        - "cena_calk": "4.29"
+        - "rabat": null
+        - "cena_po_rab": "4.29"
+    4.  **Rabaty:** Jeśli rabat jest podany jako osobna linia (np. "Rabat ORZESZKI W... -0.80"), NIE twórz dla niego osobnej pozycji. Zamiast tego, znajdź oryginalną pozycję ("ORZESZKI W") i uzupełnij jej pola:
+        - "cena_calk": "3.99" (oryginalna cena)
+        - "rabat": "0.80" (wartość rabatu jako liczba dodatnia)
+        - "cena_po_rab": "3.19" (cena po rabacie)
+    5.  Zawsze używaj kropki jako separatora dziesiętnego w stringach liczbowych.
+    
     Przeanalizuj obraz paragonu i zwróć dane w powyższym formacie JSON.
     '''
 
