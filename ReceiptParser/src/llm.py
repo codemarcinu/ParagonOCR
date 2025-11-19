@@ -48,8 +48,10 @@ def get_llm_suggestion(
         "Jesteś ekspertem w czyszczeniu i normalizowaniu nazw produktów z paragonów. "
         "Twoim zadaniem jest przyjąć surową, często skróconą lub z błędami, nazwę produktu "
         "i zwrócić TYLKO czystą, pełną, ludzką wersję tej nazwy. "
+        "Jeśli nazwa wygląda na opłatę recyklingową, kaucję, bełkot OCR (np. ciąg losowych znaków) "
+        "lub inną pozycję niebędącą produktem spożywczym/przemysłowym, zwróć słowo 'POMIŃ'. "
         "Nie dodawaj żadnych wyjaśnień, komentarzy ani znaków formatowania. "
-        "Odpowiedz tylko i wyłącznie znormalizowaną nazwą."
+        "Odpowiedz tylko i wyłącznie znormalizowaną nazwą lub słowem 'POMIŃ'."
     )
 
     # Przykłady few-shot uczące model oczekiwanego formatu
@@ -136,7 +138,9 @@ def _convert_types(data: dict) -> dict:
 
 
 def parse_receipt_with_llm(
-    image_path: str, model_name: str = Config.VISION_MODEL
+    image_path: str,
+    model_name: str = Config.VISION_MODEL,
+    system_prompt_override: str = None,
 ) -> dict | None:
     """
     Używa modelu multimodalnego do sparsowania całego paragonu z pliku obrazu.
@@ -144,6 +148,7 @@ def parse_receipt_with_llm(
     Args:
         image_path: Ścieżka do pliku z obrazem paragonu.
         model_name: Nazwa modelu Ollama do użycia (np. 'llava:latest').
+        system_prompt_override: Opcjonalny prompt systemowy, który nadpisuje domyślny.
 
     Returns:
         Słownik z danymi w formacie ParsedData, lub None w przypadku błędu.
@@ -158,7 +163,10 @@ def parse_receipt_with_llm(
         return None
 
     # Uproszczony prompt - format='json' wymusza strukturę
-    system_prompt = """
+    if system_prompt_override:
+        system_prompt = system_prompt_override
+    else:
+        system_prompt = """
     Przeanalizuj obraz paragonu i wyodrębnij dane w formacie JSON.
     
     Wymagana struktura JSON:
