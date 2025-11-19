@@ -26,9 +26,9 @@ echo "[INFO] Srodowisko wirtualne aktywowane."
 
 # 3. Instalacja zaleznosci Python (z pliku requirements.txt)
 # Sprawdzamy, czy glowny pakiet jest juz zainstalowany, zeby nie robic tego za kazdym razem
-if ! pip list | grep -q customtkinter; then
+if ! ./venv/bin/pip show customtkinter > /dev/null 2>&1; then
     echo "[INFO] Instaluje zaleznosci Pythona z $REQUIREMENTS_PATH..."
-    pip install -r "$REQUIREMENTS_PATH"
+    ./venv/bin/pip install -r "$REQUIREMENTS_PATH"
 else
     echo "[INFO] Zaleznosci Pythona sa juz zainstalowane."
 fi
@@ -45,7 +45,7 @@ fi
 # 5. Uruchomienie aplikacji
 echo "[INFO] Uruchamiam aplikacje GUI..."
 echo "------------------------------------------------"
-python "$BASE_DIR/gui.py"
+"$VENV_DIR/bin/python" "$BASE_DIR/gui.py"
 echo "------------------------------------------------"
 
 # 6. Deaktywacja

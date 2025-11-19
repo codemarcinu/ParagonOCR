@@ -10,6 +10,44 @@ from src.database import init_db
 from src.config import Config
 
 
+class ProductMappingDialog(ctk.CTkToplevel):
+    def __init__(self, parent, title, text, initial_value=""):
+        super().__init__(parent)
+        self.title(title)
+        self.geometry("500x300")
+        self.user_input = None
+
+        self.label = ctk.CTkLabel(self, text=text, wraplength=480, font=("Arial", 14))
+        self.label.pack(pady=20, padx=20)
+
+        self.entry = ctk.CTkEntry(self, width=400, font=("Arial", 14))
+        self.entry.pack(pady=10)
+        self.entry.insert(0, initial_value)
+        self.entry.focus_set()
+
+        self.ok_button = ctk.CTkButton(
+            self, text="Zatwierdź", command=self.on_ok, width=200
+        )
+        self.ok_button.pack(pady=20)
+
+        self.bind("<Return>", lambda event: self.on_ok())
+        self.bind("<Escape>", lambda event: self.on_close())
+
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
+        self.grab_set()  # Make modal
+
+    def on_ok(self):
+        self.user_input = self.entry.get()
+        self.destroy()
+
+    def on_close(self):
+        self.destroy()
+
+    def get_input(self):
+        self.master.wait_window(self)
+        return self.user_input
+
+
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -102,14 +140,12 @@ class App(ctk.CTk):
             self.after(100, self.process_log_queue)
 
     def show_prompt_dialog(self, prompt_text, default_value, raw_name):
-        dialog = ctk.CTkInputDialog(
-            title="Potrzebna informacja",
-            text=f"Nieznany produkt: {raw_name}\n{prompt_text}",
+        dialog = ProductMappingDialog(
+            self,
+            title="Nieznany produkt",
+            text=f"Produkt z paragonu: '{raw_name}'\n\n{prompt_text}",
+            initial_value=default_value,
         )
-        dialog.geometry("400x200")
-        dialog._entry.delete(0, "end")
-        dialog._entry.insert(0, default_value)
-
         user_input = dialog.get_input()
         self.prompt_result_queue.put(user_input if user_input is not None else "")
 

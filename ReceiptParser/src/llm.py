@@ -99,9 +99,11 @@ def _extract_json_from_response(response_text: str) -> dict | None:
             print(
                 f"BŁĄD: Nie udało się sparsować JSON-a z odpowiedzi LLM. Szczegóły: {e}"
             )
-            print(f"Otrzymany tekst: {json_str}")
+            print(f"Otrzymany tekst (repr): {repr(json_str)}")
             return None
-    print("BŁĄD: W odpowiedzi LLM nie znaleziono bloku JSON.")
+    print(
+        f"BŁĄD: W odpowiedzi LLM nie znaleziono bloku JSON. Otrzymany tekst (repr): {repr(response_text)}"
+    )
     return None
 
 
@@ -155,82 +157,72 @@ def parse_receipt_with_llm(
         print(f"BŁĄD: Plik obrazu nie istnieje: {image_path}")
         return None
 
-    # Konwersja obrazu do base64
-    with open(image_p, "rb") as image_file:
-        image_base64 = base64.b64encode(image_file.read()).decode("utf-8")
-
+    # Uproszczony prompt - format='json' wymusza strukturę
     system_prompt = """
-    Jesteś ekspertem od OCR i ekstrakcji danych. Twoją jedyną funkcją jest analiza obrazu paragonu i zwrócenie obiektu JSON.
-    NIE WOLNO CI zwracać żadnego tekstu, wyjaśnień ani formatowania markdown przed lub po obiekcie JSON.
-    Twoja odpowiedź musi być TYLKO I WYŁĄCZNIE poprawnym obiektem JSON.
-
-    Struktura obiektu JSON musi być następująca:
-    ```json
+    Przeanalizuj obraz paragonu i wyodrębnij dane w formacie JSON.
+    
+    Wymagana struktura JSON:
     {
       "sklep_info": {
-        "nazwa": "string (np. 'Lidl', 'Biedronka', 'Auchan', 'Kaufland')",
-        "lokalizacja": "string (adres sklepu lub miasto) or null"
+        "nazwa": "string (np. Lidl, Biedronka)",
+        "lokalizacja": "string lub null"
       },
       "paragon_info": {
-        "data_zakupu": "string w formacie YYYY-MM-DD",
-        "suma_calkowita": "string reprezentujący liczbę (np. '123.45', zawsze suma końcowa po rabatach)"
+        "data_zakupu": "string YYYY-MM-DD",
+        "suma_calkowita": "string (np. 123.45)"
       },
       "pozycje": [
         {
-          "nazwa_raw": "string (nazwa produktu z paragonu)",
-          "ilosc": "string (np. '1.000')",
-          "jednostka": "string (np. 'szt', 'kg') or null",
-          "cena_jedn": "string (cena za jednostkę)",
-          "cena_calk": "string (cena całkowita PRZED rabatem, jeśli jest podany)",
-          "rabat": "string (wartość rabatu np. '0.80') or null",
-          "cena_po_rab": "string (cena końcowa za pozycję)"
+          "nazwa_raw": "string",
+          "ilosc": "string (np. 1.0)",
+          "jednostka": "string lub null",
+          "cena_jedn": "string",
+          "cena_calk": "string",
+          "rabat": "string lub null",
+          "cena_po_rab": "string"
         }
       ]
     }
-    ```
     
-    BARDZO WAŻNE ZASADY:
-    1.  **Nazwa sklepu:** Zidentyfikuj nazwę sieci (np. "Biedronka", "Lidl", "Auchan", "Kaufland").
-    2.  **Suma całkowita:** Zawsze bierz końcową sumę do zapłaty (np. "SUMA PLN", "Razem PLN", "Ogółem").
-    3.  **Pozycje bez ilości (np. Kaufland):** Jeśli paragon pokazuje tylko nazwę i cenę końcową (jak "UHT bezLaktozy1,... 4,29"), ZAWSZE ustaw:
-        - "ilosc": "1.0"
-        - "jednostka": "szt"
-        - "cena_jedn": "4.29" (taka sama jak cena całkowita)
-        - "cena_calk": "4.29"
-        - "rabat": null
-        - "cena_po_rab": "4.29"
-    4.  **Rabaty:** Jeśli rabat jest podany jako osobna linia (np. "Rabat ORZESZKI W... -0.80"), NIE twórz dla niego osobnej pozycji. Zamiast tego, znajdź oryginalną pozycję ("ORZESZKI W") i uzupełnij jej pola:
-        - "cena_calk": "3.99" (oryginalna cena)
-        - "rabat": "0.80" (wartość rabatu jako liczba dodatnia)
-        - "cena_po_rab": "3.19" (cena po rabacie)
-    5.  Zawsze używaj kropki jako separatora dziesiętnego w stringach liczbowych.
-    
-    Przeanalizuj obraz paragonu i zwróć dane w powyższym formacie JSON.
+    Zasady:
+    1. Suma całkowita to kwota do zapłaty.
+    2. Jeśli brak ilości, przyjmij 1.0.
+    3. Ceny podawaj jako stringi z kropką.
     """
 
     try:
-        print(
-            f"INFO: Wysyłanie obrazu do modelu '{model_name}' w celu przetworzenia..."
-        )
+        print(f"INFO: Wysyłanie obrazu do modelu '{model_name}' (format=json)...")
+        print(f"INFO: Plik: {image_path}")
+
         response = client.chat(
             model=model_name,
+            format="json",  # WYMUSZENIE FORMATU JSON
             messages=[
                 {"role": "system", "content": system_prompt},
                 {
                     "role": "user",
                     "content": "Przeanalizuj ten paragon.",
-                    "images": [image_base64],
+                    "images": [image_path],  # Ollama python client obsługuje ścieżki
                 },
             ],
+            options={
+                "temperature": 0
+            },  # Zmniejszamy losowość dla większej deterministyczności
         )
 
         raw_response_text = response["message"]["content"]
         print(
-            "INFO: Otrzymano odpowiedź od LLM. Próbuję wyodrębnić i sparsować JSON..."
+            f"INFO: Otrzymano odpowiedź od LLM. Długość: {len(raw_response_text)} znaków."
         )
+        # print(f"DEBUG: Treść odpowiedzi: {raw_response_text}")
 
-        parsed_json = _extract_json_from_response(raw_response_text)
-        if not parsed_json:
+        try:
+            parsed_json = json.loads(raw_response_text)
+        except json.JSONDecodeError as e:
+            print(
+                f"BŁĄD: Model zwrócił niepoprawny JSON mimo format='json'. Szczegóły: {e}"
+            )
+            print(f"Treść: {raw_response_text}")
             return None
 
         print("INFO: Konwertuję typy danych (stringi na Decimal/datetime)...")
