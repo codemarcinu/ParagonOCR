@@ -1,4 +1,3 @@
-
 import customtkinter as ctk
 from tkinter import filedialog
 import threading
@@ -8,6 +7,8 @@ import os
 # Lokalne importy - zakładamy, że gui.py jest w folderze głównym projektu
 from src.main import run_processing_pipeline
 from src.database import init_db
+from src.config import Config
+
 
 class App(ctk.CTk):
     def __init__(self):
@@ -25,16 +26,29 @@ class App(ctk.CTk):
         self.main_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
         self.main_frame.grid_columnconfigure(1, weight=1)
 
-        self.file_button = ctk.CTkButton(self.main_frame, text="Wybierz plik paragonu", command=self.select_file)
+        self.file_button = ctk.CTkButton(
+            self.main_frame, text="Wybierz plik paragonu", command=self.select_file
+        )
         self.file_button.grid(row=0, column=0, padx=10, pady=10)
 
-        self.file_label = ctk.CTkLabel(self.main_frame, text="Nie wybrano pliku", anchor="w")
+        self.file_label = ctk.CTkLabel(
+            self.main_frame, text="Nie wybrano pliku", anchor="w"
+        )
         self.file_label.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
 
-        self.process_button = ctk.CTkButton(self.main_frame, text="Przetwórz", command=self.start_processing, state="disabled")
+        self.process_button = ctk.CTkButton(
+            self.main_frame,
+            text="Przetwórz",
+            command=self.start_processing,
+            state="disabled",
+        )
         self.process_button.grid(row=2, column=0, columnspan=2, padx=10, pady=10)
-        
-        self.init_db_button = ctk.CTkButton(self.main_frame, text="Inicjalizuj bazę danych", command=self.initialize_database)
+
+        self.init_db_button = ctk.CTkButton(
+            self.main_frame,
+            text="Inicjalizuj bazę danych",
+            command=self.initialize_database,
+        )
         self.init_db_button.grid(row=3, column=0, columnspan=2, padx=10, pady=5)
 
         self.log_textbox = ctk.CTkTextbox(self, state="disabled", wrap="word")
@@ -49,11 +63,14 @@ class App(ctk.CTk):
         self.after(100, self.process_log_queue)
 
     def select_file(self):
-        file_path = filedialog.askopenfilename(title="Wybierz plik paragonu", filetypes=[
-            ("Pliki obrazów", "*.png *.jpg *.jpeg"),
-            ("Pliki PDF", "*.pdf"),
-            ("Wszystkie pliki", "*.*"),
-        ])
+        file_path = filedialog.askopenfilename(
+            title="Wybierz plik paragonu",
+            filetypes=[
+                ("Pliki obrazów", "*.png *.jpg *.jpeg"),
+                ("Pliki PDF", "*.pdf"),
+                ("Wszystkie pliki", "*.*"),
+            ],
+        )
         if file_path:
             self.selected_file_path = file_path
             self.file_label.configure(text=os.path.basename(file_path))
@@ -76,7 +93,7 @@ class App(ctk.CTk):
                 self.log_textbox.insert("end", message + "\n")
                 self.log_textbox.configure(state="disabled")
                 self.log_textbox.see("end")
-            
+
             if not self.prompt_queue.empty():
                 prompt_text, default_value, raw_name = self.prompt_queue.get_nowait()
                 self.show_prompt_dialog(prompt_text, default_value, raw_name)
@@ -85,11 +102,14 @@ class App(ctk.CTk):
             self.after(100, self.process_log_queue)
 
     def show_prompt_dialog(self, prompt_text, default_value, raw_name):
-        dialog = ctk.CTkInputDialog(title="Potrzebna informacja", text=f"Nieznany produkt: {raw_name}\n{prompt_text}")
+        dialog = ctk.CTkInputDialog(
+            title="Potrzebna informacja",
+            text=f"Nieznany produkt: {raw_name}\n{prompt_text}",
+        )
         dialog.geometry("400x200")
         dialog._entry.delete(0, "end")
         dialog._entry.insert(0, default_value)
-        
+
         user_input = dialog.get_input()
         self.prompt_result_queue.put(user_input if user_input is not None else "")
 
@@ -115,11 +135,11 @@ class App(ctk.CTk):
         self.log_textbox.delete("1.0", "end")
         self.log_textbox.configure(state="disabled")
 
-        llm_model = "llava:latest"  # Model jest teraz na stałe
+        llm_model = Config.VISION_MODEL
 
         thread = threading.Thread(
             target=run_processing_pipeline,
-            args=(self.selected_file_path, llm_model, self.log, self.prompt_user)
+            args=(self.selected_file_path, llm_model, self.log, self.prompt_user),
         )
         thread.daemon = True
         thread.start()
@@ -132,6 +152,7 @@ class App(ctk.CTk):
         else:
             self.set_ui_state("normal")
             self.log("INFO: Przetwarzanie zakończone.")
+
 
 if __name__ == "__main__":
     app = App()

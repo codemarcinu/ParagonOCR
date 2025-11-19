@@ -1,8 +1,6 @@
-pytesseract
-Pillow
-pdf2image
 SQLAlchemy
 click
 python-dotenv
 ollama
 customtkinter
+Pillow
