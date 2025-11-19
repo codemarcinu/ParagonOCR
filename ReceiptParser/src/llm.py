@@ -214,7 +214,8 @@ def parse_receipt_with_llm(
                 },
             ],
             options={
-                "temperature": 0
+                "temperature": 0,
+                "num_predict": 2000,  # Limit tokenów, aby uniknąć pętli nieskończonej
             },  # Zmniejszamy losowość dla większej deterministyczności
         )
 

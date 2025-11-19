@@ -33,11 +33,12 @@ class LidlStrategy(ReceiptStrategy):
         3. Ignoruj sekcje "PTU A", "Kwota A", "Rozliczenie płatności".
         
         Wymagana struktura JSON:
+        Wymagana struktura JSON:
         {
-          "sklep_info": { "nazwa": "Lidl", "lokalizacja": "string" },
-          "paragon_info": { "data_zakupu": "YYYY-MM-DD", "suma_calkowita": "string" },
+          "sklep_info": { "nazwa": "Lidl", "lokalizacja": "Adres sklepu lub null" },
+          "paragon_info": { "data_zakupu": "YYYY-MM-DD", "suma_calkowita": "123.45" },
           "pozycje": [
-            { "nazwa_raw": "string", "ilosc": "string", "jednostka": "string", "cena_jedn": "string", "cena_calk": "string", "rabat": "string", "cena_po_rab": "string" }
+            { "nazwa_raw": "Nazwa produktu", "ilosc": "1.0", "jednostka": "szt/kg", "cena_jedn": "1.23", "cena_calk": "1.23", "rabat": "0.00", "cena_po_rab": "1.23" }
           ]
         }
         """
@@ -119,11 +120,12 @@ class BiedronkaStrategy(ReceiptStrategy):
         4. Czasami nazwa produktu skleja się z kodem PTU (np. "MlekoC"). Oddziel to.
         
         Wymagana struktura JSON:
+        Wymagana struktura JSON:
         {
-          "sklep_info": { "nazwa": "Biedronka", "lokalizacja": "string" },
-          "paragon_info": { "data_zakupu": "YYYY-MM-DD", "suma_calkowita": "string" },
+          "sklep_info": { "nazwa": "Biedronka", "lokalizacja": "Adres sklepu lub null" },
+          "paragon_info": { "data_zakupu": "YYYY-MM-DD", "suma_calkowita": "123.45" },
           "pozycje": [
-            { "nazwa_raw": "string", "ilosc": "string", "jednostka": "string", "cena_jedn": "string", "cena_calk": "string", "rabat": "string", "cena_po_rab": "string" }
+            { "nazwa_raw": "Nazwa produktu", "ilosc": "1.0", "jednostka": "szt/kg", "cena_jedn": "1.23", "cena_calk": "1.23", "rabat": "0.00", "cena_po_rab": "1.23" }
           ]
         }
         """
@@ -141,11 +143,12 @@ class KauflandStrategy(ReceiptStrategy):
         4. Ignoruj linie "Podsumowanie zakupów", "Ogółem".
         
         Wymagana struktura JSON:
+        Wymagana struktura JSON:
         {
-          "sklep_info": { "nazwa": "Kaufland", "lokalizacja": "string" },
-          "paragon_info": { "data_zakupu": "YYYY-MM-DD", "suma_calkowita": "string" },
+          "sklep_info": { "nazwa": "Kaufland", "lokalizacja": "Adres sklepu lub null" },
+          "paragon_info": { "data_zakupu": "YYYY-MM-DD", "suma_calkowita": "123.45" },
           "pozycje": [
-            { "nazwa_raw": "string", "ilosc": "string", "jednostka": "string", "cena_jedn": "string", "cena_calk": "string", "rabat": "string", "cena_po_rab": "string" }
+            { "nazwa_raw": "Nazwa produktu", "ilosc": "1.0", "jednostka": "szt/kg", "cena_jedn": "1.23", "cena_calk": "1.23", "rabat": "0.00", "cena_po_rab": "1.23" }
           ]
         }
         """
@@ -163,11 +166,12 @@ class AuchanStrategy(ReceiptStrategy):
         4. Opłata recyklingowa (BDO, Recykling) nie jest towarem handlowym - pomiń ją jeśli możesz.
         
         Wymagana struktura JSON:
+        Wymagana struktura JSON:
         {
-          "sklep_info": { "nazwa": "Auchan", "lokalizacja": "string" },
-          "paragon_info": { "data_zakupu": "YYYY-MM-DD", "suma_calkowita": "string" },
+          "sklep_info": { "nazwa": "Auchan", "lokalizacja": "Adres sklepu lub null" },
+          "paragon_info": { "data_zakupu": "YYYY-MM-DD", "suma_calkowita": "123.45" },
           "pozycje": [
-            { "nazwa_raw": "string", "ilosc": "string", "jednostka": "string", "cena_jedn": "string", "cena_calk": "string", "rabat": "string", "cena_po_rab": "string" }
+            { "nazwa_raw": "Nazwa produktu", "ilosc": "1.0", "jednostka": "szt/kg", "cena_jedn": "1.23", "cena_calk": "1.23", "rabat": "0.00", "cena_po_rab": "1.23" }
           ]
         }
         """
@@ -199,11 +203,12 @@ class GenericStrategy(ReceiptStrategy):
         Sformatuj wynik ściśle według zadanego schematu JSON.
         
         Wymagana struktura JSON:
+        Wymagana struktura JSON:
         {
-          "sklep_info": { "nazwa": "string", "lokalizacja": "string" },
-          "paragon_info": { "data_zakupu": "YYYY-MM-DD", "suma_calkowita": "string" },
+          "sklep_info": { "nazwa": "Nazwa sklepu", "lokalizacja": "Adres sklepu lub null" },
+          "paragon_info": { "data_zakupu": "YYYY-MM-DD", "suma_calkowita": "123.45" },
           "pozycje": [
-            { "nazwa_raw": "string", "ilosc": "string", "jednostka": "string", "cena_jedn": "string", "cena_calk": "string", "rabat": "string", "cena_po_rab": "string" }
+            { "nazwa_raw": "Nazwa produktu", "ilosc": "1.0", "jednostka": "szt/kg", "cena_jedn": "1.23", "cena_calk": "1.23", "rabat": "0.00", "cena_po_rab": "1.23" }
           ]
         }
         """
