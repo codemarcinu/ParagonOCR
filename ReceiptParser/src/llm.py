@@ -114,9 +114,17 @@ def _convert_types(data: dict) -> dict:
     """Konwertuje stringi na obiekty Decimal i datetime w sparsowanych danych."""
     try:
         # Konwersja danych paragonu
-        data["paragon_info"]["data_zakupu"] = datetime.strptime(
-            data["paragon_info"]["data_zakupu"], "%Y-%m-%d"
-        )
+        # Konwersja danych paragonu
+        raw_date = data["paragon_info"]["data_zakupu"]
+        try:
+            data["paragon_info"]["data_zakupu"] = datetime.strptime(
+                raw_date, "%Y-%m-%d"
+            )
+        except (ValueError, TypeError):
+            print(
+                f"OSTRZEŻENIE: Nieprawidłowy format daty '{raw_date}'. Ustawiam dzisiejszą datę."
+            )
+            data["paragon_info"]["data_zakupu"] = datetime.now()
         data["paragon_info"]["suma_calkowita"] = Decimal(
             data["paragon_info"]["suma_calkowita"]
         )

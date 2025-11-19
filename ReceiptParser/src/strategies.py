@@ -36,7 +36,7 @@ class LidlStrategy(ReceiptStrategy):
         Wymagana struktura JSON:
         {
           "sklep_info": { "nazwa": "Lidl", "lokalizacja": "Adres sklepu lub null" },
-          "paragon_info": { "data_zakupu": "YYYY-MM-DD", "suma_calkowita": "123.45" },
+          "paragon_info": { "data_zakupu": "2024-05-20", "suma_calkowita": "123.45" },
           "pozycje": [
             { "nazwa_raw": "Nazwa produktu", "ilosc": "1.0", "jednostka": "szt/kg", "cena_jedn": "1.23", "cena_calk": "1.23", "rabat": "0.00", "cena_po_rab": "1.23" }
           ]
@@ -123,7 +123,7 @@ class BiedronkaStrategy(ReceiptStrategy):
         Wymagana struktura JSON:
         {
           "sklep_info": { "nazwa": "Biedronka", "lokalizacja": "Adres sklepu lub null" },
-          "paragon_info": { "data_zakupu": "YYYY-MM-DD", "suma_calkowita": "123.45" },
+          "paragon_info": { "data_zakupu": "2024-05-20", "suma_calkowita": "123.45" },
           "pozycje": [
             { "nazwa_raw": "Nazwa produktu", "ilosc": "1.0", "jednostka": "szt/kg", "cena_jedn": "1.23", "cena_calk": "1.23", "rabat": "0.00", "cena_po_rab": "1.23" }
           ]
@@ -146,7 +146,7 @@ class KauflandStrategy(ReceiptStrategy):
         Wymagana struktura JSON:
         {
           "sklep_info": { "nazwa": "Kaufland", "lokalizacja": "Adres sklepu lub null" },
-          "paragon_info": { "data_zakupu": "YYYY-MM-DD", "suma_calkowita": "123.45" },
+          "paragon_info": { "data_zakupu": "2024-05-20", "suma_calkowita": "123.45" },
           "pozycje": [
             { "nazwa_raw": "Nazwa produktu", "ilosc": "1.0", "jednostka": "szt/kg", "cena_jedn": "1.23", "cena_calk": "1.23", "rabat": "0.00", "cena_po_rab": "1.23" }
           ]
@@ -169,7 +169,7 @@ class AuchanStrategy(ReceiptStrategy):
         Wymagana struktura JSON:
         {
           "sklep_info": { "nazwa": "Auchan", "lokalizacja": "Adres sklepu lub null" },
-          "paragon_info": { "data_zakupu": "YYYY-MM-DD", "suma_calkowita": "123.45" },
+          "paragon_info": { "data_zakupu": "2024-05-20", "suma_calkowita": "123.45" },
           "pozycje": [
             { "nazwa_raw": "Nazwa produktu", "ilosc": "1.0", "jednostka": "szt/kg", "cena_jedn": "1.23", "cena_calk": "1.23", "rabat": "0.00", "cena_po_rab": "1.23" }
           ]
