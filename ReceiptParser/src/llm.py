@@ -58,6 +58,7 @@ def get_llm_suggestion(
     user_prompt = f"""
     Przykłady:
     - Raw: "JajaL Z BIEG.M" -> Clean: "Jaja z wolnego wybiegu M"
+    - Raw: "ReWtymOplRec551" -> Clean: "POMIŃ"
     - Raw: "PomKroNaszSpiż240g" -> Clean: "Pomidory krojone Nasza Spiżarnia 240g"
     - Raw: "SER GOŁDA TŁ" -> Clean: "Ser Gouda tłusty"
     - Raw: "Sok Pomarańcz.1L" -> Clean: "Sok pomarańczowy 1L"
