@@ -112,26 +112,30 @@ class BiedronkaStrategy(ReceiptStrategy):
         return """
         Jesteś ekspertem od analizy paragonów sieci Biedronka (Jeronimo Martins).
         
-        KLUCZOWE ZASADY DLA BIEDRONKI:
-        1. Format w plikach PDF często rozbija linię na: "Nazwa", potem w nowej linii "Ilość x Cena".
-           Szukaj wzorca: "1.000 x 3,29" -> to oznacza 1 sztukę po 3.29.
-        2. UWAGA NA UKŁAD KOLUMNOWY W OCR: Tekst z OCR może mieć najpierw wylistowane wszystkie NAZWY produktów, a dopiero niżej wszystkie CENY.
-           Musisz inteligentnie połączyć nazwy z cenami, wiedząc, że kolejność jest ta sama.
-           Przykład OCR:
-           "Mleko"
-           "Chleb"
-           ...
-           "3,29"
-           "2,50"
-           -> Oznacza: Mleko za 3,29, Chleb za 2,50.
-        3. Ignoruj linię "Sprzedaż opodatkowana".
-        4. Ignoruj sekcje podsumowania podatków (PTU A, PTU B...).
-        5. Czasami nazwa produktu skleja się z kodem PTU (np. "MlekoC"). Oddziel to.
+        KLUCZOWE ZASADY DLA TEGO PLIKU:
+        1. To jest długi obraz powstały ze sklejenia stron PDF.
+        2. Wzorce linii produktów są nietypowe i wieloliniowe. Częsty schemat bloku produktu:
+           Linia 1: "Nazwa produktu" (np. "Mleko UHT 3,2 1l")
+           Linia 2: Cena jednostkowa (np. "3,49")
+           Linia 3: Ilość (np. "1.000")
+           Linia 4: znak "x"
+           Linia 5: Kod podatku (np. "A", "B", "C")
+           Linia 6: Wartość końcowa (np. "3,49")
+        
+        3. Zadanie: Musisz zrekonstruować te rozsypane bloki w jeden obiekt.
+           Jeśli widzisz sekwencję: Nazwa -> Liczba -> Liczba -> "x", to wiesz, że to jeden produkt.
+        
+        4. Rabaty: Często występują w OSOBNEJ linii pod produktem jako:
+           "Rabat"
+           "-4,00" (ujemna kwota)
+           Traktuj to jako pole "rabat" dla produktu powyżej (wartość dodatnia 4.00).
+
+        5. Ignoruj techniczne linie: "Strona 1 z 2", "NIEFISKALNY", "Numer transakcji".
         
         Wymagana struktura JSON:
         {
           "sklep_info": { "nazwa": "Biedronka", "lokalizacja": "Adres sklepu lub null" },
-          "paragon_info": { "data_zakupu": "2024-05-20", "suma_calkowita": "123.45" },
+          "paragon_info": { "data_zakupu": "RRRR-MM-DD", "suma_calkowita": "123.45" },
           "pozycje": [
             { "nazwa_raw": "Nazwa produktu", "ilosc": "1.0", "jednostka": "szt/kg", "cena_jedn": "1.23", "cena_calk": "1.23", "rabat": "0.00", "cena_po_rab": "1.23" }
           ]

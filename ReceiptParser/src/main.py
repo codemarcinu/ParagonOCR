@@ -51,6 +51,9 @@ def run_processing_pipeline(
         # Krok 1.5: Detekcja sklepu (Strategy Pattern) + Hybrid OCR
         log_callback("INFO: Analizuję tekst z OCR (Tesseract)...")
         full_ocr_text = extract_text_from_image(processing_file_path)
+        log_callback(
+            f"--- WYNIK OCR (Tesseract) ---\n{full_ocr_text}\n-----------------------------"
+        )
 
         # Do detekcji sklepu używamy próbki, ale do LLM przekażemy całość
         header_sample = full_ocr_text[:1000]
