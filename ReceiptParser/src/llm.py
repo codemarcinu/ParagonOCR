@@ -45,24 +45,25 @@ def get_llm_suggestion(
         return None
 
     system_prompt = (
-        "Jesteś ekspertem w czyszczeniu i normalizowaniu nazw produktów z paragonów. "
-        "Twoim zadaniem jest przyjąć surową, często skróconą lub z błędami, nazwę produktu "
-        "i zwrócić TYLKO czystą, pełną, ludzką wersję tej nazwy. "
-        "Jeśli nazwa wygląda na opłatę recyklingową, kaucję, bełkot OCR (np. ciąg losowych znaków) "
-        "lub inną pozycję niebędącą produktem spożywczym/przemysłowym, zwróć słowo 'POMIŃ'. "
-        "Nie dodawaj żadnych wyjaśnień, komentarzy ani znaków formatowania. "
-        "Odpowiedz tylko i wyłącznie znormalizowaną nazwą lub słowem 'POMIŃ'."
+        "Jesteś ekspertem od kategoryzacji produktów spożywczych. "
+        "Twoim celem jest sprowadzenie skomplikowanej nazwy z paragonu do OGÓLNEJ, BAZOWEJ nazwy produktu. "
+        "Zasady:"
+        "1. Ignoruj marki (np. 'Mlekovita', 'Coca-Cola' -> 'Napój gazowany', chyba że nazwa jest generyczna)."
+        "2. Ignoruj gramaturę i opakowanie (np. '1L', 'butelka')."
+        "3. Używaj nazw w mianowniku liczby pojedynczej (np. 'Jaja' -> 'Jajka', 'Bułki' -> 'Bułka')."
+        "4. Zwracaj TYLKO znormalizowaną nazwę."
+        "5. Dla śmieci OCR zwracaj 'POMIŃ'."
     )
 
-    # Przykłady few-shot uczące model oczekiwanego formatu
     user_prompt = f"""
     Przykłady:
-    - Raw: "JajaL Z BIEG.M" -> Clean: "Jaja z wolnego wybiegu M"
-    - Raw: "ReWtymOplRec551" -> Clean: "POMIŃ"
-    - Raw: "PomKroNaszSpiż240g" -> Clean: "Pomidory krojone Nasza Spiżarnia 240g"
-    - Raw: "SER GOŁDA TŁ" -> Clean: "Ser Gouda tłusty"
-    - Raw: "Sok Pomarańcz.1L" -> Clean: "Sok pomarańczowy 1L"
-    - Raw: "Masło Polskie 82%" -> Clean: "Masło Polskie 82%"
+    - Raw: "Mleko UHT 3,2% Łaciate 1L" -> Clean: "Mleko"
+    - Raw: "Jaja z wolnego wybiegu L 10szt" -> Clean: "Jajka"
+    - Raw: "Chleb Baltonowski krojony" -> Clean: "Chleb"
+    - Raw: "Kajzerka pszenna duża" -> Clean: "Bułka"
+    - Raw: "Woda Żywiec Zdrój Niegaz." -> Clean: "Woda mineralna"
+    - Raw: "Pomidor gałązka luz" -> Clean: "Pomidory"
+    - Raw: "Szynka Konserwowa Krakus" -> Clean: "Szynka"
 
     Zadanie:
     - Raw: "{raw_name}" -> Clean:
@@ -114,13 +115,28 @@ def _convert_types(data: dict) -> dict:
     """Konwertuje stringi na obiekty Decimal i datetime w sparsowanych danych."""
     try:
         # Konwersja danych paragonu
-        # Konwersja danych paragonu
         raw_date = data["paragon_info"]["data_zakupu"]
-        try:
-            data["paragon_info"]["data_zakupu"] = datetime.strptime(
-                raw_date, "%Y-%m-%d"
-            )
-        except (ValueError, TypeError):
+
+        # Lista obsługiwanych formatów daty
+        date_formats = [
+            "%Y-%m-%d",  # 2025-11-18
+            "%d.%m.%Y",  # 18.11.2025
+            "%d.%m.%Y %H:%M",  # 18.11.2025 16:34 (Format Biedronki)
+            "%Y-%m-%d %H:%M",  # 2025-11-18 16:34
+            "%d-%m-%Y",  # 18-11-2025
+        ]
+
+        parsed_date = None
+        for fmt in date_formats:
+            try:
+                parsed_date = datetime.strptime(raw_date, fmt)
+                break  # Udało się, przerywamy pętlę
+            except ValueError:
+                continue  # Próbujemy kolejny format
+
+        if parsed_date:
+            data["paragon_info"]["data_zakupu"] = parsed_date
+        else:
             print(
                 f"OSTRZEŻENIE: Nieprawidłowy format daty '{raw_date}'. Ustawiam dzisiejszą datę."
             )
