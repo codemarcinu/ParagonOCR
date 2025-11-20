@@ -3,6 +3,8 @@ from tkinter import filedialog
 import threading
 import queue
 import os
+from datetime import datetime
+from decimal import Decimal
 
 # Lokalne importy - zakładamy, że gui.py jest w folderze głównym projektu
 from src.main import run_processing_pipeline
@@ -46,6 +48,173 @@ class ProductMappingDialog(ctk.CTkToplevel):
     def get_input(self):
         self.master.wait_window(self)
         return self.user_input
+
+
+class ReviewDialog(ctk.CTkToplevel):
+    def __init__(self, parent, parsed_data):
+        super().__init__(parent)
+        self.title("Weryfikacja Paragonu")
+        self.geometry("1000x700")
+        self.parsed_data = parsed_data
+        self.result_data = None
+
+        # --- Header ---
+        self.header_frame = ctk.CTkFrame(self)
+        self.header_frame.pack(fill="x", padx=10, pady=10)
+
+        ctk.CTkLabel(self.header_frame, text="Sklep:").grid(
+            row=0, column=0, padx=5, pady=5
+        )
+        self.store_entry = ctk.CTkEntry(self.header_frame, width=200)
+        self.store_entry.grid(row=0, column=1, padx=5, pady=5)
+        self.store_entry.insert(0, parsed_data["sklep_info"]["nazwa"])
+
+        ctk.CTkLabel(self.header_frame, text="Data:").grid(
+            row=0, column=2, padx=5, pady=5
+        )
+        self.date_entry = ctk.CTkEntry(self.header_frame, width=150)
+        self.date_entry.grid(row=0, column=3, padx=5, pady=5)
+        # Format daty do stringa
+        date_val = parsed_data["paragon_info"]["data_zakupu"]
+        if isinstance(date_val, datetime):
+            date_val = date_val.strftime("%Y-%m-%d")
+        self.date_entry.insert(0, str(date_val))
+
+        ctk.CTkLabel(self.header_frame, text="Suma:").grid(
+            row=0, column=4, padx=5, pady=5
+        )
+        self.total_entry = ctk.CTkEntry(self.header_frame, width=100)
+        self.total_entry.grid(row=0, column=5, padx=5, pady=5)
+        self.total_entry.insert(0, str(parsed_data["paragon_info"]["suma_calkowita"]))
+
+        # --- Body (Items) ---
+        self.scrollable_frame = ctk.CTkScrollableFrame(self)
+        self.scrollable_frame.pack(fill="both", expand=True, padx=10, pady=5)
+
+        # Headers
+        headers = ["Nazwa", "Ilość", "Cena jedn.", "Wartość", "Rabat", "Po rabacie"]
+        for col, text in enumerate(headers):
+            ctk.CTkLabel(
+                self.scrollable_frame, text=text, font=("Arial", 12, "bold")
+            ).grid(row=0, column=col, padx=5, pady=5)
+
+        self.item_entries = []
+        for i, item in enumerate(parsed_data["pozycje"]):
+            row = i + 1
+            entries = {}
+
+            # Nazwa
+            e_name = ctk.CTkEntry(self.scrollable_frame, width=300)
+            e_name.grid(row=row, column=0, padx=2, pady=2)
+            e_name.insert(0, item["nazwa_raw"])
+            entries["nazwa_raw"] = e_name
+
+            # Ilość
+            e_qty = ctk.CTkEntry(self.scrollable_frame, width=60)
+            e_qty.grid(row=row, column=1, padx=2, pady=2)
+            e_qty.insert(0, str(item["ilosc"]))
+            entries["ilosc"] = e_qty
+
+            # Cena jedn
+            e_unit = ctk.CTkEntry(self.scrollable_frame, width=80)
+            e_unit.grid(row=row, column=2, padx=2, pady=2)
+            e_unit.insert(0, str(item["cena_jedn"]))
+            entries["cena_jedn"] = e_unit
+
+            # Cena całk
+            e_total = ctk.CTkEntry(self.scrollable_frame, width=80)
+            e_total.grid(row=row, column=3, padx=2, pady=2)
+            e_total.insert(0, str(item["cena_calk"]))
+            entries["cena_calk"] = e_total
+
+            # Rabat
+            e_disc = ctk.CTkEntry(self.scrollable_frame, width=80)
+            e_disc.grid(row=row, column=4, padx=2, pady=2)
+            val_disc = item.get("rabat", "0.00")
+            if val_disc is None:
+                val_disc = "0.00"
+            e_disc.insert(0, str(val_disc))
+            entries["rabat"] = e_disc
+
+            # Po rabacie
+            e_final = ctk.CTkEntry(self.scrollable_frame, width=80)
+            e_final.grid(row=row, column=5, padx=2, pady=2)
+            e_final.insert(0, str(item["cena_po_rab"]))
+            entries["cena_po_rab"] = e_final
+
+            # Hidden fields
+            entries["jednostka"] = item.get("jednostka", "")
+
+            self.item_entries.append(entries)
+
+        # --- Footer ---
+        self.footer_frame = ctk.CTkFrame(self)
+        self.footer_frame.pack(fill="x", padx=10, pady=10)
+
+        self.save_btn = ctk.CTkButton(
+            self.footer_frame,
+            text="Zatwierdź i Zapisz",
+            command=self.on_save,
+            fg_color="green",
+        )
+        self.save_btn.pack(side="right", padx=10)
+
+        self.discard_btn = ctk.CTkButton(
+            self.footer_frame, text="Odrzuć", command=self.on_discard, fg_color="red"
+        )
+        self.discard_btn.pack(side="left", padx=10)
+
+        self.protocol("WM_DELETE_WINDOW", self.on_discard)
+        self.grab_set()
+
+    def on_save(self):
+        try:
+            # Update parsed_data with values from entries
+            self.parsed_data["sklep_info"]["nazwa"] = self.store_entry.get()
+
+            # Date conversion
+            raw_date = self.date_entry.get()
+            try:
+                self.parsed_data["paragon_info"]["data_zakupu"] = datetime.strptime(
+                    raw_date, "%Y-%m-%d"
+                )
+            except ValueError:
+                # Fallback if user entered something weird, keep original or now
+                pass
+
+            self.parsed_data["paragon_info"]["suma_calkowita"] = Decimal(
+                self.total_entry.get().replace(",", ".")
+            )
+
+            new_items = []
+            for entries in self.item_entries:
+                item = {
+                    "nazwa_raw": entries["nazwa_raw"].get(),
+                    "ilosc": Decimal(entries["ilosc"].get().replace(",", ".")),
+                    "jednostka": entries["jednostka"],
+                    "cena_jedn": Decimal(entries["cena_jedn"].get().replace(",", ".")),
+                    "cena_calk": Decimal(entries["cena_calk"].get().replace(",", ".")),
+                    "rabat": Decimal(entries["rabat"].get().replace(",", ".")),
+                    "cena_po_rab": Decimal(
+                        entries["cena_po_rab"].get().replace(",", ".")
+                    ),
+                }
+                new_items.append(item)
+
+            self.parsed_data["pozycje"] = new_items
+            self.result_data = self.parsed_data
+            self.destroy()
+        except Exception as e:
+            print(f"Error saving review: {e}")
+            # Optionally show error dialog
+
+    def on_discard(self):
+        self.result_data = None
+        self.destroy()
+
+    def get_result(self):
+        self.master.wait_window(self)
+        return self.result_data
 
 
 class App(ctk.CTk):
@@ -97,6 +266,8 @@ class App(ctk.CTk):
         self.log_queue = queue.Queue()
         self.prompt_queue = queue.Queue()
         self.prompt_result_queue = queue.Queue()
+        self.review_queue = queue.Queue()
+        self.review_result_queue = queue.Queue()
 
         self.after(100, self.process_log_queue)
 
@@ -115,12 +286,19 @@ class App(ctk.CTk):
             self.process_button.configure(state="normal")
 
     def log(self, message):
+        print(message)  # Print to terminal for debugging
         self.log_queue.put(message)
 
     def prompt_user(self, prompt_text, default_value, raw_name):
         self.prompt_queue.put((prompt_text, default_value, raw_name))
         # Czekaj na wynik z głównego wątku GUI
         result = self.prompt_result_queue.get()
+        return result
+
+    def review_user(self, parsed_data):
+        self.review_queue.put(parsed_data)
+        # Czekaj na wynik z głównego wątku GUI
+        result = self.review_result_queue.get()
         return result
 
     def process_log_queue(self):
@@ -136,6 +314,10 @@ class App(ctk.CTk):
                 prompt_text, default_value, raw_name = self.prompt_queue.get_nowait()
                 self.show_prompt_dialog(prompt_text, default_value, raw_name)
 
+            if not self.review_queue.empty():
+                parsed_data = self.review_queue.get_nowait()
+                self.show_review_dialog(parsed_data)
+
         finally:
             self.after(100, self.process_log_queue)
 
@@ -148,6 +330,11 @@ class App(ctk.CTk):
         )
         user_input = dialog.get_input()
         self.prompt_result_queue.put(user_input if user_input is not None else "")
+
+    def show_review_dialog(self, parsed_data):
+        dialog = ReviewDialog(self, parsed_data)
+        result_data = dialog.get_result()
+        self.review_result_queue.put(result_data)
 
     def set_ui_state(self, state: str):
         self.process_button.configure(state=state)
@@ -175,7 +362,13 @@ class App(ctk.CTk):
 
         thread = threading.Thread(
             target=run_processing_pipeline,
-            args=(self.selected_file_path, llm_model, self.log, self.prompt_user),
+            args=(
+                self.selected_file_path,
+                llm_model,
+                self.log,
+                self.prompt_user,
+                self.review_user,
+            ),
         )
         thread.daemon = True
         thread.start()

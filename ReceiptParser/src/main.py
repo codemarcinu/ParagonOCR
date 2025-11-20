@@ -26,6 +26,7 @@ def run_processing_pipeline(
     llm_model: str,  # Teraz to jest parametr wymagany
     log_callback: Callable[[str], None],
     prompt_callback: Callable[[str, str, str], str],
+    review_callback: Callable[[dict], dict | None] = None,
 ) -> None:
     """
     Uruchamia pełny potok przetwarzania paragonu, od odczytu po zapis do bazy.
@@ -47,20 +48,26 @@ def run_processing_pipeline(
                 f"INFO: PDF skonwertowany tymczasowo do: {processing_file_path}"
             )
 
-        # Krok 1.5: Detekcja sklepu (Strategy Pattern)
-        log_callback("INFO: Analizuję nagłówek paragonu, aby wykryć sklep...")
-        header_text = extract_text_from_image(processing_file_path)
-        # Bierzemy tylko pierwsze 500 znaków dla szybkości, choć extract_text zwraca całość
-        header_sample = header_text[:1000]
+        # Krok 1.5: Detekcja sklepu (Strategy Pattern) + Hybrid OCR
+        log_callback("INFO: Analizuję tekst z OCR (Tesseract)...")
+        full_ocr_text = extract_text_from_image(processing_file_path)
+
+        # Do detekcji sklepu używamy próbki, ale do LLM przekażemy całość
+        header_sample = full_ocr_text[:1000]
 
         strategy = get_strategy_for_store(header_sample)
         log_callback(f"INFO: Wybrano strategię: {strategy.__class__.__name__}")
 
         system_prompt = strategy.get_system_prompt()
 
-        log_callback(f"INFO: Używam modelu LLM '{llm_model}' do przetworzenia obrazu.")
+        log_callback(
+            f"INFO: Używam modelu LLM '{llm_model}' do przetworzenia obrazu (wspaganego OCR)."
+        )
         parsed_data = parse_receipt_with_llm(
-            processing_file_path, llm_model, system_prompt_override=system_prompt
+            processing_file_path,
+            llm_model,
+            system_prompt_override=system_prompt,
+            ocr_text=full_ocr_text,
         )
 
         # Sprzątanie po PDF
@@ -76,6 +83,16 @@ def run_processing_pipeline(
         parsed_data = strategy.post_process(parsed_data)
 
         log_callback("INFO: Dane z paragonu zostały pomyślnie sparsowane przez LLM.")
+
+        # Krok 1.7: Manualna weryfikacja przez użytkownika (jeśli dostępna)
+        if review_callback:
+            log_callback("INFO: Oczekiwanie na weryfikację użytkownika...")
+            reviewed_data = review_callback(parsed_data)
+            if not reviewed_data:
+                log_callback("INFO: Użytkownik odrzucił zmiany. Anulowanie zapisu.")
+                return
+            parsed_data = reviewed_data
+            log_callback("INFO: Użytkownik zatwierdził dane (ewentualnie po edycji).")
 
     except Exception as e:
         log_callback(f"BŁĄD KRYTYCZNY na etapie parsowania LLM: {e}")

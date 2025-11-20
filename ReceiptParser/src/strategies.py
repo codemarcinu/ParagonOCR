@@ -115,11 +115,19 @@ class BiedronkaStrategy(ReceiptStrategy):
         KLUCZOWE ZASADY DLA BIEDRONKI:
         1. Format w plikach PDF często rozbija linię na: "Nazwa", potem w nowej linii "Ilość x Cena".
            Szukaj wzorca: "1.000 x 3,29" -> to oznacza 1 sztukę po 3.29.
-        2. Ignoruj linię "Sprzedaż opodatkowana".
-        3. Ignoruj sekcje podsumowania podatków (PTU A, PTU B...).
-        4. Czasami nazwa produktu skleja się z kodem PTU (np. "MlekoC"). Oddziel to.
+        2. UWAGA NA UKŁAD KOLUMNOWY W OCR: Tekst z OCR może mieć najpierw wylistowane wszystkie NAZWY produktów, a dopiero niżej wszystkie CENY.
+           Musisz inteligentnie połączyć nazwy z cenami, wiedząc, że kolejność jest ta sama.
+           Przykład OCR:
+           "Mleko"
+           "Chleb"
+           ...
+           "3,29"
+           "2,50"
+           -> Oznacza: Mleko za 3,29, Chleb za 2,50.
+        3. Ignoruj linię "Sprzedaż opodatkowana".
+        4. Ignoruj sekcje podsumowania podatków (PTU A, PTU B...).
+        5. Czasami nazwa produktu skleja się z kodem PTU (np. "MlekoC"). Oddziel to.
         
-        Wymagana struktura JSON:
         Wymagana struktura JSON:
         {
           "sklep_info": { "nazwa": "Biedronka", "lokalizacja": "Adres sklepu lub null" },
@@ -203,10 +211,9 @@ class GenericStrategy(ReceiptStrategy):
         Sformatuj wynik ściśle według zadanego schematu JSON.
         
         Wymagana struktura JSON:
-        Wymagana struktura JSON:
         {
           "sklep_info": { "nazwa": "Nazwa sklepu", "lokalizacja": "Adres sklepu lub null" },
-          "paragon_info": { "data_zakupu": "YYYY-MM-DD", "suma_calkowita": "123.45" },
+          "paragon_info": { "data_zakupu": "2024-05-20", "suma_calkowita": "123.45" },
           "pozycje": [
             { "nazwa_raw": "Nazwa produktu", "ilosc": "1.0", "jednostka": "szt/kg", "cena_jedn": "1.23", "cena_calk": "1.23", "rabat": "0.00", "cena_po_rab": "1.23" }
           ]

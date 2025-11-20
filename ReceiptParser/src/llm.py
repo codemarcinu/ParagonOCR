@@ -125,17 +125,28 @@ def _convert_types(data: dict) -> dict:
                 f"OSTRZEŻENIE: Nieprawidłowy format daty '{raw_date}'. Ustawiam dzisiejszą datę."
             )
             data["paragon_info"]["data_zakupu"] = datetime.now()
-        data["paragon_info"]["suma_calkowita"] = Decimal(
-            data["paragon_info"]["suma_calkowita"]
-        )
+
+        try:
+            data["paragon_info"]["suma_calkowita"] = Decimal(
+                str(data["paragon_info"]["suma_calkowita"]).replace(",", ".")
+            )
+        except (InvalidOperation, TypeError):
+            data["paragon_info"]["suma_calkowita"] = Decimal("0.00")
 
         # Konwersja danych pozycji
         for item in data["pozycje"]:
             for key in ["ilosc", "cena_jedn", "cena_calk", "cena_po_rab"]:
-                item[key] = Decimal(item[key])
+                try:
+                    item[key] = Decimal(str(item[key]).replace(",", "."))
+                except (InvalidOperation, TypeError):
+                    item[key] = Decimal("0.00")
+
             # Rabat może być nullem
             if item.get("rabat"):
-                item["rabat"] = Decimal(item["rabat"])
+                try:
+                    item["rabat"] = Decimal(str(item["rabat"]).replace(",", "."))
+                except (InvalidOperation, TypeError):
+                    item["rabat"] = Decimal("0.00")
             else:
                 item["rabat"] = Decimal("0.00")  # Ustawiamy domyślny zerowy rabat
         return data
@@ -150,6 +161,7 @@ def parse_receipt_with_llm(
     image_path: str,
     model_name: str = Config.VISION_MODEL,
     system_prompt_override: str = None,
+    ocr_text: str = None,
 ) -> dict | None:
     """
     Używa modelu multimodalnego do sparsowania całego paragonu z pliku obrazu.
@@ -218,13 +230,17 @@ def parse_receipt_with_llm(
                 {"role": "system", "content": system_prompt},
                 {
                     "role": "user",
-                    "content": "Przeanalizuj ten paragon.",
+                    "content": (
+                        f"Przeanalizuj ten paragon.\n\nWspomóż się tekstem odczytanym przez OCR (może zawierać błędy, ale układ jest zachowany):\n---\n{ocr_text}\n---"
+                        if ocr_text
+                        else "Przeanalizuj ten paragon."
+                    ),
                     "images": [image_path],  # Ollama python client obsługuje ścieżki
                 },
             ],
             options={
                 "temperature": 0,
-                "num_predict": 2000,  # Limit tokenów, aby uniknąć pętli nieskończonej
+                "num_predict": 4000,  # Limit tokenów zwiększony dla długich paragonów
             },  # Zmniejszamy losowość dla większej deterministyczności
         )
 
