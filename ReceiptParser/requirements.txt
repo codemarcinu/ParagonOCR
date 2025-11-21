@@ -6,3 +6,4 @@ customtkinter
 Pillow
 pdf2image
 pytesseract
+mistralai

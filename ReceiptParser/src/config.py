@@ -13,6 +13,7 @@ class Config:
     OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
     VISION_MODEL = os.getenv("VISION_MODEL", "llava:latest")
     TEXT_MODEL = os.getenv("TEXT_MODEL", "SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M")
+    MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "")
 
     @staticmethod
     def print_config():

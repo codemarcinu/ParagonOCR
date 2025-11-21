@@ -285,3 +285,96 @@ def parse_receipt_with_llm(
             f"BŁĄD: Wystąpił problem podczas komunikacji z modelem '{model_name}': {e}"
         )
         return None
+
+
+def parse_receipt_from_text(
+    text_content: str,
+    model_name: str = Config.TEXT_MODEL,
+) -> dict | None:
+    """
+    Używa modelu tekstowego do sparsowania paragonu na podstawie tekstu (np. z Mistral OCR).
+
+    Args:
+        text_content: Tekst paragonu (np. markdown z OCR).
+        model_name: Nazwa modelu Ollama do użycia.
+
+    Returns:
+        Słownik z danymi w formacie ParsedData, lub None w przypadku błędu.
+    """
+    if not client:
+        print("BŁĄD: Klient Ollama nie jest skonfigurowany.")
+        return None
+
+    system_prompt = """
+    Jesteś asystentem AI, który wyciąga ustrukturyzowane dane z tekstu paragonu.
+    Otrzymasz treść paragonu (OCR/Markdown). Twoim zadaniem jest wyodrębnienie informacji i zwrócenie ich w formacie JSON.
+
+    Wymagana struktura JSON:
+    {
+      "sklep_info": {
+        "nazwa": "string (np. Lidl, Biedronka)",
+        "lokalizacja": "string lub null"
+      },
+      "paragon_info": {
+        "data_zakupu": "string YYYY-MM-DD",
+        "suma_calkowita": "string (np. 123.45)"
+      },
+      "pozycje": [
+        {
+          "nazwa_raw": "string",
+          "ilosc": "string (np. 1.0)",
+          "jednostka": "string lub null",
+          "cena_jedn": "string",
+          "cena_calk": "string",
+          "rabat": "string lub null",
+          "cena_po_rab": "string"
+        }
+      ]
+    }
+
+    Zasady:
+    1. Suma całkowita to kwota do zapłaty.
+    2. Jeśli brak ilości, przyjmij 1.0.
+    3. Ceny podawaj jako stringi z kropką.
+    4. Ignoruj linie, które nie są pozycjami zakupowymi (np. sumy VAT, reklamy).
+    """
+
+    try:
+        print(f"INFO: Wysyłanie tekstu do modelu '{model_name}' (format=json)...")
+
+        response = client.chat(
+            model=model_name,
+            format="json",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {
+                    "role": "user",
+                    "content": f"Przeanalizuj ten tekst paragonu:\n\n{text_content}",
+                },
+            ],
+            options={
+                "temperature": 0,
+                "num_predict": 4000,
+            },
+        )
+
+        raw_response_text = response["message"]["content"]
+        print(
+            f"INFO: Otrzymano odpowiedź od LLM. Długość: {len(raw_response_text)} znaków."
+        )
+
+        try:
+            parsed_json = json.loads(raw_response_text)
+        except json.JSONDecodeError as e:
+            print(f"BŁĄD: Model zwrócił niepoprawny JSON. Szczegóły: {e}")
+            return None
+
+        print("INFO: Konwertuję typy danych...")
+        converted_data = _convert_types(parsed_json)
+        return converted_data
+
+    except Exception as e:
+        print(
+            f"BŁĄD: Wystąpił problem podczas komunikacji z modelem '{model_name}': {e}"
+        )
+        return None

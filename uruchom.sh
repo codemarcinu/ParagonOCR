@@ -26,12 +26,8 @@ echo "[INFO] Srodowisko wirtualne aktywowane."
 
 # 3. Instalacja zaleznosci Python (z pliku requirements.txt)
 # Sprawdzamy, czy glowny pakiet jest juz zainstalowany, zeby nie robic tego za kazdym razem
-if ! ./venv/bin/pip show customtkinter > /dev/null 2>&1; then
     echo "[INFO] Instaluje zaleznosci Pythona z $REQUIREMENTS_PATH..."
     ./venv/bin/pip install -r "$REQUIREMENTS_PATH"
-else
-    echo "[INFO] Zaleznosci Pythona sa juz zainstalowane."
-fi
 
 # 4. Sprawdzenie serwera Ollama
 if curl --output /dev/null --silent --head --fail http://localhost:11434; then

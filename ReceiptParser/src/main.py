@@ -13,9 +13,10 @@ from .database import (
     AliasProduktu,
 )
 from .data_models import ParsedData
-from .llm import get_llm_suggestion, parse_receipt_with_llm
+from .llm import get_llm_suggestion, parse_receipt_with_llm, parse_receipt_from_text
 from .ocr import convert_pdf_to_image, extract_text_from_image
 from .strategies import get_strategy_for_store
+from .mistral_ocr import MistralOCRClient
 import os
 
 # --- GŁÓWNA LOGIKA PRZETWARZANIA (NIEZALEŻNA OD UI) ---
@@ -48,30 +49,59 @@ def run_processing_pipeline(
                 f"INFO: PDF skonwertowany tymczasowo do: {processing_file_path}"
             )
 
-        # Krok 1.5: Detekcja sklepu (Strategy Pattern) + Hybrid OCR
-        log_callback("INFO: Analizuję tekst z OCR (Tesseract)...")
-        full_ocr_text = extract_text_from_image(processing_file_path)
-        log_callback(
-            f"--- WYNIK OCR (Tesseract) ---\n{full_ocr_text}\n-----------------------------"
-        )
+        if llm_model == "mistral-ocr":
+            log_callback("INFO: Używam Mistral OCR do ekstrakcji tekstu...")
+            mistral_client = MistralOCRClient()
+            ocr_markdown = mistral_client.process_image(processing_file_path)
 
-        # Do detekcji sklepu używamy próbki, ale do LLM przekażemy całość
-        header_sample = full_ocr_text[:1000]
+            if not ocr_markdown:
+                raise Exception("Mistral OCR nie zwrócił wyniku.")
 
-        strategy = get_strategy_for_store(header_sample)
-        log_callback(f"INFO: Wybrano strategię: {strategy.__class__.__name__}")
+            log_callback(
+                "INFO: Mistral OCR zakończył pracę. Przesyłam tekst do LLM (Bielik)..."
+            )
+            parsed_data = parse_receipt_from_text(ocr_markdown)
 
-        system_prompt = strategy.get_system_prompt()
+        else:
+            # Krok 1.5: Detekcja sklepu (Strategy Pattern) + Hybrid OCR
+            log_callback("INFO: Analizuję tekst z OCR (Tesseract)...")
+            full_ocr_text = extract_text_from_image(processing_file_path)
+            log_callback(
+                f"--- WYNIK OCR (Tesseract) ---\n{full_ocr_text}\n-----------------------------"
+            )
 
-        log_callback(
-            f"INFO: Używam modelu LLM '{llm_model}' do przetworzenia obrazu (wspaganego OCR)."
-        )
-        parsed_data = parse_receipt_with_llm(
-            processing_file_path,
-            llm_model,
-            system_prompt_override=system_prompt,
-            ocr_text=full_ocr_text,
-        )
+            # Do detekcji sklepu używamy próbki, ale do LLM przekażemy całość
+            header_sample = full_ocr_text[:1000]
+
+            strategy = get_strategy_for_store(header_sample)
+            log_callback(f"INFO: Wybrano strategię: {strategy.__class__.__name__}")
+
+            system_prompt = strategy.get_system_prompt()
+
+            log_callback(
+                f"INFO: Używam modelu LLM '{llm_model}' do przetworzenia obrazu (wspaganego OCR)."
+            )
+            parsed_data = parse_receipt_with_llm(
+                processing_file_path,
+                llm_model,
+                system_prompt_override=system_prompt,
+                ocr_text=full_ocr_text,
+            )
+
+        # Jeśli używamy Mistral OCR, strategia mogła nie zostać jeszcze wybrana (bo pominęliśmy Tesseract)
+        # Ale potrzebujemy jej do post-processingu.
+        # Spróbujmy wykryć strategię na podstawie tekstu z Mistral OCR jeśli jeszcze jej nie mamy.
+        if "strategy" not in locals():
+            # Używamy początku tekstu z Mistral OCR do detekcji
+            header_sample = (
+                ocr_markdown[:1000]
+                if "ocr_markdown" in locals() and ocr_markdown
+                else ""
+            )
+            strategy = get_strategy_for_store(header_sample)
+            log_callback(
+                f"INFO: Wybrano strategię (na podstawie Mistral OCR): {strategy.__class__.__name__}"
+            )
 
         # Sprzątanie po PDF
         if temp_image_path and os.path.exists(temp_image_path):
