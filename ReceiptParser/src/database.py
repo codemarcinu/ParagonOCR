@@ -1,7 +1,8 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, Numeric
+from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, Numeric, DateTime
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
 
 # --- Konfiguracja Silnika Bazy Danych ---
 
@@ -44,6 +45,7 @@ class Produkt(Base):
     kategoria = relationship("KategoriaProduktu", back_populates="produkty")
     aliasy = relationship("AliasProduktu", back_populates="produkt")
     pozycje_paragonu = relationship("PozycjaParagonu", back_populates="produkt")
+    stan_magazynowy = relationship("StanMagazynowy", back_populates="produkt", cascade="all, delete-orphan")
 
 class AliasProduktu(Base):
     __tablename__ = 'aliasy_produktow'
@@ -80,6 +82,20 @@ class PozycjaParagonu(Base):
     
     paragon = relationship("Paragon", back_populates="pozycje")
     produkt = relationship("Produkt", back_populates="pozycje_paragonu")
+
+class StanMagazynowy(Base):
+    """Tabela do śledzenia stanu magazynowego produktów (ilość, data ważności)"""
+    __tablename__ = 'stan_magazynowy'
+    stan_id = Column(Integer, primary_key=True)
+    produkt_id = Column(Integer, ForeignKey('produkty.produkt_id'), nullable=False)
+    ilosc = Column(Numeric(10, 2), nullable=False, default=0.0)
+    jednostka_miary = Column(String)  # np. 'szt', 'kg', 'l'
+    data_waznosci = Column(Date)  # Data ważności produktu
+    data_dodania = Column(DateTime, default=datetime.now)  # Kiedy produkt został dodany do magazynu
+    pozycja_paragonu_id = Column(Integer, ForeignKey('pozycje_paragonu.pozycja_id'), nullable=True)  # Opcjonalne powiązanie z paragonem
+    
+    produkt = relationship("Produkt", back_populates="stan_magazynowy")
+    pozycja_paragonu = relationship("PozycjaParagonu")
 
 # --- Funkcja Inicjalizująca ---
 

@@ -1,11 +1,11 @@
-from datetime import datetime
+from datetime import datetime, date
 from decimal import Decimal
 from typing import List, Dict, Any, TypedDict, Optional
 
 # --- Definicje Struktur Danych (TypedDicts) ---
 # Użycie TypedDict pozwala na statyczną analizę kodu i lepsze podpowiadanie składni.
 
-class ParsedItem(TypedDict):
+class ParsedItem(TypedDict, total=False):
     """Struktura dla pojedynczej pozycji na paragonie."""
     nazwa_raw: str          # Oryginalna nazwa pozycji z paragonu
     ilosc: Decimal          # Ilość, np. 1.0, 0.5 (dla wagi)
@@ -14,6 +14,7 @@ class ParsedItem(TypedDict):
     cena_calk: Decimal      # Całkowita cena za pozycję (ilość * cena_jedn)
     rabat: Optional[Decimal]  # Wartość rabatu (jeśli jest, może być None)
     cena_po_rab: Decimal    # Cena po uwzględnieniu rabatu
+    data_waznosci: Optional[date]  # Data ważności produktu (opcjonalna)
 
 class ParsedReceiptInfo(TypedDict):
     """Struktura dla ogólnych informacji o paragonie."""

@@ -1,14 +1,18 @@
 import customtkinter as ctk
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 import threading
 import queue
 import os
-from datetime import datetime
+import sys
+from datetime import datetime, date, timedelta
 from decimal import Decimal
+from sqlalchemy.orm import sessionmaker
 
-# Lokalne importy - zakładamy, że gui.py jest w folderze głównym projektu
+# Lokalne importy - gui.py jest w folderze głównym projektu, src jest w ReceiptParser/src
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'ReceiptParser'))
+
 from src.main import run_processing_pipeline
-from src.database import init_db
+from src.database import init_db, engine, Produkt, StanMagazynowy, KategoriaProduktu
 from src.config import Config
 
 
@@ -91,8 +95,8 @@ class ReviewDialog(ctk.CTkToplevel):
         self.scrollable_frame = ctk.CTkScrollableFrame(self)
         self.scrollable_frame.pack(fill="both", expand=True, padx=10, pady=5)
 
-        # Headers
-        headers = ["Nazwa", "Ilość", "Cena jedn.", "Wartość", "Rabat", "Po rabacie"]
+        # Headers - dodano kolumnę "Data ważności"
+        headers = ["Nazwa", "Ilość", "Cena jedn.", "Wartość", "Rabat", "Po rabacie", "Data ważności"]
         for col, text in enumerate(headers):
             ctk.CTkLabel(
                 self.scrollable_frame, text=text, font=("Arial", 12, "bold")
@@ -142,6 +146,14 @@ class ReviewDialog(ctk.CTkToplevel):
             e_final.insert(0, str(item["cena_po_rab"]))
             entries["cena_po_rab"] = e_final
 
+            # Data ważności
+            e_expiry = ctk.CTkEntry(self.scrollable_frame, width=120, placeholder_text="YYYY-MM-DD")
+            e_expiry.grid(row=row, column=6, padx=2, pady=2)
+            # Domyślnie ustawiamy datę za 7 dni (można zmienić)
+            default_expiry = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
+            e_expiry.insert(0, default_expiry)
+            entries["data_waznosci"] = e_expiry
+
             # Hidden fields
             entries["jednostka"] = item.get("jednostka", "")
 
@@ -188,6 +200,16 @@ class ReviewDialog(ctk.CTkToplevel):
 
             new_items = []
             for entries in self.item_entries:
+                # Parsowanie daty ważności
+                data_waznosci_str = entries["data_waznosci"].get().strip()
+                data_waznosci = None
+                if data_waznosci_str:
+                    try:
+                        data_waznosci = datetime.strptime(data_waznosci_str, "%Y-%m-%d").date()
+                    except ValueError:
+                        messagebox.showerror("Błąd", f"Nieprawidłowy format daty ważności: {data_waznosci_str}\nUżyj formatu YYYY-MM-DD")
+                        return
+                
                 item = {
                     "nazwa_raw": entries["nazwa_raw"].get(),
                     "ilosc": Decimal(entries["ilosc"].get().replace(",", ".")),
@@ -198,6 +220,7 @@ class ReviewDialog(ctk.CTkToplevel):
                     "cena_po_rab": Decimal(
                         entries["cena_po_rab"].get().replace(",", ".")
                     ),
+                    "data_waznosci": data_waznosci,  # Dodano datę ważności
                 }
                 new_items.append(item)
 
@@ -217,49 +240,352 @@ class ReviewDialog(ctk.CTkToplevel):
         return self.result_data
 
 
+class CookingDialog(ctk.CTkToplevel):
+    """Okno do zaznaczania produktów do zużycia podczas gotowania"""
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("Gotowanie - Zużycie produktów")
+        self.geometry("900x600")
+        self.result = None
+        
+        SessionLocal = sessionmaker(bind=engine)
+        self.session = SessionLocal()
+        
+        # Header
+        header_frame = ctk.CTkFrame(self)
+        header_frame.pack(fill="x", padx=10, pady=10)
+        ctk.CTkLabel(header_frame, text="Zaznacz produkty do zużycia:", font=("Arial", 16, "bold")).pack(pady=10)
+        
+        # Scrollable list of products
+        self.scrollable_frame = ctk.CTkScrollableFrame(self)
+        self.scrollable_frame.pack(fill="both", expand=True, padx=10, pady=5)
+        
+        # Headers
+        headers = ["Zaznacz", "Produkt", "Ilość", "Jednostka", "Data ważności"]
+        for col, text in enumerate(headers):
+            ctk.CTkLabel(
+                self.scrollable_frame, text=text, font=("Arial", 12, "bold")
+            ).grid(row=0, column=col, padx=5, pady=5)
+        
+        # Load products from database
+        self.checkboxes = []
+        self.product_data = []
+        self.load_products()
+        
+        # Footer
+        footer_frame = ctk.CTkFrame(self)
+        footer_frame.pack(fill="x", padx=10, pady=10)
+        
+        ctk.CTkButton(
+            footer_frame,
+            text="Zużyj zaznaczone",
+            command=self.consume_products,
+            fg_color="green",
+            width=200
+        ).pack(side="right", padx=10)
+        
+        ctk.CTkButton(
+            footer_frame,
+            text="Anuluj",
+            command=self.on_cancel,
+            width=200
+        ).pack(side="left", padx=10)
+        
+        self.protocol("WM_DELETE_WINDOW", self.on_cancel)
+        self.grab_set()
+    
+    def load_products(self):
+        """Wczytuje produkty z magazynu"""
+        # Pobierz wszystkie produkty ze stanem magazynowym > 0
+        stany = self.session.query(StanMagazynowy).join(Produkt).filter(
+            StanMagazynowy.ilosc > 0
+        ).order_by(StanMagazynowy.data_waznosci).all()
+        
+        if not stany:
+            ctk.CTkLabel(
+                self.scrollable_frame,
+                text="Brak produktów w magazynie",
+                font=("Arial", 14)
+            ).grid(row=1, column=0, columnspan=5, pady=20)
+            return
+        
+        for i, stan in enumerate(stany):
+            row = i + 1
+            checkbox = ctk.CTkCheckBox(self.scrollable_frame, text="")
+            checkbox.grid(row=row, column=0, padx=5, pady=2)
+            
+            ctk.CTkLabel(
+                self.scrollable_frame,
+                text=stan.produkt.znormalizowana_nazwa,
+                width=300
+            ).grid(row=row, column=1, padx=5, pady=2, sticky="w")
+            
+            ilosc_entry = ctk.CTkEntry(self.scrollable_frame, width=80)
+            ilosc_entry.insert(0, str(stan.ilosc))
+            ilosc_entry.grid(row=row, column=2, padx=5, pady=2)
+            
+            ctk.CTkLabel(
+                self.scrollable_frame,
+                text=stan.jednostka_miary or "szt",
+                width=80
+            ).grid(row=row, column=3, padx=5, pady=2)
+            
+            data_waz = stan.data_waznosci.strftime("%Y-%m-%d") if stan.data_waznosci else "Brak"
+            color = "red" if stan.data_waznosci and stan.data_waznosci < date.today() else "green"
+            ctk.CTkLabel(
+                self.scrollable_frame,
+                text=data_waz,
+                width=120,
+                text_color=color
+            ).grid(row=row, column=4, padx=5, pady=2)
+            
+            self.checkboxes.append({
+                "checkbox": checkbox,
+                "ilosc_entry": ilosc_entry,
+                "stan": stan,
+                "max_ilosc": stan.ilosc
+            })
+    
+    def consume_products(self):
+        """Zużywa zaznaczone produkty"""
+        consumed = []
+        for item in self.checkboxes:
+            if item["checkbox"].get():
+                try:
+                    ilosc_do_zuzycia = Decimal(item["ilosc_entry"].get().replace(",", "."))
+                    if ilosc_do_zuzycia <= 0:
+                        continue
+                    if ilosc_do_zuzycia > item["max_ilosc"]:
+                        messagebox.showerror(
+                            "Błąd",
+                            f"Nie można zużyć więcej niż dostępne {item['max_ilosc']} dla produktu {item['stan'].produkt.znormalizowana_nazwa}"
+                        )
+                        return
+                    
+                    # Zmniejsz ilość w magazynie
+                    item["stan"].ilosc -= ilosc_do_zuzycia
+                    if item["stan"].ilosc <= 0:
+                        self.session.delete(item["stan"])
+                    
+                    consumed.append({
+                        "produkt": item["stan"].produkt.znormalizowana_nazwa,
+                        "ilosc": ilosc_do_zuzycia
+                    })
+                except ValueError:
+                    messagebox.showerror("Błąd", f"Nieprawidłowa ilość dla produktu {item['stan'].produkt.znormalizowana_nazwa}")
+                    return
+        
+        if consumed:
+            self.session.commit()
+            messagebox.showinfo("Sukces", f"Zużyto {len(consumed)} produktów")
+            self.result = consumed
+            self.destroy()
+        else:
+            messagebox.showwarning("Uwaga", "Nie zaznaczono żadnych produktów")
+    
+    def on_cancel(self):
+        self.session.close()
+        self.destroy()
+
+
+class AddProductDialog(ctk.CTkToplevel):
+    """Okno do ręcznego dodawania produktów"""
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("Dodaj produkt ręcznie")
+        self.geometry("500x400")
+        self.result = None
+        
+        SessionLocal = sessionmaker(bind=engine)
+        self.session = SessionLocal()
+        
+        # Form fields
+        form_frame = ctk.CTkFrame(self)
+        form_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        
+        ctk.CTkLabel(form_frame, text="Nazwa produktu:", font=("Arial", 14)).grid(row=0, column=0, sticky="w", pady=10)
+        self.name_entry = ctk.CTkEntry(form_frame, width=300)
+        self.name_entry.grid(row=0, column=1, pady=10, padx=10)
+        
+        ctk.CTkLabel(form_frame, text="Ilość:", font=("Arial", 14)).grid(row=1, column=0, sticky="w", pady=10)
+        self.quantity_entry = ctk.CTkEntry(form_frame, width=300)
+        self.quantity_entry.insert(0, "1.0")
+        self.quantity_entry.grid(row=1, column=1, pady=10, padx=10)
+        
+        ctk.CTkLabel(form_frame, text="Jednostka:", font=("Arial", 14)).grid(row=2, column=0, sticky="w", pady=10)
+        self.unit_entry = ctk.CTkEntry(form_frame, width=300)
+        self.unit_entry.insert(0, "szt")
+        self.unit_entry.grid(row=2, column=1, pady=10, padx=10)
+        
+        ctk.CTkLabel(form_frame, text="Data ważności (YYYY-MM-DD):", font=("Arial", 14)).grid(row=3, column=0, sticky="w", pady=10)
+        self.expiry_entry = ctk.CTkEntry(form_frame, width=300, placeholder_text="YYYY-MM-DD")
+        default_expiry = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
+        self.expiry_entry.insert(0, default_expiry)
+        self.expiry_entry.grid(row=3, column=1, pady=10, padx=10)
+        
+        # Buttons
+        button_frame = ctk.CTkFrame(self)
+        button_frame.pack(fill="x", padx=20, pady=10)
+        
+        ctk.CTkButton(
+            button_frame,
+            text="Dodaj",
+            command=self.add_product,
+            fg_color="green",
+            width=200
+        ).pack(side="right", padx=10)
+        
+        ctk.CTkButton(
+            button_frame,
+            text="Anuluj",
+            command=self.on_cancel,
+            width=200
+        ).pack(side="left", padx=10)
+        
+        self.protocol("WM_DELETE_WINDOW", self.on_cancel)
+        self.grab_set()
+    
+    def add_product(self):
+        """Dodaje produkt do bazy"""
+        nazwa = self.name_entry.get().strip()
+        if not nazwa:
+            messagebox.showerror("Błąd", "Nazwa produktu nie może być pusta")
+            return
+        
+        try:
+            ilosc = Decimal(self.quantity_entry.get().replace(",", "."))
+            if ilosc <= 0:
+                messagebox.showerror("Błąd", "Ilość musi być większa od zera")
+                return
+        except ValueError:
+            messagebox.showerror("Błąd", "Nieprawidłowa ilość")
+            return
+        
+        jednostka = self.unit_entry.get().strip() or "szt"
+        
+        data_waznosci_str = self.expiry_entry.get().strip()
+        data_waznosci = None
+        if data_waznosci_str:
+            try:
+                data_waznosci = datetime.strptime(data_waznosci_str, "%Y-%m-%d").date()
+            except ValueError:
+                messagebox.showerror("Błąd", "Nieprawidłowy format daty. Użyj YYYY-MM-DD")
+                return
+        
+        # Znajdź lub utwórz produkt
+        produkt = self.session.query(Produkt).filter_by(znormalizowana_nazwa=nazwa).first()
+        if not produkt:
+            # Utwórz nowy produkt (bez kategorii na razie)
+            produkt = Produkt(znormalizowana_nazwa=nazwa)
+            self.session.add(produkt)
+            self.session.flush()
+        
+        # Dodaj do magazynu
+        stan = StanMagazynowy(
+            produkt_id=produkt.produkt_id,
+            ilosc=ilosc,
+            jednostka_miary=jednostka,
+            data_waznosci=data_waznosci
+        )
+        self.session.add(stan)
+        self.session.commit()
+        
+        messagebox.showinfo("Sukces", f"Dodano produkt '{nazwa}' do magazynu")
+        self.result = True
+        self.destroy()
+    
+    def on_cancel(self):
+        self.session.close()
+        self.destroy()
+
+
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("ReceiptParser")
-        self.geometry("800x600")
+        self.title("ReceiptParser - System Zarządzania Paragonami")
+        self.geometry("1000x700")
         ctk.set_appearance_mode("System")
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
 
-        # --- WIDGETY ---
-        self.main_frame = ctk.CTkFrame(self)
-        self.main_frame.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
-        self.main_frame.grid_columnconfigure(1, weight=1)
+        # --- MENU BAR ---
+        self.menu_frame = ctk.CTkFrame(self)
+        self.menu_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=5)
+        self.menu_frame.grid_columnconfigure(0, weight=1)
+        
+        # Menu buttons
+        menu_buttons_frame = ctk.CTkFrame(self.menu_frame)
+        menu_buttons_frame.pack(side="left", padx=5, pady=5)
+        
+        ctk.CTkButton(
+            menu_buttons_frame,
+            text="📄 Paragony",
+            command=self.show_receipts_tab,
+            width=120
+        ).pack(side="left", padx=5)
+        
+        ctk.CTkButton(
+            menu_buttons_frame,
+            text="🍳 Gotowanie",
+            command=self.show_cooking_dialog,
+            width=120
+        ).pack(side="left", padx=5)
+        
+        ctk.CTkButton(
+            menu_buttons_frame,
+            text="➕ Dodaj produkt",
+            command=self.show_add_product_dialog,
+            width=120
+        ).pack(side="left", padx=5)
+        
+        ctk.CTkButton(
+            menu_buttons_frame,
+            text="📦 Magazyn",
+            command=self.show_inventory,
+            width=120
+        ).pack(side="left", padx=5)
+
+        # --- MAIN CONTENT AREA ---
+        self.content_frame = ctk.CTkFrame(self)
+        self.content_frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+        self.content_frame.grid_columnconfigure(0, weight=1)
+        self.content_frame.grid_rowconfigure(0, weight=1)
+
+        # --- WIDGETY DLA PARAGONÓW ---
+        self.receipts_frame = ctk.CTkFrame(self.content_frame)
+        self.receipts_frame.grid(row=0, column=0, sticky="nsew")
+        self.receipts_frame.grid_columnconfigure(0, weight=1)
+        self.receipts_frame.grid_rowconfigure(1, weight=1)
 
         self.file_button = ctk.CTkButton(
-            self.main_frame, text="Wybierz plik paragonu", command=self.select_file
+            self.receipts_frame, text="📁 Wybierz plik paragonu", command=self.select_file
         )
-        self.file_button.grid(row=0, column=0, padx=10, pady=10)
+        self.file_button.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
         self.file_label = ctk.CTkLabel(
-            self.main_frame, text="Nie wybrano pliku", anchor="w"
+            self.receipts_frame, text="Nie wybrano pliku", anchor="w"
         )
         self.file_label.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
 
         self.process_button = ctk.CTkButton(
-            self.main_frame,
-            text="Przetwórz",
+            self.receipts_frame,
+            text="🔄 Przetwórz",
             command=self.start_processing,
             state="disabled",
         )
-        self.process_button.grid(row=2, column=0, columnspan=2, padx=10, pady=10)
+        self.process_button.grid(row=0, column=2, padx=10, pady=10)
 
         self.init_db_button = ctk.CTkButton(
-            self.main_frame,
-            text="Inicjalizuj bazę danych",
+            self.receipts_frame,
+            text="⚙️ Inicjalizuj bazę danych",
             command=self.initialize_database,
         )
-        self.init_db_button.grid(row=3, column=0, columnspan=2, padx=10, pady=5)
+        self.init_db_button.grid(row=0, column=3, padx=10, pady=10)
 
-        self.log_textbox = ctk.CTkTextbox(self, state="disabled", wrap="word")
-        self.log_textbox.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+        self.log_textbox = ctk.CTkTextbox(self.receipts_frame, state="disabled", wrap="word")
+        self.log_textbox.grid(row=1, column=0, columnspan=4, padx=10, pady=10, sticky="nsew")
 
         # --- Zmienne stanu ---
         self.selected_file_path = None
@@ -270,6 +596,100 @@ class App(ctk.CTk):
         self.review_result_queue = queue.Queue()
 
         self.after(100, self.process_log_queue)
+        
+        # Show receipts tab by default
+        self.show_receipts_tab()
+
+    def show_receipts_tab(self):
+        """Pokazuje zakładkę paragonów"""
+        self.receipts_frame.grid(row=0, column=0, sticky="nsew")
+    
+    def show_cooking_dialog(self):
+        """Otwiera okno gotowania"""
+        dialog = CookingDialog(self)
+        dialog.wait_window()
+    
+    def show_add_product_dialog(self):
+        """Otwiera okno dodawania produktu"""
+        dialog = AddProductDialog(self)
+        dialog.wait_window()
+        if dialog.result:
+            self.log("INFO: Produkt został dodany do magazynu")
+    
+    def show_inventory(self):
+        """Pokazuje stan magazynu"""
+        SessionLocal = sessionmaker(bind=engine)
+        session = SessionLocal()
+        
+        # Create inventory window
+        inv_window = ctk.CTkToplevel(self)
+        inv_window.title("Stan Magazynu")
+        inv_window.geometry("1000x600")
+        
+        scrollable = ctk.CTkScrollableFrame(inv_window)
+        scrollable.pack(fill="both", expand=True, padx=10, pady=10)
+        
+        # Headers
+        headers = ["Produkt", "Ilość", "Jednostka", "Data ważności", "Status"]
+        for col, text in enumerate(headers):
+            ctk.CTkLabel(
+                scrollable, text=text, font=("Arial", 12, "bold")
+            ).grid(row=0, column=col, padx=5, pady=5)
+        
+        stany = session.query(StanMagazynowy).join(Produkt).filter(
+            StanMagazynowy.ilosc > 0
+        ).order_by(StanMagazynowy.data_waznosci).all()
+        
+        for i, stan in enumerate(stany):
+            row = i + 1
+            ctk.CTkLabel(
+                scrollable,
+                text=stan.produkt.znormalizowana_nazwa,
+                width=300
+            ).grid(row=row, column=0, padx=5, pady=2, sticky="w")
+            
+            ctk.CTkLabel(
+                scrollable,
+                text=str(stan.ilosc),
+                width=100
+            ).grid(row=row, column=1, padx=5, pady=2)
+            
+            ctk.CTkLabel(
+                scrollable,
+                text=stan.jednostka_miary or "szt",
+                width=100
+            ).grid(row=row, column=2, padx=5, pady=2)
+            
+            data_waz = stan.data_waznosci.strftime("%Y-%m-%d") if stan.data_waznosci else "Brak"
+            ctk.CTkLabel(
+                scrollable,
+                text=data_waz,
+                width=120
+            ).grid(row=row, column=3, padx=5, pady=2)
+            
+            # Status
+            if stan.data_waznosci:
+                if stan.data_waznosci < date.today():
+                    status = "⚠️ Przeterminowany"
+                    color = "red"
+                elif stan.data_waznosci <= date.today() + timedelta(days=3):
+                    status = "🔴 Wkrótce przeterminowany"
+                    color = "orange"
+                else:
+                    status = "✅ OK"
+                    color = "green"
+            else:
+                status = "❓ Brak daty"
+                color = "gray"
+            
+            ctk.CTkLabel(
+                scrollable,
+                text=status,
+                width=150,
+                text_color=color
+            ).grid(row=row, column=4, padx=5, pady=2)
+        
+        session.close()
 
     def select_file(self):
         file_path = filedialog.askopenfilename(

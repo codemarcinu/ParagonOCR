@@ -13,6 +13,7 @@ from .database import (
     Produkt,
     AliasProduktu,
     KategoriaProduktu,
+    StanMagazynowy,
 )
 from .knowledge_base import get_product_metadata
 from .data_models import ParsedData
@@ -332,6 +333,22 @@ def save_to_database(
             cena_po_rabacie=cena_po_rab,
         )
         paragon.pozycje.append(pozycja)
+        session.flush()  # Flush, aby uzyskać pozycja_id
+        
+        # Dodaj stan magazynowy, jeśli podano datę ważności
+        data_waznosci = item_data.get("data_waznosci")
+        if data_waznosci:
+            stan = StanMagazynowy(
+                produkt_id=product_id,
+                ilosc=item_data["ilosc"],
+                jednostka_miary=item_data.get("jednostka", "szt"),
+                data_waznosci=data_waznosci,
+                pozycja_paragonu_id=pozycja.pozycja_id,
+            )
+            session.add(stan)
+            log_callback(f"   -> Dodano do magazynu: {item_data['ilosc']} {item_data.get('jednostka', 'szt')} (ważność: {data_waznosci})")
+        else:
+            log_callback(f"   -> Uwaga: Brak daty ważności dla produktu '{item_data['nazwa_raw']}' - nie dodano do magazynu")
 
     session.add(paragon)
     log_callback(
