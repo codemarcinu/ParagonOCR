@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, Toplevel
 import threading
 import queue
 import os
@@ -14,6 +14,55 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'ReceiptParser'))
 from src.main import run_processing_pipeline
 from src.database import init_db, engine, Produkt, StanMagazynowy, KategoriaProduktu
 from src.config import Config
+from history_manager import load_history, add_to_history
+
+
+class ToolTip:
+    """Prosta implementacja tooltipa dla CustomTkinter."""
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tipwindow = None
+        self.id = None
+        self.x = self.y = 0
+        self.widget.bind("<Enter>", self.enter)
+        self.widget.bind("<Leave>", self.leave)
+        self.widget.bind("<ButtonPress>", self.leave)
+
+    def enter(self, event=None):
+        self.schedule()
+
+    def leave(self, event=None):
+        self.unschedule()
+        self.hidetip()
+
+    def schedule(self):
+        self.unschedule()
+        self.id = self.widget.after(500, self.showtip)
+
+    def unschedule(self):
+        id = self.id
+        self.id = None
+        if id:
+            self.widget.after_cancel(id)
+
+    def showtip(self):
+        x, y, cx, cy = self.widget.bbox("insert") if hasattr(self.widget, "bbox") else (0, 0, 0, 0)
+        x += self.widget.winfo_rootx() + 25
+        y += self.widget.winfo_rooty() + 20
+        self.tipwindow = tw = Toplevel(self.widget)
+        tw.wm_overrideredirect(True)
+        tw.wm_geometry("+%d+%d" % (x, y))
+        label = ctk.CTkLabel(tw, text=self.text, justify="left",
+                             bg="#1a1a1a", fg_color="#1a1a1a", text_color="white",
+                             font=("Arial", 10), padx=5, pady=5)
+        label.pack()
+
+    def hidetip(self):
+        tw = self.tipwindow
+        self.tipwindow = None
+        if tw:
+            tw.destroy()
 
 
 class ProductMappingDialog(ctk.CTkToplevel):
@@ -103,37 +152,63 @@ class ReviewDialog(ctk.CTkToplevel):
             ).grid(row=0, column=col, padx=5, pady=5)
 
         self.item_entries = []
+        self.row_frames = []  # Przechowuj ramki wierszy dla kolorowania
         for i, item in enumerate(parsed_data["pozycje"]):
             row = i + 1
             entries = {}
+            
+            # Sprawdź czy produkt powinien być oznaczony specjalnie
+            nazwa_raw = item.get("nazwa_raw", "").strip()
+            is_skip = nazwa_raw.upper() == "POMIŃ" or nazwa_raw.upper() == "SKIP"
+            is_unknown = not nazwa_raw or len(nazwa_raw) < 2
+            
+            # Utwórz ramkę dla wiersza (dla kolorowania tła)
+            row_frame = ctk.CTkFrame(self.scrollable_frame)
+            row_frame.grid(row=row, column=0, columnspan=7, padx=2, pady=2, sticky="ew")
+            self.row_frames.append(row_frame)
+            
+            # Ustaw kolor tła w zależności od typu produktu
+            if is_skip:
+                row_frame.configure(fg_color="#3d1a1a")  # Ciemnoczerwony dla POMIŃ
+                tooltip_text = "Ta pozycja została oznaczona do pominięcia"
+            elif is_unknown:
+                row_frame.configure(fg_color="#3d3d1a")  # Ciemnożółty dla nieznanych
+                tooltip_text = "Nieznany produkt - wymaga weryfikacji"
+            else:
+                tooltip_text = f"Produkt: {nazwa_raw}"
+            
+            # Konfiguruj kolumny w ramce
+            for col in range(7):
+                row_frame.grid_columnconfigure(col, weight=1)
 
             # Nazwa
-            e_name = ctk.CTkEntry(self.scrollable_frame, width=300)
-            e_name.grid(row=row, column=0, padx=2, pady=2)
-            e_name.insert(0, item["nazwa_raw"])
+            e_name = ctk.CTkEntry(row_frame, width=300)
+            e_name.grid(row=0, column=0, padx=2, pady=2, sticky="ew")
+            e_name.insert(0, nazwa_raw)
             entries["nazwa_raw"] = e_name
+            ToolTip(e_name, tooltip_text)
 
             # Ilość
-            e_qty = ctk.CTkEntry(self.scrollable_frame, width=60)
-            e_qty.grid(row=row, column=1, padx=2, pady=2)
+            e_qty = ctk.CTkEntry(row_frame, width=60)
+            e_qty.grid(row=0, column=1, padx=2, pady=2, sticky="ew")
             e_qty.insert(0, str(item["ilosc"]))
             entries["ilosc"] = e_qty
 
             # Cena jedn
-            e_unit = ctk.CTkEntry(self.scrollable_frame, width=80)
-            e_unit.grid(row=row, column=2, padx=2, pady=2)
+            e_unit = ctk.CTkEntry(row_frame, width=80)
+            e_unit.grid(row=0, column=2, padx=2, pady=2, sticky="ew")
             e_unit.insert(0, str(item["cena_jedn"]))
             entries["cena_jedn"] = e_unit
 
             # Cena całk
-            e_total = ctk.CTkEntry(self.scrollable_frame, width=80)
-            e_total.grid(row=row, column=3, padx=2, pady=2)
+            e_total = ctk.CTkEntry(row_frame, width=80)
+            e_total.grid(row=0, column=3, padx=2, pady=2, sticky="ew")
             e_total.insert(0, str(item["cena_calk"]))
             entries["cena_calk"] = e_total
 
             # Rabat
-            e_disc = ctk.CTkEntry(self.scrollable_frame, width=80)
-            e_disc.grid(row=row, column=4, padx=2, pady=2)
+            e_disc = ctk.CTkEntry(row_frame, width=80)
+            e_disc.grid(row=0, column=4, padx=2, pady=2, sticky="ew")
             val_disc = item.get("rabat", "0.00")
             if val_disc is None:
                 val_disc = "0.00"
@@ -141,14 +216,14 @@ class ReviewDialog(ctk.CTkToplevel):
             entries["rabat"] = e_disc
 
             # Po rabacie
-            e_final = ctk.CTkEntry(self.scrollable_frame, width=80)
-            e_final.grid(row=row, column=5, padx=2, pady=2)
+            e_final = ctk.CTkEntry(row_frame, width=80)
+            e_final.grid(row=0, column=5, padx=2, pady=2, sticky="ew")
             e_final.insert(0, str(item["cena_po_rab"]))
             entries["cena_po_rab"] = e_final
 
             # Data ważności
-            e_expiry = ctk.CTkEntry(self.scrollable_frame, width=120, placeholder_text="YYYY-MM-DD")
-            e_expiry.grid(row=row, column=6, padx=2, pady=2)
+            e_expiry = ctk.CTkEntry(row_frame, width=120, placeholder_text="YYYY-MM-DD")
+            e_expiry.grid(row=0, column=6, padx=2, pady=2, sticky="ew")
             # Domyślnie ustawiamy datę za 7 dni (można zmienić)
             default_expiry = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
             e_expiry.insert(0, default_expiry)
@@ -557,35 +632,67 @@ class App(ctk.CTk):
         self.receipts_frame = ctk.CTkFrame(self.content_frame)
         self.receipts_frame.grid(row=0, column=0, sticky="nsew")
         self.receipts_frame.grid_columnconfigure(0, weight=1)
-        self.receipts_frame.grid_rowconfigure(1, weight=1)
+        self.receipts_frame.grid_rowconfigure(5, weight=1)
+        
+        # Wczytaj historię plików
+        self.refresh_history()
 
-        self.file_button = ctk.CTkButton(
-            self.receipts_frame, text="📁 Wybierz plik paragonu", command=self.select_file
+        # Historia plików
+        history_frame = ctk.CTkFrame(self.receipts_frame)
+        history_frame.grid(row=0, column=0, columnspan=4, padx=10, pady=(10, 5), sticky="ew")
+        history_frame.grid_columnconfigure(1, weight=1)
+        
+        ctk.CTkLabel(history_frame, text="Ostatnie pliki:", font=("Arial", 12)).grid(row=0, column=0, padx=5, pady=5)
+        
+        self.history_combo = ctk.CTkComboBox(
+            history_frame,
+            values=[],
+            command=self.on_history_selected,
+            width=400
         )
-        self.file_button.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        self.history_combo.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+        self.history_combo.set("Wybierz z historii...")
+        
+        self.file_button = ctk.CTkButton(
+            history_frame, text="📁 Wybierz plik", command=self.select_file, width=150
+        )
+        self.file_button.grid(row=0, column=2, padx=5, pady=5)
 
         self.file_label = ctk.CTkLabel(
             self.receipts_frame, text="Nie wybrano pliku", anchor="w"
         )
-        self.file_label.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
+        self.file_label.grid(row=1, column=0, columnspan=4, padx=10, pady=5, sticky="ew")
 
+        buttons_frame = ctk.CTkFrame(self.receipts_frame)
+        buttons_frame.grid(row=2, column=0, columnspan=4, padx=10, pady=5, sticky="ew")
+        
         self.process_button = ctk.CTkButton(
-            self.receipts_frame,
+            buttons_frame,
             text="🔄 Przetwórz",
             command=self.start_processing,
             state="disabled",
         )
-        self.process_button.grid(row=0, column=2, padx=10, pady=10)
+        self.process_button.pack(side="left", padx=5)
 
         self.init_db_button = ctk.CTkButton(
-            self.receipts_frame,
+            buttons_frame,
             text="⚙️ Inicjalizuj bazę danych",
             command=self.initialize_database,
         )
-        self.init_db_button.grid(row=0, column=3, padx=10, pady=10)
+        self.init_db_button.pack(side="left", padx=5)
+
+        # Status label i progress bar
+        self.status_label = ctk.CTkLabel(
+            self.receipts_frame, text="Gotowy", anchor="w", font=("Arial", 12)
+        )
+        self.status_label.grid(row=3, column=0, columnspan=4, padx=10, pady=(10, 5), sticky="ew")
+
+        self.progress_bar = ctk.CTkProgressBar(self.receipts_frame)
+        self.progress_bar.grid(row=4, column=0, columnspan=4, padx=10, pady=5, sticky="ew")
+        self.progress_bar.set(0)
 
         self.log_textbox = ctk.CTkTextbox(self.receipts_frame, state="disabled", wrap="word")
-        self.log_textbox.grid(row=1, column=0, columnspan=4, padx=10, pady=10, sticky="nsew")
+        self.log_textbox.grid(row=5, column=0, columnspan=4, padx=10, pady=10, sticky="nsew")
 
         # --- Zmienne stanu ---
         self.selected_file_path = None
@@ -691,6 +798,32 @@ class App(ctk.CTk):
         
         session.close()
 
+    def refresh_history(self):
+        """Odświeża listę historii plików w combobox."""
+        history = load_history()
+        # Konwertuj na krótkie nazwy dla wyświetlenia
+        display_values = [os.path.basename(path) for path in history]
+        self.history_combo.configure(values=display_values)
+        if history:
+            self.history_combo.set("Wybierz z historii...")
+        else:
+            self.history_combo.set("Brak historii")
+    
+    def on_history_selected(self, choice):
+        """Obsługuje wybór pliku z historii."""
+        if choice and choice != "Wybierz z historii..." and choice != "Brak historii":
+            history = load_history()
+            # Znajdź pełną ścieżkę na podstawie nazwy pliku
+            for path in history:
+                if os.path.basename(path) == choice:
+                    if os.path.exists(path):
+                        self.selected_file_path = path
+                        self.file_label.configure(text=os.path.basename(path))
+                        self.process_button.configure(state="normal")
+                        return
+            # Jeśli nie znaleziono, odśwież historię
+            self.refresh_history()
+    
     def select_file(self):
         file_path = filedialog.askopenfilename(
             title="Wybierz plik paragonu",
@@ -704,10 +837,21 @@ class App(ctk.CTk):
             self.selected_file_path = file_path
             self.file_label.configure(text=os.path.basename(file_path))
             self.process_button.configure(state="normal")
+            # Dodaj do historii
+            add_to_history(file_path)
+            self.refresh_history()
 
-    def log(self, message):
+    def log(self, message, progress=None, status=None):
+        """
+        Loguje wiadomość z opcjonalnym postępem i statusem.
+        
+        Args:
+            message: Wiadomość do wyświetlenia
+            progress: Postęp 0-100 (float) lub -1 dla indeterminate, None dla braku zmiany
+            status: Tekst statusu do wyświetlenia, None dla braku zmiany
+        """
         print(message)  # Print to terminal for debugging
-        self.log_queue.put(message)
+        self.log_queue.put((message, progress, status))
 
     def prompt_user(self, prompt_text, default_value, raw_name):
         self.prompt_queue.put((prompt_text, default_value, raw_name))
@@ -731,17 +875,51 @@ class App(ctk.CTk):
             return None
         return result
 
+    def update_status(self, message, progress=None):
+        """
+        Aktualizuje status label i pasek postępu.
+        
+        Args:
+            message: Tekst statusu
+            progress: Postęp 0-100 (float) lub -1 dla indeterminate, None dla braku zmiany
+        """
+        if message:
+            self.status_label.configure(text=message)
+        
+        if progress is not None:
+            if progress == -1:
+                # Tryb indeterminate
+                self.progress_bar.start()
+            else:
+                # Tryb determinate
+                self.progress_bar.stop()
+                self.progress_bar.set(progress / 100.0)
+
     def process_log_queue(self):
         try:
             # Limit iteracji aby uniknąć memory leak przy szybkim zapełnianiu queue
             max_messages = 50
             processed = 0
             while not self.log_queue.empty() and processed < max_messages:
-                message = self.log_queue.get_nowait()
+                item = self.log_queue.get_nowait()
+                # Obsługa starego formatu (tylko string) i nowego (tuple)
+                if isinstance(item, tuple):
+                    message, progress, status = item
+                else:
+                    message = item
+                    progress = None
+                    status = None
+                
                 self.log_textbox.configure(state="normal")
                 self.log_textbox.insert("end", message + "\n")
                 self.log_textbox.configure(state="disabled")
                 self.log_textbox.see("end")
+                
+                # Aktualizuj status i postęp
+                if status is not None or progress is not None:
+                    status_text = status if status is not None else self.status_label.cget("text")
+                    self.update_status(status_text, progress)
+                
                 processed += 1
 
             if not self.prompt_queue.empty():
@@ -787,10 +965,18 @@ class App(ctk.CTk):
         if not self.selected_file_path:
             return
 
+        # Dodaj do historii przed przetwarzaniem
+        add_to_history(self.selected_file_path)
+        self.refresh_history()
+
         self.set_ui_state("disabled")
+        self.process_button.configure(text="⏳ Przetwarzanie...")
         self.log_textbox.configure(state="normal")
         self.log_textbox.delete("1.0", "end")
         self.log_textbox.configure(state="disabled")
+        
+        # Uruchom pasek postępu w trybie indeterminate
+        self.update_status("Rozpoczynam przetwarzanie...", progress=-1)
 
         llm_model = Config.VISION_MODEL
 
@@ -814,6 +1000,11 @@ class App(ctk.CTk):
             self.after(100, lambda: self.monitor_thread(thread))
         else:
             self.set_ui_state("normal")
+            self.process_button.configure(text="🔄 Przetwórz")
+            # Zatrzymaj pasek postępu i ustaw na 100%
+            self.progress_bar.stop()
+            self.progress_bar.set(1.0)
+            self.update_status("Gotowy", progress=100)
             self.log("INFO: Przetwarzanie zakończone.")
 
 

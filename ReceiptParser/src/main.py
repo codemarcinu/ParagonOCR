@@ -1,6 +1,6 @@
 import click
 from sqlalchemy.orm import sessionmaker, Session, joinedload
-from typing import Callable
+from typing import Callable, Optional
 
 # Lokalne importy z naszego projektu
 from .database import (
@@ -21,8 +21,35 @@ from .strategies import get_strategy_for_store
 from .mistral_ocr import MistralOCRClient
 from .normalization_rules import find_static_match
 import os
+import inspect
 
 # --- GŁÓWNA LOGIKA PRZETWARZANIA (NIEZALEŻNA OD UI) ---
+
+
+def _call_log_callback(
+    log_callback: Callable,
+    message: str,
+    progress: Optional[float] = None,
+    status: Optional[str] = None,
+):
+    """
+    Wywołuje log_callback z obsługą zarówno starego (tylko message) jak i nowego formatu.
+    
+    Args:
+        log_callback: Funkcja callback do wywołania
+        message: Wiadomość do zalogowania
+        progress: Postęp 0-100 lub -1 dla indeterminate
+        status: Tekst statusu
+    """
+    import inspect
+    sig = inspect.signature(log_callback)
+    # Sprawdź czy callback przyjmuje więcej niż jeden argument
+    if len(sig.parameters) > 1:
+        # Nowy format - przekazujemy tuple
+        log_callback(message, progress, status)
+    else:
+        # Stary format - tylko message
+        log_callback(message)
 
 
 def run_processing_pipeline(
@@ -43,47 +70,39 @@ def run_processing_pipeline(
 
         # Obsługa PDF
         if file_path.lower().endswith(".pdf"):
-            log_callback(f"INFO: Wykryto plik PDF. Konwertuję na obraz...")
+            _call_log_callback(log_callback, f"INFO: Wykryto plik PDF. Konwertuję na obraz...", progress=-1, status="Konwertowanie PDF...")
             temp_image_path = convert_pdf_to_image(file_path)
             if not temp_image_path:
                 raise Exception("Nie udało się skonwertować pliku PDF na obraz.")
             processing_file_path = temp_image_path
-            log_callback(
-                f"INFO: PDF skonwertowany tymczasowo do: {processing_file_path}"
-            )
+            _call_log_callback(log_callback, f"INFO: PDF skonwertowany tymczasowo do: {processing_file_path}")
 
         if llm_model == "mistral-ocr":
-            log_callback("INFO: Używam Mistral OCR do ekstrakcji tekstu...")
+            _call_log_callback(log_callback, "INFO: Używam Mistral OCR do ekstrakcji tekstu...", progress=-1, status="OCR (Mistral)...")
             mistral_client = MistralOCRClient()
             ocr_markdown = mistral_client.process_image(processing_file_path)
 
             if not ocr_markdown:
                 raise Exception("Mistral OCR nie zwrócił wyniku.")
 
-            log_callback(
-                "INFO: Mistral OCR zakończył pracę. Przesyłam tekst do LLM (Bielik)..."
-            )
+            _call_log_callback(log_callback, "INFO: Mistral OCR zakończył pracę. Przesyłam tekst do LLM (Bielik)...", progress=30, status="Przetwarzanie przez LLM...")
             parsed_data = parse_receipt_from_text(ocr_markdown)
 
         else:
             # Krok 1.5: Detekcja sklepu (Strategy Pattern) + Hybrid OCR
-            log_callback("INFO: Analizuję tekst z OCR (Tesseract)...")
+            _call_log_callback(log_callback, "INFO: Analizuję tekst z OCR (Tesseract)...", progress=-1, status="OCR (Tesseract)...")
             full_ocr_text = extract_text_from_image(processing_file_path)
-            log_callback(
-                f"--- WYNIK OCR (Tesseract) ---\n{full_ocr_text}\n-----------------------------"
-            )
+            _call_log_callback(log_callback, f"--- WYNIK OCR (Tesseract) ---\n{full_ocr_text}\n-----------------------------")
 
             # Do detekcji sklepu używamy próbki, ale do LLM przekażemy całość
             header_sample = full_ocr_text[:1000]
 
             strategy = get_strategy_for_store(header_sample)
-            log_callback(f"INFO: Wybrano strategię: {strategy.__class__.__name__}")
+            _call_log_callback(log_callback, f"INFO: Wybrano strategię: {strategy.__class__.__name__}")
 
             system_prompt = strategy.get_system_prompt()
 
-            log_callback(
-                f"INFO: Używam modelu LLM '{llm_model}' do przetworzenia obrazu (wspaganego OCR)."
-            )
+            _call_log_callback(log_callback, f"INFO: Używam modelu LLM '{llm_model}' do przetworzenia obrazu (wspaganego OCR).", progress=30, status="Przetwarzanie przez LLM...")
             parsed_data = parse_receipt_with_llm(
                 processing_file_path,
                 llm_model,
@@ -109,30 +128,30 @@ def run_processing_pipeline(
         # Sprzątanie po PDF
         if temp_image_path and os.path.exists(temp_image_path):
             os.remove(temp_image_path)
-            log_callback("INFO: Usunięto tymczasowy plik obrazu.")
+            _call_log_callback(log_callback, "INFO: Usunięto tymczasowy plik obrazu.")
 
         if not parsed_data:
             raise Exception("Parsowanie za pomocą LLM nie zwróciło danych.")
 
         # Krok 1.6: Post-processing (Strategy Pattern)
-        log_callback("INFO: Uruchamiam post-processing specyficzny dla sklepu...")
+        _call_log_callback(log_callback, "INFO: Uruchamiam post-processing specyficzny dla sklepu...", progress=60, status="Post-processing...")
         parsed_data = strategy.post_process(parsed_data)
 
-        log_callback("INFO: Dane z paragonu zostały pomyślnie sparsowane przez LLM.")
+        _call_log_callback(log_callback, "INFO: Dane z paragonu zostały pomyślnie sparsowane przez LLM.", progress=70, status="Dane sparsowane")
 
         # Krok 1.7: Manualna weryfikacja przez użytkownika (jeśli dostępna)
         if review_callback:
-            log_callback("INFO: Oczekiwanie na weryfikację użytkownika...")
+            _call_log_callback(log_callback, "INFO: Oczekiwanie na weryfikację użytkownika...", progress=70, status="Oczekiwanie na weryfikację...")
             reviewed_data = review_callback(parsed_data)
             if not reviewed_data:
-                log_callback("INFO: Użytkownik odrzucił zmiany. Anulowanie zapisu.")
+                _call_log_callback(log_callback, "INFO: Użytkownik odrzucił zmiany. Anulowanie zapisu.")
                 return
             parsed_data = reviewed_data
-            log_callback("INFO: Użytkownik zatwierdził dane (ewentualnie po edycji).")
+            _call_log_callback(log_callback, "INFO: Użytkownik zatwierdził dane (ewentualnie po edycji).", progress=80, status="Zapisuję do bazy...")
 
     except Exception as e:
-        log_callback(f"BŁĄD KRYTYCZNY na etapie parsowania LLM: {e}")
-        log_callback("Upewnij się, że serwer Ollama działa i model jest dostępny.")
+        _call_log_callback(log_callback, f"BŁĄD KRYTYCZNY na etapie parsowania LLM: {e}")
+        _call_log_callback(log_callback, "Upewnij się, że serwer Ollama działa i model jest dostępny.")
         return
 
     # Krok 2: Zapis do bazy (ta logika jest już dobra i pozostaje bez zmian)
@@ -144,14 +163,14 @@ def run_processing_pipeline(
                 session, parsed_data, file_path, log_callback, prompt_callback
             )
             session.commit()
-            log_callback("--- Sukces! Dane zostały zapisane w bazie danych. ---")
+            _call_log_callback(log_callback, "--- Sukces! Dane zostały zapisane w bazie danych. ---", progress=100, status="Gotowy")
         except Exception as e:
             session.rollback()
-            log_callback(f"BŁĄD KRYTYCZNY podczas zapisu do bazy danych: {e}")
+            _call_log_callback(log_callback, f"BŁĄD KRYTYCZNY podczas zapisu do bazy danych: {e}")
         finally:
             session.close()
     else:
-        log_callback("BŁĄD: Nie udało się uzyskać danych do zapisu.")
+        _call_log_callback(log_callback, "BŁĄD: Nie udało się uzyskać danych do zapisu.")
 
 
 def save_to_database(
@@ -161,11 +180,11 @@ def save_to_database(
     log_callback: Callable,
     prompt_callback: Callable,
 ):
-    log_callback("INFO: Rozpoczynam zapis do bazy danych...")
+    _call_log_callback(log_callback, "INFO: Rozpoczynam zapis do bazy danych...", progress=80, status="Zapisuję do bazy...")
     sklep_name = parsed_data["sklep_info"]["nazwa"]
     sklep = session.query(Sklep).filter_by(nazwa_sklepu=sklep_name).first()
     if not sklep:
-        log_callback(f"INFO: Sklep '{sklep_name}' nie istnieje. Tworzę nowy wpis.")
+        _call_log_callback(log_callback, f"INFO: Sklep '{sklep_name}' nie istnieje. Tworzę nowy wpis.")
         sklep = Sklep(
             nazwa_sklepu=sklep_name,
             lokalizacja=parsed_data["sklep_info"]["lokalizacja"],
@@ -173,9 +192,7 @@ def save_to_database(
         session.add(sklep)
         session.flush()
     else:
-        log_callback(
-            f"INFO: Znaleziono istniejący sklep '{sklep_name}' w bazie danych."
-        )
+        _call_log_callback(log_callback, f"INFO: Znaleziono istniejący sklep '{sklep_name}' w bazie danych.")
 
     paragon = Paragon(
         sklep_id=sklep.sklep_id,
@@ -184,8 +201,13 @@ def save_to_database(
         plik_zrodlowy=file_path,
     )
 
-    log_callback("INFO: Przetwarzam pozycje z paragonu...")
-    for item_data in parsed_data["pozycje"]:
+    _call_log_callback(log_callback, "INFO: Przetwarzam pozycje z paragonu...", progress=85, status="Przetwarzam pozycje...")
+    total_items = len(parsed_data["pozycje"])
+    for idx, item_data in enumerate(parsed_data["pozycje"]):
+        # Aktualizuj postęp dla każdej pozycji (85-95%)
+        if total_items > 0:
+            progress = 85 + int((idx / total_items) * 10)
+            _call_log_callback(log_callback, f"INFO: Przetwarzam pozycję {idx + 1}/{total_items}...", progress=progress, status=f"Przetwarzam pozycję {idx + 1}/{total_items}...")
         # Logika rabatów została przeniesiona do strategies.py (LidlStrategy)
         # Tutaj zakładamy, że dane są już wyczyszczone przez strategy.post_process
 
@@ -198,7 +220,7 @@ def save_to_database(
             pass
 
         if product_id is None:
-            log_callback(f"   -> Pominięto pozycję: {item_data['nazwa_raw']}")
+            _call_log_callback(log_callback, f"   -> Pominięto pozycję: {item_data['nazwa_raw']}")
             continue
 
         pozycja = PozycjaParagonu(
@@ -216,9 +238,7 @@ def save_to_database(
         paragon.pozycje.append(pozycja)
 
     session.add(paragon)
-    log_callback(
-        f"INFO: Przygotowano do zapisu 1 paragon z {len(paragon.pozycje)} pozycjami."
-    )
+    _call_log_callback(log_callback, f"INFO: Przygotowano do zapisu 1 paragon z {len(paragon.pozycje)} pozycjami.", progress=95, status="Kończenie zapisu...")
 
 
 def resolve_product(
@@ -232,32 +252,30 @@ def resolve_product(
         .first()
     )
     if alias:
-        log_callback(
-            f"   -> Znaleziono alias (DB) dla '{raw_name}': '{alias.produkt.znormalizowana_nazwa}'"
-        )
+        _call_log_callback(log_callback, f"   -> Znaleziono alias (DB) dla '{raw_name}': '{alias.produkt.znormalizowana_nazwa}'")
         return alias.produkt_id
 
-    log_callback(f"  ?? Nieznany produkt: '{raw_name}'")
+    _call_log_callback(log_callback, f"  ?? Nieznany produkt: '{raw_name}'")
 
     # 2. Sprawdź Reguły Statyczne (Oszczędność LLM)
     suggested_name = find_static_match(raw_name)
     source = "Reguły Statyczne"
 
     if suggested_name:
-        log_callback(f"   -> Sugestia (Słownik): '{suggested_name}'")
+        _call_log_callback(log_callback, f"   -> Sugestia (Słownik): '{suggested_name}'")
     else:
         # 3. Zapytaj LLM (Ostatnia deska ratunku)
-        log_callback("   -> Słownik pusty. Pytam LLM...")
+        _call_log_callback(log_callback, "   -> Słownik pusty. Pytam LLM...")
         suggested_name = get_llm_suggestion(raw_name)
         source = "LLM"
         if suggested_name:
-            log_callback(f"   -> Sugestia (LLM): '{suggested_name}'")
+            _call_log_callback(log_callback, f"   -> Sugestia (LLM): '{suggested_name}'")
         else:
-            log_callback("   -> Nie udało się uzyskać sugestii LLM.")
+            _call_log_callback(log_callback, "   -> Nie udało się uzyskać sugestii LLM.")
 
     # Obsługa przypadku "POMIŃ" (czy to ze słownika, czy z LLM)
     if suggested_name == "POMIŃ":
-        log_callback("   -> System zasugerował pominięcie tej pozycji.")
+        _call_log_callback(log_callback, "   -> System zasugerował pominięcie tej pozycji.")
         # Opcjonalnie: Możesz tu od razu zwrócić None, jeśli ufasz regułom w 100%
         # return None
 
@@ -269,7 +287,7 @@ def resolve_product(
     normalized_name = prompt_callback(prompt_text, suggested_name or "", raw_name)
 
     if not normalized_name:
-        log_callback("   -> Pominięto przypisanie produktu dla tej pozycji.")
+        _call_log_callback(log_callback, "   -> Pominięto przypisanie produktu dla tej pozycji.")
         return None
 
     # ... Dalsza część kodu (Zapis do bazy Produkt/Alias) bez zmian ...
@@ -287,7 +305,7 @@ def resolve_product(
     if can_freeze is None:
         freeze_info = ""  # Brak danych
 
-    log_callback(f"   -> Kategoria: {kategoria_nazwa} | {freeze_info}")
+    _call_log_callback(log_callback, f"   -> Kategoria: {kategoria_nazwa} | {freeze_info}")
 
     # Pobierz lub utwórz kategorię w bazie
     kategoria = (
@@ -296,28 +314,26 @@ def resolve_product(
         .first()
     )
     if not kategoria:
-        log_callback(f"   -> Tworzę nową kategorię: '{kategoria_nazwa}'")
+        _call_log_callback(log_callback, f"   -> Tworzę nową kategorię: '{kategoria_nazwa}'")
         kategoria = KategoriaProduktu(nazwa_kategorii=kategoria_nazwa)
         session.add(kategoria)
         session.flush()
 
     if not product:
-        log_callback(f"   -> Tworzę nowy produkt w bazie: '{normalized_name}'")
+        _call_log_callback(log_callback, f"   -> Tworzę nowy produkt w bazie: '{normalized_name}'")
         product = Produkt(
             znormalizowana_nazwa=normalized_name, kategoria_id=kategoria.kategoria_id
         )
         session.add(product)
         session.flush()
     else:
-        log_callback(f"   -> Znaleziono istniejący produkt: '{normalized_name}'")
+        _call_log_callback(log_callback, f"   -> Znaleziono istniejący produkt: '{normalized_name}'")
         # Opcjonalnie: Aktualizuj kategorię jeśli brakuje (dla starszych wpisów)
         if product.kategoria_id is None:
             product.kategoria_id = kategoria.kategoria_id
-            log_callback(
-                f"   -> Zaktualizowano kategorię produktu na: '{kategoria_nazwa}'"
-            )
+            _call_log_callback(log_callback, f"   -> Zaktualizowano kategorię produktu na: '{kategoria_nazwa}'")
 
-    log_callback(f"   -> Tworzę nowy alias: '{raw_name}' -> '{normalized_name}'")
+    _call_log_callback(log_callback, f"   -> Tworzę nowy alias: '{raw_name}' -> '{normalized_name}'")
     new_alias = AliasProduktu(nazwa_z_paragonu=raw_name, produkt_id=product.produkt_id)
     session.add(new_alias)
     return product.produkt_id
