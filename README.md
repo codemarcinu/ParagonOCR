@@ -27,10 +27,13 @@
 
 ### 📦 Zarządzanie Magazynem i GUI
 - Nowoczesny interfejs graficzny oparty na **CustomTkinter**
+- **Spójny design system** - ujednolicone kolory, ikony i odstępy
 - Moduł **"Gotowanie"** do łatwego zużywania produktów z bazy
 - Śledzenie dat ważności i stanów magazynowych
 - Ręczne dodawanie produktów do magazynu
 - Przeglądanie stanu magazynu z oznaczeniem produktów przeterminowanych
+- **Analityka zakupów** - statystyki, trendy, wydatki według sklepów i kategorii
+- **Asystent AI Bielik** - czat kulinarny z propozycjami potraw i listami zakupów
 
 ### 💾 Baza Danych
 - Pełna struktura relacyjna w **SQLite** (SQLAlchemy ORM)
@@ -169,17 +172,22 @@ ParagonOCR/
 ├── history_manager.py      # Moduł zarządzania historią plików
 ├── uruchom.sh              # Skrypt startowy (Linux/Mac)
 ├── .env                    # Konfiguracja (klucze API, modele)
+├── .gitignore              # Pliki ignorowane przez Git
 ├── paragony/               # Katalog na pliki wejściowe (PDF/IMG)
 ├── logs/                   # Katalog na logi (tworzony automatycznie przy włączeniu logowania)
 │   └── paragonocr_YYYYMMDD.log  # Pliki logów (jeśli ENABLE_FILE_LOGGING=true)
-├── scripts/                # Skrypty pomocnicze i narzędzia deweloperskie
+├── scripts/                # ✨ Skrypty pomocnicze i narzędzia deweloperskie
 │   ├── check_database.py   # Sprawdzanie zawartości bazy danych
-│   ├── debug_ocr.py         # Debugowanie OCR
-│   ├── verify_config.py     # Weryfikacja konfiguracji
-│   ├── verify_knowledge.py  # Weryfikacja bazy wiedzy
-│   ├── test_bielik.py       # Test demonstracyjny asystenta Bielik
-│   ├── test_mistral.py      # Test integracji Mistral OCR
-│   └── test_receipt.py      # Test pełnego pipeline przetwarzania
+│   ├── debug_ocr.py        # Debugowanie OCR
+│   ├── verify_config.py    # Weryfikacja konfiguracji
+│   ├── verify_knowledge.py # Weryfikacja bazy wiedzy
+│   ├── test_bielik.py      # Test demonstracyjny asystenta Bielik
+│   ├── test_mistral.py     # Test integracji Mistral OCR
+│   └── test_receipt.py     # Test pełnego pipeline przetwarzania
+├── ANALIZA_BEZPIECZEŃSTWA.md  # Analiza bezpieczeństwa aplikacji
+├── ANALIZA_KODU.md         # Analiza struktury i jakości kodu
+├── ANALIZA_SUGESTII_UX.md  # Analiza sugestii UX
+├── ANALIZA_GUI_ULEPSZENIA.md # Analiza GUI i propozycje ulepszeń
 ├── ReceiptParser/
 │   ├── data/               # Baza danych SQLite (receipts.db)
 │   │   ├── receipts/       # Opcjonalny katalog na pliki paragonów
@@ -301,6 +309,24 @@ System zawiera wbudowaną bazę wiedzy o produktach:
 - **Metadane**: Informacja czy produkt można mrozić
 - **Normalizacja sklepów**: Automatyczne rozpoznawanie sklepów po wzorcach
 
+### 🦅 Asystent AI Bielik
+
+Inteligentny asystent kulinarny zintegrowany z aplikacją:
+- **Czat kulinarny** - zadawaj pytania o produkty, gotowanie, przepisy
+- **Propozycje potraw** - sugestie dań na podstawie dostępnych produktów w magazynie
+- **Lista zakupów** - automatyczne generowanie listy brakujących produktów
+- **Konfigurowalne prompty** - możliwość edycji promptów systemowych przez GUI
+
+### 📊 Analityka Zakupów
+
+Zaawansowana analityka danych o zakupach:
+- **Statystyki ogólne** - łączna liczba paragonów, wydatki, średnie wartości
+- **Wydatki według sklepów** - ranking sklepów według wydatków
+- **Wydatki według kategorii** - analiza wydatków na kategorie produktów
+- **Najczęściej kupowane produkty** - ranking produktów z liczbą zakupów
+- **Statystyki miesięczne** - trendy wydatków w czasie
+- **Ostatnie paragony** - szybki podgląd ostatnio dodanych paragonów
+
 ## ⚡ Optymalizacje i Ulepszenia
 
 ### Wprowadzone Optymalizacje (2025-11-22)
@@ -343,6 +369,26 @@ System zawiera wbudowaną bazę wiedzy o produktach:
 - ✅ **Stałe matematyczne** - `MATH_TOLERANCE`, `SIGNIFICANT_DIFFERENCE`, `MIN_PRODUCT_PRICE`
 - ✅ **Stałe dla Kaufland** - `KAUFLAND_TYPICAL_DISCOUNTS`, `KAUFLAND_DISCOUNT_TOLERANCE`
 - ✅ **Logowanie do pliku** - włączane przez `ENABLE_FILE_LOGGING=true` w `.env`
+
+### Reorganizacja Projektu i Ulepszenia GUI (2025-01-XX)
+
+**Organizacja kodu:**
+- ✅ **Katalog `scripts/`** - wszystkie skrypty pomocnicze i narzędzia deweloperskie w jednym miejscu
+- ✅ **Usunięcie duplikacji** - usunięto duplikaty plików testowych
+- ✅ **Zaktualizowany `.gitignore`** - dodano `htmlcov/`, `logs/` i inne pliki tymczasowe
+- ✅ **Ujednolicone importy** - wszystkie skrypty używają względnych ścieżek
+
+**Ulepszenia GUI:**
+- ✅ **Spójny design system** - klasy `AppColors`, `AppSpacing`, `Icons` dla ujednoliconego stylu
+- ✅ **Hover effects** - dynamiczne przyciemnianie kolorów przycisków przy najechaniu
+- ✅ **Tooltips** - pomoc kontekstowa dla wszystkich przycisków menu
+- ✅ **Alternatywne kolory wierszy** - lepsza czytelność tabel
+- ✅ **Minimalny rozmiar okna** - ochrona przed zbyt małymi oknami
+- ✅ **Lepsze odstępy** - ujednolicone padding i margin w całej aplikacji
+- ✅ **Spójne ikony** - ujednolicony zestaw ikon dla wszystkich akcji
+
+**Dokumentacja:**
+- ✅ **ANALIZA_GUI_ULEPSZENIA.md** - szczegółowa analiza GUI z propozycjami dalszych ulepszeń
 
 ## 🐛 Rozwiązywanie Problemów
 
@@ -420,6 +466,33 @@ Aplikacja implementuje szereg mechanizmów bezpieczeństwa:
 
 Więcej informacji o bezpieczeństwie znajdziesz w `ANALIZA_BEZPIECZEŃSTWA.md`.
 
+## 📚 Dokumentacja Dodatkowa
+
+Projekt zawiera szczegółowe dokumenty analityczne:
+
+- **ANALIZA_BEZPIECZEŃSTWA.md** - analiza mechanizmów bezpieczeństwa, potencjalne zagrożenia i rekomendacje
+- **ANALIZA_KODU.md** - analiza struktury kodu, flow przetwarzania, code smells i obszary do poprawy
+- **ANALIZA_SUGESTII_UX.md** - analiza sugestii UX, możliwości implementacji i priorytetyzacja
+- **ANALIZA_GUI_ULEPSZENIA.md** - szczegółowa analiza GUI z propozycjami wizualnych i UX ulepszeń
+
+## 🛠️ Narzędzia Deweloperskie
+
+W katalogu `scripts/` znajdują się pomocne narzędzia:
+
+- **check_database.py** - sprawdza zawartość bazy danych (sklepy, paragony, produkty)
+- **debug_ocr.py** - testuje ekstrakcję tekstu z obrazów/PDF
+- **verify_config.py** - weryfikuje poprawność konfiguracji i importów
+- **verify_knowledge.py** - testuje bazę wiedzy (normalizacja sklepów, metadane produktów)
+- **test_bielik.py** - demonstracja funkcjonalności asystenta Bielik
+- **test_mistral.py** - test integracji z Mistral OCR API
+- **test_receipt.py** - test pełnego pipeline przetwarzania paragonu
+
+Uruchomienie przykład:
+```bash
+python scripts/check_database.py
+python scripts/test_bielik.py
+```
+
 ## 📝 Licencja
 
 Projekt stworzony w celach edukacyjnych i do użytku domowego.
@@ -427,6 +500,19 @@ Projekt stworzony w celach edukacyjnych i do użytku domowego.
 ## 🤝 Autor
 
 **Marcin** (CodeMarcinu)
+
+## 🎨 Design System
+
+Aplikacja wykorzystuje spójny design system z ujednoliconymi:
+
+- **Kolory** (`AppColors`) - spójna paleta kolorów dla wszystkich elementów UI
+- **Odstępy** (`AppSpacing`) - ujednolicone wartości padding i margin
+- **Ikony** (`Icons`) - spójny zestaw ikon dla wszystkich akcji
+- **Hover effects** - dynamiczne przyciemnianie przycisków przy najechaniu
+- **Tooltips** - pomoc kontekstowa dla wszystkich interaktywnych elementów
+- **Alternatywne kolory wierszy** - lepsza czytelność tabel
+
+Więcej informacji o ulepszeniach GUI znajdziesz w `ANALIZA_GUI_ULEPSZENIA.md`.
 
 ## 🙏 Podziękowania
 
