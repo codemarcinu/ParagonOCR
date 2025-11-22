@@ -313,6 +313,7 @@ def parse_receipt_with_llm(
 def parse_receipt_from_text(
     text_content: str,
     model_name: str = Config.TEXT_MODEL,
+    system_prompt_override: str = None,
 ) -> dict | None:
     """
     Używa modelu tekstowego do sparsowania paragonu na podstawie tekstu (np. z Mistral OCR).
@@ -320,6 +321,7 @@ def parse_receipt_from_text(
     Args:
         text_content: Tekst paragonu (np. markdown z OCR).
         model_name: Nazwa modelu Ollama do użycia.
+        system_prompt_override: Opcjonalny prompt systemowy (np. ze strategii), który nadpisuje domyślny.
 
     Returns:
         Słownik z danymi w formacie ParsedData, lub None w przypadku błędu.
@@ -328,7 +330,10 @@ def parse_receipt_from_text(
         print("BŁĄD: Klient Ollama nie jest skonfigurowany.")
         return None
 
-    system_prompt = """
+    if system_prompt_override:
+        system_prompt = system_prompt_override
+    else:
+        system_prompt = """
     Jesteś asystentem AI, który wyciąga ustrukturyzowane dane z tekstu paragonu.
     Otrzymasz treść paragonu (OCR/Markdown). Twoim zadaniem jest wyodrębnienie informacji i zwrócenie ich w formacie JSON.
 

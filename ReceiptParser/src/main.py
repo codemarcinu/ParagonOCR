@@ -171,7 +171,14 @@ def run_processing_pipeline(
             log_callback(
                 "INFO: Mistral OCR zakończył pracę. Przesyłam tekst do LLM (Bielik)..."
             )
-            parsed_data = parse_receipt_from_text(ocr_markdown)
+            
+            # Detekcja strategii na podstawie tekstu z Mistral OCR
+            header_sample = ocr_markdown[:1000] if ocr_markdown else ""
+            strategy = get_strategy_for_store(header_sample)
+            log_callback(f"INFO: Wybrano strategię (na podstawie Mistral OCR): {strategy.__class__.__name__}")
+            system_prompt = strategy.get_system_prompt()
+            
+            parsed_data = parse_receipt_from_text(ocr_markdown, system_prompt_override=system_prompt)
 
         else:
             # Krok 1.5: Detekcja sklepu (Strategy Pattern) + Hybrid OCR
@@ -199,20 +206,7 @@ def run_processing_pipeline(
                 ocr_text=full_ocr_text,
             )
 
-        # Jeśli używamy Mistral OCR, strategia mogła nie zostać jeszcze wybrana (bo pominęliśmy Tesseract)
-        # Ale potrzebujemy jej do post-processingu.
-        # Spróbujmy wykryć strategię na podstawie tekstu z Mistral OCR jeśli jeszcze jej nie mamy.
-        if "strategy" not in locals():
-            # Używamy początku tekstu z Mistral OCR do detekcji
-            header_sample = (
-                ocr_markdown[:1000]
-                if "ocr_markdown" in locals() and ocr_markdown
-                else ""
-            )
-            strategy = get_strategy_for_store(header_sample)
-            log_callback(
-                f"INFO: Wybrano strategię (na podstawie Mistral OCR): {strategy.__class__.__name__}"
-            )
+        # Strategia powinna być już wybrana wcześniej (dla Mistral OCR lub Tesseract)
 
         # Sprzątanie po PDF
         if temp_image_path and os.path.exists(temp_image_path):
@@ -224,7 +218,13 @@ def run_processing_pipeline(
 
         # Krok 1.6: Post-processing (Strategy Pattern)
         log_callback("INFO: Uruchamiam post-processing specyficzny dla sklepu...")
-        parsed_data = strategy.post_process(parsed_data)
+        # Przekaż tekst OCR do post_process (jeśli dostępny)
+        ocr_text_for_post_process = None
+        if llm_model == "mistral-ocr":
+            ocr_text_for_post_process = ocr_markdown
+        else:
+            ocr_text_for_post_process = full_ocr_text if 'full_ocr_text' in locals() else None
+        parsed_data = strategy.post_process(parsed_data, ocr_text=ocr_text_for_post_process)
 
         # Krok 1.6.5: Matematyczna weryfikacja (sanity check)
         log_callback("INFO: Weryfikuję matematyczną spójność danych...")
