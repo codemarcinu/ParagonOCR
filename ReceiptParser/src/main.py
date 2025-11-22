@@ -301,10 +301,18 @@ def resolve_product(
     if suggested_name:
         _call_log_callback(log_callback, f"   -> Sugestia (Słownik): '{suggested_name}'")
     else:
-        # 3. Zapytaj LLM (Ostatnia deska ratunku)
-        _call_log_callback(log_callback, "   -> Słownik pusty. Pytam LLM...")
-        suggested_name = get_llm_suggestion(raw_name)
-        source = "LLM"
+        # 3. Zapytaj LLM z przykładami uczenia (Ostatnia deska ratunku)
+        _call_log_callback(log_callback, "   -> Słownik pusty. Pytam LLM z przykładami uczenia...")
+        
+        # Pobierz przykłady uczenia z bazy danych
+        from .llm import get_learning_examples
+        learning_examples = get_learning_examples(raw_name, session, max_examples=5, min_similarity=30)
+        
+        if learning_examples:
+            _call_log_callback(log_callback, f"   -> Znaleziono {len(learning_examples)} podobnych przykładów uczenia")
+        
+        suggested_name = get_llm_suggestion(raw_name, learning_examples=learning_examples)
+        source = "LLM (z uczeniem)"
         if suggested_name:
             _call_log_callback(log_callback, f"   -> Sugestia (LLM): '{suggested_name}'")
         else:

@@ -6,6 +6,8 @@ import re
 from pathlib import Path
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
+from typing import List, Tuple, Optional
+from rapidfuzz import fuzz
 from .config import Config
 
 # --- Klient Ollama ---
@@ -53,15 +55,69 @@ def clean_llm_suggestion(suggestion: str) -> str:
     return suggestion.strip()
 
 
+def get_learning_examples(
+    raw_name: str, session, max_examples: int = 5, min_similarity: int = 30
+) -> List[Tuple[str, str]]:
+    """
+    Pobiera przykłady uczenia z bazy danych na podstawie podobieństwa nazw.
+    
+    Args:
+        raw_name: Surowa nazwa produktu do znalezienia podobnych przykładów
+        session: Sesja SQLAlchemy do bazy danych
+        max_examples: Maksymalna liczba przykładów do zwrócenia
+        min_similarity: Minimalne podobieństwo (0-100) do uwzględnienia przykładu
+    
+    Returns:
+        Lista krotek (raw_name, normalized_name) z przykładami uczenia
+    """
+    try:
+        from .database import AliasProduktu
+        from sqlalchemy.orm import joinedload
+        
+        # Pobierz wszystkie aliasy z bazy (z dołączonym produktem)
+        all_aliases = session.query(AliasProduktu).options(
+            joinedload(AliasProduktu.produkt)
+        ).all()
+        
+        if not all_aliases:
+            return []
+        
+        # Oblicz podobieństwo dla każdego aliasu
+        scored_examples = []
+        for alias in all_aliases:
+            similarity = fuzz.ratio(raw_name.lower(), alias.nazwa_z_paragonu.lower())
+            if similarity >= min_similarity:
+                scored_examples.append((
+                    similarity,
+                    alias.nazwa_z_paragonu,
+                    alias.produkt.znormalizowana_nazwa
+                ))
+        
+        # Sortuj po podobieństwie (malejąco) i weź najlepsze
+        scored_examples.sort(reverse=True, key=lambda x: x[0])
+        
+        # Zwróć tylko pary (raw, normalized) bez score
+        examples = [(raw, normalized) for _, raw, normalized in scored_examples[:max_examples]]
+        
+        return examples
+    except Exception as e:
+        print(f"BŁĄD podczas pobierania przykładów uczenia: {e}")
+        return []
+
+
 def get_llm_suggestion(
-    raw_name: str, model_name: str = Config.TEXT_MODEL
+    raw_name: str, 
+    model_name: str = Config.TEXT_MODEL,
+    learning_examples: Optional[List[Tuple[str, str]]] = None
 ) -> str | None:
     """
     Używa modelu językowego do normalizacji "brudnej" nazwy produktu.
+    Może używać przykładów uczenia z poprzednich wyborów użytkownika.
 
     Args:
         raw_name: Surowa nazwa produktu z paragonu.
         model_name: Nazwa modelu Ollama do użycia.
+        learning_examples: Opcjonalna lista przykładów uczenia (raw_name, normalized_name).
 
     Returns:
         Znormalizowana nazwa produktu jako string, lub None w przypadku błędu.
@@ -81,8 +137,16 @@ def get_llm_suggestion(
     5. Jeśli produkt to plastikowa torba/reklamówka, zwróć dokładnie słowo: "POMIŃ".
     """
 
+    # Buduj sekcję z przykładami uczenia
+    learning_section = ""
+    if learning_examples and len(learning_examples) > 0:
+        learning_section = "\n    PRZYKŁADY Z POPRZEDNICH WYBORÓW UŻYTKOWNIKA (użyj podobnego stylu normalizacji):\n"
+        for raw, normalized in learning_examples:
+            learning_section += f'    - "{raw}" -> "{normalized}"\n'
+        learning_section += "\n"
+    
     user_prompt = f"""
-    PRZYKŁADY:
+    PRZYKŁADY OGÓLNE:
     - "Mleko UHT 3,2% Łaciate 1L" -> "Mleko"
     - "Jaja z wolnego wybiegu L 10szt" -> "Jajka"
     - "Chleb Baltonowski krojony 500g" -> "Chleb"
@@ -91,7 +155,7 @@ def get_llm_suggestion(
     - "Pomidor gałązka luz" -> "Pomidory"
     - "Coca Cola 0.5L" -> "Napój gazowany"
     - "Reklamówka mała płatna" -> "POMIŃ"
-    
+{learning_section}
     Nazwa z paragonu: "{raw_name}"
     Znormalizowana nazwa:
     """
