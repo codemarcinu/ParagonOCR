@@ -54,9 +54,11 @@ class ToolTip:
         self.tipwindow = tw = Toplevel(self.widget)
         tw.wm_overrideredirect(True)
         tw.wm_geometry("+%d+%d" % (x, y))
-        label = ctk.CTkLabel(tw, text=self.text, justify="left",
-                             bg="#1a1a1a", fg_color="#1a1a1a", text_color="white",
-                             font=("Arial", 10), padx=5, pady=5)
+        # Użyj standardowego tkinter Label zamiast CTkLabel dla tooltipa
+        from tkinter import Label
+        label = Label(tw, text=self.text, justify="left",
+                     bg="#1a1a1a", fg="white",
+                     font=("Arial", 10), padx=5, pady=5)
         label.pack()
 
     def hidetip(self):
@@ -90,7 +92,8 @@ class ProductMappingDialog(ctk.CTkToplevel):
         self.bind("<Escape>", lambda event: self.on_close())
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
-        self.grab_set()  # Make modal
+        # Użyj after() aby upewnić się, że okno jest widoczne przed grab_set
+        self.after(100, self.grab_set)  # Make modal
 
     def on_ok(self):
         self.user_input = self.entry.get()
@@ -285,7 +288,8 @@ class ReviewDialog(ctk.CTkToplevel):
         self.discard_btn.pack(side="left", padx=10)
 
         self.protocol("WM_DELETE_WINDOW", self.on_discard)
-        self.grab_set()
+        # Użyj after() aby upewnić się, że okno jest widoczne przed grab_set
+        self.after(100, self.grab_set)
 
     def on_save(self):
         try:
@@ -400,7 +404,8 @@ class CookingDialog(ctk.CTkToplevel):
         ).pack(side="left", padx=10)
         
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
-        self.grab_set()
+        # Użyj after() aby upewnić się, że okno jest widoczne przed grab_set
+        self.after(100, self.grab_set)
     
     def load_products(self):
         """Wczytuje produkty z magazynu"""
@@ -551,7 +556,8 @@ class AddProductDialog(ctk.CTkToplevel):
         ).pack(side="left", padx=10)
         
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
-        self.grab_set()
+        # Użyj after() aby upewnić się, że okno jest widoczne przed grab_set
+        self.after(100, self.grab_set)
     
     def add_product(self):
         """Dodaje produkt do bazy"""

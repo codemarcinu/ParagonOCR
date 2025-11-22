@@ -33,33 +33,42 @@ class ReceiptStrategy(ABC):
         
         filtered_items = []
         for item in data["pozycje"]:
-            nazwa_raw = item.get("nazwa_raw", "").strip().lower()
+            nazwa_raw = item.get("nazwa_raw", "").strip()
+            nazwa_raw_lower = nazwa_raw.lower()
             
             # Wzorce do wykrywania PTU/VAT i innych nieproduktów
             non_product_patterns = [
-                r"^ptu\s*[abc]?$",  # PTU, PTU A, PTU B, PTU C
-                r"^vat\s*[abc]?$",  # VAT, VAT A, VAT B, VAT C
+                r"^ptu\s*[abc]?\s*$",  # PTU, PTU A, PTU B, PTU C (z możliwymi spacjami)
+                r"^vat\s*[abc]?\s*$",  # VAT, VAT A, VAT B, VAT C (z możliwymi spacjami)
                 r"podatek\s+vat",  # Podatek VAT
                 r"podatek\s+ptu",  # Podatek PTU
-                r"kwota\s+[abc]$",  # Kwota A, Kwota B, Kwota C
+                r"kwota\s+[abc]\s*$",  # Kwota A, Kwota B, Kwota C
                 r"suma\s+pln",  # Suma PLN
                 r"^suma\s*$",  # Suma
+                r"^razem\s*$",  # Razem
                 r"podsumowanie",  # Podsumowanie
                 r"ogółem",  # Ogółem
                 r"rozliczenie\s+płatności",  # Rozliczenie płatności
                 r"sprzedaż\s+opodatkowana",  # Sprzedaż opodatkowana
+                r"^ptu\s*[abc]?\s*\d",  # PTU A 25.39 (z liczbą po)
+                r"^kwota\s*[abc]\s*\d",  # Kwota A 23.00% (z liczbą po)
             ]
             
             # Sprawdź czy pozycja pasuje do wzorców nieproduktów
             is_non_product = False
+            matched_pattern = None
             for pattern in non_product_patterns:
-                if re.search(pattern, nazwa_raw):
+                if re.search(pattern, nazwa_raw_lower):
                     is_non_product = True
+                    matched_pattern = pattern
                     break
             
             # Jeśli to nie jest nieprodukt, dodaj do listy
             if not is_non_product:
                 filtered_items.append(item)
+            # Debug: można dodać logowanie tutaj jeśli potrzeba
+            # elif matched_pattern:
+            #     print(f"DEBUG: Filtrowanie pozycji '{nazwa_raw}' (wzorzec: {matched_pattern})")
         
         data["pozycje"] = filtered_items
         return data
