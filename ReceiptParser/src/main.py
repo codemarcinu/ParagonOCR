@@ -22,6 +22,7 @@ from .ocr import convert_pdf_to_image, extract_text_from_image
 from .strategies import get_strategy_for_store
 from .mistral_ocr import MistralOCRClient
 from .normalization_rules import find_static_match
+from .config import Config
 from decimal import Decimal, InvalidOperation
 from datetime import datetime, date
 import os
@@ -56,10 +57,10 @@ def verify_math_consistency(parsed_data: ParsedData, log_callback: Callable) -> 
             
             # Sprawdź zgodność matematyczną: ilość * cena_jedn powinna równać się cena_calk
             # (cena_calk to cena PRZED rabatem, jeśli jest rabat)
-            # Tolerancja 0.01 PLN (błędy zaokrągleń)
+            # Tolerancja dla błędów zaokrągleń
             roznica = abs(obliczona - cena_calk)
 
-            if roznica > Decimal("0.01"):
+            if roznica > Config.MATH_TOLERANCE:
                 nazwa = item.get("nazwa_raw", "Nieznany produkt")
                 log_callback(
                     f"OSTRZEŻENIE: Niezgodność matematyczna dla '{nazwa}': "
@@ -85,7 +86,7 @@ def verify_math_consistency(parsed_data: ParsedData, log_callback: Callable) -> 
                 else:
                     # Jeśli cena_calk > obliczona, może być błąd OCR w cenie jednostkowej
                     # lub może być ukryty rabat (ale tylko jeśli różnica jest znacząca)
-                    if roznica > Decimal("1.00"):  # Różnica większa niż 1 PLN
+                    if roznica > Config.SIGNIFICANT_DIFFERENCE:  # Różnica większa niż znacząca
                         log_callback(
                             f"  -> Korekta: ustawiam cena_calk na {obliczona:.2f} (było {cena_calk:.2f}) - prawdopodobny błąd OCR"
                         )

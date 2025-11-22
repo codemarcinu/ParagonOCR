@@ -1,4 +1,5 @@
 import os
+from decimal import Decimal
 from dotenv import load_dotenv
 
 # Ładujemy zmienne z pliku .env (zakładamy, że jest w folderze nadrzędnym względem src lub w root projektu)
@@ -16,6 +17,24 @@ class Config:
     MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "")
     # Timeout dla zapytań do Ollama (w sekundach)
     OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "300"))  # Domyślnie 5 minut
+    
+    # --- Stałe matematyczne dla weryfikacji paragonów ---
+    # Tolerancja dla błędów zaokrągleń w weryfikacji matematycznej (w PLN)
+    MATH_TOLERANCE = Decimal("0.01")
+    # Znacząca różnica w cenach, która wymaga korekty (w PLN)
+    SIGNIFICANT_DIFFERENCE = Decimal("1.00")
+    # Minimalna cena produktu, poniżej której pozycja jest traktowana jako błąd OCR (w PLN)
+    MIN_PRODUCT_PRICE = Decimal("0.01")
+    
+    # --- Stałe dla strategii Kaufland ---
+    # Typowe rabaty z karty Kaufland Card (w PLN)
+    KAUFLAND_TYPICAL_DISCOUNTS = [Decimal("5.0"), Decimal("10.0"), Decimal("15.0")]
+    # Tolerancja dla wykrywania rabatów z karty (w PLN)
+    KAUFLAND_DISCOUNT_TOLERANCE = Decimal("1.0")
+    
+    # --- Konfiguracja logowania ---
+    # Włącza logowanie do pliku (domyślnie wyłączone)
+    ENABLE_FILE_LOGGING = os.getenv("ENABLE_FILE_LOGGING", "false").lower() == "true"
 
     @staticmethod
     def print_config():

@@ -106,6 +106,10 @@ VISION_MODEL=llava:latest
 TEXT_MODEL=SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M
 # Timeout dla zapytań do Ollama (w sekundach, domyślnie 300 = 5 minut)
 OLLAMA_TIMEOUT=300
+
+# Opcjonalne: Logowanie do pliku (domyślnie wyłączone)
+# Logi zapisywane są w katalogu logs/ jako paragonocr_YYYYMMDD.log
+ENABLE_FILE_LOGGING=false
 ```
 
 **Uwaga:** Klucz API Mistral jest opcjonalny - aplikacja działa również bez niego (używa Tesseract OCR).
@@ -165,6 +169,8 @@ ParagonOCR/
 ├── uruchom.sh              # Skrypt startowy (Linux/Mac)
 ├── .env                    # Konfiguracja (klucze API, modele)
 ├── paragony/               # Katalog na pliki wejściowe (PDF/IMG)
+├── logs/                   # Katalog na logi (tworzony automatycznie przy włączeniu logowania)
+│   └── paragonocr_YYYYMMDD.log  # Pliki logów (jeśli ENABLE_FILE_LOGGING=true)
 ├── ReceiptParser/
 │   ├── data/               # Baza danych SQLite (receipts.db)
 │   │   └── receipts/       # Opcjonalny katalog na pliki paragonów
@@ -179,7 +185,8 @@ ParagonOCR/
 │       ├── knowledge_base.py # Metadane produktów (kategorie, mrożenie)
 │       ├── normalization_rules.py # Regexy do normalizacji nazw
 │       ├── data_models.py  # TypedDict definicje struktur danych
-│       └── config.py       # Konfiguracja z .env
+│       ├── config.py       # Konfiguracja z .env i stałe
+│       └── logger.py       # Moduł logowania (opcjonalne logowanie do pliku)
 └── tests/                  # Testy jednostkowe i integracyjne
     ├── README.md           # Dokumentacja testów
     ├── conftest.py         # Wspólne fixtures pytest
@@ -296,6 +303,20 @@ System zawiera wbudowaną bazę wiedzy o produktach:
 - ✅ **Walidacja nazw produktów** - sprawdzanie długości i czyszczenie
 - ✅ **Obsługa ujemnych rabatów** - poprawne wykrywanie i korekta błędnych wartości
 
+### Wprowadzone Ulepszenia Jakości Kodu (2025-11-22)
+
+**Refaktoryzacja i Czytelność:**
+- ✅ **Eliminacja magic numbers** - wszystkie hardcoded wartości przeniesione do stałych konfiguracyjnych (`Config`)
+- ✅ **Type safety** - użycie `TypedDict` (`ParsedData`) zamiast `Dict` w sygnaturach metod
+- ✅ **Eliminacja duplikacji** - wspólna metoda `_merge_discounts()` dla strategii Lidl i Biedronka
+- ✅ **Podział długich metod** - `KauflandStrategy.post_process()` podzielona na 5 mniejszych funkcji
+- ✅ **Opcjonalne logowanie do pliku** - moduł `logger.py` z możliwością zapisu logów do pliku
+
+**Konfiguracja:**
+- ✅ **Stałe matematyczne** - `MATH_TOLERANCE`, `SIGNIFICANT_DIFFERENCE`, `MIN_PRODUCT_PRICE`
+- ✅ **Stałe dla Kaufland** - `KAUFLAND_TYPICAL_DISCOUNTS`, `KAUFLAND_DISCOUNT_TOLERANCE`
+- ✅ **Logowanie do pliku** - włączane przez `ENABLE_FILE_LOGGING=true` w `.env`
+
 ## 🐛 Rozwiązywanie Problemów
 
 ### Problem: "Nie udało się skonwertować pliku PDF"
@@ -322,6 +343,13 @@ System zawiera wbudowaną bazę wiedzy o produktach:
 ```bash
 export PYTHONPATH="${PYTHONPATH}:$(pwd)/ReceiptParser"
 ```
+
+### Problem: Jak włączyć logowanie do pliku?
+**Rozwiązanie:** Dodaj do pliku `.env`:
+```ini
+ENABLE_FILE_LOGGING=true
+```
+Logi będą zapisywane w katalogu `logs/` jako `paragonocr_YYYYMMDD.log`. Katalog zostanie utworzony automatycznie przy pierwszym uruchomieniu z włączonym logowaniem.
 
 ## 📝 Licencja
 

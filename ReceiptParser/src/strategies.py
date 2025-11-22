@@ -1,5 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
+from decimal import Decimal
+import re
+from .config import Config
+from .data_models import ParsedData
 
 
 class ReceiptStrategy(ABC):
@@ -10,8 +14,112 @@ class ReceiptStrategy(ABC):
         """Zwraca specyficzny prompt dla danego sklepu."""
         pass
 
-    def post_process(self, data: Dict, ocr_text: str = None) -> Dict:
+    def post_process(self, data: ParsedData, ocr_text: Optional[str] = None) -> ParsedData:
         """Domyślna implementacja: brak zmian."""
+        return data
+    
+    def _merge_discounts(
+        self, 
+        data: ParsedData, 
+        fix_negative_discounts: bool = False,
+        strict_discount_name: bool = False
+    ) -> ParsedData:
+        """
+        Wspólna metoda do scalania rabatów z produktami powyżej.
+        
+        Args:
+            data: Dane paragonu do przetworzenia
+            fix_negative_discounts: Jeśli True, koryguje ujemne rabaty w obecnej pozycji przed scalaniem
+            strict_discount_name: Jeśli True, wymaga dokładnego dopasowania nazwy "rabat"/"upust" (bez innych słów)
+        
+        Returns:
+            Przetworzone dane z scalonymi rabatami
+        """
+        if not data or "pozycje" not in data:
+            return data
+
+        cleaned_items = []
+        items = data["pozycje"]
+        skip_indices = set()
+
+        for i in range(len(items)):
+            if i in skip_indices:
+                continue
+
+            current_item = items[i]
+            
+            # Opcjonalna korekta ujemnych rabatów w obecnej pozycji (dla Biedronki)
+            if fix_negative_discounts:
+                try:
+                    current_rabat_raw = current_item.get("rabat", 0)
+                    if isinstance(current_rabat_raw, str):
+                        current_rabat_raw = current_rabat_raw.replace(",", ".")
+                    current_rabat_value = float(current_rabat_raw)
+                    if current_rabat_value < 0:
+                        # LLM zwrócił ujemny rabat - konwertuj na dodatni
+                        current_item["rabat"] = f"{abs(current_rabat_value):.2f}"
+                        # Przelicz cenę po rabacie
+                        base_price = float(str(current_item.get("cena_calk", 0)).replace(",", "."))
+                        cena_po_rab = max(0.0, base_price - abs(current_rabat_value))
+                        current_item["cena_po_rab"] = f"{cena_po_rab:.2f}"
+                except (ValueError, TypeError):
+                    pass
+
+            # Sprawdzamy, czy następny element to rabat
+            if i + 1 < len(items):
+                next_item = items[i + 1]
+                is_discount = False
+                
+                # Wykrywanie rabatu
+                raw_name_lower = next_item.get("nazwa_raw", "").lower().strip()
+                try:
+                    price_total = float(str(next_item.get("cena_calk", 0)).replace(",", "."))
+                except (ValueError, TypeError):
+                    price_total = 0.0
+
+                # Wykrywanie po cenie (ujemna) - to jest najpewniejszy wskaźnik
+                if price_total < 0:
+                    is_discount = True
+                elif strict_discount_name:
+                    # Dla Biedronki: tylko dokładne dopasowanie "rabat" lub "upust" (bez innych słów)
+                    if raw_name_lower in ["rabat", "upust"]:
+                        is_discount = True
+                else:
+                    # Dla Lidla: sprawdzamy czy nazwa zawiera "rabat" lub "upust"
+                    if "rabat" in raw_name_lower or "upust" in raw_name_lower:
+                        is_discount = True
+
+                if is_discount:
+                    # To jest rabat do bieżącego produktu!
+                    discount_value = abs(price_total)
+                    
+                    # Pobieramy obecny rabat
+                    try:
+                        current_rabat = float(str(current_item.get("rabat", 0)).replace(",", "."))
+                    except (ValueError, TypeError):
+                        current_rabat = 0.0
+                    
+                    new_rabat = current_rabat + discount_value
+                    current_item["rabat"] = f"{new_rabat:.2f}"
+                    
+                    # Przelicz cenę po rabacie
+                    try:
+                        base_price = float(str(current_item.get("cena_calk", 0)).replace(",", "."))
+                        cena_po_rab = max(0.0, base_price - new_rabat)
+                        current_item["cena_po_rab"] = f"{cena_po_rab:.2f}"
+                        
+                        # Jeśli rabat jest większy niż cena, korygujemy
+                        if new_rabat > base_price:
+                            current_item["rabat"] = f"{base_price:.2f}"
+                            current_item["cena_po_rab"] = "0.00"
+                    except (ValueError, TypeError):
+                        pass
+                    
+                    skip_indices.add(i + 1)  # Pomiń ten rabat w głównej pętli
+
+            cleaned_items.append(current_item)
+
+        data["pozycje"] = cleaned_items
         return data
 
 
@@ -41,68 +149,9 @@ class LidlStrategy(ReceiptStrategy):
         }
         """
 
-    def post_process(self, data: Dict) -> Dict:
+    def post_process(self, data: ParsedData, ocr_text: Optional[str] = None) -> ParsedData:
         """Scalanie ujemnych pozycji (rabatów) z produktem powyżej."""
-        cleaned_items = []
-        if not data or "pozycje" not in data:
-            return data
-
-        # Iterujemy po kopiach, żeby móc modyfikować
-        items = data["pozycje"]
-        skip_indices = set()
-
-        for i in range(len(items)):
-            if i in skip_indices:
-                continue
-
-            current_item = items[i]
-
-            # Sprawdzamy, czy następny element to rabat (ujemna cena lub nazwa sugerująca rabat)
-            if i + 1 < len(items):
-                next_item = items[i + 1]
-                is_discount = False
-
-                # Wykrywanie po nazwie lub ujemnej cenie
-                raw_name_lower = next_item.get("nazwa_raw", "").lower()
-                try:
-                    price_total = float(next_item.get("cena_calk", 0))
-                except (ValueError, TypeError):
-                    price_total = 0
-
-                if (
-                    "rabat" in raw_name_lower
-                    or "upust" in raw_name_lower
-                    or price_total < 0
-                ):
-                    is_discount = True
-
-                if is_discount:
-                    # To jest rabat do bieżącego produktu!
-                    discount_value = abs(price_total)
-
-                    # Pobieramy obecny rabat (może być stringiem lub liczbą)
-                    try:
-                        current_rabat = float(current_item.get("rabat") or 0)
-                    except (ValueError, TypeError):
-                        current_rabat = 0.0
-
-                    current_item["rabat"] = str(current_rabat + discount_value)
-
-                    # Przelicz cenę po rabacie
-                    try:
-                        base_price = float(current_item.get("cena_calk", 0))
-                        current_item["cena_po_rab"] = str(
-                            round(base_price - (current_rabat + discount_value), 2)
-                        )
-                    except (ValueError, TypeError):
-                        pass
-
-                    skip_indices.add(i + 1)  # Pomiń ten rabat w głównej pętli
-
-            cleaned_items.append(current_item)
-
-        data["pozycje"] = cleaned_items
-        return data
+        return self._merge_discounts(data, fix_negative_discounts=False, strict_discount_name=False)
 
 
 class BiedronkaStrategy(ReceiptStrategy):
@@ -140,102 +189,113 @@ class BiedronkaStrategy(ReceiptStrategy):
         }
         """
 
-    def post_process(self, data: Dict) -> Dict:
-        """Scalanie rabatów dla Biedronki (identyczna logika jak Lidl, ale warto mieć osobno na przyszłość)."""
-        if not data or "pozycje" not in data:
-            return data
-
-        cleaned_items = []
-        items = data["pozycje"]
-        skip_indices = set()
-
-        for i in range(len(items)):
-            if i in skip_indices:
-                continue
-
-            current_item = items[i]
-            
-            # Najpierw sprawdź, czy obecna pozycja ma ujemny rabat (LLM czasem zwraca ujemne rabaty)
-            try:
-                current_rabat_raw = current_item.get("rabat", 0)
-                if isinstance(current_rabat_raw, str):
-                    current_rabat_raw = current_rabat_raw.replace(",", ".")
-                current_rabat_value = float(current_rabat_raw)
-                if current_rabat_value < 0:
-                    # LLM zwrócił ujemny rabat - konwertuj na dodatni
-                    current_item["rabat"] = f"{abs(current_rabat_value):.2f}"
-                    # Przelicz cenę po rabacie
-                    base_price = float(str(current_item.get("cena_calk", 0)).replace(",", "."))
-                    cena_po_rab = max(0.0, base_price - abs(current_rabat_value))
-                    current_item["cena_po_rab"] = f"{cena_po_rab:.2f}"
-            except (ValueError, TypeError):
-                pass
-
-            # Sprawdzamy czy następna pozycja to rabat
-            # UWAGA: Produkt z "Rabat" w nazwie (np. "KawMielRafiin250g Rabat") to NIE jest rabat do scalenia,
-            # tylko produkt który już ma rabat w polu "rabat". Scalamy tylko pozycje które są TYLKO rabatem.
-            if i + 1 < len(items):
-                next_item = items[i + 1]
-                next_raw_name = next_item.get("nazwa_raw", "").strip()
-                next_raw_name_lower = next_raw_name.lower()
-                
-                # Sprawdzenie po cenie (ujemna) - to jest główny wskaźnik
-                try:
-                    price_total = float(str(next_item.get("cena_calk", 0)).replace(",", "."))
-                except (ValueError, TypeError):
-                    price_total = 0.0
-
-                # Rabat to pozycja która:
-                # 1. Ma ujemną cenę całkowitą (to jest najpewniejszy wskaźnik) LUB
-                # 2. Nazwa to TYLKO "Rabat" / "Upust" (bez innych słów, bez produktu)
-                is_discount = False
-                
-                if price_total < 0:
-                    # Ujemna cena = na pewno rabat
-                    is_discount = True
-                elif next_raw_name_lower in ["rabat", "upust"]:
-                    # Nazwa to tylko "Rabat" lub "Upust" - to jest rabat
-                    is_discount = True
-                # NIE traktujemy produktów z "Rabat" w nazwie jako rabatów do scalenia!
-                # (np. "KawMielRafiin250g Rabat" to produkt, nie rabat)
-
-                if is_discount:
-                    # Mamy rabat!
-                    discount_value = abs(price_total)
-                    
-                    # Aktualizujemy obecny produkt
-                    try:
-                        current_rabat = float(str(current_item.get("rabat", 0)).replace(",", "."))
-                    except (ValueError, TypeError):
-                        current_rabat = 0.0
-                    
-                    new_rabat = current_rabat + discount_value
-                    current_item["rabat"] = f"{new_rabat:.2f}"
-                    
-                    # Przeliczamy cenę końcową
-                    try:
-                        base_price = float(str(current_item.get("cena_calk", 0)).replace(",", "."))
-                        # W Biedrze cena_calk to często cena PRZED rabatem, więc odejmujemy
-                        # Upewniamy się, że cena po rabacie nie jest ujemna
-                        cena_po_rab = max(0.0, base_price - new_rabat)
-                        current_item["cena_po_rab"] = f"{cena_po_rab:.2f}"
-                        
-                        # Jeśli rabat jest większy niż cena, korygujemy
-                        if new_rabat > base_price:
-                            current_item["rabat"] = f"{base_price:.2f}"
-                            current_item["cena_po_rab"] = "0.00"
-                    except (ValueError, TypeError):
-                        pass
-                    
-                    skip_indices.add(i + 1)  # Pomijamy ten wiersz w kolejnym obiegu
-
-            cleaned_items.append(current_item)
-
-        data["pozycje"] = cleaned_items
-        return data
+    def post_process(self, data: ParsedData, ocr_text: Optional[str] = None) -> ParsedData:
+        """
+        Scalanie rabatów dla Biedronki.
+        Używa wspólnej metody z korektą ujemnych rabatów i ścisłym dopasowaniem nazwy.
+        """
+        return self._merge_discounts(data, fix_negative_discounts=True, strict_discount_name=True)
 
 
 class KauflandStrategy(ReceiptStrategy):
+    def _calculate_items_sum(self, items: List[Dict]) -> float:
+        """Oblicza sumę pozycji (po rabatach)."""
+        suma_pozycji = 0.0
+        for item in items:
+            try:
+                cena_po_rab = float(str(item.get("cena_po_rab", item.get("cena_calk", 0))).replace(",", "."))
+                suma_pozycji += cena_po_rab
+            except (ValueError, TypeError):
+                try:
+                    cena_calk = float(str(item.get("cena_calk", 0)).replace(",", "."))
+                    suma_pozycji += cena_calk
+                except (ValueError, TypeError):
+                    pass
+        return suma_pozycji
+    
+    def _detect_card_discount_from_items(self, items: List[Dict]) -> Optional[float]:
+        """Wykrywa rabat z karty Kaufland Card w pozycjach paragonu."""
+        for item in items:
+            name_lower = item.get("nazwa_raw", "").lower()
+            # Szukamy pozycji z informacją o rabacie z karty
+            if any(keyword in name_lower for keyword in ["kaufland card", "zaoszczędzono", "card", "zaoszczedzono"]):
+                # Spróbuj wyciągnąć kwotę rabatu z ceny (może być ujemna)
+                try:
+                    cena = float(str(item.get("cena_calk", 0)).replace(",", "."))
+                    if cena < 0:
+                        return abs(cena)
+                    elif cena > 0 and cena <= 20.0:  # Typowy rabat z karty to 5-15 PLN
+                        return cena
+                except (ValueError, TypeError):
+                    pass
+        return None
+    
+    def _detect_card_discount_from_ocr(self, ocr_text: str) -> Optional[float]:
+        """Wykrywa rabat z karty Kaufland Card w tekście OCR."""
+        if not ocr_text:
+            return None
+        try:
+            # Szukaj wzorca: "zaoszczędzono X,XX PLN" lub "Kaufland Card ... X,XX PLN"
+            pattern = r'(?:zaoszcz[ęe]dzo|kaufland\s+card).*?(\d+[.,]\d+)\s*pln'
+            match = re.search(pattern, ocr_text.lower())
+            if match:
+                return float(match.group(1).replace(',', '.'))
+        except (ValueError, TypeError, AttributeError):
+            pass
+        return None
+    
+    def _detect_card_discount_from_pattern(self, roznica: float, suma_pozycji: float) -> Optional[float]:
+        """Wykrywa rabat z karty na podstawie wzorców różnic między sumą pozycji a sumą paragonu."""
+        if not (50.0 <= suma_pozycji <= 200.0):
+            return None
+        # Sprawdź, czy różnica między sumą pozycji a sumą paragonu jest bliska typowego rabatu
+        roznica_decimal = Decimal(str(roznica))
+        for typical_discount in Config.KAUFLAND_TYPICAL_DISCOUNTS:
+            if abs(roznica_decimal + typical_discount) < Config.KAUFLAND_DISCOUNT_TOLERANCE:
+                return float(typical_discount)
+        return None
+    
+    def _correct_total_sum(
+        self, 
+        data: ParsedData, 
+        suma_pozycji: float, 
+        suma_paragonu: float, 
+        roznica: float, 
+        rabat_z_karty: Optional[float]
+    ) -> ParsedData:
+        """Koryguje sumę całkowitą paragonu na podstawie wykrytego rabatu i różnic."""
+        TOLERANCE = 0.10  # Tolerancja dla małych różnic
+        
+        # Jeśli suma paragonu jest bardzo duża (prawdopodobnie błąd parsowania), zawsze korygujemy
+        if suma_paragonu > suma_pozycji * 2:
+            # Suma paragonu jest więcej niż 2x większa od sumy pozycji - to na pewno błąd
+            if rabat_z_karty is not None:
+                suma_po_rabacie = max(0.0, suma_pozycji - rabat_z_karty)
+                data["paragon_info"]["suma_calkowita"] = f"{suma_po_rabacie:.2f}"
+            else:
+                data["paragon_info"]["suma_calkowita"] = f"{suma_pozycji:.2f}"
+        # Jeśli suma paragonu > suma pozycji (różnica dodatnia, ale nie bardzo duża), to prawdopodobnie błąd parsowania
+        elif roznica > TOLERANCE:
+            if rabat_z_karty is not None:
+                suma_po_rabacie = max(0.0, suma_pozycji - rabat_z_karty)
+                data["paragon_info"]["suma_calkowita"] = f"{suma_po_rabacie:.2f}"
+            else:
+                data["paragon_info"]["suma_calkowita"] = f"{suma_pozycji:.2f}"
+        # Jeśli suma paragonu < suma pozycji (różnica ujemna), to może być rabat z karty Kaufland Card
+        elif roznica < -TOLERANCE and abs(roznica) <= 20.0:
+            if rabat_z_karty is not None:
+                suma_po_rabacie = max(0.0, suma_pozycji - rabat_z_karty)
+                # Sprawdź, czy suma paragonu jest bliska sumie po rabacie
+                if abs(suma_paragonu - suma_po_rabacie) > TOLERANCE:
+                    data["paragon_info"]["suma_calkowita"] = f"{suma_po_rabacie:.2f}"
+        # Jeśli różnica jest mała, ale znaleźliśmy rabat z karty, sprawdzamy czy suma jest poprawna
+        elif abs(roznica) < TOLERANCE and rabat_z_karty is not None:
+            suma_po_rabacie = max(0.0, suma_pozycji - rabat_z_karty)
+            if abs(suma_paragonu - suma_po_rabacie) > TOLERANCE:
+                data["paragon_info"]["suma_calkowita"] = f"{suma_po_rabacie:.2f}"
+        
+        return data
+    
     def get_system_prompt(self) -> str:
         return """
         Jesteś ekspertem od analizy paragonów sieci Kaufland.
@@ -267,85 +327,21 @@ class KauflandStrategy(ReceiptStrategy):
         }
         """
     
-    def post_process(self, data: Dict, ocr_text: str = None) -> Dict:
+    def post_process(self, data: ParsedData, ocr_text: Optional[str] = None) -> ParsedData:
         """
         Post-processing dla Kaufland:
         1. Scalanie rabatów na pojedyncze produkty (jak w Lidl/Biedronka)
         2. Weryfikacja i korekta sumy całkowitej (uwzględnienie rabatu z karty)
         """
-        import re
         if not data or "pozycje" not in data:
             return data
         
-        # Krok 1: Scalanie rabatów na pojedyncze produkty (identyczna logika jak Lidl)
-        cleaned_items = []
-        items = data["pozycje"]
-        skip_indices = set()
-        
-        for i in range(len(items)):
-            if i in skip_indices:
-                continue
-            
-            current_item = items[i]
-            
-            # Sprawdzamy, czy następny element to rabat (ujemna cena lub nazwa sugerująca rabat)
-            if i + 1 < len(items):
-                next_item = items[i + 1]
-                is_discount = False
-                
-                # Wykrywanie po nazwie lub ujemnej cenie
-                raw_name_lower = next_item.get("nazwa_raw", "").lower()
-                try:
-                    price_total = float(str(next_item.get("cena_calk", 0)).replace(",", "."))
-                except (ValueError, TypeError):
-                    price_total = 0
-                
-                if (
-                    "rabat" in raw_name_lower
-                    or "upust" in raw_name_lower
-                    or price_total < 0
-                ):
-                    is_discount = True
-                
-                if is_discount:
-                    # To jest rabat do bieżącego produktu!
-                    discount_value = abs(price_total)
-                    
-                    # Pobieramy obecny rabat
-                    try:
-                        current_rabat = float(str(current_item.get("rabat", 0)).replace(",", "."))
-                    except (ValueError, TypeError):
-                        current_rabat = 0.0
-                    
-                    current_item["rabat"] = f"{current_rabat + discount_value:.2f}"
-                    
-                    # Przelicz cenę po rabacie
-                    try:
-                        base_price = float(str(current_item.get("cena_calk", 0)).replace(",", "."))
-                        cena_po_rab = max(0.0, base_price - (current_rabat + discount_value))
-                        current_item["cena_po_rab"] = f"{cena_po_rab:.2f}"
-                    except (ValueError, TypeError):
-                        pass
-                    
-                    skip_indices.add(i + 1)  # Pomiń ten rabat w głównej pętli
-            
-            cleaned_items.append(current_item)
-        
-        data["pozycje"] = cleaned_items
+        # Krok 1: Scalanie rabatów na pojedyncze produkty (używamy wspólnej metody)
+        data = self._merge_discounts(data, fix_negative_discounts=False, strict_discount_name=False)
         
         # Krok 2: Weryfikacja i korekta sumy całkowitej
-        # Oblicz sumę pozycji (po rabatach)
-        suma_pozycji = 0.0
-        for item in cleaned_items:
-            try:
-                cena_po_rab = float(str(item.get("cena_po_rab", item.get("cena_calk", 0))).replace(",", "."))
-                suma_pozycji += cena_po_rab
-            except (ValueError, TypeError):
-                try:
-                    cena_calk = float(str(item.get("cena_calk", 0)).replace(",", "."))
-                    suma_pozycji += cena_calk
-                except (ValueError, TypeError):
-                    pass
+        items = data["pozycje"]
+        suma_pozycji = self._calculate_items_sum(items)
         
         # Pobierz sumę z paragonu
         try:
@@ -356,113 +352,15 @@ class KauflandStrategy(ReceiptStrategy):
         # Weryfikacja i korekta sumy całkowitej
         roznica = suma_paragonu - suma_pozycji
         
-        # Sprawdź, czy w pozycjach jest informacja o rabacie z karty Kaufland Card
-        rabat_z_karty = None
-        for item in cleaned_items:
-            name_lower = item.get("nazwa_raw", "").lower()
-            # Szukamy pozycji z informacją o rabacie z karty
-            if any(keyword in name_lower for keyword in ["kaufland card", "zaoszczędzono", "card", "zaoszczedzono"]):
-                # Spróbuj wyciągnąć kwotę rabatu z ceny (może być ujemna)
-                try:
-                    cena = float(str(item.get("cena_calk", 0)).replace(",", "."))
-                    if cena < 0:
-                        rabat_z_karty = abs(cena)
-                    elif cena > 0 and cena <= 20.0:  # Typowy rabat z karty to 5-15 PLN
-                        rabat_z_karty = cena
-                except (ValueError, TypeError):
-                    pass
+        # Wykrywanie rabatu z karty (wieloetapowe)
+        rabat_z_karty = self._detect_card_discount_from_items(items)
+        if rabat_z_karty is None:
+            rabat_z_karty = self._detect_card_discount_from_ocr(ocr_text) if ocr_text else None
+        if rabat_z_karty is None:
+            rabat_z_karty = self._detect_card_discount_from_pattern(roznica, suma_pozycji)
         
-        # Jeśli nie znaleźliśmy rabatu w pozycjach, spróbuj wykryć go w tekście OCR
-        if rabat_z_karty is None and ocr_text:
-            try:
-                # Szukaj wzorca: "zaoszczędzono X,XX PLN" lub "Kaufland Card ... X,XX PLN"
-                pattern = r'(?:zaoszcz[ęe]dzo|kaufland\s+card).*?(\d+[.,]\d+)\s*pln'
-                match = re.search(pattern, ocr_text.lower())
-                if match:
-                    rabat_z_karty = float(match.group(1).replace(',', '.'))
-            except (ValueError, TypeError, AttributeError):
-                pass
-        
-        # Jeśli nie znaleźliśmy rabatu w pozycjach, ale suma pozycji jest w typowym zakresie,
-        # możemy spróbować wykryć rabat na podstawie wzorców
-        # Dla Kaufland typowy rabat z karty to 10 PLN
-        if rabat_z_karty is None and 50.0 <= suma_pozycji <= 200.0:
-            # Sprawdź, czy różnica między sumą pozycji a sumą paragonu jest bliska typowego rabatu
-            if abs(roznica + 10.0) < 1.0:  # Różnica jest bliska -10 PLN (rabat 10 PLN)
-                rabat_z_karty = 10.0
-            elif abs(roznica + 5.0) < 1.0:  # Różnica jest bliska -5 PLN (rabat 5 PLN)
-                rabat_z_karty = 5.0
-            elif abs(roznica + 15.0) < 1.0:  # Różnica jest bliska -15 PLN (rabat 15 PLN)
-                rabat_z_karty = 15.0
-            # Jeśli suma paragonu jest bardzo duża (błąd parsowania), a suma pozycji jest w typowym zakresie,
-            # możemy założyć, że jest rabat z karty (typowy 10 PLN dla Kaufland)
-            elif suma_paragonu > suma_pozycji * 2 and suma_pozycji >= 50.0:
-                # Dla Kaufland typowy rabat z karty to 10 PLN
-                # Ale nie zakładamy automatycznie, bo nie mamy pewności
-                # Sprawdzamy, czy suma pozycji jest "okrągła" (np. 109.29), co sugeruje brak rabatu w sumie
-                # W takim przypadku możemy założyć rabat z karty
-                # Ale na razie nie odejmujemy automatycznie
-                pass
-        
-        # Jeśli suma paragonu jest bardzo duża (prawdopodobnie błąd parsowania), zawsze korygujemy
-        if suma_paragonu > suma_pozycji * 2:
-            # Suma paragonu jest więcej niż 2x większa od sumy pozycji - to na pewno błąd
-            # (np. LLM wziął numer paragonu zamiast sumy)
-            # Ustawiamy sumę na sumę pozycji, a następnie sprawdzamy czy jest rabat z karty
-            
-            # Dla Kaufland: typowy rabat z karty to 5-15 PLN
-            # Jeśli nie znaleźliśmy rabatu w pozycjach, ale suma pozycji jest w typowym zakresie,
-            # możemy założyć, że może być rabat z karty (typowy 10 PLN)
-            if rabat_z_karty is None and 50.0 <= suma_pozycji <= 200.0:
-                # Nie znaleźliśmy rabatu w pozycjach, ale suma pozycji jest w typowym zakresie
-                # Dla Kaufland typowy rabat z karty to 10 PLN
-                # Sprawdzamy, czy suma pozycji jest większa niż 50 PLN (typowy zakres dla rabatu z karty)
-                # Jeśli tak, możemy założyć rabat z karty (typowy 10 PLN)
-                # Ale nie odejmujemy automatycznie, bo nie mamy pewności
-                # Ustawiamy sumę na sumę pozycji (bez rabatu)
-                # UWAGA: W przyszłości można dodać bardziej zaawansowaną logikę wykrywania rabatu
-                # na podstawie wzorców w tekście OCR (np. "Z Kaufland Card zaoszczędzono X,XX PLN")
-                data["paragon_info"]["suma_calkowita"] = f"{suma_pozycji:.2f}"
-            elif rabat_z_karty is not None:
-                # Znaleźliśmy rabat z karty w pozycjach - odejmujemy go od sumy
-                suma_po_rabacie = max(0.0, suma_pozycji - rabat_z_karty)
-                data["paragon_info"]["suma_calkowita"] = f"{suma_po_rabacie:.2f}"
-            else:
-                # Brak rabatu lub suma poza typowym zakresem - ustawiamy na sumę pozycji
-                data["paragon_info"]["suma_calkowita"] = f"{suma_pozycji:.2f}"
-        # Jeśli suma paragonu > suma pozycji (różnica dodatnia, ale nie bardzo duża), to prawdopodobnie błąd parsowania
-        elif roznica > 0.10:
-            # Korekta: ustawiamy sumę paragonu na sumę pozycji
-            # Ale najpierw sprawdzamy, czy jest rabat z karty
-            if rabat_z_karty is not None:
-                suma_po_rabacie = max(0.0, suma_pozycji - rabat_z_karty)
-                data["paragon_info"]["suma_calkowita"] = f"{suma_po_rabacie:.2f}"
-            else:
-                data["paragon_info"]["suma_calkowita"] = f"{suma_pozycji:.2f}"
-        # Jeśli suma paragonu < suma pozycji (różnica ujemna), to może być rabat z karty Kaufland Card
-        # Typowy rabat z karty to 5-15 PLN. Jeśli różnica jest w tym zakresie, prawdopodobnie to rabat z karty.
-        elif roznica < -0.10 and abs(roznica) <= 20.0:
-            # Prawdopodobnie rabat z karty - suma do zapłaty = suma pozycji - rabat
-            # Suma paragonu jest już poprawna (po rabacie), więc nie zmieniamy jej
-            # Ale jeśli znaleźliśmy rabat w pozycjach, upewniamy się, że suma jest poprawna
-            if rabat_z_karty is not None:
-                suma_po_rabacie = max(0.0, suma_pozycji - rabat_z_karty)
-                # Sprawdź, czy suma paragonu jest bliska sumie po rabacie
-                if abs(suma_paragonu - suma_po_rabacie) < 0.10:
-                    # Suma paragonu jest już poprawna
-                    pass
-                else:
-                    # Korekta: ustawiamy sumę na sumę po rabacie
-                    data["paragon_info"]["suma_calkowita"] = f"{suma_po_rabacie:.2f}"
-        # Jeśli różnica jest mała (< 0.10), zakładamy że wszystko jest OK
-        # Ale jeśli znaleźliśmy rabat z karty, sprawdzamy czy suma jest poprawna
-        elif abs(roznica) < 0.10 and rabat_z_karty is not None:
-            # Różnica jest mała, ale znaleźliśmy rabat z karty
-            # Sprawdź, czy suma paragonu jest równa sumie pozycji - rabat
-            suma_po_rabacie = max(0.0, suma_pozycji - rabat_z_karty)
-            if abs(suma_paragonu - suma_po_rabacie) > 0.10:
-                # Suma paragonu nie uwzględnia rabatu - korygujemy
-                data["paragon_info"]["suma_calkowita"] = f"{suma_po_rabacie:.2f}"
+        # Korekta sumy całkowitej
+        data = self._correct_total_sum(data, suma_pozycji, suma_paragonu, roznica, rabat_z_karty)
         
         return data
 
@@ -536,7 +434,7 @@ class AuchanStrategy(ReceiptStrategy):
         }
         """
 
-    def post_process(self, data: Dict) -> Dict:
+    def post_process(self, data: ParsedData, ocr_text: Optional[str] = None) -> ParsedData:
         """
         Usuwanie pozycji, które wyglądają na błędy OCR (śmieci).
         UWAGA: Opłaty recyklingowe (ReWtymOplRec) są zachowywane, bo są częścią sumy paragonu.
@@ -560,8 +458,8 @@ class AuchanStrategy(ReceiptStrategy):
                 cena_calk = item.get("cena_calk", 0)
                 try:
                     cena_float = float(str(cena_calk).replace(",", "."))
-                    # Jeśli cena jest większa niż 0.01, to może być ważna pozycja
-                    if cena_float > 0.01:
+                    # Jeśli cena jest większa niż minimalna, to może być ważna pozycja
+                    if cena_float > float(Config.MIN_PRODUCT_PRICE):
                         valid_items.append(item)
                         continue
                 except (ValueError, TypeError):
