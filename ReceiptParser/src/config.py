@@ -14,6 +14,8 @@ class Config:
     VISION_MODEL = os.getenv("VISION_MODEL", "llava:latest")
     TEXT_MODEL = os.getenv("TEXT_MODEL", "SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M")
     MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "")
+    # Timeout dla zapytań do Ollama (w sekundach)
+    OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "300"))  # Domyślnie 5 minut
 
     @staticmethod
     def print_config():

@@ -23,6 +23,7 @@ from .strategies import get_strategy_for_store
 from .mistral_ocr import MistralOCRClient
 from .normalization_rules import find_static_match
 from decimal import Decimal, InvalidOperation
+from datetime import datetime, date
 import os
 
 # --- GŁÓWNA LOGIKA PRZETWARZANIA (NIEZALEŻNA OD UI) ---
@@ -146,10 +147,10 @@ def run_processing_pipeline(
     Funkcja jest niezależna od UI i przyjmuje callbacki do komunikacji z użytkownikiem.
     """
     # Krok 1: Parsowanie multimodalne jest teraz domyślnym i jedynym potokiem
+    processing_file_path = file_path
+    temp_image_path = None
+    
     try:
-        processing_file_path = file_path
-        temp_image_path = None
-
         # Obsługa PDF
         if file_path.lower().endswith(".pdf"):
             log_callback(f"INFO: Wykryto plik PDF. Konwertuję na obraz...")
@@ -209,11 +210,6 @@ def run_processing_pipeline(
 
         # Strategia powinna być już wybrana wcześniej (dla Mistral OCR lub Tesseract)
 
-        # Sprzątanie po PDF
-        if temp_image_path and os.path.exists(temp_image_path):
-            os.remove(temp_image_path)
-            log_callback("INFO: Usunięto tymczasowy plik obrazu.")
-
         if not parsed_data:
             raise Exception("Parsowanie za pomocą LLM nie zwróciło danych.")
 
@@ -247,6 +243,14 @@ def run_processing_pipeline(
         log_callback(f"BŁĄD KRYTYCZNY na etapie parsowania LLM: {e}")
         log_callback("Upewnij się, że serwer Ollama działa i model jest dostępny.")
         return
+    finally:
+        # Sprzątanie po PDF - zawsze wykonujemy, nawet w przypadku błędu
+        if temp_image_path and os.path.exists(temp_image_path):
+            try:
+                os.remove(temp_image_path)
+                log_callback("INFO: Usunięto tymczasowy plik obrazu.")
+            except OSError as e:
+                log_callback(f"OSTRZEŻENIE: Nie udało się usunąć tymczasowego pliku {temp_image_path}: {e}")
 
     # Krok 2: Zapis do bazy (ta logika jest już dobra i pozostaje bez zmian)
     if parsed_data:
@@ -290,20 +294,43 @@ def save_to_database(
             f"INFO: Znaleziono istniejący sklep '{sklep_name}' w bazie danych."
         )
 
+    # Walidacja danych przed zapisem
+    data_zakupu = parsed_data["paragon_info"]["data_zakupu"]
+    if not data_zakupu:
+        raise ValueError("Brak daty zakupu w danych paragonu. Nie można zapisać do bazy.")
+    
+    # Konwersja datetime na date jeśli potrzeba
+    if isinstance(data_zakupu, datetime):
+        data_zakupu = data_zakupu.date()
+    elif not isinstance(data_zakupu, date):
+        raise ValueError(f"Nieprawidłowy format daty zakupu: {type(data_zakupu)}")
+
     paragon = Paragon(
         sklep_id=sklep.sklep_id,
-        data_zakupu=parsed_data["paragon_info"]["data_zakupu"].date(),
+        data_zakupu=data_zakupu,
         suma_paragonu=parsed_data["paragon_info"]["suma_calkowita"],
         plik_zrodlowy=file_path,
     )
 
     log_callback("INFO: Przetwarzam pozycje z paragonu...")
+    
+    # Optymalizacja N+1: Batch loading aliasów dla wszystkich pozycji
+    raw_names = [item["nazwa_raw"] for item in parsed_data["pozycje"]]
+    aliases = (
+        session.query(AliasProduktu)
+        .options(joinedload(AliasProduktu.produkt))
+        .filter(AliasProduktu.nazwa_z_paragonu.in_(raw_names))
+        .all()
+    )
+    alias_map = {a.nazwa_z_paragonu: a.produkt_id for a in aliases}
+    log_callback(f"INFO: Załadowano {len(alias_map)} aliasów z bazy danych (batch loading).")
+    
     for item_data in parsed_data["pozycje"]:
         # Logika rabatów została przeniesiona do strategies.py (LidlStrategy)
         # Tutaj zakładamy, że dane są już wyczyszczone przez strategy.post_process
 
         product_id = resolve_product(
-            session, item_data["nazwa_raw"], log_callback, prompt_callback
+            session, item_data["nazwa_raw"], log_callback, prompt_callback, alias_map=alias_map
         )
 
         # Jeśli resolve_product zwrócił None (np. dla śmieci OCR), pomijamy dodawanie
@@ -316,9 +343,17 @@ def save_to_database(
         cena_calk = item_data["cena_calk"]
         cena_po_rab = item_data.get("cena_po_rab")
         
-        # Jeśli cena po rabacie nie została wyliczona (brak rabatu), to jest równa cenie całkowitej
-        if not cena_po_rab or (isinstance(cena_po_rab, (int, float, Decimal)) and float(cena_po_rab) == 0):
+        # Konwersja na Decimal dla porównań
+        try:
+            cena_po_rab_decimal = Decimal(str(cena_po_rab).replace(",", ".")) if cena_po_rab else None
+        except (ValueError, TypeError):
+            cena_po_rab_decimal = None
+        
+        # Jeśli cena po rabacie nie została wyliczona (brak rabatu) lub jest ujemna, to jest równa cenie całkowitej
+        if not cena_po_rab_decimal or cena_po_rab_decimal <= 0:
             cena_po_rab = cena_calk
+        else:
+            cena_po_rab = cena_po_rab_decimal
 
         pozycja = PozycjaParagonu(
             produkt_id=product_id,
@@ -357,9 +392,21 @@ def save_to_database(
 
 
 def resolve_product(
-    session: Session, raw_name: str, log_callback: Callable, prompt_callback: Callable
+    session: Session, raw_name: str, log_callback: Callable, prompt_callback: Callable, alias_map: dict = None
 ) -> int | None:
     # 1. Sprawdź Aliasy w Bazie (Najszybsze i Najpewniejsze)
+    # Używamy cache jeśli dostępny (batch loading), w przeciwnym razie zapytanie do DB
+    if alias_map is not None and raw_name in alias_map:
+        product_id = alias_map[raw_name]
+        # Pobierz nazwę produktu dla logowania
+        produkt = session.query(Produkt).filter_by(produkt_id=product_id).first()
+        if produkt:
+            log_callback(
+                f"   -> Znaleziono alias (cache) dla '{raw_name}': '{produkt.znormalizowana_nazwa}'"
+            )
+        return product_id
+    
+    # Fallback: zapytanie do bazy jeśli nie ma w cache
     alias = (
         session.query(AliasProduktu)
         .options(joinedload(AliasProduktu.produkt))
@@ -406,9 +453,21 @@ def resolve_product(
     # Ale dla bezpieczeństwa na początku zostawmy prompt.
     normalized_name = prompt_callback(prompt_text, suggested_name or "", raw_name)
 
+    # Walidacja nazwy produktu
     if not normalized_name:
         log_callback("   -> Pominięto przypisanie produktu dla tej pozycji.")
         return None
+    
+    # Czyszczenie i walidacja nazwy
+    normalized_name = normalized_name.strip()
+    if not normalized_name or len(normalized_name) == 0:
+        log_callback("   -> Pusta nazwa produktu, pomijam przypisanie.")
+        return None
+    
+    # Sprawdzenie maksymalnej długości (np. 200 znaków)
+    if len(normalized_name) > 200:
+        log_callback(f"   -> OSTRZEŻENIE: Nazwa produktu jest za długa ({len(normalized_name)} znaków), obcinam do 200.")
+        normalized_name = normalized_name[:200].strip()
 
     # ... Dalsza część kodu (Zapis do bazy Produkt/Alias) bez zmian ...
     product = (

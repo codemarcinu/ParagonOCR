@@ -37,6 +37,7 @@
 - Obsługa aliasów produktów (mapowanie różnych nazw na jeden znormalizowany produkt)
 - Kategoryzacja produktów z metadanymi (możliwość mrożenia)
 - Historia zakupów z pełnymi szczegółami paragonów
+- **Zoptymalizowane zapytania** - batch loading aliasów, indeksy na kluczowych kolumnach
 
 ## 🛠️ Wymagania Systemowe
 
@@ -103,6 +104,8 @@ MISTRAL_API_KEY=twoj_klucz_api_tutaj
 OLLAMA_HOST=http://localhost:11434
 VISION_MODEL=llava:latest
 TEXT_MODEL=SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M
+# Timeout dla zapytań do Ollama (w sekundach, domyślnie 300 = 5 minut)
+OLLAMA_TIMEOUT=300
 ```
 
 **Uwaga:** Klucz API Mistral jest opcjonalny - aplikacja działa również bez niego (używa Tesseract OCR).
@@ -273,6 +276,26 @@ System zawiera wbudowaną bazę wiedzy o produktach:
 - **Metadane**: Informacja czy produkt można mrozić
 - **Normalizacja sklepów**: Automatyczne rozpoznawanie sklepów po wzorcach
 
+## ⚡ Optymalizacje i Ulepszenia
+
+### Wprowadzone Optymalizacje (2025-11-22)
+
+**Wydajność:**
+- ✅ **Batch loading aliasów** - eliminacja problemu N+1 w zapytaniach do bazy danych
+- ✅ **Indeksy bazy danych** - przyspieszenie zapytań na `nazwa_z_paragonu` i `znormalizowana_nazwa`
+- ✅ **Timeout dla Ollama** - konfigurowalny timeout zapobiega zawieszeniu aplikacji
+- ✅ **Truncation tekstu** - automatyczne obcinanie zbyt długich tekstów dla LLM
+
+**Stabilność:**
+- ✅ **Naprawione race conditions** - timeouty w komunikacji między wątkami GUI
+- ✅ **Cleanup plików tymczasowych** - gwarancja usuwania plików nawet przy błędach
+- ✅ **Walidacja danych** - sprawdzanie poprawności przed zapisem do bazy
+- ✅ **Ochrona przed memory leak** - limit iteracji w przetwarzaniu kolejki logów
+
+**Jakość kodu:**
+- ✅ **Walidacja nazw produktów** - sprawdzanie długości i czyszczenie
+- ✅ **Obsługa ujemnych rabatów** - poprawne wykrywanie i korekta błędnych wartości
+
 ## 🐛 Rozwiązywanie Problemów
 
 ### Problem: "Nie udało się skonwertować pliku PDF"
@@ -283,6 +306,11 @@ System zawiera wbudowaną bazę wiedzy o produktach:
 1. Upewnij się, że Ollama jest uruchomiona: `systemctl --user status ollama` (Linux) lub `ollama serve` (ręcznie)
 2. Sprawdź, czy model jest pobrany: `ollama list`
 3. Pobierz model: `ollama pull SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M`
+
+### Problem: "Timeout podczas komunikacji z Ollama"
+**Rozwiązanie:** 
+- Zwiększ wartość `OLLAMA_TIMEOUT` w pliku `.env` (domyślnie 300 sekund)
+- Sprawdź, czy Ollama działa poprawnie: `curl http://localhost:11434/api/tags`
 
 ### Problem: "Mistral OCR nie zwrócił wyniku"
 **Rozwiązanie:** 

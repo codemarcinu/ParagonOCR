@@ -1,4 +1,5 @@
 import ollama
+import httpx
 
 import json
 import re
@@ -11,7 +12,10 @@ from .config import Config
 # Globalny klient do komunikacji z serwerem Ollama.
 # Upewnij się, że kontener Docker z Ollamą jest uruchomiony.
 try:
-    client = ollama.Client(host=Config.OLLAMA_HOST)
+    # Tworzymy httpx client z timeoutem
+    timeout = httpx.Timeout(Config.OLLAMA_TIMEOUT, connect=10.0)
+    http_client = httpx.Client(timeout=timeout)
+    client = ollama.Client(host=Config.OLLAMA_HOST, http_client=http_client)
     # Sprawdzenie połączenia przy starcie
     # client.list()
 except Exception as e:
@@ -19,6 +23,7 @@ except Exception as e:
         f"BŁĄD: Nie można połączyć się z Ollama na {Config.OLLAMA_HOST}. Upewnij się, że usługa działa. Szczegóły: {e}"
     )
     client = None
+    http_client = None
 
 # --- Normalizacja Nazw Produktów ---
 
@@ -262,6 +267,12 @@ def parse_receipt_with_llm(
         print(f"INFO: Wysyłanie obrazu do modelu '{model_name}' (format=json)...")
         print(f"INFO: Plik: {image_path}")
 
+        # Truncation tekstu OCR jeśli jest za długi (limit ~10000 znaków dla bezpieczeństwa)
+        MAX_OCR_TEXT_LENGTH = 10000
+        if ocr_text and len(ocr_text) > MAX_OCR_TEXT_LENGTH:
+            print(f"OSTRZEŻENIE: Tekst OCR jest za długi ({len(ocr_text)} znaków), obcinam do {MAX_OCR_TEXT_LENGTH} znaków.")
+            ocr_text = ocr_text[:MAX_OCR_TEXT_LENGTH] + "\n\n[... tekst OCR obcięty ...]"
+
         response = client.chat(
             model=model_name,
             format="json",  # WYMUSZENIE FORMATU JSON
@@ -406,6 +417,12 @@ def parse_receipt_from_text(
     try:
         print(f"INFO: Wysyłanie tekstu do modelu '{model_name}' (format=json)...")
 
+        # Truncation tekstu jeśli jest za długi (limit ~50000 znaków dla bezpieczeństwa)
+        MAX_TEXT_LENGTH = 50000
+        if len(text_content) > MAX_TEXT_LENGTH:
+            print(f"OSTRZEŻENIE: Tekst paragonu jest za długi ({len(text_content)} znaków), obcinam do {MAX_TEXT_LENGTH} znaków.")
+            text_content = text_content[:MAX_TEXT_LENGTH] + "\n\n[... tekst obcięty ...]"
+        
         response = client.chat(
             model=model_name,
             format="json",

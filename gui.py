@@ -711,24 +711,38 @@ class App(ctk.CTk):
 
     def prompt_user(self, prompt_text, default_value, raw_name):
         self.prompt_queue.put((prompt_text, default_value, raw_name))
-        # Czekaj na wynik z głównego wątku GUI
-        result = self.prompt_result_queue.get()
+        # Czekaj na wynik z głównego wątku GUI z timeoutem (5 minut)
+        try:
+            result = self.prompt_result_queue.get(timeout=300)
+        except queue.Empty:
+            # Timeout - używamy wartości domyślnej
+            print(f"TIMEOUT: Brak odpowiedzi użytkownika dla '{raw_name}', używam wartości domyślnej: '{default_value}'")
+            return default_value
         return result
 
     def review_user(self, parsed_data):
         self.review_queue.put(parsed_data)
-        # Czekaj na wynik z głównego wątku GUI
-        result = self.review_result_queue.get()
+        # Czekaj na wynik z głównego wątku GUI z timeoutem (10 minut)
+        try:
+            result = self.review_result_queue.get(timeout=600)
+        except queue.Empty:
+            # Timeout - użytkownik nie odpowiedział, zwracamy None (odrzucamy)
+            print("TIMEOUT: Brak odpowiedzi użytkownika na weryfikację paragonu, odrzucam zmiany.")
+            return None
         return result
 
     def process_log_queue(self):
         try:
-            while not self.log_queue.empty():
+            # Limit iteracji aby uniknąć memory leak przy szybkim zapełnianiu queue
+            max_messages = 50
+            processed = 0
+            while not self.log_queue.empty() and processed < max_messages:
                 message = self.log_queue.get_nowait()
                 self.log_textbox.configure(state="normal")
                 self.log_textbox.insert("end", message + "\n")
                 self.log_textbox.configure(state="disabled")
                 self.log_textbox.see("end")
+                processed += 1
 
             if not self.prompt_queue.empty():
                 prompt_text, default_value, raw_name = self.prompt_queue.get_nowait()

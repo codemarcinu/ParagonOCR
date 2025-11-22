@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, Numeric, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, Numeric, DateTime, Index
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
@@ -38,6 +38,9 @@ class KategoriaProduktu(Base):
 
 class Produkt(Base):
     __tablename__ = 'produkty'
+    __table_args__ = (
+        Index('idx_produkt_nazwa', 'znormalizowana_nazwa'),
+    )
     produkt_id = Column(Integer, primary_key=True)
     znormalizowana_nazwa = Column(String, nullable=False, unique=True)
     kategoria_id = Column(Integer, ForeignKey('kategorie_produktow.kategoria_id'))
@@ -49,6 +52,9 @@ class Produkt(Base):
 
 class AliasProduktu(Base):
     __tablename__ = 'aliasy_produktow'
+    __table_args__ = (
+        Index('idx_alias_nazwa', 'nazwa_z_paragonu'),
+    )
     alias_id = Column(Integer, primary_key=True)
     nazwa_z_paragonu = Column(String, nullable=False, unique=True)
     produkt_id = Column(Integer, ForeignKey('produkty.produkt_id'), nullable=False)
