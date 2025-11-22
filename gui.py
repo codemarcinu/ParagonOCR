@@ -21,6 +21,60 @@ from src.purchase_analytics import PurchaseAnalytics
 from history_manager import load_history, add_to_history
 
 
+# --- KONSTANTY STYLISTYCZNE ---
+class AppColors:
+    """Spójna paleta kolorów dla aplikacji"""
+    PRIMARY = "#1f538d"      # Niebieski (główny)
+    SUCCESS = "#2d8659"      # Zielony (sukces)
+    WARNING = "#d97706"      # Pomarańczowy (ostrzeżenie)
+    ERROR = "#dc2626"        # Czerwony (błąd)
+    INFO = "#2563eb"         # Niebieski (informacja)
+    
+    # Statusy produktów
+    EXPIRED = "#dc2626"          # Przeterminowany
+    EXPIRING_SOON = "#d97706"   # Wkrótce przeterminowany
+    OK = "#2d8659"              # OK
+    UNKNOWN = "#6b7280"         # Nieznany
+    
+    # Tła dla wierszy tabel
+    ROW_EVEN = "#2b2b2b"        # Parzyste wiersze (dark mode)
+    ROW_ODD = "#1f1f1f"         # Nieparzyste wiersze (dark mode)
+    ROW_EVEN_LIGHT = "#f9fafb"  # Parzyste wiersze (light mode)
+    ROW_ODD_LIGHT = "#ffffff"   # Nieparzyste wiersze (light mode)
+    
+    # Chat
+    CHAT_BOT = "#1f538d"        # Wiadomości od bota
+    CHAT_USER = "#2b2b2b"       # Wiadomości użytkownika
+
+
+class AppSpacing:
+    """Spójne odstępy dla aplikacji"""
+    XS = 5
+    SM = 10
+    MD = 15
+    LG = 20
+    XL = 30
+
+
+class Icons:
+    """Spójne ikony dla aplikacji"""
+    RECEIPT = "📄"
+    COOKING = "🍳"
+    ADD = "➕"
+    INVENTORY = "📦"
+    SETTINGS = "⚙️"
+    BEAR = "🦅"
+    REFRESH = "🔄"
+    SAVE = "💾"
+    DELETE = "🗑️"
+    ANALYTICS = "📊"
+    SHOP = "🏪"
+    CATEGORY = "📦"
+    PRODUCT = "🛒"
+    CALENDAR = "📅"
+    FILE = "📁"
+
+
 class ToolTip:
     """Prosta implementacja tooltipa dla CustomTkinter."""
     def __init__(self, widget, text):
@@ -198,13 +252,22 @@ class ReviewDialog(ctk.CTkToplevel):
             self.row_frames.append(row_frame)
             
             # Ustaw kolor tła w zależności od typu produktu
+            # Alternatywne kolory dla lepszej czytelności
+            is_even = i % 2 == 0
+            mode = ctk.get_appearance_mode()
+            
             if is_skip:
-                row_frame.configure(fg_color="#3d1a1a")  # Ciemnoczerwony dla POMIŃ
+                row_frame.configure(fg_color=AppColors.ERROR)
                 tooltip_text = "Ta pozycja została oznaczona do pominięcia"
             elif is_unknown:
-                row_frame.configure(fg_color="#3d3d1a")  # Ciemnożółty dla nieznanych
+                row_frame.configure(fg_color=AppColors.WARNING)
                 tooltip_text = "Nieznany produkt - wymaga weryfikacji"
             else:
+                # Alternatywne kolory dla parzystych/nieparzystych wierszy
+                if mode == "Dark":
+                    row_frame.configure(fg_color=AppColors.ROW_EVEN if is_even else AppColors.ROW_ODD)
+                else:
+                    row_frame.configure(fg_color=AppColors.ROW_EVEN_LIGHT if is_even else AppColors.ROW_ODD_LIGHT)
                 tooltip_text = f"Produkt: {nazwa_raw}"
             
             # Konfiguruj kolumny w ramce
@@ -279,16 +342,21 @@ class ReviewDialog(ctk.CTkToplevel):
 
         self.save_btn = ctk.CTkButton(
             self.footer_frame,
-            text="Zatwierdź i Zapisz",
+            text=f"{Icons.SAVE} Zatwierdź i Zapisz",
             command=self.on_save,
-            fg_color="green",
+            fg_color=AppColors.SUCCESS,
+            hover_color=App._adjust_color(AppColors.SUCCESS, -15)
         )
-        self.save_btn.pack(side="right", padx=10)
+        self.save_btn.pack(side="right", padx=AppSpacing.SM)
 
         self.discard_btn = ctk.CTkButton(
-            self.footer_frame, text="Odrzuć", command=self.on_discard, fg_color="red"
+            self.footer_frame, 
+            text="Odrzuć", 
+            command=self.on_discard, 
+            fg_color=AppColors.ERROR,
+            hover_color=App._adjust_color(AppColors.ERROR, -15)
         )
-        self.discard_btn.pack(side="left", padx=10)
+        self.discard_btn.pack(side="left", padx=AppSpacing.SM)
 
         self.protocol("WM_DELETE_WINDOW", self.on_discard)
         # Użyj after() aby upewnić się, że okno jest widoczne przed grab_set
@@ -395,16 +463,17 @@ class CookingDialog(ctk.CTkToplevel):
             footer_frame,
             text="Zużyj zaznaczone",
             command=self.consume_products,
-            fg_color="green",
+            fg_color=AppColors.SUCCESS,
+            hover_color=App._adjust_color(AppColors.SUCCESS, -15),
             width=200
-        ).pack(side="right", padx=10)
+        ).pack(side="right", padx=AppSpacing.SM)
         
         ctk.CTkButton(
             footer_frame,
             text="Anuluj",
             command=self.on_cancel,
             width=200
-        ).pack(side="left", padx=10)
+        ).pack(side="left", padx=AppSpacing.SM)
         
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
         # Użyj after() aby upewnić się, że okno jest widoczne przed grab_set
@@ -547,16 +616,17 @@ class AddProductDialog(ctk.CTkToplevel):
             button_frame,
             text="Dodaj",
             command=self.add_product,
-            fg_color="green",
+            fg_color=AppColors.SUCCESS,
+            hover_color=App._adjust_color(AppColors.SUCCESS, -15),
             width=200
-        ).pack(side="right", padx=10)
+        ).pack(side="right", padx=AppSpacing.SM)
         
         ctk.CTkButton(
             button_frame,
             text="Anuluj",
             command=self.on_cancel,
             width=200
-        ).pack(side="left", padx=10)
+        ).pack(side="left", padx=AppSpacing.SM)
         
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
         # Użyj after() aby upewnić się, że okno jest widoczne przed grab_set
@@ -690,10 +760,10 @@ class BielikChatDialog(ctk.CTkToplevel):
         
         # Kolor w zależności od nadawcy
         if sender == "Bielik":
-            msg_frame.configure(fg_color="#1f538d")
-            sender_text = "🦅 Bielik:"
+            msg_frame.configure(fg_color=AppColors.CHAT_BOT)
+            sender_text = f"{Icons.BEAR} Bielik:"
         else:
-            msg_frame.configure(fg_color="#2b2b2b")
+            msg_frame.configure(fg_color=AppColors.CHAT_USER)
             sender_text = "Ty:"
         
         # Label z wiadomością
@@ -817,27 +887,30 @@ class SettingsDialog(ctk.CTkToplevel):
         
         ctk.CTkButton(
             footer_frame,
-            text="💾 Zapisz",
+            text=f"{Icons.SAVE} Zapisz",
             command=self.save_prompts,
-            fg_color="green",
+            fg_color=AppColors.SUCCESS,
+            hover_color=App._adjust_color(AppColors.SUCCESS, -15),
             width=150
-        ).pack(side="left", padx=5)
+        ).pack(side="left", padx=AppSpacing.XS)
         
         ctk.CTkButton(
             footer_frame,
-            text="🔄 Resetuj do domyślnych",
+            text=f"{Icons.REFRESH} Resetuj do domyślnych",
             command=self.reset_prompts,
-            fg_color="orange",
+            fg_color=AppColors.WARNING,
+            hover_color=App._adjust_color(AppColors.WARNING, -15),
             width=200
-        ).pack(side="left", padx=5)
+        ).pack(side="left", padx=AppSpacing.XS)
         
         ctk.CTkButton(
             footer_frame,
-            text="❌ Anuluj",
+            text="Anuluj",
             command=self.destroy,
-            fg_color="red",
+            fg_color=AppColors.ERROR,
+            hover_color=App._adjust_color(AppColors.ERROR, -15),
             width=150
-        ).pack(side="right", padx=5)
+        ).pack(side="right", padx=AppSpacing.XS)
         
         self.protocol("WM_DELETE_WINDOW", self.destroy)
         self.after(100, self.grab_set)
@@ -874,11 +947,27 @@ class SettingsDialog(ctk.CTkToplevel):
 
 
 class App(ctk.CTk):
+    @staticmethod
+    def _adjust_color(color, amount):
+        """Przyciemnia lub rozjaśnia kolor o określoną wartość"""
+        # Prosta implementacja - można użyć biblioteki colorsys dla lepszej kontroli
+        try:
+            # Konwertuj hex na RGB
+            color = color.lstrip('#')
+            rgb = tuple(int(color[i:i+2], 16) for i in (0, 2, 4))
+            # Dostosuj jasność
+            new_rgb = tuple(max(0, min(255, c + amount)) for c in rgb)
+            # Konwertuj z powrotem na hex
+            return '#%02x%02x%02x' % new_rgb
+        except:
+            return color
+    
     def __init__(self):
         super().__init__()
 
         self.title("ReceiptParser - System Zarządzania Paragonami")
         self.geometry("1000x700")
+        self.minsize(800, 600)  # Minimalny rozmiar okna
         ctk.set_appearance_mode("System")
 
         self.grid_columnconfigure(0, weight=1)
@@ -893,47 +982,72 @@ class App(ctk.CTk):
         menu_buttons_frame = ctk.CTkFrame(self.menu_frame)
         menu_buttons_frame.pack(side="left", padx=5, pady=5)
         
-        ctk.CTkButton(
+        # Menu buttons z ujednoliconymi kolorami i tooltips
+        btn_receipts = ctk.CTkButton(
             menu_buttons_frame,
-            text="📄 Paragony",
+            text=f"{Icons.RECEIPT} Paragony",
             command=self.show_receipts_tab,
-            width=120
-        ).pack(side="left", padx=5)
+            width=120,
+            fg_color=AppColors.PRIMARY,
+            hover_color=App._adjust_color(AppColors.PRIMARY, -15)
+        )
+        btn_receipts.pack(side="left", padx=AppSpacing.XS)
+        ToolTip(btn_receipts, "Wyświetl analitykę zakupów i paragony")
         
-        ctk.CTkButton(
+        btn_cooking = ctk.CTkButton(
             menu_buttons_frame,
-            text="🍳 Gotowanie",
+            text=f"{Icons.COOKING} Gotowanie",
             command=self.show_cooking_dialog,
-            width=120
-        ).pack(side="left", padx=5)
+            width=120,
+            fg_color=AppColors.PRIMARY,
+            hover_color=App._adjust_color(AppColors.PRIMARY, -15)
+        )
+        btn_cooking.pack(side="left", padx=AppSpacing.XS)
+        ToolTip(btn_cooking, "Zaznacz produkty do zużycia podczas gotowania")
         
-        ctk.CTkButton(
+        btn_add = ctk.CTkButton(
             menu_buttons_frame,
-            text="➕ Dodaj produkt",
+            text=f"{Icons.ADD} Dodaj produkt",
             command=self.show_add_product_dialog,
-            width=120
-        ).pack(side="left", padx=5)
+            width=120,
+            fg_color=AppColors.PRIMARY,
+            hover_color=App._adjust_color(AppColors.PRIMARY, -15)
+        )
+        btn_add.pack(side="left", padx=AppSpacing.XS)
+        ToolTip(btn_add, "Dodaj produkt ręcznie do magazynu")
         
-        ctk.CTkButton(
+        btn_inventory = ctk.CTkButton(
             menu_buttons_frame,
-            text="📦 Magazyn",
+            text=f"{Icons.INVENTORY} Magazyn",
             command=self.show_inventory,
-            width=120
-        ).pack(side="left", padx=5)
+            width=120,
+            fg_color=AppColors.PRIMARY,
+            hover_color=App._adjust_color(AppColors.PRIMARY, -15)
+        )
+        btn_inventory.pack(side="left", padx=AppSpacing.XS)
+        ToolTip(btn_inventory, "Przeglądaj i edytuj stan magazynu")
         
-        ctk.CTkButton(
+        btn_bielik = ctk.CTkButton(
             menu_buttons_frame,
-            text="🦅 Bielik",
+            text=f"{Icons.BEAR} Bielik",
             command=self.show_bielik_chat,
-            width=120
-        ).pack(side="left", padx=5)
+            width=120,
+            fg_color=AppColors.PRIMARY,
+            hover_color=App._adjust_color(AppColors.PRIMARY, -15)
+        )
+        btn_bielik.pack(side="left", padx=AppSpacing.XS)
+        ToolTip(btn_bielik, "Otwórz czat z asystentem kulinarnym Bielik")
         
-        ctk.CTkButton(
+        btn_settings = ctk.CTkButton(
             menu_buttons_frame,
-            text="⚙️ Ustawienia",
+            text=f"{Icons.SETTINGS} Ustawienia",
             command=self.show_settings,
-            width=120
-        ).pack(side="left", padx=5)
+            width=120,
+            fg_color=AppColors.PRIMARY,
+            hover_color=App._adjust_color(AppColors.PRIMARY, -15)
+        )
+        btn_settings.pack(side="left", padx=AppSpacing.XS)
+        ToolTip(btn_settings, "Ustawienia i konfiguracja promptów")
 
         # --- MAIN CONTENT AREA ---
         self.content_frame = ctk.CTkFrame(self)
@@ -954,26 +1068,34 @@ class App(ctk.CTk):
         
         ctk.CTkLabel(
             header_frame,
-            text="📊 Analityka Zakupów",
+            text=f"{Icons.ANALYTICS} Analityka Zakupów",
             font=("Arial", 20, "bold")
-        ).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        ).grid(row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w")
         
         buttons_frame = ctk.CTkFrame(header_frame)
-        buttons_frame.grid(row=0, column=1, padx=10, pady=10, sticky="e")
+        buttons_frame.grid(row=0, column=1, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="e")
         
-        ctk.CTkButton(
+        btn_add_receipt = ctk.CTkButton(
             buttons_frame,
-            text="📁 Dodaj paragon",
+            text=f"{Icons.FILE} Dodaj paragon",
             command=self.show_add_receipt_dialog,
-            width=150
-        ).pack(side="left", padx=5)
+            width=150,
+            fg_color=AppColors.SUCCESS,
+            hover_color=self._adjust_color(AppColors.SUCCESS, -15)
+        )
+        btn_add_receipt.pack(side="left", padx=AppSpacing.XS)
+        ToolTip(btn_add_receipt, "Dodaj nowy paragon do przetworzenia")
         
-        ctk.CTkButton(
+        btn_refresh = ctk.CTkButton(
             buttons_frame,
-            text="🔄 Odśwież",
+            text=f"{Icons.REFRESH} Odśwież",
             command=self.refresh_analytics,
-            width=100
-        ).pack(side="left", padx=5)
+            width=100,
+            fg_color=AppColors.INFO,
+            hover_color=self._adjust_color(AppColors.INFO, -15)
+        )
+        btn_refresh.pack(side="left", padx=AppSpacing.XS)
+        ToolTip(btn_refresh, "Odśwież dane analityki")
         
         # Scrollable area dla analityki
         self.analytics_scrollable = ctk.CTkScrollableFrame(self.receipts_frame)
@@ -1100,18 +1222,21 @@ class App(ctk.CTk):
         
         ctk.CTkButton(
             action_frame,
-            text="💾 Zapisz zmiany",
+            text=f"{Icons.SAVE} Zapisz zmiany",
             command=lambda: self.save_inventory_changes(inv_window, session, inventory_items),
-            fg_color="green",
+            fg_color=AppColors.SUCCESS,
+            hover_color=App._adjust_color(AppColors.SUCCESS, -15),
             width=150
-        ).pack(side="left", padx=5)
+        ).pack(side="left", padx=AppSpacing.XS)
         
         ctk.CTkButton(
             action_frame,
-            text="🔄 Odśwież",
+            text=f"{Icons.REFRESH} Odśwież",
             command=lambda: self.refresh_inventory_window(inv_window, session),
+            fg_color=AppColors.INFO,
+            hover_color=App._adjust_color(AppColors.INFO, -15),
             width=150
-        ).pack(side="left", padx=5)
+        ).pack(side="left", padx=AppSpacing.XS)
         
         scrollable = ctk.CTkScrollableFrame(inv_window)
         scrollable.pack(fill="both", expand=True, padx=10, pady=10)
@@ -1165,16 +1290,16 @@ class App(ctk.CTk):
             if stan.data_waznosci:
                 if stan.data_waznosci < date.today():
                     status = "⚠️ Przeterminowany"
-                    color = "red"
+                    color = AppColors.EXPIRED
                 elif stan.data_waznosci <= date.today() + timedelta(days=3):
                     status = "🔴 Wkrótce przeterminowany"
-                    color = "orange"
+                    color = AppColors.EXPIRING_SOON
                 else:
                     status = "✅ OK"
-                    color = "green"
+                    color = AppColors.OK
             else:
                 status = "❓ Brak daty"
-                color = "gray"
+                color = AppColors.UNKNOWN
             
             status_label = ctk.CTkLabel(
                 scrollable,
@@ -1187,13 +1312,14 @@ class App(ctk.CTk):
             # Przycisk usuwania
             delete_btn = ctk.CTkButton(
                 scrollable,
-                text="🗑️ Usuń",
+                text=f"{Icons.DELETE} Usuń",
                 command=lambda s=stan: self.delete_inventory_item(inv_window, session, s),
-                fg_color="red",
+                fg_color=AppColors.ERROR,
+                hover_color=App._adjust_color(AppColors.ERROR, -15),
                 width=80,
                 height=25
             )
-            delete_btn.grid(row=row, column=6, padx=5, pady=2)
+            delete_btn.grid(row=row, column=6, padx=AppSpacing.XS, pady=2)
             
             inventory_items.append({
                 "stan": stan,
@@ -1321,9 +1447,9 @@ class App(ctk.CTk):
                 
                 ctk.CTkLabel(
                     stats_frame,
-                    text="📊 Ogólne Statystyki",
+                    text=f"{Icons.ANALYTICS} Ogólne Statystyki",
                     font=("Arial", 16, "bold")
-                ).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+                ).grid(row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w")
                 
                 stats_text = f"""
 Łączna liczba paragonów: {stats['total_receipts']}
@@ -1360,9 +1486,9 @@ class App(ctk.CTk):
                 
                 ctk.CTkLabel(
                     stores_frame,
-                    text="🏪 Wydatki według Sklepów",
+                    text=f"{Icons.SHOP} Wydatki według Sklepów",
                     font=("Arial", 16, "bold")
-                ).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+                ).grid(row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w")
                 
                 stores = analytics.get_spending_by_store(limit=10)
                 stores_text = "\n".join([
@@ -1385,9 +1511,9 @@ class App(ctk.CTk):
                 
                 ctk.CTkLabel(
                     categories_frame,
-                    text="📦 Wydatki według Kategorii",
+                    text=f"{Icons.CATEGORY} Wydatki według Kategorii",
                     font=("Arial", 16, "bold")
-                ).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+                ).grid(row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w")
                 
                 categories = analytics.get_spending_by_category(limit=10)
                 categories_text = "\n".join([
@@ -1410,9 +1536,9 @@ class App(ctk.CTk):
                 
                 ctk.CTkLabel(
                     products_frame,
-                    text="🛒 Najczęściej Kupowane Produkty",
+                    text=f"{Icons.PRODUCT} Najczęściej Kupowane Produkty",
                     font=("Arial", 16, "bold")
-                ).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+                ).grid(row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w")
                 
                 products = analytics.get_top_products(limit=10)
                 products_text = "\n".join([
@@ -1435,9 +1561,9 @@ class App(ctk.CTk):
                 
                 ctk.CTkLabel(
                     monthly_frame,
-                    text="📅 Statystyki Miesięczne",
+                    text=f"{Icons.CALENDAR} Statystyki Miesięczne",
                     font=("Arial", 16, "bold")
-                ).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+                ).grid(row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w")
                 
                 monthly_stats = analytics.get_monthly_statistics()
                 if monthly_stats:
