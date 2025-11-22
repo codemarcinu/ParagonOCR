@@ -6,7 +6,7 @@ Projekt zawiera kompleksowe testy jednostkowe i integracyjne dla systemu parsowa
 
 ## Statystyki testów
 
-- **Łączna liczba testów**: 89
+- **Łączna liczba testów**: 109
 - **Status**: ✅ Wszystkie testy przechodzą
 - **Pokrycie kodu**: 73% (główne moduły: 70-100%)
 
@@ -69,6 +69,16 @@ Projekt zawiera kompleksowe testy jednostkowe i integracyjne dla systemu parsowa
 - `resolve_product` z mockami (aliasy, reguły statyczne, LLM)
 - Tworzenie nowych produktów i kategorii
 
+### 11. `test_bielik.py` - Testy asystenta AI Bielik
+- **Wyszukiwanie produktów (RAG)**: Testy fuzzy matching, filtrowanie po podobieństwie
+- **Dostępne produkty**: Pobieranie produktów z magazynu, grupowanie
+- **Proponowanie potraw**: Generowanie sugestii na podstawie dostępnych produktów
+- **Listy zakupów**: Generowanie list, filtrowanie produktów już w magazynie
+- **Odpowiedzi na pytania**: Konwersacyjny asystent z kontekstem produktów
+- **Funkcje pomocnicze**: Testy wrapperów `ask_bielik`, `get_dish_suggestions`, `get_shopping_list`
+- **Context manager**: Testy zarządzania sesją bazy danych
+- Wszystkie testy używają mocków dla Ollama i bazy danych
+
 ## Uruchamianie testów
 
 ### Wszystkie testy
@@ -104,6 +114,7 @@ pytest tests/test_strategies.py::TestLidlStrategy::test_post_process_scales_disc
 - ✅ `strategies.py`: 82%
 - ✅ `database.py`: 86%
 - ✅ `llm.py`: 77% (z mockami)
+- ✅ `bielik.py`: 85% (z mockami)
 
 ### Średnie pokrycie (50-80%)
 - ⚠️ `config.py`: 71%
@@ -146,6 +157,18 @@ def test_lidl_scales_discounts():
 ```python
 def test_mleko_normalization():
     assert find_static_match("Mleko UHT 3,2%") == "Mleko"
+```
+
+### Test asystenta Bielik
+```python
+@patch("src.bielik.client")
+def test_suggest_dishes_success(mock_client):
+    assistant = BielikAssistant(session=mock_session)
+    assistant.get_available_products = Mock(return_value=[...])
+    mock_client.chat.return_value = {"message": {"content": json.dumps({...})}}
+    
+    result = assistant.suggest_dishes("obiad")
+    assert len(result) > 0
 ```
 
 ## Kontakt
