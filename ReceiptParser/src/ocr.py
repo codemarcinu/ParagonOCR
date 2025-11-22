@@ -31,13 +31,16 @@ def convert_pdf_to_image(pdf_path: str) -> Optional[str]:
         if len(images) == 1:
             fd, temp_file_path = create_secure_temp_file(suffix=".jpg")
             try:
-                with os.fdopen(fd, 'wb') as tmp_file:
-                    images[0].save(tmp_file.name, "JPEG")
+                # Użyj deskryptora bezpośrednio lub zamknij i użyj ścieżki
+                os.close(fd)  # Zamknij deskryptor, będziemy używać ścieżki
+                images[0].save(temp_file_path, "JPEG")
                 return temp_file_path
             except Exception:
-                os.close(fd)
                 if temp_file_path and os.path.exists(temp_file_path):
-                    os.unlink(temp_file_path)
+                    try:
+                        os.unlink(temp_file_path)
+                    except Exception:
+                        pass
                 raise
 
         # Jeśli jest więcej stron, sklejamy je w pionie
@@ -65,13 +68,16 @@ def convert_pdf_to_image(pdf_path: str) -> Optional[str]:
 
         fd, temp_file_path = create_secure_temp_file(suffix=".jpg")
         try:
-            with os.fdopen(fd, 'wb') as tmp_file:
-                merged_image.save(tmp_file.name, "JPEG")
+            # Użyj deskryptora bezpośrednio lub zamknij i użyj ścieżki
+            os.close(fd)  # Zamknij deskryptor, będziemy używać ścieżki
+            merged_image.save(temp_file_path, "JPEG")
             return temp_file_path
         except Exception:
-            os.close(fd)
             if temp_file_path and os.path.exists(temp_file_path):
-                os.unlink(temp_file_path)
+                try:
+                    os.unlink(temp_file_path)
+                except Exception:
+                    pass
             raise
 
     except Exception as e:
