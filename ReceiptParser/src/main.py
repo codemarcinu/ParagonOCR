@@ -1,4 +1,5 @@
 import click
+from click.exceptions import Abort
 from sqlalchemy.orm import sessionmaker, Session, joinedload
 from typing import Callable
 
@@ -408,9 +409,28 @@ def resolve_product(
                 f"   -> Zaktualizowano kategorię produktu na: '{kategoria_nazwa}'"
             )
 
-    log_callback(f"   -> Tworzę nowy alias: '{raw_name}' -> '{normalized_name}'")
-    new_alias = AliasProduktu(nazwa_z_paragonu=raw_name, produkt_id=product.produkt_id)
-    session.add(new_alias)
+    # Sprawdź, czy alias już istnieje (w bazie lub w sesji)
+    existing_alias = (
+        session.query(AliasProduktu)
+        .filter_by(nazwa_z_paragonu=raw_name)
+        .first()
+    )
+    if existing_alias:
+        log_callback(f"   -> Alias '{raw_name}' już istnieje. Pomijam tworzenie nowego.")
+        if existing_alias.produkt_id != product.produkt_id:
+            log_callback(f"   -> OSTRZEŻENIE: Istniejący alias wskazuje na inny produkt (ID: {existing_alias.produkt_id}). Aktualizuję na {product.produkt_id}.")
+            existing_alias.produkt_id = product.produkt_id
+    else:
+        # Sprawdź też w sesji (pending objects) - może alias został dodany wcześniej w tej samej sesji
+        for obj in session.new:
+            if isinstance(obj, AliasProduktu) and obj.nazwa_z_paragonu == raw_name:
+                log_callback(f"   -> Alias '{raw_name}' jest już w sesji (pending). Pomijam tworzenie nowego.")
+                return product.produkt_id
+        
+        log_callback(f"   -> Tworzę nowy alias: '{raw_name}' -> '{normalized_name}'")
+        new_alias = AliasProduktu(nazwa_z_paragonu=raw_name, produkt_id=product.produkt_id)
+        session.add(new_alias)
+        session.flush()  # Flush, aby kolejne zapytania widziały nowy alias
     return product.produkt_id
 
 
@@ -430,7 +450,12 @@ def cli_log_callback(message: str):
 def cli_prompt_callback(prompt_text: str, default_value: str, raw_name: str) -> str:
     """Callback do zadawania pytań dla trybu CLI."""
     text = f"{prompt_text} (Enter by zaakceptować sugestię, zostaw puste by pominąć)"
-    return click.prompt(text, default=default_value)
+    try:
+        return click.prompt(text, default=default_value)
+    except (Abort, EOFError, KeyboardInterrupt):
+        # Jeśli nie ma interaktywnego terminala, używamy wartości domyślnej
+        cli_log_callback(f"INFO: Brak interaktywnego terminala. Używam wartości domyślnej: '{default_value}'")
+        return default_value
 
 
 @click.group()
