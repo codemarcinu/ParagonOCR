@@ -1,8 +1,6 @@
 import click
-from click.exceptions import Abort
 from sqlalchemy.orm import sessionmaker, Session, joinedload
 from typing import Callable
-from rapidfuzz import process, fuzz
 
 # Lokalne importy z naszego projektu
 from .database import (
@@ -14,7 +12,6 @@ from .database import (
     Produkt,
     AliasProduktu,
     KategoriaProduktu,
-    StanMagazynowy,
 )
 from .knowledge_base import get_product_metadata
 from .data_models import ParsedData
@@ -22,119 +19,10 @@ from .llm import get_llm_suggestion, parse_receipt_with_llm, parse_receipt_from_
 from .ocr import convert_pdf_to_image, extract_text_from_image
 from .strategies import get_strategy_for_store
 from .mistral_ocr import MistralOCRClient
-from .normalization_rules import find_static_match, clean_raw_name_ocr
-from .config import Config
-from decimal import Decimal, InvalidOperation
-from datetime import datetime, date
+from .normalization_rules import find_static_match
 import os
 
 # --- GŁÓWNA LOGIKA PRZETWARZANIA (NIEZALEŻNA OD UI) ---
-
-
-def verify_math_consistency(parsed_data: ParsedData, log_callback: Callable) -> ParsedData:
-    """
-    Weryfikuje matematyczną spójność danych: czy ilość * cena_jedn == cena_calk.
-    Jeśli nie, loguje ostrzeżenie i próbuje naprawić (może być ukryty rabat).
-    """
-    if not parsed_data or "pozycje" not in parsed_data:
-        return parsed_data
-
-    items = parsed_data["pozycje"]
-    fixed_count = 0
-
-    for item in items:
-        try:
-            # Konwersja na Decimal dla precyzji
-            ilosc = Decimal(str(item.get("ilosc", 1.0)).replace(",", "."))
-            cena_jedn = Decimal(str(item.get("cena_jedn", 0)).replace(",", "."))
-            cena_calk = Decimal(str(item.get("cena_calk", 0)).replace(",", "."))
-            rabat = Decimal(str(item.get("rabat", 0)).replace(",", "."))
-
-            # Obliczona wartość (ilość * cena jednostkowa)
-            obliczona = ilosc * cena_jedn
-
-            # Pobierz cenę po rabacie (jeśli istnieje)
-            cena_po_rab = Decimal(str(item.get("cena_po_rab", 0)).replace(",", "."))
-            
-            # Sprawdź zgodność matematyczną: ilość * cena_jedn powinna równać się cena_calk
-            # (cena_calk to cena PRZED rabatem, jeśli jest rabat)
-            # Tolerancja dla błędów zaokrągleń
-            roznica = abs(obliczona - cena_calk)
-
-            if roznica > Config.MATH_TOLERANCE:
-                nazwa = item.get("nazwa_raw", "Nieznany produkt")
-                log_callback(
-                    f"OSTRZEŻENIE: Niezgodność matematyczna dla '{nazwa}': "
-                    f"{ilosc} * {cena_jedn} = {obliczona}, ale cena_calk = {cena_calk} (różnica: {roznica:.2f})"
-                )
-
-                # Jeśli cena_calk < obliczona, może to być błąd OCR - używamy obliczonej wartości
-                if cena_calk < obliczona:
-                    # Korekta: ustawiamy cena_calk na obliczoną wartość
-                    log_callback(
-                        f"  -> Korekta: ustawiam cena_calk na {obliczona:.2f} (było {cena_calk:.2f})"
-                    )
-                    item["cena_calk"] = str(obliczona)
-                    # Jeśli nie ma rabatu, cena_po_rab = cena_calk
-                    if rabat == 0:
-                        if not item.get("cena_po_rab") or cena_po_rab == 0:
-                            item["cena_po_rab"] = str(obliczona)
-                    else:
-                        # Jeśli jest rabat, przelicz cenę po rabacie
-                        nowa_cena_po_rab = max(Decimal("0"), obliczona - rabat)
-                        item["cena_po_rab"] = str(nowa_cena_po_rab)
-                    fixed_count += 1
-                else:
-                    # Jeśli cena_calk > obliczona, może być błąd OCR w cenie jednostkowej
-                    # lub może być ukryty rabat (ale tylko jeśli różnica jest znacząca)
-                    if roznica > Config.SIGNIFICANT_DIFFERENCE:  # Różnica większa niż znacząca
-                        log_callback(
-                            f"  -> Korekta: ustawiam cena_calk na {obliczona:.2f} (było {cena_calk:.2f}) - prawdopodobny błąd OCR"
-                        )
-                        item["cena_calk"] = str(obliczona)
-                        if rabat == 0:
-                            if not item.get("cena_po_rab") or cena_po_rab == 0:
-                                item["cena_po_rab"] = str(obliczona)
-                        else:
-                            nowa_cena_po_rab = max(Decimal("0"), obliczona - rabat)
-                            item["cena_po_rab"] = str(nowa_cena_po_rab)
-                        fixed_count += 1
-                    # Jeśli różnica jest mała (< 1 PLN), ignorujemy - może być błąd zaokrąglenia
-            
-            # Walidacja: cena_po_rab nie może być ujemna
-            final_cena_po_rab = Decimal(str(item.get("cena_po_rab", 0)).replace(",", "."))
-            final_rabat = Decimal(str(item.get("rabat", 0)).replace(",", "."))
-            final_cena_calk = Decimal(str(item.get("cena_calk", 0)).replace(",", "."))
-            
-            if final_cena_po_rab < 0:
-                log_callback(
-                    f"OSTRZEŻENIE: Ujemna cena po rabacie dla '{item.get('nazwa_raw', 'Nieznany')}': {final_cena_po_rab:.2f}. Korekta na 0."
-                )
-                item["cena_po_rab"] = "0.00"
-                fixed_count += 1
-            
-            # Walidacja: rabat nie może być większy niż cena całkowita
-            if final_rabat > final_cena_calk:
-                log_callback(
-                    f"OSTRZEŻENIE: Rabat ({final_rabat:.2f}) większy niż cena całkowita ({final_cena_calk:.2f}) dla '{item.get('nazwa_raw', 'Nieznany')}'. Korekta rabatu."
-                )
-                item["rabat"] = str(final_cena_calk)
-                item["cena_po_rab"] = "0.00"
-                fixed_count += 1
-
-        except (ValueError, TypeError, InvalidOperation) as e:
-            nazwa = item.get("nazwa_raw", "Nieznany produkt")
-            log_callback(
-                f"OSTRZEŻENIE: Nie udało się zweryfikować matematyki dla '{nazwa}': {e}"
-            )
-            continue
-
-    if fixed_count > 0:
-        log_callback(
-            f"INFO: Naprawiono {fixed_count} pozycji z niezgodnościami matematycznymi."
-        )
-
-    return parsed_data
 
 
 def run_processing_pipeline(
@@ -149,10 +37,10 @@ def run_processing_pipeline(
     Funkcja jest niezależna od UI i przyjmuje callbacki do komunikacji z użytkownikiem.
     """
     # Krok 1: Parsowanie multimodalne jest teraz domyślnym i jedynym potokiem
-    processing_file_path = file_path
-    temp_image_path = None
-    
     try:
+        processing_file_path = file_path
+        temp_image_path = None
+
         # Obsługa PDF
         if file_path.lower().endswith(".pdf"):
             log_callback(f"INFO: Wykryto plik PDF. Konwertuję na obraz...")
@@ -175,14 +63,7 @@ def run_processing_pipeline(
             log_callback(
                 "INFO: Mistral OCR zakończył pracę. Przesyłam tekst do LLM (Bielik)..."
             )
-            
-            # Detekcja strategii na podstawie tekstu z Mistral OCR
-            header_sample = ocr_markdown[:1000] if ocr_markdown else ""
-            strategy = get_strategy_for_store(header_sample)
-            log_callback(f"INFO: Wybrano strategię (na podstawie Mistral OCR): {strategy.__class__.__name__}")
-            system_prompt = strategy.get_system_prompt()
-            
-            parsed_data = parse_receipt_from_text(ocr_markdown, system_prompt_override=system_prompt)
+            parsed_data = parse_receipt_from_text(ocr_markdown)
 
         else:
             # Krok 1.5: Detekcja sklepu (Strategy Pattern) + Hybrid OCR
@@ -210,24 +91,32 @@ def run_processing_pipeline(
                 ocr_text=full_ocr_text,
             )
 
-        # Strategia powinna być już wybrana wcześniej (dla Mistral OCR lub Tesseract)
+        # Jeśli używamy Mistral OCR, strategia mogła nie zostać jeszcze wybrana (bo pominęliśmy Tesseract)
+        # Ale potrzebujemy jej do post-processingu.
+        # Spróbujmy wykryć strategię na podstawie tekstu z Mistral OCR jeśli jeszcze jej nie mamy.
+        if "strategy" not in locals():
+            # Używamy początku tekstu z Mistral OCR do detekcji
+            header_sample = (
+                ocr_markdown[:1000]
+                if "ocr_markdown" in locals() and ocr_markdown
+                else ""
+            )
+            strategy = get_strategy_for_store(header_sample)
+            log_callback(
+                f"INFO: Wybrano strategię (na podstawie Mistral OCR): {strategy.__class__.__name__}"
+            )
+
+        # Sprzątanie po PDF
+        if temp_image_path and os.path.exists(temp_image_path):
+            os.remove(temp_image_path)
+            log_callback("INFO: Usunięto tymczasowy plik obrazu.")
 
         if not parsed_data:
             raise Exception("Parsowanie za pomocą LLM nie zwróciło danych.")
 
         # Krok 1.6: Post-processing (Strategy Pattern)
         log_callback("INFO: Uruchamiam post-processing specyficzny dla sklepu...")
-        # Przekaż tekst OCR do post_process (jeśli dostępny)
-        ocr_text_for_post_process = None
-        if llm_model == "mistral-ocr":
-            ocr_text_for_post_process = ocr_markdown
-        else:
-            ocr_text_for_post_process = full_ocr_text if 'full_ocr_text' in locals() else None
-        parsed_data = strategy.post_process(parsed_data, ocr_text=ocr_text_for_post_process)
-
-        # Krok 1.6.5: Matematyczna weryfikacja (sanity check)
-        log_callback("INFO: Weryfikuję matematyczną spójność danych...")
-        parsed_data = verify_math_consistency(parsed_data, log_callback)
+        parsed_data = strategy.post_process(parsed_data)
 
         log_callback("INFO: Dane z paragonu zostały pomyślnie sparsowane przez LLM.")
 
@@ -245,14 +134,6 @@ def run_processing_pipeline(
         log_callback(f"BŁĄD KRYTYCZNY na etapie parsowania LLM: {e}")
         log_callback("Upewnij się, że serwer Ollama działa i model jest dostępny.")
         return
-    finally:
-        # Sprzątanie po PDF - zawsze wykonujemy, nawet w przypadku błędu
-        if temp_image_path and os.path.exists(temp_image_path):
-            try:
-                os.remove(temp_image_path)
-                log_callback("INFO: Usunięto tymczasowy plik obrazu.")
-            except OSError as e:
-                log_callback(f"OSTRZEŻENIE: Nie udało się usunąć tymczasowego pliku {temp_image_path}: {e}")
 
     # Krok 2: Zapis do bazy (ta logika jest już dobra i pozostaje bez zmian)
     if parsed_data:
@@ -296,66 +177,29 @@ def save_to_database(
             f"INFO: Znaleziono istniejący sklep '{sklep_name}' w bazie danych."
         )
 
-    # Walidacja danych przed zapisem
-    data_zakupu = parsed_data["paragon_info"]["data_zakupu"]
-    if not data_zakupu:
-        raise ValueError("Brak daty zakupu w danych paragonu. Nie można zapisać do bazy.")
-    
-    # Konwersja datetime na date jeśli potrzeba
-    if isinstance(data_zakupu, datetime):
-        data_zakupu = data_zakupu.date()
-    elif not isinstance(data_zakupu, date):
-        raise ValueError(f"Nieprawidłowy format daty zakupu: {type(data_zakupu)}")
-
     paragon = Paragon(
         sklep_id=sklep.sklep_id,
-        data_zakupu=data_zakupu,
+        data_zakupu=parsed_data["paragon_info"]["data_zakupu"].date(),
         suma_paragonu=parsed_data["paragon_info"]["suma_calkowita"],
         plik_zrodlowy=file_path,
     )
 
     log_callback("INFO: Przetwarzam pozycje z paragonu...")
-    
-    # Optymalizacja N+1: Batch loading aliasów dla wszystkich pozycji
-    raw_names = [item["nazwa_raw"] for item in parsed_data["pozycje"]]
-    aliases = (
-        session.query(AliasProduktu)
-        .options(joinedload(AliasProduktu.produkt))
-        .filter(AliasProduktu.nazwa_z_paragonu.in_(raw_names))
-        .all()
-    )
-    alias_map = {a.nazwa_z_paragonu: a.produkt_id for a in aliases}
-    log_callback(f"INFO: Załadowano {len(alias_map)} aliasów z bazy danych (batch loading).")
-    
     for item_data in parsed_data["pozycje"]:
         # Logika rabatów została przeniesiona do strategies.py (LidlStrategy)
         # Tutaj zakładamy, że dane są już wyczyszczone przez strategy.post_process
 
         product_id = resolve_product(
-            session, item_data["nazwa_raw"], log_callback, prompt_callback, alias_map=alias_map
+            session, item_data["nazwa_raw"], log_callback, prompt_callback
         )
 
         # Jeśli resolve_product zwrócił None (np. dla śmieci OCR), pomijamy dodawanie
-        # UWAGA: Produkt "POMIŃ" jest specjalnym produktem, który powinien być zapisany
+        if product_id is None and item_data["nazwa_raw"] != "POMIŃ":
+            pass
+
         if product_id is None:
             log_callback(f"   -> Pominięto pozycję: {item_data['nazwa_raw']}")
             continue
-
-        # Upewniamy się, że cena_po_rabacie jest zawsze wypełniona
-        cena_calk = item_data["cena_calk"]
-        cena_po_rab = item_data.get("cena_po_rab")
-        
-        # Konwersja na Decimal dla porównań
-        try:
-            cena_po_rab_decimal = Decimal(str(cena_po_rab).replace(",", ".")) if cena_po_rab else None
-        except (ValueError, TypeError):
-            cena_po_rab_decimal = None
-        
-        # Jeśli cena po rabacie nie została wyliczona (brak rabatu) lub jest ujemna, to jest równa cenie całkowitej
-        if not cena_po_rab_decimal or cena_po_rab_decimal <= 0:
-            cena_po_rab = cena_calk
-        else:
-            cena_po_rab = cena_po_rab_decimal
 
         pozycja = PozycjaParagonu(
             produkt_id=product_id,
@@ -363,29 +207,13 @@ def save_to_database(
             ilosc=item_data["ilosc"],
             jednostka_miary=item_data["jednostka"],
             cena_jednostkowa=item_data["cena_jedn"],
-            cena_calkowita=cena_calk,
+            cena_calkowita=item_data["cena_calk"],
             rabat=(
                 item_data["rabat"] if item_data["rabat"] else 0
             ),  # Domyślnie 0 dla bazy
-            cena_po_rabacie=cena_po_rab,
+            cena_po_rabacie=item_data["cena_po_rab"],
         )
         paragon.pozycje.append(pozycja)
-        session.flush()  # Flush, aby uzyskać pozycja_id
-        
-        # Dodaj stan magazynowy, jeśli podano datę ważności
-        data_waznosci = item_data.get("data_waznosci")
-        if data_waznosci:
-            stan = StanMagazynowy(
-                produkt_id=product_id,
-                ilosc=item_data["ilosc"],
-                jednostka_miary=item_data.get("jednostka", "szt"),
-                data_waznosci=data_waznosci,
-                pozycja_paragonu_id=pozycja.pozycja_id,
-            )
-            session.add(stan)
-            log_callback(f"   -> Dodano do magazynu: {item_data['ilosc']} {item_data.get('jednostka', 'szt')} (ważność: {data_waznosci})")
-        else:
-            log_callback(f"   -> Uwaga: Brak daty ważności dla produktu '{item_data['nazwa_raw']}' - nie dodano do magazynu")
 
     session.add(paragon)
     log_callback(
@@ -394,45 +222,9 @@ def save_to_database(
 
 
 def resolve_product(
-    session: Session, raw_name: str, log_callback: Callable, prompt_callback: Callable, alias_map: dict = None
+    session: Session, raw_name: str, log_callback: Callable, prompt_callback: Callable
 ) -> int | None:
-    # 0. Wstępne czyszczenie (Pre-cleaning)
-    raw_name = clean_raw_name_ocr(raw_name)
-    
     # 1. Sprawdź Aliasy w Bazie (Najszybsze i Najpewniejsze)
-    # Używamy cache jeśli dostępny (batch loading), w przeciwnym razie zapytanie do DB
-    
-    # A. Dokładne dopasowanie
-    if alias_map is not None and raw_name in alias_map:
-        product_id = alias_map[raw_name]
-        # Pobierz nazwę produktu dla logowania
-        produkt = session.query(Produkt).filter_by(produkt_id=product_id).first()
-        if produkt:
-            log_callback(
-                f"   -> Znaleziono alias (cache) dla '{raw_name}': '{produkt.znormalizowana_nazwa}'"
-            )
-        return product_id
-    
-    # B. Dopasowanie rozmyte (Fuzzy)
-    if alias_map:
-        # Szukamy najlepszego dopasowania w kluczach alias_map
-        # threshold=90 oznacza bardzo wysokie podobieństwo (literówki, kropka vs przecinek)
-        match = process.extractOne(raw_name, alias_map.keys(), scorer=fuzz.token_sort_ratio)
-        
-        if match:
-            best_match_name, score, _ = match
-            if score >= 92:  # Bardzo bezpieczny próg
-                product_id = alias_map[best_match_name]
-                log_callback(f"   -> Znaleziono alias (Fuzzy {score}%) dla '{raw_name}': '{best_match_name}'")
-                
-                # Opcjonalnie: Dodaj nowy wariant do bazy, żeby następnym razem było 100% match
-                # (To "uczy" system wariacji OCR)
-                new_alias = AliasProduktu(nazwa_z_paragonu=raw_name, produkt_id=product_id)
-                session.add(new_alias)
-                
-                return product_id
-    
-    # Fallback: zapytanie do bazy jeśli nie ma w cache
     alias = (
         session.query(AliasProduktu)
         .options(joinedload(AliasProduktu.produkt))
@@ -459,18 +251,15 @@ def resolve_product(
         suggested_name = get_llm_suggestion(raw_name)
         source = "LLM"
         if suggested_name:
-            # Dodatkowe czyszczenie na wypadek, gdyby LLM zwróciło coś z prefiksem
-            from .llm import clean_llm_suggestion
-            suggested_name = clean_llm_suggestion(suggested_name)
             log_callback(f"   -> Sugestia (LLM): '{suggested_name}'")
         else:
             log_callback("   -> Nie udało się uzyskać sugestii LLM.")
 
     # Obsługa przypadku "POMIŃ" (czy to ze słownika, czy z LLM)
-    # "POMIŃ" to specjalny produkt, który powinien być zapisany, ale oznacza, że pozycja nie jest produktem spożywczym
     if suggested_name == "POMIŃ":
-        log_callback("   -> System zasugerował oznaczenie jako 'POMIŃ' (pozycja nie jest produktem spożywczym).")
-        # Kontynuujemy, aby zapisać tę pozycję z produktem "POMIŃ"
+        log_callback("   -> System zasugerował pominięcie tej pozycji.")
+        # Opcjonalnie: Możesz tu od razu zwrócić None, jeśli ufasz regułom w 100%
+        # return None
 
     # 4. Weryfikacja Użytkownika (Prompt)
     prompt_text = f"Nieznany produkt (Sugerowany przez {source}: {suggested_name or 'Brak'}). Do jakiego produktu go przypisać?"
@@ -479,21 +268,9 @@ def resolve_product(
     # Ale dla bezpieczeństwa na początku zostawmy prompt.
     normalized_name = prompt_callback(prompt_text, suggested_name or "", raw_name)
 
-    # Walidacja nazwy produktu
     if not normalized_name:
         log_callback("   -> Pominięto przypisanie produktu dla tej pozycji.")
         return None
-    
-    # Czyszczenie i walidacja nazwy
-    normalized_name = normalized_name.strip()
-    if not normalized_name or len(normalized_name) == 0:
-        log_callback("   -> Pusta nazwa produktu, pomijam przypisanie.")
-        return None
-    
-    # Sprawdzenie maksymalnej długości (np. 200 znaków)
-    if len(normalized_name) > 200:
-        log_callback(f"   -> OSTRZEŻENIE: Nazwa produktu jest za długa ({len(normalized_name)} znaków), obcinam do 200.")
-        normalized_name = normalized_name[:200].strip()
 
     # ... Dalsza część kodu (Zapis do bazy Produkt/Alias) bez zmian ...
     product = (
@@ -540,28 +317,9 @@ def resolve_product(
                 f"   -> Zaktualizowano kategorię produktu na: '{kategoria_nazwa}'"
             )
 
-    # Sprawdź, czy alias już istnieje (w bazie lub w sesji)
-    existing_alias = (
-        session.query(AliasProduktu)
-        .filter_by(nazwa_z_paragonu=raw_name)
-        .first()
-    )
-    if existing_alias:
-        log_callback(f"   -> Alias '{raw_name}' już istnieje. Pomijam tworzenie nowego.")
-        if existing_alias.produkt_id != product.produkt_id:
-            log_callback(f"   -> OSTRZEŻENIE: Istniejący alias wskazuje na inny produkt (ID: {existing_alias.produkt_id}). Aktualizuję na {product.produkt_id}.")
-            existing_alias.produkt_id = product.produkt_id
-    else:
-        # Sprawdź też w sesji (pending objects) - może alias został dodany wcześniej w tej samej sesji
-        for obj in session.new:
-            if isinstance(obj, AliasProduktu) and obj.nazwa_z_paragonu == raw_name:
-                log_callback(f"   -> Alias '{raw_name}' jest już w sesji (pending). Pomijam tworzenie nowego.")
-                return product.produkt_id
-        
-        log_callback(f"   -> Tworzę nowy alias: '{raw_name}' -> '{normalized_name}'")
-        new_alias = AliasProduktu(nazwa_z_paragonu=raw_name, produkt_id=product.produkt_id)
-        session.add(new_alias)
-        session.flush()  # Flush, aby kolejne zapytania widziały nowy alias
+    log_callback(f"   -> Tworzę nowy alias: '{raw_name}' -> '{normalized_name}'")
+    new_alias = AliasProduktu(nazwa_z_paragonu=raw_name, produkt_id=product.produkt_id)
+    session.add(new_alias)
     return product.produkt_id
 
 
@@ -581,12 +339,7 @@ def cli_log_callback(message: str):
 def cli_prompt_callback(prompt_text: str, default_value: str, raw_name: str) -> str:
     """Callback do zadawania pytań dla trybu CLI."""
     text = f"{prompt_text} (Enter by zaakceptować sugestię, zostaw puste by pominąć)"
-    try:
-        return click.prompt(text, default=default_value)
-    except (Abort, EOFError, KeyboardInterrupt):
-        # Jeśli nie ma interaktywnego terminala, używamy wartości domyślnej
-        cli_log_callback(f"INFO: Brak interaktywnego terminala. Używam wartości domyślnej: '{default_value}'")
-        return default_value
+    return click.prompt(text, default=default_value)
 
 
 @click.group()
