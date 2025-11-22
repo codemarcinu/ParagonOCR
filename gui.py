@@ -6,14 +6,15 @@ import os
 import sys
 from datetime import datetime, date, timedelta
 from decimal import Decimal
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, joinedload
 
 # Lokalne importy - gui.py jest w folderze głównym projektu, src jest w ReceiptParser/src
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'ReceiptParser'))
 
 from src.main import run_processing_pipeline
-from src.database import init_db, engine, Produkt, StanMagazynowy, KategoriaProduktu
+from src.database import init_db, engine, Produkt, StanMagazynowy, KategoriaProduktu, AliasProduktu
 from src.config import Config
+from src.normalization_rules import find_static_match
 from history_manager import load_history, add_to_history
 
 
@@ -144,12 +145,35 @@ class ReviewDialog(ctk.CTkToplevel):
         self.scrollable_frame = ctk.CTkScrollableFrame(self)
         self.scrollable_frame.pack(fill="both", expand=True, padx=10, pady=5)
 
-        # Headers - dodano kolumnę "Data ważności"
-        headers = ["Nazwa", "Ilość", "Cena jedn.", "Wartość", "Rabat", "Po rabacie", "Data ważności"]
+        # Headers - dodano kolumnę "Znormalizowana nazwa" i "Data ważności"
+        headers = ["Nazwa (raw)", "Znormalizowana nazwa", "Ilość", "Cena jedn.", "Wartość", "Rabat", "Po rabacie", "Data ważności"]
         for col, text in enumerate(headers):
             ctk.CTkLabel(
                 self.scrollable_frame, text=text, font=("Arial", 12, "bold")
             ).grid(row=0, column=col, padx=5, pady=5)
+
+        # Pobierz sugestie znormalizowanych nazw z bazy danych (jeśli dostępna)
+        SessionLocal = sessionmaker(bind=engine)
+        session = SessionLocal()
+        normalized_suggestions = {}
+        try:
+            for item in parsed_data["pozycje"]:
+                nazwa_raw = item.get("nazwa_raw", "").strip()
+                # Sprawdź czy istnieje alias w bazie
+                alias = session.query(AliasProduktu).options(
+                    joinedload(AliasProduktu.produkt)
+                ).filter_by(nazwa_z_paragonu=nazwa_raw).first()
+                if alias:
+                    normalized_suggestions[nazwa_raw] = alias.produkt.znormalizowana_nazwa
+                else:
+                    # Użyj reguł statycznych
+                    suggestion = find_static_match(nazwa_raw)
+                    if suggestion:
+                        normalized_suggestions[nazwa_raw] = suggestion
+        except Exception as e:
+            print(f"Błąd podczas pobierania sugestii normalizacji: {e}")
+        finally:
+            session.close()
 
         self.item_entries = []
         self.row_frames = []  # Przechowuj ramki wierszy dla kolorowania
@@ -164,7 +188,7 @@ class ReviewDialog(ctk.CTkToplevel):
             
             # Utwórz ramkę dla wiersza (dla kolorowania tła)
             row_frame = ctk.CTkFrame(self.scrollable_frame)
-            row_frame.grid(row=row, column=0, columnspan=7, padx=2, pady=2, sticky="ew")
+            row_frame.grid(row=row, column=0, columnspan=8, padx=2, pady=2, sticky="ew")
             self.row_frames.append(row_frame)
             
             # Ustaw kolor tła w zależności od typu produktu
@@ -178,37 +202,46 @@ class ReviewDialog(ctk.CTkToplevel):
                 tooltip_text = f"Produkt: {nazwa_raw}"
             
             # Konfiguruj kolumny w ramce
-            for col in range(7):
+            for col in range(8):
                 row_frame.grid_columnconfigure(col, weight=1)
 
-            # Nazwa
-            e_name = ctk.CTkEntry(row_frame, width=300)
+            # Nazwa raw
+            e_name = ctk.CTkEntry(row_frame, width=200)
             e_name.grid(row=0, column=0, padx=2, pady=2, sticky="ew")
             e_name.insert(0, nazwa_raw)
             entries["nazwa_raw"] = e_name
             ToolTip(e_name, tooltip_text)
 
+            # Znormalizowana nazwa (sugestia)
+            normalized_name = normalized_suggestions.get(nazwa_raw, "")
+            e_normalized = ctk.CTkEntry(row_frame, width=200)
+            e_normalized.grid(row=0, column=1, padx=2, pady=2, sticky="ew")
+            e_normalized.insert(0, normalized_name)
+            entries["nazwa_znormalizowana"] = e_normalized
+            if normalized_name:
+                ToolTip(e_normalized, f"Sugestia znormalizowanej nazwy: {normalized_name}")
+
             # Ilość
             e_qty = ctk.CTkEntry(row_frame, width=60)
-            e_qty.grid(row=0, column=1, padx=2, pady=2, sticky="ew")
+            e_qty.grid(row=0, column=2, padx=2, pady=2, sticky="ew")
             e_qty.insert(0, str(item["ilosc"]))
             entries["ilosc"] = e_qty
 
             # Cena jedn
             e_unit = ctk.CTkEntry(row_frame, width=80)
-            e_unit.grid(row=0, column=2, padx=2, pady=2, sticky="ew")
+            e_unit.grid(row=0, column=3, padx=2, pady=2, sticky="ew")
             e_unit.insert(0, str(item["cena_jedn"]))
             entries["cena_jedn"] = e_unit
 
             # Cena całk
             e_total = ctk.CTkEntry(row_frame, width=80)
-            e_total.grid(row=0, column=3, padx=2, pady=2, sticky="ew")
+            e_total.grid(row=0, column=4, padx=2, pady=2, sticky="ew")
             e_total.insert(0, str(item["cena_calk"]))
             entries["cena_calk"] = e_total
 
             # Rabat
             e_disc = ctk.CTkEntry(row_frame, width=80)
-            e_disc.grid(row=0, column=4, padx=2, pady=2, sticky="ew")
+            e_disc.grid(row=0, column=5, padx=2, pady=2, sticky="ew")
             val_disc = item.get("rabat", "0.00")
             if val_disc is None:
                 val_disc = "0.00"
@@ -217,13 +250,13 @@ class ReviewDialog(ctk.CTkToplevel):
 
             # Po rabacie
             e_final = ctk.CTkEntry(row_frame, width=80)
-            e_final.grid(row=0, column=5, padx=2, pady=2, sticky="ew")
+            e_final.grid(row=0, column=6, padx=2, pady=2, sticky="ew")
             e_final.insert(0, str(item["cena_po_rab"]))
             entries["cena_po_rab"] = e_final
 
             # Data ważności
             e_expiry = ctk.CTkEntry(row_frame, width=120, placeholder_text="YYYY-MM-DD")
-            e_expiry.grid(row=0, column=6, padx=2, pady=2, sticky="ew")
+            e_expiry.grid(row=0, column=7, padx=2, pady=2, sticky="ew")
             # Domyślnie ustawiamy datę za 7 dni (można zmienić)
             default_expiry = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
             e_expiry.insert(0, default_expiry)

@@ -15,7 +15,53 @@ class ReceiptStrategy(ABC):
         pass
 
     def post_process(self, data: ParsedData, ocr_text: Optional[str] = None) -> ParsedData:
-        """Domyślna implementacja: brak zmian."""
+        """Domyślna implementacja: filtrowanie PTU/VAT i innych nieproduktów."""
+        return self._filter_non_products(data)
+    
+    def _filter_non_products(self, data: ParsedData) -> ParsedData:
+        """
+        Filtruje pozycje, które nie są produktami (PTU/VAT, sumy, itp.).
+        
+        Args:
+            data: Dane paragonu do przetworzenia
+        
+        Returns:
+            Przetworzone dane z usuniętymi pozycjami PTU/VAT
+        """
+        if not data or "pozycje" not in data:
+            return data
+        
+        filtered_items = []
+        for item in data["pozycje"]:
+            nazwa_raw = item.get("nazwa_raw", "").strip().lower()
+            
+            # Wzorce do wykrywania PTU/VAT i innych nieproduktów
+            non_product_patterns = [
+                r"^ptu\s*[abc]?$",  # PTU, PTU A, PTU B, PTU C
+                r"^vat\s*[abc]?$",  # VAT, VAT A, VAT B, VAT C
+                r"podatek\s+vat",  # Podatek VAT
+                r"podatek\s+ptu",  # Podatek PTU
+                r"kwota\s+[abc]$",  # Kwota A, Kwota B, Kwota C
+                r"suma\s+pln",  # Suma PLN
+                r"^suma\s*$",  # Suma
+                r"podsumowanie",  # Podsumowanie
+                r"ogółem",  # Ogółem
+                r"rozliczenie\s+płatności",  # Rozliczenie płatności
+                r"sprzedaż\s+opodatkowana",  # Sprzedaż opodatkowana
+            ]
+            
+            # Sprawdź czy pozycja pasuje do wzorców nieproduktów
+            is_non_product = False
+            for pattern in non_product_patterns:
+                if re.search(pattern, nazwa_raw):
+                    is_non_product = True
+                    break
+            
+            # Jeśli to nie jest nieprodukt, dodaj do listy
+            if not is_non_product:
+                filtered_items.append(item)
+        
+        data["pozycje"] = filtered_items
         return data
     
     def _merge_discounts(
@@ -151,6 +197,7 @@ class LidlStrategy(ReceiptStrategy):
 
     def post_process(self, data: ParsedData, ocr_text: Optional[str] = None) -> ParsedData:
         """Scalanie ujemnych pozycji (rabatów) z produktem powyżej."""
+        data = self._filter_non_products(data)  # Najpierw usuń PTU/VAT
         return self._merge_discounts(data, fix_negative_discounts=False, strict_discount_name=False)
 
 
@@ -194,6 +241,7 @@ class BiedronkaStrategy(ReceiptStrategy):
         Scalanie rabatów dla Biedronki.
         Używa wspólnej metody z korektą ujemnych rabatów i ścisłym dopasowaniem nazwy.
         """
+        data = self._filter_non_products(data)  # Najpierw usuń PTU/VAT
         return self._merge_discounts(data, fix_negative_discounts=True, strict_discount_name=True)
 
 
@@ -330,11 +378,15 @@ class KauflandStrategy(ReceiptStrategy):
     def post_process(self, data: ParsedData, ocr_text: Optional[str] = None) -> ParsedData:
         """
         Post-processing dla Kaufland:
-        1. Scalanie rabatów na pojedyncze produkty (jak w Lidl/Biedronka)
-        2. Weryfikacja i korekta sumy całkowitej (uwzględnienie rabatu z karty)
+        1. Filtrowanie PTU/VAT i nieproduktów
+        2. Scalanie rabatów na pojedyncze produkty (jak w Lidl/Biedronka)
+        3. Weryfikacja i korekta sumy całkowitej (uwzględnienie rabatu z karty)
         """
         if not data or "pozycje" not in data:
             return data
+        
+        # Krok 0: Usuń PTU/VAT i inne nieprodukty
+        data = self._filter_non_products(data)
         
         # Krok 1: Scalanie rabatów na pojedyncze produkty (używamy wspólnej metody)
         data = self._merge_discounts(data, fix_negative_discounts=False, strict_discount_name=False)
@@ -441,6 +493,9 @@ class AuchanStrategy(ReceiptStrategy):
         """
         if not data or "pozycje" not in data:
             return data
+
+        # Najpierw usuń PTU/VAT
+        data = self._filter_non_products(data)
 
         valid_items = []
         for item in data["pozycje"]:
