@@ -96,3 +96,4 @@ def clear_history() -> None:
         except IOError:
             pass
 
+

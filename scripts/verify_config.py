@@ -1,8 +1,8 @@
 import sys
 import os
 
-# Add ReceiptParser to path so we can import src
-sys.path.append(os.path.join(os.getcwd(), "ReceiptParser"))
+# Dodaj ścieżkę do modułów (scripts/ jest w głównym katalogu, ReceiptParser/ też)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'ReceiptParser'))
 
 try:
     from src.config import Config

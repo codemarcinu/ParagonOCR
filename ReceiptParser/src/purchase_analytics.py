@@ -267,3 +267,4 @@ class PurchaseAnalytics:
         """Context manager exit."""
         self.close()
 
+

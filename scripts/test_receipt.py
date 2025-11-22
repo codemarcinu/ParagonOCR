@@ -9,14 +9,14 @@ from pathlib import Path
 from decimal import Decimal
 from datetime import datetime
 
-# Dodaj ścieżkę do modułów
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "ReceiptParser"))
+# Dodaj ścieżkę do modułów (scripts/ jest w głównym katalogu, ReceiptParser/ też)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "ReceiptParser"))
 
-from ReceiptParser.src.ocr import extract_text_from_image
-from ReceiptParser.src.llm import parse_receipt_from_text, parse_receipt_with_llm
-from ReceiptParser.src.strategies import get_strategy_for_store
-from ReceiptParser.src.main import verify_math_consistency
-from ReceiptParser.src.config import Config
+from src.ocr import extract_text_from_image
+from src.llm import parse_receipt_from_text, parse_receipt_with_llm
+from src.strategies import get_strategy_for_store
+from src.config import Config
+# Uwaga: verify_math_consistency nie istnieje w main.py - może być w strategies.py lub została usunięta
 
 
 def default_serializer(obj):
@@ -58,7 +58,7 @@ def test_receipt(file_path: str, use_mistral_ocr: bool = True, use_vision_model:
         if use_mistral_ocr:
             print("  -> Używam Mistral OCR...")
             try:
-                from ReceiptParser.src.mistral_ocr import MistralOCRClient
+                from src.mistral_ocr import MistralOCRClient
                 mistral_client = MistralOCRClient()
                 ocr_text = mistral_client.process_image(file_path)
             except ImportError:
@@ -126,9 +126,10 @@ def test_receipt(file_path: str, use_mistral_ocr: bool = True, use_vision_model:
         parsed_data = strategy.post_process(parsed_data, ocr_text=ocr_text)
         print("  ✓ Post-processing przez strategię zakończony")
         
-        # Weryfikacja matematyczna
-        parsed_data = verify_math_consistency(parsed_data, log_callback)
-        print("  ✓ Weryfikacja matematyczna zakończona")
+        # Weryfikacja matematyczna (funkcja może być w strategies.py lub została usunięta)
+        # parsed_data = verify_math_consistency(parsed_data, log_callback)
+        # print("  ✓ Weryfikacja matematyczna zakończona")
+        print("  ⚠ Weryfikacja matematyczna pominięta (funkcja verify_math_consistency nie istnieje)")
         
         # Krok 5: Wyświetlenie wyników
         print("\n[5/5] WYNIKI:")

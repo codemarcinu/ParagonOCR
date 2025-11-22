@@ -4,8 +4,8 @@
 import sys
 import os
 
-# Dodaj ścieżkę do modułów
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'ReceiptParser'))
+# Dodaj ścieżkę do modułów (scripts/ jest w głównym katalogu, ReceiptParser/ też)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'ReceiptParser'))
 
 from src.database import engine, Sklep, Paragon, PozycjaParagonu, Produkt, AliasProduktu
 from sqlalchemy.orm import sessionmaker
@@ -82,4 +82,5 @@ else:
 
 session.close()
 print("\n" + "=" * 60)
+
 

@@ -2,8 +2,8 @@
 import sys
 import os
 
-# Add src to path
-sys.path.append(os.path.join(os.getcwd(), "ReceiptParser", "src"))
+# Dodaj ścieżkę do modułów (scripts/ jest w głównym katalogu, ReceiptParser/src/ też)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'ReceiptParser', 'src'))
 
 try:
     from knowledge_base import get_product_metadata, normalize_shop_name

@@ -77,3 +77,4 @@ class TestNormalizationRules:
         assert find_static_match("mleko") == "Mleko"
         assert find_static_match("MleKo") == "Mleko"
 
+

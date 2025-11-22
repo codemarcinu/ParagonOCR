@@ -1,8 +1,12 @@
 import os
 import sys
-from ReceiptParser.src.mistral_ocr import MistralOCRClient
-from ReceiptParser.src.llm import parse_receipt_from_text
-from ReceiptParser.src.config import Config
+
+# Dodaj ścieżkę do modułów (scripts/ jest w głównym katalogu, ReceiptParser/ też)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'ReceiptParser'))
+
+from src.mistral_ocr import MistralOCRClient
+from src.llm import parse_receipt_from_text
+from src.config import Config
 
 
 def test_mistral_integration(image_path):

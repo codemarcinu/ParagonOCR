@@ -166,14 +166,24 @@ python -m ReceiptParser.src.main process --file sciezka/do/paragonu.pdf --llm ll
 ```
 ParagonOCR/
 ├── gui.py                  # Główny plik interfejsu graficznego
+├── history_manager.py      # Moduł zarządzania historią plików
 ├── uruchom.sh              # Skrypt startowy (Linux/Mac)
 ├── .env                    # Konfiguracja (klucze API, modele)
 ├── paragony/               # Katalog na pliki wejściowe (PDF/IMG)
 ├── logs/                   # Katalog na logi (tworzony automatycznie przy włączeniu logowania)
 │   └── paragonocr_YYYYMMDD.log  # Pliki logów (jeśli ENABLE_FILE_LOGGING=true)
+├── scripts/                # Skrypty pomocnicze i narzędzia deweloperskie
+│   ├── check_database.py   # Sprawdzanie zawartości bazy danych
+│   ├── debug_ocr.py         # Debugowanie OCR
+│   ├── verify_config.py     # Weryfikacja konfiguracji
+│   ├── verify_knowledge.py  # Weryfikacja bazy wiedzy
+│   ├── test_bielik.py       # Test demonstracyjny asystenta Bielik
+│   ├── test_mistral.py      # Test integracji Mistral OCR
+│   └── test_receipt.py      # Test pełnego pipeline przetwarzania
 ├── ReceiptParser/
 │   ├── data/               # Baza danych SQLite (receipts.db)
-│   │   └── receipts/       # Opcjonalny katalog na pliki paragonów
+│   │   ├── receipts/       # Opcjonalny katalog na pliki paragonów
+│   │   └── bielik_prompts.json  # Prompty dla asystenta Bielik
 │   ├── requirements.txt    # Zależności Python
 │   └── src/
 │       ├── main.py         # Logika orkiestracji pipeline'u
@@ -186,12 +196,19 @@ ParagonOCR/
 │       ├── normalization_rules.py # Regexy do normalizacji nazw
 │       ├── data_models.py  # TypedDict definicje struktur danych
 │       ├── config.py       # Konfiguracja z .env i stałe
+│       ├── config_prompts.py # Zarządzanie promptami dla Bielik
 │       ├── logger.py       # Moduł logowania (opcjonalne logowanie do pliku)
-│       └── security.py     # Moduł bezpieczeństwa (walidacja, sanityzacja)
+│       ├── security.py     # Moduł bezpieczeństwa (walidacja, sanityzacja)
+│       ├── bielik.py       # Asystent AI Bielik (gotowanie, lista zakupów)
+│       ├── purchase_analytics.py # Analiza zakupów
+│       └── migrate_db.py    # Migracje bazy danych
 └── tests/                  # Testy jednostkowe i integracyjne
     ├── README.md           # Dokumentacja testów
     ├── conftest.py         # Wspólne fixtures pytest
-    └── test_*.py            # Pliki testowe
+    ├── test_*.py           # Pliki testowe
+    └── evaluation/         # Testy ewaluacyjne
+        ├── evaluate_accuracy.py
+        └── ground_truth.json
 ```
 
 ## 🧪 Testowanie

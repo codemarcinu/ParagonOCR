@@ -152,3 +152,4 @@ class TestMathVerification:
         assert len(result["pozycje"]) == 1
         # Funkcja powinna obsłużyć stringi (konwersja w _convert_types)
 
+

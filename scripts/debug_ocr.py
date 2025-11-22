@@ -1,8 +1,8 @@
 import sys
 import os
 
-# Add src to path
-sys.path.append(os.path.join(os.getcwd(), "ReceiptParser"))
+# Dodaj ścieżkę do modułów (scripts/ jest w głównym katalogu, ReceiptParser/ też)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'ReceiptParser'))
 
 from src.ocr import convert_pdf_to_image, extract_text_from_image
 

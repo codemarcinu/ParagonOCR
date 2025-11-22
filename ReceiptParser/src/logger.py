@@ -85,3 +85,4 @@ def log_message(message: str, level: str = "INFO", callback: Optional[Callable[[
 if ENABLE_FILE_LOGGING:
     setup_logging()
 
+

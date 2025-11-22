@@ -4,10 +4,10 @@
 import sys
 import os
 
-# Dodaj ścieżkę do modułów
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'ReceiptParser'))
+# Dodaj ścieżkę do modułów (scripts/ jest w głównym katalogu, ReceiptParser/ też)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'ReceiptParser'))
 
-from ReceiptParser.src.bielik import BielikAssistant, ask_bielik, get_dish_suggestions, get_shopping_list
+from src.bielik import BielikAssistant, ask_bielik, get_dish_suggestions, get_shopping_list
 
 def main():
     print("=" * 60)
@@ -59,4 +59,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

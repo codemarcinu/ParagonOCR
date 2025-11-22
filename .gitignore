@@ -5,12 +5,37 @@
 # Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
 venv/
 .venv/
+*.egg-info/
+dist/
+build/
+
+# Testing & Coverage
+htmlcov/
+.coverage
+.coverage.*
+.pytest_cache/
+.tox/
+*.cover
+
+# Logs
+logs/
+*.log
 
 # IDE
 .idea/
 .vscode/
+*.swp
+*.swo
+*~
 
 # System
 .DS_Store
+Thumbs.db
+
+# Database (opcjonalnie - usuń jeśli chcesz commitować bazę)
+# ReceiptParser/data/receipts.db

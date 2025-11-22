@@ -155,3 +155,4 @@ class TestTypeConversion:
         assert result["pozycje"][0]["ilosc"] == Decimal("0.365")
         assert result["pozycje"][0]["jednostka"] == "kg"
 
+

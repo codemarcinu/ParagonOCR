@@ -129,3 +129,4 @@ class TestFullPipeline:
         assert len(log_messages) > 0
         assert float(final_data["pozycje"][0]["rabat"]) == 2.00
 
+

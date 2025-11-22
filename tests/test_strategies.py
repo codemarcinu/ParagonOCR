@@ -285,3 +285,4 @@ class TestStrategySelection:
         strategy = get_strategy_for_store(text)
         assert isinstance(strategy, GenericStrategy)
 
+

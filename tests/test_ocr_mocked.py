@@ -135,3 +135,4 @@ class TestExtractTextFromImage:
             # Powinno zwrócić pusty string po obsłudze wyjątku
             assert isinstance(result, str)
 
+
