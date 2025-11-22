@@ -1,0 +1,316 @@
+# 🧾 ParagonOCR (ReceiptParser)
+
+**ParagonOCR** to zaawansowany system do cyfryzacji, analizy i zarządzania danymi z paragonów sklepowych. Aplikacja wykorzystuje hybrydowe podejście do OCR (Tesseract + Mistral AI) oraz lokalne modele językowe (LLM via Ollama), aby precyzyjnie ekstrahować dane o zakupach, kategoryzować produkty i zarządzać domowym magazynem.
+
+## 🚀 Główne Funkcjonalności
+
+### 🔍 Hybrydowy OCR
+- **Mistral OCR** (przez API) dla wysokiej precyzji odczytu trudnych paragonów
+- **Tesseract OCR** jako fallback dla szybkiej analizy nagłówków i detekcji sklepu
+- Obsługa plików PDF (automatyczna konwersja na obrazy) oraz obrazów (PNG, JPG)
+
+### 🤖 Inteligentne Parsowanie (LLM)
+- Integracja z **Ollama** (model `SpeakLeash/Bielik` lub `LLaVA`) do interpretacji nieustrukturyzowanego tekstu
+- Automatyczna korekta błędów OCR i normalizacja nazw produktów
+- Wsparcie dla modeli multimodalnych (wizja + tekst) oraz tekstowych
+
+### 🏪 Strategie Sklepowe (Strategy Pattern)
+- Dedykowane algorytmy dla sieci: **Lidl, Biedronka, Kaufland, Auchan**
+- Inteligentne scalanie rabatów (np. "Lidl Plus", "Rabat" w osobnej linii)
+- Obsługa specyficznych formatów (produkty ważone, wieloliniowe opisy)
+- Automatyczna detekcja sklepu na podstawie wzorców regex
+
+### ✅ Weryfikacja Matematyczna
+- Automatyczne sprawdzanie spójności: `Ilość × Cena jedn. = Wartość`
+- Wykrywanie i naprawa "ukrytych" rabatów oraz błędów odczytu
+- Korekcja błędów OCR w cenach i ilościach
+
+### 📦 Zarządzanie Magazynem i GUI
+- Nowoczesny interfejs graficzny oparty na **CustomTkinter**
+- Moduł **"Gotowanie"** do łatwego zużywania produktów z bazy
+- Śledzenie dat ważności i stanów magazynowych
+- Ręczne dodawanie produktów do magazynu
+- Przeglądanie stanu magazynu z oznaczeniem produktów przeterminowanych
+
+### 💾 Baza Danych
+- Pełna struktura relacyjna w **SQLite** (SQLAlchemy ORM)
+- Obsługa aliasów produktów (mapowanie różnych nazw na jeden znormalizowany produkt)
+- Kategoryzacja produktów z metadanymi (możliwość mrożenia)
+- Historia zakupów z pełnymi szczegółami paragonów
+
+## 🛠️ Wymagania Systemowe
+
+### Oprogramowanie
+- **Python 3.13+**
+- **Tesseract OCR** (zainstalowany w systemie i dodany do PATH)
+- **Poppler** (do konwersji PDF na obrazy)
+- **Ollama** (uruchomiona lokalnie) z pobranymi modelami:
+  - `SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M` (zalecany do tekstu)
+  - `llava:latest` (opcjonalnie do wizji)
+
+### Instalacja zależności systemowych
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt-get install tesseract-ocr poppler-utils
+```
+
+**macOS:**
+```bash
+brew install tesseract poppler
+```
+
+**Windows:**
+- Pobierz i zainstaluj Tesseract z [GitHub Releases](https://github.com/UB-Mannheim/tesseract/wiki)
+- Pobierz i zainstaluj Poppler z [poppler-windows](https://github.com/oschwartz10612/poppler-windows/releases)
+
+## 📦 Instalacja
+
+### 1. Sklonuj repozytorium
+
+```bash
+git clone https://github.com/codemarcinu/paragonocr.git
+cd paragonocr
+```
+
+### 2. Utwórz środowisko wirtualne i zainstaluj zależności
+
+Możesz skorzystać z gotowego skryptu startowego, który zrobi to za Ciebie:
+
+```bash
+chmod +x uruchom.sh
+./uruchom.sh
+```
+
+Lub ręcznie:
+
+```bash
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# venv\Scripts\activate   # Windows
+pip install -r ReceiptParser/requirements.txt
+```
+
+### 3. Konfiguracja `.env`
+
+Utwórz plik `.env` w głównym katalogu projektu:
+
+```ini
+# Konfiguracja API (dla Mistral OCR)
+MISTRAL_API_KEY=twoj_klucz_api_tutaj
+
+# Konfiguracja Ollama
+OLLAMA_HOST=http://localhost:11434
+VISION_MODEL=llava:latest
+TEXT_MODEL=SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M
+```
+
+**Uwaga:** Klucz API Mistral jest opcjonalny - aplikacja działa również bez niego (używa Tesseract OCR).
+
+### 4. Inicjalizacja bazy danych
+
+Przy pierwszym uruchomieniu, zainicjalizuj bazę danych:
+
+```bash
+# Przez GUI: kliknij przycisk "⚙️ Inicjalizuj bazę danych"
+# Lub przez CLI:
+python -m ReceiptParser.src.main init-db
+```
+
+## 🖥️ Uruchomienie
+
+### Interfejs Graficzny (Zalecane)
+
+Najprostszy sposób na uruchomienie aplikacji to skorzystanie ze skryptu pomocniczego, który ustawia `PYTHONPATH` i aktywuje środowisko:
+
+```bash
+./uruchom.sh
+```
+
+Alternatywnie ręcznie:
+
+```bash
+export PYTHONPATH="${PYTHONPATH}:$(pwd)/ReceiptParser"
+source venv/bin/activate
+python gui.py
+```
+
+### Tryb CLI (Linia komend)
+
+Aplikacja posiada również interfejs CLI do przetwarzania wsadowego lub debugowania:
+
+```bash
+# Inicjalizacja bazy danych
+python -m ReceiptParser.src.main init-db
+
+# Przetworzenie pojedynczego pliku
+python -m ReceiptParser.src.main process --file sciezka/do/paragonu.jpg --llm mistral-ocr
+# lub
+python -m ReceiptParser.src.main process --file sciezka/do/paragonu.pdf --llm llava:latest
+```
+
+**Opcje modeli LLM:**
+- `mistral-ocr` - używa Mistral OCR API + model tekstowy (Bielik)
+- `llava:latest` - używa modelu multimodalnego (wizja + tekst)
+- `SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M` - używa modelu tekstowego z Tesseract OCR
+
+## 🗂️ Struktura Projektu
+
+```
+ParagonOCR/
+├── gui.py                  # Główny plik interfejsu graficznego
+├── uruchom.sh              # Skrypt startowy (Linux/Mac)
+├── .env                    # Konfiguracja (klucze API, modele)
+├── paragony/               # Katalog na pliki wejściowe (PDF/IMG)
+├── ReceiptParser/
+│   ├── data/               # Baza danych SQLite (receipts.db)
+│   │   └── receipts/       # Opcjonalny katalog na pliki paragonów
+│   ├── requirements.txt    # Zależności Python
+│   └── src/
+│       ├── main.py         # Logika orkiestracji pipeline'u
+│       ├── database.py     # Modele SQLAlchemy
+│       ├── strategies.py   # Logika specyficzna dla sklepów (Lidl, Biedronka...)
+│       ├── llm.py          # Komunikacja z Ollama
+│       ├── ocr.py          # Wrapper na Tesseract i PDF2Image
+│       ├── mistral_ocr.py  # Klient Mistral API
+│       ├── knowledge_base.py # Metadane produktów (kategorie, mrożenie)
+│       ├── normalization_rules.py # Regexy do normalizacji nazw
+│       ├── data_models.py  # TypedDict definicje struktur danych
+│       └── config.py       # Konfiguracja z .env
+└── tests/                  # Testy jednostkowe i integracyjne
+    ├── README.md           # Dokumentacja testów
+    ├── conftest.py         # Wspólne fixtures pytest
+    └── test_*.py            # Pliki testowe
+```
+
+## 🧪 Testowanie
+
+Projekt posiada rozbudowany zestaw testów (pytest) z pokryciem kodu ~73%.
+
+### Uruchamianie testów
+
+```bash
+# Wszystkie testy
+pytest tests/ -v
+
+# Z pokryciem kodu
+pytest tests/ --cov=ReceiptParser/src --cov-report=term-missing --cov-report=html
+
+# Konkretny plik testowy
+pytest tests/test_strategies.py -v
+
+# Konkretny test
+pytest tests/test_strategies.py::TestLidlStrategy::test_post_process_scales_discounts -v
+```
+
+### Statystyki testów
+
+- **Łączna liczba testów**: 89
+- **Status**: ✅ Wszystkie testy przechodzą
+- **Pokrycie kodu**: 73% (główne moduły: 70-100%)
+
+Testy pokrywają:
+- Strategie parsowania (Lidl, Biedronka, Auchan, Kaufland)
+- Normalizację produktów
+- Weryfikację matematyczną
+- Integrację z bazą danych (na mockach)
+- Komunikację z LLM (na mockach)
+- OCR (na mockach)
+
+Więcej informacji o testach znajdziesz w `tests/README.md`.
+
+## 📊 Schemat Bazy Danych
+
+### Tabele
+
+- **`sklepy`**: Przechowuje nazwy i lokalizacje sklepów
+- **`paragony`**: Nagłówki paragonów (data, suma, relacja do sklepu, plik źródłowy)
+- **`produkty`**: Znormalizowane nazwy produktów i ich kategorie
+- **`kategorie_produktow`**: Kategorie produktów (np. "Nabiał", "Pieczywo")
+- **`aliasy_produktow`**: Mapuje "dziwne" nazwy z paragonów (np. "Mleko 3.2% Łaciat") na produkty znormalizowane (np. "Mleko")
+- **`pozycje_paragonu`**: Konkretne linie z paragonu (cena, ilość, rabaty, relacja do produktu)
+- **`stan_magazynowy`**: Aktualny stan posiadania, daty ważności, jednostki miary
+
+### Relacje
+
+```
+Sklep 1:N Paragon
+Paragon 1:N PozycjaParagonu
+Produkt 1:N PozycjaParagonu
+Produkt 1:N AliasProduktu
+Produkt 1:N StanMagazynowy
+KategoriaProduktu 1:N Produkt
+```
+
+## 🔧 Funkcjonalności Szczegółowe
+
+### Strategie Parsowania
+
+Każdy sklep ma dedykowaną strategię parsowania, która:
+- Definiuje specyficzny prompt systemowy dla LLM
+- Wykonuje post-processing danych (np. scalanie rabatów)
+- Obsługuje specyficzne formaty paragonów
+
+**Obsługiwane sklepy:**
+- Lidl (scalanie rabatów Lidl Plus)
+- Biedronka (obsługa rabatów i produktów ważonych)
+- Kaufland
+- Auchan (usuwanie śmieci OCR)
+- Carrefour, Żabka, Dino, Netto, Stokrotka, Rossmann, Hebe, Orlen, Shell, McDonald's (podstawowa obsługa)
+
+### Normalizacja Produktów
+
+System automatycznie normalizuje nazwy produktów poprzez:
+1. **Sprawdzenie aliasów w bazie danych** (najszybsze)
+2. **Reguły statyczne** (regex patterns) - oszczędność zapytań do LLM
+3. **Zapytanie do LLM** (ostatnia deska ratunku)
+4. **Weryfikacja użytkownika** (interaktywny prompt)
+
+### Baza Wiedzy
+
+System zawiera wbudowaną bazę wiedzy o produktach:
+- **Kategorie**: Pieczywo, Nabiał, Mięso, Warzywa, Owoce, itd.
+- **Metadane**: Informacja czy produkt można mrozić
+- **Normalizacja sklepów**: Automatyczne rozpoznawanie sklepów po wzorcach
+
+## 🐛 Rozwiązywanie Problemów
+
+### Problem: "Nie udało się skonwertować pliku PDF"
+**Rozwiązanie:** Upewnij się, że Poppler jest zainstalowany i dostępny w PATH.
+
+### Problem: "BŁĄD: Klient Ollama nie jest skonfigurowany"
+**Rozwiązanie:** 
+1. Upewnij się, że Ollama jest uruchomiona: `systemctl --user status ollama` (Linux) lub `ollama serve` (ręcznie)
+2. Sprawdź, czy model jest pobrany: `ollama list`
+3. Pobierz model: `ollama pull SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M`
+
+### Problem: "Mistral OCR nie zwrócił wyniku"
+**Rozwiązanie:** 
+- Sprawdź, czy klucz API jest poprawny w pliku `.env`
+- Jeśli nie masz klucza API, użyj trybu bez Mistral OCR (aplikacja automatycznie użyje Tesseract)
+
+### Problem: Błędy importów w GUI
+**Rozwiązanie:** Upewnij się, że używasz skryptu `uruchom.sh` lub ręcznie ustawiasz `PYTHONPATH`:
+```bash
+export PYTHONPATH="${PYTHONPATH}:$(pwd)/ReceiptParser"
+```
+
+## 📝 Licencja
+
+Projekt stworzony w celach edukacyjnych i do użytku domowego.
+
+## 🤝 Autor
+
+**Marcin** (CodeMarcinu)
+
+## 🙏 Podziękowania
+
+- **Ollama** - za lokalne modele LLM
+- **Mistral AI** - za API OCR
+- **Tesseract OCR** - za darmowy OCR
+- **CustomTkinter** - za nowoczesny interfejs GUI
+
+---
+
+*Jeśli masz pytania lub sugestie, utwórz issue w repozytorium.*
+
