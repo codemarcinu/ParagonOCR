@@ -1,14 +1,10 @@
 import ollama
-import base64
+
 import json
 import re
 from pathlib import Path
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
-
-# --- Klient Ollama ---
-# Globalny klient do komunikacji z serwerem Ollama.
-# Upewnij się, że kontener Docker z Ollamą jest uruchomiony.
 from .config import Config
 
 # --- Klient Ollama ---

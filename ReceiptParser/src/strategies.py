@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List, Any
-import re
 
 
 class ReceiptStrategy(ABC):
@@ -32,7 +31,6 @@ class LidlStrategy(ReceiptStrategy):
            Nasz system scali to w post-processingu.
         3. Ignoruj sekcje "PTU A", "Kwota A", "Rozliczenie płatności".
         
-        Wymagana struktura JSON:
         Wymagana struktura JSON:
         {
           "sklep_info": { "nazwa": "Lidl", "lokalizacja": "Adres sklepu lub null" },
@@ -155,7 +153,6 @@ class KauflandStrategy(ReceiptStrategy):
         4. Ignoruj linie "Podsumowanie zakupów", "Ogółem".
         
         Wymagana struktura JSON:
-        Wymagana struktura JSON:
         {
           "sklep_info": { "nazwa": "Kaufland", "lokalizacja": "Adres sklepu lub null" },
           "paragon_info": { "data_zakupu": "2024-05-20", "suma_calkowita": "123.45" },
@@ -177,7 +174,6 @@ class AuchanStrategy(ReceiptStrategy):
         3. Format często wygląda tak: "Nazwa ... Ilość x Cena Wartość".
         4. Opłata recyklingowa (BDO, Recykling) nie jest towarem handlowym - pomiń ją jeśli możesz.
         
-        Wymagana struktura JSON:
         Wymagana struktura JSON:
         {
           "sklep_info": { "nazwa": "Auchan", "lokalizacja": "Adres sklepu lub null" },
