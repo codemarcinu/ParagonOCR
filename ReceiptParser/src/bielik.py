@@ -24,6 +24,7 @@ from .database import (
 )
 from .config import Config
 from .llm import client
+from .config_prompts import get_prompt
 
 
 class BielikAssistant:
@@ -222,26 +223,7 @@ class BielikAssistant:
             ]
         )
 
-        system_prompt = """Jesteś asystentem kulinarnym Bielik. Twoim zadaniem jest proponowanie potraw na podstawie dostępnych produktów.
-
-Zasady:
-1. Proponuj tylko potrawy, które można przygotować z dostępnych produktów
-2. Jeśli brakuje jakiegoś składnika, możesz zasugerować alternatywę lub pominięcie
-3. Uwzględniaj różnorodność (obiad, kolacja, śniadanie)
-4. Zwracaj odpowiedź w formacie JSON z listą potraw
-
-Format odpowiedzi:
-{
-  "potrawy": [
-    {
-      "nazwa": "Nazwa potrawy",
-      "opis": "Krótki opis jak przygotować",
-      "skladniki": ["składnik1", "składnik2", ...],
-      "czas_przygotowania": "około X minut",
-      "trudnosc": "łatwa/średnia/trudna"
-    }
-  ]
-}"""
+        system_prompt = get_prompt("suggest_dishes")
 
         user_prompt = f"""Dostępne produkty w magazynie:
 {products_text}
@@ -303,27 +285,7 @@ Zwróć propozycje w formacie JSON."""
         available_products = self.get_available_products()
         available_names = {p["nazwa"].lower() for p in available_products}
 
-        system_prompt = """Jesteś asystentem kulinarnym Bielik. Generujesz listy zakupów na podstawie potraw lub zapytań użytkownika.
-
-Zasady:
-1. Zwracaj tylko produkty, których użytkownik NIE MA w magazynie
-2. Uwzględniaj ilości (np. "500g mąki", "1kg ziemniaków")
-3. Grupuj produkty według kategorii (Warzywa, Mięso, Nabiał, itp.)
-4. Zwracaj odpowiedź w formacie JSON
-
-Format odpowiedzi:
-{
-  "potrawa": "Nazwa potrawy (jeśli dotyczy)",
-  "produkty": [
-    {
-      "nazwa": "Nazwa produktu",
-      "ilosc": "ilość z jednostką (np. 500g, 1kg, 2 szt)",
-      "kategoria": "Kategoria produktu",
-      "priorytet": "wysoki/średni/niski"
-    }
-  ],
-  "uwagi": "Dodatkowe uwagi lub sugestie"
-}"""
+        system_prompt = get_prompt("shopping_list")
 
         available_text = "\n".join(
             [f"- {p['nazwa']}" for p in available_products[:50]]
@@ -421,15 +383,7 @@ Dostępne produkty w magazynie (NIE dodawaj ich do listy zakupów):
             for p in available_products[:20]:
                 available_context += f"- {p['nazwa']} ({p['kategoria']}) - {p['total_ilosc']} {p['stany'][0]['jednostka'] if p['stany'] else 'szt'}\n"
 
-        system_prompt = """Jesteś Bielik - asystentem kulinarnym AI. Odpowiadasz na pytania użytkownika o jedzenie, gotowanie, produkty i żywność.
-
-Zasady:
-1. Bądź pomocny, przyjazny i konkretny
-2. Używaj informacji o produktach z bazy danych (RAG)
-3. Jeśli użytkownik pyta "co mam do jedzenia", zaproponuj potrawy na podstawie dostępnych produktów
-4. Jeśli użytkownik pyta o konkretny produkt, użyj informacji z bazy
-5. Odpowiadaj po polsku, w sposób naturalny i zrozumiały
-6. Możesz proponować przepisy, sugestie kulinarne, porady dotyczące przechowywania żywności"""
+        system_prompt = get_prompt("answer_question")
 
         user_prompt = f"""Pytanie użytkownika: {question}
 {products_context}

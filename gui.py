@@ -12,9 +12,12 @@ from sqlalchemy.orm import sessionmaker, joinedload
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'ReceiptParser'))
 
 from src.main import run_processing_pipeline
-from src.database import init_db, engine, Produkt, StanMagazynowy, KategoriaProduktu, AliasProduktu
+from src.database import init_db, engine, Produkt, StanMagazynowy, KategoriaProduktu, AliasProduktu, Paragon
 from src.config import Config
 from src.normalization_rules import find_static_match
+from src.bielik import BielikAssistant
+from src.config_prompts import load_prompts, save_prompts, reset_prompts_to_default, DEFAULT_PROMPTS
+from src.purchase_analytics import PurchaseAnalytics
 from history_manager import load_history, add_to_history
 
 
@@ -613,6 +616,263 @@ class AddProductDialog(ctk.CTkToplevel):
         self.destroy()
 
 
+class BielikChatDialog(ctk.CTkToplevel):
+    """Okno czatu z asystentem Bielik"""
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("🦅 Bielik - Asystent Kulinarny")
+        self.geometry("800x600")
+        self.assistant = None
+        
+        # Header
+        header_frame = ctk.CTkFrame(self)
+        header_frame.pack(fill="x", padx=10, pady=10)
+        ctk.CTkLabel(
+            header_frame, 
+            text="🦅 Bielik - Asystent Kulinarny", 
+            font=("Arial", 18, "bold")
+        ).pack(pady=10)
+        
+        # Chat area (scrollable)
+        self.chat_frame = ctk.CTkScrollableFrame(self)
+        self.chat_frame.pack(fill="both", expand=True, padx=10, pady=5)
+        
+        # Input area
+        input_frame = ctk.CTkFrame(self)
+        input_frame.pack(fill="x", padx=10, pady=10)
+        
+        self.input_entry = ctk.CTkEntry(
+            input_frame, 
+            placeholder_text="Zadaj pytanie Bielikowi...",
+            font=("Arial", 14)
+        )
+        self.input_entry.pack(side="left", fill="x", expand=True, padx=5)
+        self.input_entry.bind("<Return>", lambda e: self.send_message())
+        
+        self.send_button = ctk.CTkButton(
+            input_frame,
+            text="Wyślij",
+            command=self.send_message,
+            width=100
+        )
+        self.send_button.pack(side="right", padx=5)
+        
+        # Status label
+        self.status_label = ctk.CTkLabel(
+            self, 
+            text="Gotowy", 
+            font=("Arial", 10)
+        )
+        self.status_label.pack(pady=5)
+        
+        # Inicjalizuj asystenta
+        self.init_assistant()
+        
+        # Dodaj powitanie
+        self.add_message("Bielik", "Cześć! Jestem Bielik, twój asystent kulinarny. Jak mogę Ci pomóc?")
+        
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
+    
+    def init_assistant(self):
+        """Inicjalizuje asystenta Bielik"""
+        try:
+            self.assistant = BielikAssistant()
+            self.status_label.configure(text="Gotowy", text_color="green")
+        except Exception as e:
+            self.status_label.configure(text=f"Błąd: {e}", text_color="red")
+            messagebox.showerror("Błąd", f"Nie udało się połączyć z bazą danych: {e}")
+    
+    def add_message(self, sender: str, message: str):
+        """Dodaje wiadomość do czatu"""
+        # Ramka dla wiadomości
+        msg_frame = ctk.CTkFrame(self.chat_frame)
+        msg_frame.pack(fill="x", padx=5, pady=5)
+        
+        # Kolor w zależności od nadawcy
+        if sender == "Bielik":
+            msg_frame.configure(fg_color="#1f538d")
+            sender_text = "🦅 Bielik:"
+        else:
+            msg_frame.configure(fg_color="#2b2b2b")
+            sender_text = "Ty:"
+        
+        # Label z wiadomością
+        msg_label = ctk.CTkLabel(
+            msg_frame,
+            text=f"{sender_text} {message}",
+            font=("Arial", 12),
+            wraplength=700,
+            justify="left",
+            anchor="w"
+        )
+        msg_label.pack(fill="x", padx=10, pady=5)
+        
+        # Przewiń do dołu
+        self.chat_frame.update()
+        self.chat_frame._parent_canvas.yview_moveto(1.0)
+    
+    def send_message(self):
+        """Wysyła wiadomość do Bielika"""
+        question = self.input_entry.get().strip()
+        if not question:
+            return
+        
+        # Wyczyść pole wejściowe
+        self.input_entry.delete(0, "end")
+        
+        # Dodaj wiadomość użytkownika
+        self.add_message("User", question)
+        
+        # Wyłącz przycisk podczas przetwarzania
+        self.send_button.configure(state="disabled")
+        self.status_label.configure(text="Bielik myśli...", text_color="orange")
+        
+        # Uruchom w osobnym wątku, żeby nie blokować GUI
+        import threading
+        thread = threading.Thread(target=self.process_question, args=(question,))
+        thread.daemon = True
+        thread.start()
+    
+    def process_question(self, question: str):
+        """Przetwarza pytanie w osobnym wątku"""
+        try:
+            if not self.assistant:
+                self.init_assistant()
+            
+            answer = self.assistant.answer_question(question)
+            
+            # Aktualizuj GUI w głównym wątku
+            self.after(0, lambda: self.add_message("Bielik", answer))
+            self.after(0, lambda: self.status_label.configure(text="Gotowy", text_color="green"))
+            self.after(0, lambda: self.send_button.configure(state="normal"))
+        except Exception as e:
+            error_msg = f"Przepraszam, wystąpił błąd: {str(e)}"
+            self.after(0, lambda: self.add_message("Bielik", error_msg))
+            self.after(0, lambda: self.status_label.configure(text="Błąd", text_color="red"))
+            self.after(0, lambda: self.send_button.configure(state="normal"))
+    
+    def on_close(self):
+        """Zamyka okno i zwalnia zasoby"""
+        if self.assistant:
+            self.assistant.close()
+        self.destroy()
+
+
+class SettingsDialog(ctk.CTkToplevel):
+    """Okno ustawień - edycja promptów systemowych"""
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("⚙️ Ustawienia - Prompty Systemowe")
+        self.geometry("900x700")
+        
+        # Header
+        header_frame = ctk.CTkFrame(self)
+        header_frame.pack(fill="x", padx=10, pady=10)
+        ctk.CTkLabel(
+            header_frame,
+            text="⚙️ Ustawienia Promptów Systemowych Bielika",
+            font=("Arial", 18, "bold")
+        ).pack(pady=10)
+        
+        # Scrollable frame dla promptów
+        scrollable = ctk.CTkScrollableFrame(self)
+        scrollable.pack(fill="both", expand=True, padx=10, pady=5)
+        
+        # Wczytaj prompty
+        self.prompts = load_prompts()
+        self.text_boxes = {}
+        
+        # Opisy promptów
+        prompt_descriptions = {
+            "answer_question": "Prompt dla odpowiadania na pytania użytkownika",
+            "suggest_dishes": "Prompt dla proponowania potraw",
+            "shopping_list": "Prompt dla generowania list zakupów"
+        }
+        
+        # Utwórz pola tekstowe dla każdego promptu
+        for i, (key, value) in enumerate(self.prompts.items()):
+            # Label z opisem
+            label = ctk.CTkLabel(
+                scrollable,
+                text=prompt_descriptions.get(key, key),
+                font=("Arial", 14, "bold")
+            )
+            label.grid(row=i*2, column=0, sticky="w", padx=10, pady=(10, 5))
+            
+            # Textbox dla promptu
+            textbox = ctk.CTkTextbox(
+                scrollable,
+                height=150,
+                font=("Arial", 11)
+            )
+            textbox.insert("1.0", value)
+            textbox.grid(row=i*2+1, column=0, sticky="ew", padx=10, pady=5)
+            scrollable.grid_columnconfigure(0, weight=1)
+            
+            self.text_boxes[key] = textbox
+        
+        # Footer z przyciskami
+        footer_frame = ctk.CTkFrame(self)
+        footer_frame.pack(fill="x", padx=10, pady=10)
+        
+        ctk.CTkButton(
+            footer_frame,
+            text="💾 Zapisz",
+            command=self.save_prompts,
+            fg_color="green",
+            width=150
+        ).pack(side="left", padx=5)
+        
+        ctk.CTkButton(
+            footer_frame,
+            text="🔄 Resetuj do domyślnych",
+            command=self.reset_prompts,
+            fg_color="orange",
+            width=200
+        ).pack(side="left", padx=5)
+        
+        ctk.CTkButton(
+            footer_frame,
+            text="❌ Anuluj",
+            command=self.destroy,
+            fg_color="red",
+            width=150
+        ).pack(side="right", padx=5)
+        
+        self.protocol("WM_DELETE_WINDOW", self.destroy)
+        self.after(100, self.grab_set)
+    
+    def save_prompts(self):
+        """Zapisuje prompty do pliku"""
+        try:
+            new_prompts = {}
+            for key, textbox in self.text_boxes.items():
+                new_prompts[key] = textbox.get("1.0", "end-1c").strip()
+            
+            if save_prompts(new_prompts):
+                messagebox.showinfo("Sukces", "Prompty zostały zapisane!")
+                self.destroy()
+            else:
+                messagebox.showerror("Błąd", "Nie udało się zapisać promptów.")
+        except Exception as e:
+            messagebox.showerror("Błąd", f"Wystąpił błąd podczas zapisywania: {e}")
+    
+    def reset_prompts(self):
+        """Resetuje prompty do wartości domyślnych"""
+        if messagebox.askyesno(
+            "Potwierdzenie",
+            "Czy na pewno chcesz zresetować wszystkie prompty do wartości domyślnych?"
+        ):
+            try:
+                reset_prompts_to_default()
+                # Odśwież okno
+                self.destroy()
+                # Otwórz ponownie
+                SettingsDialog(self.master)
+            except Exception as e:
+                messagebox.showerror("Błąd", f"Nie udało się zresetować promptów: {e}")
+
+
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -660,6 +920,20 @@ class App(ctk.CTk):
             command=self.show_inventory,
             width=120
         ).pack(side="left", padx=5)
+        
+        ctk.CTkButton(
+            menu_buttons_frame,
+            text="🦅 Bielik",
+            command=self.show_bielik_chat,
+            width=120
+        ).pack(side="left", padx=5)
+        
+        ctk.CTkButton(
+            menu_buttons_frame,
+            text="⚙️ Ustawienia",
+            command=self.show_settings,
+            width=120
+        ).pack(side="left", padx=5)
 
         # --- MAIN CONTENT AREA ---
         self.content_frame = ctk.CTkFrame(self)
@@ -667,14 +941,53 @@ class App(ctk.CTk):
         self.content_frame.grid_columnconfigure(0, weight=1)
         self.content_frame.grid_rowconfigure(0, weight=1)
 
-        # --- WIDGETY DLA PARAGONÓW ---
+        # --- WIDGETY DLA PARAGONÓW (ANALITYKA) ---
         self.receipts_frame = ctk.CTkFrame(self.content_frame)
         self.receipts_frame.grid(row=0, column=0, sticky="nsew")
         self.receipts_frame.grid_columnconfigure(0, weight=1)
-        self.receipts_frame.grid_rowconfigure(5, weight=1)
+        self.receipts_frame.grid_rowconfigure(1, weight=1)
+        
+        # Header z przyciskami
+        header_frame = ctk.CTkFrame(self.receipts_frame)
+        header_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
+        header_frame.grid_columnconfigure(1, weight=1)
+        
+        ctk.CTkLabel(
+            header_frame,
+            text="📊 Analityka Zakupów",
+            font=("Arial", 20, "bold")
+        ).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        
+        buttons_frame = ctk.CTkFrame(header_frame)
+        buttons_frame.grid(row=0, column=1, padx=10, pady=10, sticky="e")
+        
+        ctk.CTkButton(
+            buttons_frame,
+            text="📁 Dodaj paragon",
+            command=self.show_add_receipt_dialog,
+            width=150
+        ).pack(side="left", padx=5)
+        
+        ctk.CTkButton(
+            buttons_frame,
+            text="🔄 Odśwież",
+            command=self.refresh_analytics,
+            width=100
+        ).pack(side="left", padx=5)
+        
+        # Scrollable area dla analityki
+        self.analytics_scrollable = ctk.CTkScrollableFrame(self.receipts_frame)
+        self.analytics_scrollable.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+        self.analytics_scrollable.grid_columnconfigure(0, weight=1)
+        
+        # Stary widok przetwarzania (ukryty, dostępny przez dialog)
+        self.processing_frame = ctk.CTkFrame(self.content_frame)
+        self.processing_frame.grid(row=0, column=0, sticky="nsew")
+        self.processing_frame.grid_columnconfigure(0, weight=1)
+        self.processing_frame.grid_rowconfigure(5, weight=1)
         
         # Historia plików
-        history_frame = ctk.CTkFrame(self.receipts_frame)
+        history_frame = ctk.CTkFrame(self.processing_frame)
         history_frame.grid(row=0, column=0, columnspan=4, padx=10, pady=(10, 5), sticky="ew")
         history_frame.grid_columnconfigure(1, weight=1)
         
@@ -698,15 +1011,15 @@ class App(ctk.CTk):
         self.file_button.grid(row=0, column=2, padx=5, pady=5)
 
         self.file_label = ctk.CTkLabel(
-            self.receipts_frame, text="Nie wybrano pliku", anchor="w"
+            self.processing_frame, text="Nie wybrano pliku", anchor="w"
         )
         self.file_label.grid(row=1, column=0, columnspan=4, padx=10, pady=5, sticky="ew")
 
-        buttons_frame = ctk.CTkFrame(self.receipts_frame)
-        buttons_frame.grid(row=2, column=0, columnspan=4, padx=10, pady=5, sticky="ew")
+        buttons_frame2 = ctk.CTkFrame(self.processing_frame)
+        buttons_frame2.grid(row=2, column=0, columnspan=4, padx=10, pady=5, sticky="ew")
         
         self.process_button = ctk.CTkButton(
-            buttons_frame,
+            buttons_frame2,
             text="🔄 Przetwórz",
             command=self.start_processing,
             state="disabled",
@@ -714,7 +1027,7 @@ class App(ctk.CTk):
         self.process_button.pack(side="left", padx=5)
 
         self.init_db_button = ctk.CTkButton(
-            buttons_frame,
+            buttons_frame2,
             text="⚙️ Inicjalizuj bazę danych",
             command=self.initialize_database,
         )
@@ -722,16 +1035,19 @@ class App(ctk.CTk):
 
         # Status label i progress bar
         self.status_label = ctk.CTkLabel(
-            self.receipts_frame, text="Gotowy", anchor="w", font=("Arial", 12)
+            self.processing_frame, text="Gotowy", anchor="w", font=("Arial", 12)
         )
         self.status_label.grid(row=3, column=0, columnspan=4, padx=10, pady=(10, 5), sticky="ew")
 
-        self.progress_bar = ctk.CTkProgressBar(self.receipts_frame)
+        self.progress_bar = ctk.CTkProgressBar(self.processing_frame)
         self.progress_bar.grid(row=4, column=0, columnspan=4, padx=10, pady=5, sticky="ew")
         self.progress_bar.set(0)
 
-        self.log_textbox = ctk.CTkTextbox(self.receipts_frame, state="disabled", wrap="word")
+        self.log_textbox = ctk.CTkTextbox(self.processing_frame, state="disabled", wrap="word")
         self.log_textbox.grid(row=5, column=0, columnspan=4, padx=10, pady=10, sticky="nsew")
+        
+        # Ukryj processing_frame domyślnie
+        self.processing_frame.grid_remove()
 
         # --- Zmienne stanu ---
         self.selected_file_path = None
@@ -747,8 +1063,14 @@ class App(ctk.CTk):
         self.show_receipts_tab()
 
     def show_receipts_tab(self):
-        """Pokazuje zakładkę paragonów"""
+        """Pokazuje zakładkę paragonów z analityką"""
+        # Ukryj wszystkie inne widoki
+        for widget in self.content_frame.winfo_children():
+            widget.grid_remove()
+        
+        # Pokaż widok analityki
         self.receipts_frame.grid(row=0, column=0, sticky="nsew")
+        self.refresh_analytics()
     
     def show_cooking_dialog(self):
         """Otwiera okno gotowania"""
@@ -964,6 +1286,211 @@ class App(ctk.CTk):
         """Zamyka okno magazynu i zamyka sesję"""
         session.close()
         inv_window.destroy()
+    
+    def show_bielik_chat(self):
+        """Otwiera okno czatu z Bielikiem"""
+        dialog = BielikChatDialog(self)
+        dialog.wait_window()
+    
+    def show_settings(self):
+        """Otwiera okno ustawień"""
+        dialog = SettingsDialog(self)
+        dialog.wait_window()
+    
+    def show_add_receipt_dialog(self):
+        """Otwiera widok do dodawania paragonu"""
+        # Ukryj analitykę i pokaż widok przetwarzania
+        self.receipts_frame.grid_remove()
+        self.processing_frame.grid(row=0, column=0, sticky="nsew")
+    
+    def refresh_analytics(self):
+        """Odświeża widok analityki zakupów"""
+        # Wyczyść poprzednią zawartość
+        for widget in self.analytics_scrollable.winfo_children():
+            widget.destroy()
+        
+        try:
+            with PurchaseAnalytics() as analytics:
+                # Ogólne statystyki
+                stats = analytics.get_total_statistics()
+                
+                # Sekcja ogólnych statystyk
+                stats_frame = ctk.CTkFrame(self.analytics_scrollable)
+                stats_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
+                stats_frame.grid_columnconfigure(0, weight=1)
+                
+                ctk.CTkLabel(
+                    stats_frame,
+                    text="📊 Ogólne Statystyki",
+                    font=("Arial", 16, "bold")
+                ).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+                
+                stats_text = f"""
+Łączna liczba paragonów: {stats['total_receipts']}
+Łączne wydatki: {stats['total_spent']:.2f} PLN
+Łączna liczba pozycji: {stats['total_items']}
+Średnia wartość paragonu: {stats['avg_receipt']:.2f} PLN
+"""
+                if stats['oldest_date']:
+                    stats_text += f"Pierwszy paragon: {stats['oldest_date']}\n"
+                if stats['newest_date']:
+                    stats_text += f"Ostatni paragon: {stats['newest_date']}\n"
+                
+                ctk.CTkLabel(
+                    stats_frame,
+                    text=stats_text.strip(),
+                    font=("Arial", 12),
+                    justify="left",
+                    anchor="w"
+                ).grid(row=1, column=0, padx=20, pady=10, sticky="w")
+                
+                if stats['total_receipts'] == 0:
+                    ctk.CTkLabel(
+                        self.analytics_scrollable,
+                        text="Brak danych do wyświetlenia. Dodaj paragony, aby zobaczyć analitykę.",
+                        font=("Arial", 14),
+                        text_color="gray"
+                    ).grid(row=1, column=0, padx=20, pady=20)
+                    return
+                
+                # Wydatki według sklepów
+                stores_frame = ctk.CTkFrame(self.analytics_scrollable)
+                stores_frame.grid(row=1, column=0, sticky="ew", padx=10, pady=10)
+                stores_frame.grid_columnconfigure(0, weight=1)
+                
+                ctk.CTkLabel(
+                    stores_frame,
+                    text="🏪 Wydatki według Sklepów",
+                    font=("Arial", 16, "bold")
+                ).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+                
+                stores = analytics.get_spending_by_store(limit=10)
+                stores_text = "\n".join([
+                    f"{i+1}. {store[0]}: {store[1]:.2f} PLN"
+                    for i, store in enumerate(stores)
+                ])
+                
+                ctk.CTkLabel(
+                    stores_frame,
+                    text=stores_text if stores_text else "Brak danych",
+                    font=("Arial", 12),
+                    justify="left",
+                    anchor="w"
+                ).grid(row=1, column=0, padx=20, pady=10, sticky="w")
+                
+                # Wydatki według kategorii
+                categories_frame = ctk.CTkFrame(self.analytics_scrollable)
+                categories_frame.grid(row=2, column=0, sticky="ew", padx=10, pady=10)
+                categories_frame.grid_columnconfigure(0, weight=1)
+                
+                ctk.CTkLabel(
+                    categories_frame,
+                    text="📦 Wydatki według Kategorii",
+                    font=("Arial", 16, "bold")
+                ).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+                
+                categories = analytics.get_spending_by_category(limit=10)
+                categories_text = "\n".join([
+                    f"{i+1}. {cat[0]}: {cat[1]:.2f} PLN"
+                    for i, cat in enumerate(categories)
+                ])
+                
+                ctk.CTkLabel(
+                    categories_frame,
+                    text=categories_text if categories_text else "Brak danych",
+                    font=("Arial", 12),
+                    justify="left",
+                    anchor="w"
+                ).grid(row=1, column=0, padx=20, pady=10, sticky="w")
+                
+                # Najczęściej kupowane produkty
+                products_frame = ctk.CTkFrame(self.analytics_scrollable)
+                products_frame.grid(row=3, column=0, sticky="ew", padx=10, pady=10)
+                products_frame.grid_columnconfigure(0, weight=1)
+                
+                ctk.CTkLabel(
+                    products_frame,
+                    text="🛒 Najczęściej Kupowane Produkty",
+                    font=("Arial", 16, "bold")
+                ).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+                
+                products = analytics.get_top_products(limit=10)
+                products_text = "\n".join([
+                    f"{i+1}. {prod[0]} - {prod[1]}x zakupów, {prod[2]:.2f} PLN"
+                    for i, prod in enumerate(products)
+                ])
+                
+                ctk.CTkLabel(
+                    products_frame,
+                    text=products_text if products_text else "Brak danych",
+                    font=("Arial", 12),
+                    justify="left",
+                    anchor="w"
+                ).grid(row=1, column=0, padx=20, pady=10, sticky="w")
+                
+                # Statystyki miesięczne
+                monthly_frame = ctk.CTkFrame(self.analytics_scrollable)
+                monthly_frame.grid(row=4, column=0, sticky="ew", padx=10, pady=10)
+                monthly_frame.grid_columnconfigure(0, weight=1)
+                
+                ctk.CTkLabel(
+                    monthly_frame,
+                    text="📅 Statystyki Miesięczne",
+                    font=("Arial", 16, "bold")
+                ).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+                
+                monthly_stats = analytics.get_monthly_statistics()
+                if monthly_stats:
+                    monthly_text = "\n".join([
+                        f"{stat['month_name']}: {stat['receipts_count']} paragonów, {stat['total_spent']:.2f} PLN"
+                        for stat in monthly_stats[:12]  # Ostatnie 12 miesięcy
+                    ])
+                else:
+                    monthly_text = "Brak danych"
+                
+                ctk.CTkLabel(
+                    monthly_frame,
+                    text=monthly_text,
+                    font=("Arial", 12),
+                    justify="left",
+                    anchor="w"
+                ).grid(row=1, column=0, padx=20, pady=10, sticky="w")
+                
+                # Ostatnie paragony
+                recent_frame = ctk.CTkFrame(self.analytics_scrollable)
+                recent_frame.grid(row=5, column=0, sticky="ew", padx=10, pady=10)
+                recent_frame.grid_columnconfigure(0, weight=1)
+                
+                ctk.CTkLabel(
+                    recent_frame,
+                    text="📄 Ostatnie Paragony",
+                    font=("Arial", 16, "bold")
+                ).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+                
+                recent = analytics.get_recent_receipts(limit=10)
+                if recent:
+                    recent_text = "\n".join([
+                        f"{i+1}. {rec['date']} - {rec['store']}: {rec['total']:.2f} PLN ({rec['items_count']} pozycji)"
+                        for i, rec in enumerate(recent)
+                    ])
+                else:
+                    recent_text = "Brak danych"
+                
+                ctk.CTkLabel(
+                    recent_frame,
+                    text=recent_text,
+                    font=("Arial", 12),
+                    justify="left",
+                    anchor="w"
+                ).grid(row=1, column=0, padx=20, pady=10, sticky="w")
+                
+        except Exception as e:
+            ctk.CTkLabel(
+                self.analytics_scrollable,
+                text=f"Błąd podczas ładowania analityki: {str(e)}",
+                font=("Arial", 12),
+                text_color="red"
+            ).grid(row=0, column=0, padx=20, pady=20)
 
     def refresh_history(self):
         """Odświeża listę historii plików w combobox."""
