@@ -1124,6 +1124,10 @@ class App(ctk.CTk):
         self.log("INFO: Rozpoczynam inicjalizację bazy danych...")
         try:
             init_db()
+            # Uruchom migracje po inicjalizacji
+            from src.migrate_db import migrate_all
+            self.log("INFO: Sprawdzam i aktualizuję schemat bazy danych...")
+            migrate_all()
             self.log("INFO: Baza danych została pomyślnie zainicjalizowana!")
         except Exception as e:
             self.log(f"BŁĄD: Nie udało się zainicjalizować bazy danych: {e}")

@@ -442,7 +442,20 @@ def init_db_command():
     """Inicjalizuje bazę danych i tworzy wszystkie tabele."""
     click.echo("Rozpoczynam inicjalizację bazy danych...")
     init_db()
+    
+    # Uruchom migracje po inicjalizacji
+    from .migrate_db import migrate_all
+    click.echo("Sprawdzam i aktualizuję schemat bazy danych...")
+    migrate_all()
+    
     click.secho("Baza danych została pomyślnie zainicjalizowana!", fg="green")
+
+
+@cli.command()
+def migrate():
+    """Wykonuje migracje bazy danych (dodaje brakujące kolumny)."""
+    from .migrate_db import migrate_all
+    migrate_all()
 
 
 @cli.command()
