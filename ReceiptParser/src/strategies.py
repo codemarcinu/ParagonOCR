@@ -154,6 +154,22 @@ class BiedronkaStrategy(ReceiptStrategy):
                 continue
 
             current_item = items[i]
+            
+            # Najpierw sprawdź, czy obecna pozycja ma ujemny rabat (LLM czasem zwraca ujemne rabaty)
+            try:
+                current_rabat_raw = current_item.get("rabat", 0)
+                if isinstance(current_rabat_raw, str):
+                    current_rabat_raw = current_rabat_raw.replace(",", ".")
+                current_rabat_value = float(current_rabat_raw)
+                if current_rabat_value < 0:
+                    # LLM zwrócił ujemny rabat - konwertuj na dodatni
+                    current_item["rabat"] = f"{abs(current_rabat_value):.2f}"
+                    # Przelicz cenę po rabacie
+                    base_price = float(str(current_item.get("cena_calk", 0)).replace(",", "."))
+                    cena_po_rab = max(0.0, base_price - abs(current_rabat_value))
+                    current_item["cena_po_rab"] = f"{cena_po_rab:.2f}"
+            except (ValueError, TypeError):
+                pass
 
             # Sprawdzamy czy następna pozycja to rabat
             if i + 1 < len(items):
@@ -182,13 +198,21 @@ class BiedronkaStrategy(ReceiptStrategy):
                     except (ValueError, TypeError):
                         current_rabat = 0.0
                     
-                    current_item["rabat"] = f"{current_rabat + discount_value:.2f}"
+                    new_rabat = current_rabat + discount_value
+                    current_item["rabat"] = f"{new_rabat:.2f}"
                     
                     # Przeliczamy cenę końcową
                     try:
                         base_price = float(str(current_item.get("cena_calk", 0)).replace(",", "."))
                         # W Biedrze cena_calk to często cena PRZED rabatem, więc odejmujemy
-                        current_item["cena_po_rab"] = f"{base_price - (current_rabat + discount_value):.2f}"
+                        # Upewniamy się, że cena po rabacie nie jest ujemna
+                        cena_po_rab = max(0.0, base_price - new_rabat)
+                        current_item["cena_po_rab"] = f"{cena_po_rab:.2f}"
+                        
+                        # Jeśli rabat jest większy niż cena, korygujemy
+                        if new_rabat > base_price:
+                            current_item["rabat"] = f"{base_price:.2f}"
+                            current_item["cena_po_rab"] = "0.00"
                     except (ValueError, TypeError):
                         pass
                     

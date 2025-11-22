@@ -23,6 +23,32 @@ except Exception as e:
 # --- Normalizacja Nazw Produktów ---
 
 
+def clean_llm_suggestion(suggestion: str) -> str:
+    """
+    Czyści sugestię z LLM z prefiksów typu 'Clean: "', cudzysłowów i innych artefaktów.
+    
+    Args:
+        suggestion: Surowa sugestia z LLM
+        
+    Returns:
+        Oczyszczona nazwa produktu
+    """
+    if not suggestion:
+        return suggestion
+    
+    # Usuń prefiksy typu "Clean: " lub "Clean:"
+    suggestion = re.sub(r'^Clean:\s*"?', '', suggestion, flags=re.IGNORECASE)
+    suggestion = re.sub(r'^Clean\s*"?', '', suggestion, flags=re.IGNORECASE)
+    
+    # Usuń cudzysłowy na początku i końcu
+    suggestion = suggestion.strip().strip('"').strip("'")
+    
+    # Usuń ewentualne dwukropki i spacje na początku
+    suggestion = re.sub(r'^:\s*', '', suggestion)
+    
+    return suggestion.strip()
+
+
 def get_llm_suggestion(
     raw_name: str, model_name: str = Config.TEXT_MODEL
 ) -> str | None:
@@ -74,8 +100,9 @@ def get_llm_suggestion(
             ],
         )
         suggestion = response["message"]["content"].strip()
-        # Czasami model może zwrócić nazwę w cudzysłowach, usuwamy je
-        return suggestion.strip("'\"")
+        # Czyścimy sugestię z prefiksów i artefaktów
+        cleaned = clean_llm_suggestion(suggestion)
+        return cleaned if cleaned else None
     except Exception as e:
         print(
             f"BŁĄD: Wystąpił problem podczas komunikacji z modelem '{model_name}': {e}"

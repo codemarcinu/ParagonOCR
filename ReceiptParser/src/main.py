@@ -46,23 +46,33 @@ def verify_math_consistency(parsed_data: ParsedData, log_callback: Callable) -> 
             cena_calk = Decimal(str(item.get("cena_calk", 0)).replace(",", "."))
             rabat = Decimal(str(item.get("rabat", 0)).replace(",", "."))
 
-            # Obliczona wartość
+            # Obliczona wartość (ilość * cena jednostkowa)
             obliczona = ilosc * cena_jedn
 
+            # Pobierz cenę po rabacie (jeśli istnieje)
+            cena_po_rab = Decimal(str(item.get("cena_po_rab", 0)).replace(",", "."))
+            
+            # Jeśli cena_po_rab jest ustawiona i różna od zera, użyj jej jako bazowej ceny
+            # W przeciwnym razie użyj cena_calk
+            if cena_po_rab > 0:
+                base_price = cena_po_rab + rabat  # Cena przed rabatem = cena po rabacie + rabat
+            else:
+                base_price = cena_calk
+
             # Tolerancja 0.01 PLN (błędy zaokrągleń)
-            roznica = abs(obliczona - cena_calk)
+            roznica = abs(obliczona - base_price)
 
             if roznica > Decimal("0.01"):
                 nazwa = item.get("nazwa_raw", "Nieznany produkt")
                 log_callback(
                     f"OSTRZEŻENIE: Niezgodność matematyczna dla '{nazwa}': "
-                    f"{ilosc} * {cena_jedn} = {obliczona}, ale cena_calk = {cena_calk} (różnica: {roznica:.2f})"
+                    f"{ilosc} * {cena_jedn} = {obliczona}, ale cena bazowa = {base_price} (różnica: {roznica:.2f})"
                 )
 
-                # Jeśli różnica jest ujemna (cena_calk < obliczona), może to być rabat
-                if cena_calk < obliczona:
+                # Jeśli różnica jest ujemna (base_price < obliczona), może to być rabat
+                if base_price < obliczona:
                     # Prawdopodobnie jest ukryty rabat
-                    ukryty_rabat = obliczona - cena_calk
+                    ukryty_rabat = obliczona - base_price
                     if rabat == 0:
                         # Aktualizuj rabat jeśli był zerowy
                         item["rabat"] = str(ukryty_rabat)
@@ -75,20 +85,43 @@ def verify_math_consistency(parsed_data: ParsedData, log_callback: Callable) -> 
                         log_callback(
                             f"  -> Zaktualizowano rabat: {rabat:.2f} -> {rabat + ukryty_rabat:.2f} PLN"
                         )
-
-                    # Aktualizuj cenę po rabacie
-                    item["cena_po_rab"] = str(cena_calk)
+                    
+                    # Przelicz cenę po rabacie (nie może być ujemna)
+                    nowa_cena_po_rab = max(Decimal("0"), base_price - Decimal(str(item.get("rabat", 0)).replace(",", ".")))
+                    item["cena_po_rab"] = str(nowa_cena_po_rab)
+                    item["cena_calk"] = str(base_price)
                     fixed_count += 1
                 else:
-                    # Jeśli cena_calk > obliczona, może być błąd OCR - używamy obliczonej wartości
+                    # Jeśli base_price > obliczona, może być błąd OCR - używamy obliczonej wartości
                     log_callback(
-                        f"  -> Korekta: ustawiam cena_calk na {obliczona:.2f} (było {cena_calk:.2f})"
+                        f"  -> Korekta: ustawiam cena_calk na {obliczona:.2f} (było {base_price:.2f})"
                     )
                     item["cena_calk"] = str(obliczona)
                     # Jeśli nie ma rabatu, cena_po_rab = cena_calk
                     if not item.get("cena_po_rab") or Decimal(str(item.get("cena_po_rab", 0)).replace(",", ".")) == 0:
                         item["cena_po_rab"] = str(obliczona)
                     fixed_count += 1
+            
+            # Walidacja: cena_po_rab nie może być ujemna
+            final_cena_po_rab = Decimal(str(item.get("cena_po_rab", 0)).replace(",", "."))
+            final_rabat = Decimal(str(item.get("rabat", 0)).replace(",", "."))
+            final_cena_calk = Decimal(str(item.get("cena_calk", 0)).replace(",", "."))
+            
+            if final_cena_po_rab < 0:
+                log_callback(
+                    f"OSTRZEŻENIE: Ujemna cena po rabacie dla '{item.get('nazwa_raw', 'Nieznany')}': {final_cena_po_rab:.2f}. Korekta na 0."
+                )
+                item["cena_po_rab"] = "0.00"
+                fixed_count += 1
+            
+            # Walidacja: rabat nie może być większy niż cena całkowita
+            if final_rabat > final_cena_calk:
+                log_callback(
+                    f"OSTRZEŻENIE: Rabat ({final_rabat:.2f}) większy niż cena całkowita ({final_cena_calk:.2f}) dla '{item.get('nazwa_raw', 'Nieznany')}'. Korekta rabatu."
+                )
+                item["rabat"] = str(final_cena_calk)
+                item["cena_po_rab"] = "0.00"
+                fixed_count += 1
 
         except (ValueError, TypeError, InvalidOperation) as e:
             nazwa = item.get("nazwa_raw", "Nieznany produkt")
@@ -278,9 +311,7 @@ def save_to_database(
         )
 
         # Jeśli resolve_product zwrócił None (np. dla śmieci OCR), pomijamy dodawanie
-        if product_id is None and item_data["nazwa_raw"] != "POMIŃ":
-            pass
-
+        # UWAGA: Produkt "POMIŃ" jest specjalnym produktem, który powinien być zapisany
         if product_id is None:
             log_callback(f"   -> Pominięto pozycję: {item_data['nazwa_raw']}")
             continue
@@ -343,15 +374,18 @@ def resolve_product(
         suggested_name = get_llm_suggestion(raw_name)
         source = "LLM"
         if suggested_name:
+            # Dodatkowe czyszczenie na wypadek, gdyby LLM zwróciło coś z prefiksem
+            from .llm import clean_llm_suggestion
+            suggested_name = clean_llm_suggestion(suggested_name)
             log_callback(f"   -> Sugestia (LLM): '{suggested_name}'")
         else:
             log_callback("   -> Nie udało się uzyskać sugestii LLM.")
 
     # Obsługa przypadku "POMIŃ" (czy to ze słownika, czy z LLM)
+    # "POMIŃ" to specjalny produkt, który powinien być zapisany, ale oznacza, że pozycja nie jest produktem spożywczym
     if suggested_name == "POMIŃ":
-        log_callback("   -> System zasugerował pominięcie tej pozycji.")
-        # Opcjonalnie: Możesz tu od razu zwrócić None, jeśli ufasz regułom w 100%
-        # return None
+        log_callback("   -> System zasugerował oznaczenie jako 'POMIŃ' (pozycja nie jest produktem spożywczym).")
+        # Kontynuujemy, aby zapisać tę pozycję z produktem "POMIŃ"
 
     # 4. Weryfikacja Użytkownika (Prompt)
     prompt_text = f"Nieznany produkt (Sugerowany przez {source}: {suggested_name or 'Brak'}). Do jakiego produktu go przypisać?"
