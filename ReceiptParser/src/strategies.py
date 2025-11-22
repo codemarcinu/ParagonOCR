@@ -172,21 +172,32 @@ class BiedronkaStrategy(ReceiptStrategy):
                 pass
 
             # Sprawdzamy czy następna pozycja to rabat
+            # UWAGA: Produkt z "Rabat" w nazwie (np. "KawMielRafiin250g Rabat") to NIE jest rabat do scalenia,
+            # tylko produkt który już ma rabat w polu "rabat". Scalamy tylko pozycje które są TYLKO rabatem.
             if i + 1 < len(items):
                 next_item = items[i + 1]
-                raw_name = next_item.get("nazwa_raw", "").lower()
+                next_raw_name = next_item.get("nazwa_raw", "").strip()
+                next_raw_name_lower = next_raw_name.lower()
                 
-                # Biedronka często pisze "Rabat" albo po prostu ujemna kwota
-                is_discount = "rabat" in raw_name or "upust" in raw_name
-                
-                # Sprawdzenie po cenie (ujemna)
+                # Sprawdzenie po cenie (ujemna) - to jest główny wskaźnik
                 try:
                     price_total = float(str(next_item.get("cena_calk", 0)).replace(",", "."))
                 except (ValueError, TypeError):
                     price_total = 0.0
 
+                # Rabat to pozycja która:
+                # 1. Ma ujemną cenę całkowitą (to jest najpewniejszy wskaźnik) LUB
+                # 2. Nazwa to TYLKO "Rabat" / "Upust" (bez innych słów, bez produktu)
+                is_discount = False
+                
                 if price_total < 0:
+                    # Ujemna cena = na pewno rabat
                     is_discount = True
+                elif next_raw_name_lower in ["rabat", "upust"]:
+                    # Nazwa to tylko "Rabat" lub "Upust" - to jest rabat
+                    is_discount = True
+                # NIE traktujemy produktów z "Rabat" w nazwie jako rabatów do scalenia!
+                # (np. "KawMielRafiin250g Rabat" to produkt, nie rabat)
 
                 if is_discount:
                     # Mamy rabat!

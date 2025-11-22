@@ -52,55 +52,50 @@ def verify_math_consistency(parsed_data: ParsedData, log_callback: Callable) -> 
             # Pobierz cenę po rabacie (jeśli istnieje)
             cena_po_rab = Decimal(str(item.get("cena_po_rab", 0)).replace(",", "."))
             
-            # Jeśli cena_po_rab jest ustawiona i różna od zera, użyj jej jako bazowej ceny
-            # W przeciwnym razie użyj cena_calk
-            if cena_po_rab > 0:
-                base_price = cena_po_rab + rabat  # Cena przed rabatem = cena po rabacie + rabat
-            else:
-                base_price = cena_calk
-
+            # Sprawdź zgodność matematyczną: ilość * cena_jedn powinna równać się cena_calk
+            # (cena_calk to cena PRZED rabatem, jeśli jest rabat)
             # Tolerancja 0.01 PLN (błędy zaokrągleń)
-            roznica = abs(obliczona - base_price)
+            roznica = abs(obliczona - cena_calk)
 
             if roznica > Decimal("0.01"):
                 nazwa = item.get("nazwa_raw", "Nieznany produkt")
                 log_callback(
                     f"OSTRZEŻENIE: Niezgodność matematyczna dla '{nazwa}': "
-                    f"{ilosc} * {cena_jedn} = {obliczona}, ale cena bazowa = {base_price} (różnica: {roznica:.2f})"
+                    f"{ilosc} * {cena_jedn} = {obliczona}, ale cena_calk = {cena_calk} (różnica: {roznica:.2f})"
                 )
 
-                # Jeśli różnica jest ujemna (base_price < obliczona), może to być rabat
-                if base_price < obliczona:
-                    # Prawdopodobnie jest ukryty rabat
-                    ukryty_rabat = obliczona - base_price
-                    if rabat == 0:
-                        # Aktualizuj rabat jeśli był zerowy
-                        item["rabat"] = str(ukryty_rabat)
-                        log_callback(
-                            f"  -> Wykryto ukryty rabat: {ukryty_rabat:.2f} PLN"
-                        )
-                    else:
-                        # Sumuj z istniejącym rabatem
-                        item["rabat"] = str(rabat + ukryty_rabat)
-                        log_callback(
-                            f"  -> Zaktualizowano rabat: {rabat:.2f} -> {rabat + ukryty_rabat:.2f} PLN"
-                        )
-                    
-                    # Przelicz cenę po rabacie (nie może być ujemna)
-                    nowa_cena_po_rab = max(Decimal("0"), base_price - Decimal(str(item.get("rabat", 0)).replace(",", ".")))
-                    item["cena_po_rab"] = str(nowa_cena_po_rab)
-                    item["cena_calk"] = str(base_price)
-                    fixed_count += 1
-                else:
-                    # Jeśli base_price > obliczona, może być błąd OCR - używamy obliczonej wartości
+                # Jeśli cena_calk < obliczona, może to być błąd OCR - używamy obliczonej wartości
+                if cena_calk < obliczona:
+                    # Korekta: ustawiamy cena_calk na obliczoną wartość
                     log_callback(
-                        f"  -> Korekta: ustawiam cena_calk na {obliczona:.2f} (było {base_price:.2f})"
+                        f"  -> Korekta: ustawiam cena_calk na {obliczona:.2f} (było {cena_calk:.2f})"
                     )
                     item["cena_calk"] = str(obliczona)
                     # Jeśli nie ma rabatu, cena_po_rab = cena_calk
-                    if not item.get("cena_po_rab") or Decimal(str(item.get("cena_po_rab", 0)).replace(",", ".")) == 0:
-                        item["cena_po_rab"] = str(obliczona)
+                    if rabat == 0:
+                        if not item.get("cena_po_rab") or cena_po_rab == 0:
+                            item["cena_po_rab"] = str(obliczona)
+                    else:
+                        # Jeśli jest rabat, przelicz cenę po rabacie
+                        nowa_cena_po_rab = max(Decimal("0"), obliczona - rabat)
+                        item["cena_po_rab"] = str(nowa_cena_po_rab)
                     fixed_count += 1
+                else:
+                    # Jeśli cena_calk > obliczona, może być błąd OCR w cenie jednostkowej
+                    # lub może być ukryty rabat (ale tylko jeśli różnica jest znacząca)
+                    if roznica > Decimal("1.00"):  # Różnica większa niż 1 PLN
+                        log_callback(
+                            f"  -> Korekta: ustawiam cena_calk na {obliczona:.2f} (było {cena_calk:.2f}) - prawdopodobny błąd OCR"
+                        )
+                        item["cena_calk"] = str(obliczona)
+                        if rabat == 0:
+                            if not item.get("cena_po_rab") or cena_po_rab == 0:
+                                item["cena_po_rab"] = str(obliczona)
+                        else:
+                            nowa_cena_po_rab = max(Decimal("0"), obliczona - rabat)
+                            item["cena_po_rab"] = str(nowa_cena_po_rab)
+                        fixed_count += 1
+                    # Jeśli różnica jest mała (< 1 PLN), ignorujemy - może być błąd zaokrąglenia
             
             # Walidacja: cena_po_rab nie może być ujemna
             final_cena_po_rab = Decimal(str(item.get("cena_po_rab", 0)).replace(",", "."))
