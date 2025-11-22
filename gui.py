@@ -763,20 +763,39 @@ class App(ctk.CTk):
             self.log("INFO: Produkt został dodany do magazynu")
     
     def show_inventory(self):
-        """Pokazuje stan magazynu"""
+        """Pokazuje stan magazynu z możliwością edycji"""
         SessionLocal = sessionmaker(bind=engine)
         session = SessionLocal()
         
         # Create inventory window
         inv_window = ctk.CTkToplevel(self)
-        inv_window.title("Stan Magazynu")
-        inv_window.geometry("1000x600")
+        inv_window.title("Stan Magazynu - Edycja")
+        inv_window.geometry("1200x700")
+        
+        # Frame dla przycisków akcji
+        action_frame = ctk.CTkFrame(inv_window)
+        action_frame.pack(fill="x", padx=10, pady=5)
+        
+        ctk.CTkButton(
+            action_frame,
+            text="💾 Zapisz zmiany",
+            command=lambda: self.save_inventory_changes(inv_window, session, inventory_items),
+            fg_color="green",
+            width=150
+        ).pack(side="left", padx=5)
+        
+        ctk.CTkButton(
+            action_frame,
+            text="🔄 Odśwież",
+            command=lambda: self.refresh_inventory_window(inv_window, session),
+            width=150
+        ).pack(side="left", padx=5)
         
         scrollable = ctk.CTkScrollableFrame(inv_window)
         scrollable.pack(fill="both", expand=True, padx=10, pady=10)
         
-        # Headers
-        headers = ["Produkt", "Ilość", "Jednostka", "Data ważności", "Status"]
+        # Headers - dodano kolumnę "Akcje"
+        headers = ["Produkt", "Ilość", "Jednostka", "Data ważności", "Status", "Akcje"]
         for col, text in enumerate(headers):
             ctk.CTkLabel(
                 scrollable, text=text, font=("Arial", 12, "bold")
@@ -786,34 +805,35 @@ class App(ctk.CTk):
             StanMagazynowy.ilosc > 0
         ).order_by(StanMagazynowy.data_waznosci).all()
         
+        inventory_items = []
+        
         for i, stan in enumerate(stany):
             row = i + 1
+            
+            # Produkt (tylko do odczytu)
             ctk.CTkLabel(
                 scrollable,
                 text=stan.produkt.znormalizowana_nazwa,
-                width=300
+                width=250
             ).grid(row=row, column=0, padx=5, pady=2, sticky="w")
             
-            ctk.CTkLabel(
-                scrollable,
-                text=str(stan.ilosc),
-                width=100
-            ).grid(row=row, column=1, padx=5, pady=2)
+            # Ilość (edytowalna)
+            ilosc_entry = ctk.CTkEntry(scrollable, width=100)
+            ilosc_entry.insert(0, str(stan.ilosc))
+            ilosc_entry.grid(row=row, column=1, padx=5, pady=2)
             
-            ctk.CTkLabel(
-                scrollable,
-                text=stan.jednostka_miary or "szt",
-                width=100
-            ).grid(row=row, column=2, padx=5, pady=2)
+            # Jednostka (edytowalna)
+            jednostka_entry = ctk.CTkEntry(scrollable, width=100)
+            jednostka_entry.insert(0, stan.jednostka_miary or "szt")
+            jednostka_entry.grid(row=row, column=2, padx=5, pady=2)
             
-            data_waz = stan.data_waznosci.strftime("%Y-%m-%d") if stan.data_waznosci else "Brak"
-            ctk.CTkLabel(
-                scrollable,
-                text=data_waz,
-                width=120
-            ).grid(row=row, column=3, padx=5, pady=2)
+            # Data ważności (edytowalna)
+            data_entry = ctk.CTkEntry(scrollable, width=120, placeholder_text="YYYY-MM-DD")
+            if stan.data_waznosci:
+                data_entry.insert(0, stan.data_waznosci.strftime("%Y-%m-%d"))
+            data_entry.grid(row=row, column=3, padx=5, pady=2)
             
-            # Status
+            # Status (tylko do odczytu)
             if stan.data_waznosci:
                 if stan.data_waznosci < date.today():
                     status = "⚠️ Przeterminowany"
@@ -828,14 +848,112 @@ class App(ctk.CTk):
                 status = "❓ Brak daty"
                 color = "gray"
             
-            ctk.CTkLabel(
+            status_label = ctk.CTkLabel(
                 scrollable,
                 text=status,
                 width=150,
                 text_color=color
-            ).grid(row=row, column=4, padx=5, pady=2)
+            )
+            status_label.grid(row=row, column=4, padx=5, pady=2)
+            
+            # Przycisk usuwania
+            delete_btn = ctk.CTkButton(
+                scrollable,
+                text="🗑️ Usuń",
+                command=lambda s=stan: self.delete_inventory_item(inv_window, session, s),
+                fg_color="red",
+                width=80,
+                height=25
+            )
+            delete_btn.grid(row=row, column=5, padx=5, pady=2)
+            
+            inventory_items.append({
+                "stan": stan,
+                "ilosc_entry": ilosc_entry,
+                "jednostka_entry": jednostka_entry,
+                "data_entry": data_entry,
+                "status_label": status_label
+            })
         
+        if not stany:
+            ctk.CTkLabel(
+                scrollable,
+                text="Brak produktów w magazynie",
+                font=("Arial", 14)
+            ).grid(row=1, column=0, columnspan=6, pady=20)
+        
+        # Przechowaj referencje w oknie
+        inv_window.inventory_items = inventory_items
+        inv_window.session = session
+        
+        inv_window.protocol("WM_DELETE_WINDOW", lambda: self.close_inventory_window(inv_window, session))
+    
+    def save_inventory_changes(self, inv_window, session, inventory_items):
+        """Zapisuje zmiany w magazynie"""
+        try:
+            for item in inventory_items:
+                stan = item["stan"]
+                
+                # Aktualizuj ilość
+                try:
+                    nowa_ilosc = Decimal(item["ilosc_entry"].get().replace(",", "."))
+                    if nowa_ilosc < 0:
+                        messagebox.showerror("Błąd", f"Ilość nie może być ujemna dla produktu {stan.produkt.znormalizowana_nazwa}")
+                        return
+                    if nowa_ilosc == 0:
+                        # Usuń produkt z magazynu jeśli ilość = 0
+                        session.delete(stan)
+                        continue
+                    stan.ilosc = nowa_ilosc
+                except ValueError:
+                    messagebox.showerror("Błąd", f"Nieprawidłowa ilość dla produktu {stan.produkt.znormalizowana_nazwa}")
+                    return
+                
+                # Aktualizuj jednostkę
+                stan.jednostka_miary = item["jednostka_entry"].get().strip() or None
+                
+                # Aktualizuj datę ważności
+                data_str = item["data_entry"].get().strip()
+                if data_str:
+                    try:
+                        stan.data_waznosci = datetime.strptime(data_str, "%Y-%m-%d").date()
+                    except ValueError:
+                        messagebox.showerror("Błąd", f"Nieprawidłowy format daty dla produktu {stan.produkt.znormalizowana_nazwa}\nUżyj formatu YYYY-MM-DD")
+                        return
+                else:
+                    stan.data_waznosci = None
+            
+            session.commit()
+            messagebox.showinfo("Sukces", "Zmiany zostały zapisane!")
+            # Odśwież okno
+            self.refresh_inventory_window(inv_window, session)
+        except Exception as e:
+            session.rollback()
+            messagebox.showerror("Błąd", f"Nie udało się zapisać zmian: {e}")
+    
+    def delete_inventory_item(self, inv_window, session, stan):
+        """Usuwa produkt z magazynu"""
+        if messagebox.askyesno("Potwierdzenie", f"Czy na pewno chcesz usunąć {stan.produkt.znormalizowana_nazwa} z magazynu?"):
+            try:
+                session.delete(stan)
+                session.commit()
+                messagebox.showinfo("Sukces", "Produkt został usunięty z magazynu")
+                # Odśwież okno
+                self.refresh_inventory_window(inv_window, session)
+            except Exception as e:
+                session.rollback()
+                messagebox.showerror("Błąd", f"Nie udało się usunąć produktu: {e}")
+    
+    def refresh_inventory_window(self, inv_window, session):
+        """Odświeża okno magazynu"""
         session.close()
+        inv_window.destroy()
+        self.show_inventory()
+    
+    def close_inventory_window(self, inv_window, session):
+        """Zamyka okno magazynu i zamyka sesję"""
+        session.close()
+        inv_window.destroy()
 
     def refresh_history(self):
         """Odświeża listę historii plików w combobox."""
