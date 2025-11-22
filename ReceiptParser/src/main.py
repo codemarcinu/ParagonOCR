@@ -11,12 +11,15 @@ from .database import (
     PozycjaParagonu,
     Produkt,
     AliasProduktu,
+    KategoriaProduktu,
 )
+from .knowledge_base import get_product_metadata
 from .data_models import ParsedData
 from .llm import get_llm_suggestion, parse_receipt_with_llm, parse_receipt_from_text
 from .ocr import convert_pdf_to_image, extract_text_from_image
 from .strategies import get_strategy_for_store
 from .mistral_ocr import MistralOCRClient
+from .normalization_rules import find_static_match
 import os
 
 # --- GŁÓWNA LOGIKA PRZETWARZANIA (NIEZALEŻNA OD UI) ---
@@ -220,7 +223,8 @@ def save_to_database(
 
 def resolve_product(
     session: Session, raw_name: str, log_callback: Callable, prompt_callback: Callable
-) -> int:
+) -> int | None:
+    # 1. Sprawdź Aliasy w Bazie (Najszybsze i Najpewniejsze)
     alias = (
         session.query(AliasProduktu)
         .options(joinedload(AliasProduktu.produkt))
@@ -229,39 +233,89 @@ def resolve_product(
     )
     if alias:
         log_callback(
-            f"   -> Znaleziono alias dla '{raw_name}': '{alias.produkt.znormalizowana_nazwa}'"
+            f"   -> Znaleziono alias (DB) dla '{raw_name}': '{alias.produkt.znormalizowana_nazwa}'"
         )
         return alias.produkt_id
 
     log_callback(f"  ?? Nieznany produkt: '{raw_name}'")
-    suggested_name = get_llm_suggestion(raw_name)
-    if suggested_name:
-        log_callback(f"   -> Sugestia LLM: '{suggested_name}'")
-        if suggested_name == "POMIŃ":
-            log_callback(
-                "   -> LLM zasugerował pominięcie tej pozycji (śmieci/kaucja)."
-            )
-            return None
-    else:
-        log_callback("   -> Nie udało się uzyskać sugestii LLM.")
 
-    prompt_text = "Do jakiego produktu go przypisać?"
+    # 2. Sprawdź Reguły Statyczne (Oszczędność LLM)
+    suggested_name = find_static_match(raw_name)
+    source = "Reguły Statyczne"
+
+    if suggested_name:
+        log_callback(f"   -> Sugestia (Słownik): '{suggested_name}'")
+    else:
+        # 3. Zapytaj LLM (Ostatnia deska ratunku)
+        log_callback("   -> Słownik pusty. Pytam LLM...")
+        suggested_name = get_llm_suggestion(raw_name)
+        source = "LLM"
+        if suggested_name:
+            log_callback(f"   -> Sugestia (LLM): '{suggested_name}'")
+        else:
+            log_callback("   -> Nie udało się uzyskać sugestii LLM.")
+
+    # Obsługa przypadku "POMIŃ" (czy to ze słownika, czy z LLM)
+    if suggested_name == "POMIŃ":
+        log_callback("   -> System zasugerował pominięcie tej pozycji.")
+        # Opcjonalnie: Możesz tu od razu zwrócić None, jeśli ufasz regułom w 100%
+        # return None
+
+    # 4. Weryfikacja Użytkownika (Prompt)
+    prompt_text = f"Nieznany produkt (Sugerowany przez {source}: {suggested_name or 'Brak'}). Do jakiego produktu go przypisać?"
+
+    # Jeśli mamy sugestię ze słownika, możemy chcieć ją pominąć w pytaniu użytkownika (auto-akceptacja)
+    # Ale dla bezpieczeństwa na początku zostawmy prompt.
     normalized_name = prompt_callback(prompt_text, suggested_name or "", raw_name)
 
     if not normalized_name:
         log_callback("   -> Pominięto przypisanie produktu dla tej pozycji.")
         return None
 
+    # ... Dalsza część kodu (Zapis do bazy Produkt/Alias) bez zmian ...
     product = (
         session.query(Produkt).filter_by(znormalizowana_nazwa=normalized_name).first()
     )
+
+    # Pobierz metadane z bazy wiedzy
+    metadata = get_product_metadata(normalized_name)
+    kategoria_nazwa = metadata["kategoria"]
+    can_freeze = metadata["can_freeze"]
+
+    # Info dla usera
+    freeze_info = "❄️ MOŻNA MROZIĆ" if can_freeze else "🚫 NIE MROZIĆ"
+    if can_freeze is None:
+        freeze_info = ""  # Brak danych
+
+    log_callback(f"   -> Kategoria: {kategoria_nazwa} | {freeze_info}")
+
+    # Pobierz lub utwórz kategorię w bazie
+    kategoria = (
+        session.query(KategoriaProduktu)
+        .filter_by(nazwa_kategorii=kategoria_nazwa)
+        .first()
+    )
+    if not kategoria:
+        log_callback(f"   -> Tworzę nową kategorię: '{kategoria_nazwa}'")
+        kategoria = KategoriaProduktu(nazwa_kategorii=kategoria_nazwa)
+        session.add(kategoria)
+        session.flush()
+
     if not product:
         log_callback(f"   -> Tworzę nowy produkt w bazie: '{normalized_name}'")
-        product = Produkt(znormalizowana_nazwa=normalized_name, kategoria_id=None)
+        product = Produkt(
+            znormalizowana_nazwa=normalized_name, kategoria_id=kategoria.kategoria_id
+        )
         session.add(product)
         session.flush()
     else:
         log_callback(f"   -> Znaleziono istniejący produkt: '{normalized_name}'")
+        # Opcjonalnie: Aktualizuj kategorię jeśli brakuje (dla starszych wpisów)
+        if product.kategoria_id is None:
+            product.kategoria_id = kategoria.kategoria_id
+            log_callback(
+                f"   -> Zaktualizowano kategorię produktu na: '{kategoria_nazwa}'"
+            )
 
     log_callback(f"   -> Tworzę nowy alias: '{raw_name}' -> '{normalized_name}'")
     new_alias = AliasProduktu(nazwa_z_paragonu=raw_name, produkt_id=product.produkt_id)
