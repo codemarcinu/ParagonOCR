@@ -12,10 +12,10 @@ from .config import Config
 # Globalny klient do komunikacji z serwerem Ollama.
 # Upewnij się, że kontener Docker z Ollamą jest uruchomiony.
 try:
-    # Tworzymy httpx client z timeoutem
+    # Tworzymy timeout i przekazujemy go bezpośrednio do ollama.Client
+    # ollama.Client przyjmuje **kwargs, które są przekazywane do httpx.Client
     timeout = httpx.Timeout(Config.OLLAMA_TIMEOUT, connect=10.0)
-    http_client = httpx.Client(timeout=timeout)
-    client = ollama.Client(host=Config.OLLAMA_HOST, http_client=http_client)
+    client = ollama.Client(host=Config.OLLAMA_HOST, timeout=timeout)
     # Sprawdzenie połączenia przy starcie
     # client.list()
 except Exception as e:
@@ -23,7 +23,6 @@ except Exception as e:
         f"BŁĄD: Nie można połączyć się z Ollama na {Config.OLLAMA_HOST}. Upewnij się, że usługa działa. Szczegóły: {e}"
     )
     client = None
-    http_client = None
 
 # --- Normalizacja Nazw Produktów ---
 
