@@ -9,3 +9,4 @@ pytesseract
 mistralai
 pytest
 pytest-cov
+rapidfuzz

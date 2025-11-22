@@ -70,29 +70,30 @@ def get_llm_suggestion(
         print("BŁĄD: Klient Ollama nie jest skonfigurowany.")
         return None
 
-    system_prompt = (
-        "Jesteś ekspertem od kategoryzacji produktów spożywczych. "
-        "Twoim celem jest sprowadzenie skomplikowanej nazwy z paragonu do OGÓLNEJ, BAZOWEJ nazwy produktu. "
-        "Zasady:"
-        "1. Ignoruj marki (np. 'Mlekovita', 'Coca-Cola' -> 'Napój gazowany', chyba że nazwa jest generyczna)."
-        "2. Ignoruj gramaturę i opakowanie (np. '1L', 'butelka')."
-        "3. Używaj nazw w mianowniku liczby pojedynczej (np. 'Jaja' -> 'Jajka', 'Bułki' -> 'Bułka')."
-        "4. Zwracaj TYLKO znormalizowaną nazwę."
-        "5. Dla śmieci OCR zwracaj 'POMIŃ'."
-    )
+    system_prompt = """
+    Jesteś wirtualnym magazynierem. Twoim zadaniem jest zamiana nazwy z paragonu na KRÓTKĄ, GENERYCZNĄ nazwę produktu do domowej spiżarni.
+    
+    ZASADY KRYTYCZNE:
+    1. USUWASZ marki (np. "Krakus", "Mlekovita", "Winiary" -> USUŃ).
+    2. USUWASZ gramaturę i opakowania (np. "1L", "500g", "butelka", "szt" -> USUŃ).
+    3. USUWASZ przymiotniki marketingowe (np. "tradycyjne", "babuni", "pyszne", "luksusowe" -> USUŃ).
+    4. Zmieniasz na Mianownik Liczby Pojedynczej (np. "Bułki" -> "Bułka", "Jaja" -> "Jajka").
+    5. Jeśli produkt to plastikowa torba/reklamówka, zwróć dokładnie słowo: "POMIŃ".
+    """
 
     user_prompt = f"""
-    Przykłady:
-    - Raw: "Mleko UHT 3,2% Łaciate 1L" -> Clean: "Mleko"
-    - Raw: "Jaja z wolnego wybiegu L 10szt" -> Clean: "Jajka"
-    - Raw: "Chleb Baltonowski krojony" -> Clean: "Chleb"
-    - Raw: "Kajzerka pszenna duża" -> Clean: "Bułka"
-    - Raw: "Woda Żywiec Zdrój Niegaz." -> Clean: "Woda mineralna"
-    - Raw: "Pomidor gałązka luz" -> Clean: "Pomidory"
-    - Raw: "Szynka Konserwowa Krakus" -> Clean: "Szynka"
-
-    Zadanie:
-    - Raw: "{raw_name}" -> Clean:
+    PRZYKŁADY:
+    - "Mleko UHT 3,2% Łaciate 1L" -> "Mleko"
+    - "Jaja z wolnego wybiegu L 10szt" -> "Jajka"
+    - "Chleb Baltonowski krojony 500g" -> "Chleb"
+    - "Kajzerka pszenna duża" -> "Bułka"
+    - "Szynka Konserwowa Krakus" -> "Szynka"
+    - "Pomidor gałązka luz" -> "Pomidory"
+    - "Coca Cola 0.5L" -> "Napój gazowany"
+    - "Reklamówka mała płatna" -> "POMIŃ"
+    
+    Nazwa z paragonu: "{raw_name}"
+    Znormalizowana nazwa:
     """
 
     try:

@@ -1,5 +1,28 @@
 import re
 
+
+def clean_raw_name_ocr(raw_name: str) -> str:
+    """
+    Usuwa typowe śmieci z paragonów przed właściwą normalizacją.
+    """
+    name = raw_name.upper()  # Pracuj na UPPERCASE dla spójności
+
+    # 1. Usuń kody podatkowe i znaki na końcu (np. " A", " B", " 23%")
+    name = re.sub(r'\s+[ABC]\s*$', '', name)
+    name = re.sub(r'\s+\d{1,2}%\s*$', '', name)
+
+    # 2. Usuń "1 x " lub "1.000 x" z początku (częsty błąd OCR sklejania ilości z nazwą)
+    name = re.sub(r'^\d+([.,]\d+)?\s*[xX*]\s*', '', name)
+
+    # 3. Usuń dziwne znaki na początku/końcu (np. kropki, przecinki, myślniki)
+    name = name.strip(" .,-_*")
+
+    # 4. Usuń słowa "RABAT", "PROMOCJA" jeśli są doklejone do nazwy
+    name = re.sub(r'\s+(RABAT|PROMOCJA|UPUST).*$', '', name)
+
+    return name
+
+
 # Twardy słownik mapowania.
 # Klucz: Znormalizowana nazwa (cel)
 # Wartość: Lista wzorców REGEX, które mają "złapać" tę nazwę w surowym tekście.
@@ -8,14 +31,14 @@ import re
 
 STATIC_RULES = {
     # --- PIECZYWO ---
+    # Najpierw specyficzne
+    "Bagietka": [r"bagietka", r"półbagietka", r"czosnkowa"],
     "Bułka": [
         r"bułka",
         r"bułki",
         r"kajzerka",
         r"grahamka",
-        r"bagietka",
         r"ciabatta",
-        r"półbagietka",
         r"buł\.",
         r"pieczywo.*pszenne",
     ],
@@ -24,6 +47,8 @@ STATIC_RULES = {
     # --- NABIAŁ ---
     "Mleko": [r"mleko", r"mlecz.*", r"uht"],
     "Masło": [r"masło", r"maslo", r"osełka", r"osełkowa"],
+    # Najpierw specyficzne sery
+    "Mozzarella": [r"mozzarella", r"mozarella"],
     "Ser Żółty": [
         r"ser.*gouda",
         r"ser.*edamski",
@@ -33,19 +58,21 @@ STATIC_RULES = {
         r"sert.*mierzw",
         r"ser.*morski",
     ],
+    # Potem ogólne
     "Ser Biały/Twaróg": [
         r"twaróg",
         r"twarog",
         r"ser.*biały",
         r"serek.*wiejski",
         r"grani",
+        r"bieluch",
     ],
     "Śmietana": [r"śmietana", r"smietana", r"śmietanka", r"smietanka", r"śmietan"],
     "Jogurt": [r"jogurt", r"jog\.", r"skyr", r"actimel", r"danone"],
     "Jajka": [r"jaja", r"jajka", r"wolny wybieg", r"ściółkowa"],
     # --- WARZYWA I OWOCE ---
     "Ziemniaki": [r"ziemnia.*", r"ziemniaki", r"wczesne"],
-    "Pomidory": [r"pomidor", r"pom\.", r"cherry", r"gałązka"],
+    "Pomidory": [r"pomidor", r"pom\.", r"cherry", r"gałązka", r"pomidory"],
     "Ogórki": [r"ogórek", r"ogorek", r"szklarniowy", r"gruntowy"],
     "Papryka": [r"papryka"],
     "Cebula": [r"cebula", r"dymka"],

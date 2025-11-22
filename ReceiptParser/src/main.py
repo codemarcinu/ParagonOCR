@@ -2,6 +2,7 @@ import click
 from click.exceptions import Abort
 from sqlalchemy.orm import sessionmaker, Session, joinedload
 from typing import Callable
+from rapidfuzz import process, fuzz
 
 # Lokalne importy z naszego projektu
 from .database import (
@@ -21,7 +22,7 @@ from .llm import get_llm_suggestion, parse_receipt_with_llm, parse_receipt_from_
 from .ocr import convert_pdf_to_image, extract_text_from_image
 from .strategies import get_strategy_for_store
 from .mistral_ocr import MistralOCRClient
-from .normalization_rules import find_static_match
+from .normalization_rules import find_static_match, clean_raw_name_ocr
 from .config import Config
 from decimal import Decimal, InvalidOperation
 from datetime import datetime, date
@@ -395,8 +396,13 @@ def save_to_database(
 def resolve_product(
     session: Session, raw_name: str, log_callback: Callable, prompt_callback: Callable, alias_map: dict = None
 ) -> int | None:
+    # 0. Wstępne czyszczenie (Pre-cleaning)
+    raw_name = clean_raw_name_ocr(raw_name)
+    
     # 1. Sprawdź Aliasy w Bazie (Najszybsze i Najpewniejsze)
     # Używamy cache jeśli dostępny (batch loading), w przeciwnym razie zapytanie do DB
+    
+    # A. Dokładne dopasowanie
     if alias_map is not None and raw_name in alias_map:
         product_id = alias_map[raw_name]
         # Pobierz nazwę produktu dla logowania
@@ -406,6 +412,25 @@ def resolve_product(
                 f"   -> Znaleziono alias (cache) dla '{raw_name}': '{produkt.znormalizowana_nazwa}'"
             )
         return product_id
+    
+    # B. Dopasowanie rozmyte (Fuzzy)
+    if alias_map:
+        # Szukamy najlepszego dopasowania w kluczach alias_map
+        # threshold=90 oznacza bardzo wysokie podobieństwo (literówki, kropka vs przecinek)
+        match = process.extractOne(raw_name, alias_map.keys(), scorer=fuzz.token_sort_ratio)
+        
+        if match:
+            best_match_name, score, _ = match
+            if score >= 92:  # Bardzo bezpieczny próg
+                product_id = alias_map[best_match_name]
+                log_callback(f"   -> Znaleziono alias (Fuzzy {score}%) dla '{raw_name}': '{best_match_name}'")
+                
+                # Opcjonalnie: Dodaj nowy wariant do bazy, żeby następnym razem było 100% match
+                # (To "uczy" system wariacji OCR)
+                new_alias = AliasProduktu(nazwa_z_paragonu=raw_name, produkt_id=product_id)
+                session.add(new_alias)
+                
+                return product_id
     
     # Fallback: zapytanie do bazy jeśli nie ma w cache
     alias = (
