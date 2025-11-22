@@ -186,7 +186,8 @@ ParagonOCR/
 │       ├── normalization_rules.py # Regexy do normalizacji nazw
 │       ├── data_models.py  # TypedDict definicje struktur danych
 │       ├── config.py       # Konfiguracja z .env i stałe
-│       └── logger.py       # Moduł logowania (opcjonalne logowanie do pliku)
+│       ├── logger.py       # Moduł logowania (opcjonalne logowanie do pliku)
+│       └── security.py     # Moduł bezpieczeństwa (walidacja, sanityzacja)
 └── tests/                  # Testy jednostkowe i integracyjne
     ├── README.md           # Dokumentacja testów
     ├── conftest.py         # Wspólne fixtures pytest
@@ -303,6 +304,15 @@ System zawiera wbudowaną bazę wiedzy o produktach:
 - ✅ **Walidacja nazw produktów** - sprawdzanie długości i czyszczenie
 - ✅ **Obsługa ujemnych rabatów** - poprawne wykrywanie i korekta błędnych wartości
 
+**Bezpieczeństwo (2025-11-22):**
+- ✅ **Walidacja ścieżek plików** - ochrona przed path traversal attacks
+- ✅ **Bezpieczne pliki tymczasowe** - odpowiednie uprawnienia (chmod 600) i cleanup
+- ✅ **Walidacja rozmiaru plików** - ochrona przed DoS (max 100MB dla plików, 50MB dla obrazów)
+- ✅ **Walidacja wymiarów obrazów** - maksymalne wymiary 10000x10000px
+- ✅ **Sanityzacja logów** - usuwanie wrażliwych danych (pełne ścieżki, długie teksty OCR)
+- ✅ **Walidacja modeli LLM** - tylko dozwolone modele mogą być używane
+- ✅ **Nowy moduł bezpieczeństwa** - `ReceiptParser/src/security.py` z funkcjami walidacji i sanityzacji
+
 ### Wprowadzone Ulepszenia Jakości Kodu (2025-11-22)
 
 **Refaktoryzacja i Czytelność:**
@@ -350,6 +360,48 @@ export PYTHONPATH="${PYTHONPATH}:$(pwd)/ReceiptParser"
 ENABLE_FILE_LOGGING=true
 ```
 Logi będą zapisywane w katalogu `logs/` jako `paragonocr_YYYYMMDD.log`. Katalog zostanie utworzony automatycznie przy pierwszym uruchomieniu z włączonym logowaniem.
+
+### Problem: "BŁĄD WALIDACJI: Model 'xyz' nie jest dozwolony"
+**Rozwiązanie:** Aplikacja waliduje modele LLM dla bezpieczeństwa. Dozwolone modele to:
+- `llava:latest`
+- `SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M`
+- `mistral-ocr`
+
+Jeśli chcesz użyć innego modelu, dodaj go do listy `ALLOWED_LLM_MODELS` w `ReceiptParser/src/security.py`.
+
+### Problem: "Plik jest za duży" lub "Obraz za duży"
+**Rozwiązanie:** Aplikacja ma limity bezpieczeństwa:
+- Maksymalny rozmiar pliku: 100 MB
+- Maksymalny rozmiar obrazu: 50 MB
+- Maksymalne wymiary obrazu: 10000x10000px
+
+Te limity chronią przed atakami DoS. Jeśli potrzebujesz przetwarzać większe pliki, możesz zmienić stałe w `ReceiptParser/src/security.py`.
+
+## 🔒 Bezpieczeństwo
+
+Aplikacja implementuje szereg mechanizmów bezpieczeństwa:
+
+### Ochrona przed Path Traversal
+- Wszystkie ścieżki plików są walidowane i normalizowane przed użyciem
+- Sprawdzanie rozszerzeń plików i rozmiarów
+- Ochrona przed dostępem do plików poza katalogiem projektu
+
+### Bezpieczne Pliki Tymczasowe
+- Pliki tymczasowe tworzone z odpowiednimi uprawnieniami (tylko właściciel)
+- Automatyczny cleanup nawet przy błędach
+- Ochrona przed race conditions
+
+### Sanityzacja Danych
+- Logi nie zawierają pełnych ścieżek (tylko nazwy plików)
+- Długie teksty OCR są obcinane w logach
+- Błędy są sanityzowane przed wyświetleniem
+
+### Walidacja Wejściowa
+- Walidacja modeli LLM (tylko dozwolone)
+- Walidacja rozmiaru i wymiarów plików
+- Ochrona przed DoS przez zbyt duże pliki
+
+Więcej informacji o bezpieczeństwie znajdziesz w `ANALIZA_BEZPIECZEŃSTWA.md`.
 
 ## 📝 Licencja
 

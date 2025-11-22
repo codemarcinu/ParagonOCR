@@ -9,6 +9,12 @@ from decimal import Decimal, InvalidOperation
 from typing import List, Tuple, Optional
 from rapidfuzz import fuzz
 from .config import Config
+from .security import sanitize_path, sanitize_log_message
+
+# Import sanitize_log_message dla użycia w globalnym except
+def _sanitize_error(e: Exception) -> str:
+    """Pomocnicza funkcja do sanityzacji błędów."""
+    return sanitize_log_message(str(e))
 
 # --- Klient Ollama ---
 # Globalny klient do komunikacji z serwerem Ollama.
@@ -21,8 +27,10 @@ try:
     # Sprawdzenie połączenia przy starcie
     # client.list()
 except Exception as e:
+    # Import tutaj, żeby uniknąć circular import
+    from .security import sanitize_log_message
     print(
-        f"BŁĄD: Nie można połączyć się z Ollama na {Config.OLLAMA_HOST}. Upewnij się, że usługa działa. Szczegóły: {e}"
+        f"BŁĄD: Nie można połączyć się z Ollama na {Config.OLLAMA_HOST}. Upewnij się, że usługa działa. Szczegóły: {sanitize_log_message(str(e))}"
     )
     client = None
 
@@ -101,7 +109,7 @@ def get_learning_examples(
         
         return examples
     except Exception as e:
-        print(f"BŁĄD podczas pobierania przykładów uczenia: {e}")
+        print(f"BŁĄD podczas pobierania przykładów uczenia: {sanitize_log_message(str(e))}")
         return []
 
 
@@ -174,7 +182,7 @@ def get_llm_suggestion(
         return cleaned if cleaned else None
     except Exception as e:
         print(
-            f"BŁĄD: Wystąpił problem podczas komunikacji z modelem '{model_name}': {e}"
+            f"BŁĄD: Wystąpił problem podczas komunikacji z modelem '{model_name}': {sanitize_log_message(str(e))}"
         )
         return None
 
@@ -329,7 +337,7 @@ def parse_receipt_with_llm(
 
     try:
         print(f"INFO: Wysyłanie obrazu do modelu '{model_name}' (format=json)...")
-        print(f"INFO: Plik: {image_path}")
+        print(f"INFO: Plik: {sanitize_path(image_path)}")  # Tylko nazwa pliku, nie pełna ścieżka
 
         # Truncation tekstu OCR jeśli jest za długi (limit ~10000 znaków dla bezpieczeństwa)
         MAX_OCR_TEXT_LENGTH = 10000
@@ -362,15 +370,16 @@ def parse_receipt_with_llm(
         print(
             f"INFO: Otrzymano odpowiedź od LLM. Długość: {len(raw_response_text)} znaków."
         )
-        # print(f"DEBUG: Treść odpowiedzi: {raw_response_text}")
+        # Sanityzuj odpowiedź przed logowaniem (jeśli potrzeba debug)
+        # print(f"DEBUG: Treść odpowiedzi: {sanitize_log_message(raw_response_text, max_length=500)}")
 
         try:
             parsed_json = json.loads(raw_response_text)
         except json.JSONDecodeError as e:
             print(
-                f"BŁĄD: Model zwrócił niepoprawny JSON mimo format='json'. Szczegóły: {e}"
+                f"BŁĄD: Model zwrócił niepoprawny JSON mimo format='json'. Szczegóły: {sanitize_log_message(str(e))}"
             )
-            print(f"Treść: {raw_response_text}")
+            print(f"Treść (obcięta): {sanitize_log_message(raw_response_text, max_length=500)}")
             return None
 
         print("INFO: Konwertuję typy danych (stringi na Decimal/datetime)...")
@@ -511,7 +520,8 @@ def parse_receipt_from_text(
         try:
             parsed_json = json.loads(raw_response_text)
         except json.JSONDecodeError as e:
-            print(f"BŁĄD: Model zwrócił niepoprawny JSON. Szczegóły: {e}")
+            print(f"BŁĄD: Model zwrócił niepoprawny JSON. Szczegóły: {sanitize_log_message(str(e))}")
+            print(f"Treść (obcięta): {sanitize_log_message(raw_response_text, max_length=500)}")
             return None
 
         print("INFO: Konwertuję typy danych...")
@@ -520,6 +530,6 @@ def parse_receipt_from_text(
 
     except Exception as e:
         print(
-            f"BŁĄD: Wystąpił problem podczas komunikacji z modelem '{model_name}': {e}"
+            f"BŁĄD: Wystąpił problem podczas komunikacji z modelem '{model_name}': {sanitize_log_message(str(e))}"
         )
         return None

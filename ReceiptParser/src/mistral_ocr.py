@@ -1,6 +1,7 @@
 import os
 from mistralai import Mistral
 from .config import Config
+from .security import validate_file_path, sanitize_path, sanitize_log_message
 
 
 class MistralOCRClient:
@@ -22,12 +23,16 @@ class MistralOCRClient:
             print("BŁĄD: Klient Mistral nie jest zainicjalizowany (brak klucza API).")
             return None
 
-        if not os.path.exists(image_path):
-            print(f"BŁĄD: Plik nie istnieje: {image_path}")
-            return None
-
         try:
-            print(f"INFO: Wysyłanie pliku do Mistral OCR: {image_path}")
+            # Waliduj ścieżkę pliku
+            validated_path = validate_file_path(
+                image_path,
+                allowed_extensions=['.png', '.jpg', '.jpeg', '.pdf'],
+                max_size=50 * 1024 * 1024  # 50 MB
+            )
+            image_path = str(validated_path)
+            
+            print(f"INFO: Wysyłanie pliku do Mistral OCR: {sanitize_path(image_path)}")
 
             uploaded_file = self.client.files.upload(
                 file={
@@ -55,6 +60,12 @@ class MistralOCRClient:
 
             return full_markdown
 
+        except FileNotFoundError:
+            print(f"BŁĄD: Plik nie istnieje: {sanitize_path(image_path)}")
+            return None
+        except ValueError as e:
+            print(f"BŁĄD WALIDACJI: {sanitize_log_message(str(e))}")
+            return None
         except Exception as e:
-            print(f"BŁĄD: Wystąpił błąd podczas komunikacji z Mistral OCR: {e}")
+            print(f"BŁĄD: Wystąpił błąd podczas komunikacji z Mistral OCR: {sanitize_log_message(str(e))}")
             return None

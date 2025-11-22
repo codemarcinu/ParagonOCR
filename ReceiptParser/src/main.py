@@ -21,6 +21,13 @@ from .ocr import convert_pdf_to_image, extract_text_from_image
 from .strategies import get_strategy_for_store
 from .mistral_ocr import MistralOCRClient
 from .normalization_rules import find_static_match
+from .security import (
+    validate_file_path,
+    validate_llm_model,
+    sanitize_path,
+    sanitize_log_message,
+    sanitize_ocr_text,
+)
 import os
 import inspect
 
@@ -64,10 +71,21 @@ def run_processing_pipeline(
     Uruchamia pełny potok przetwarzania paragonu, od odczytu po zapis do bazy.
     Funkcja jest niezależna od UI i przyjmuje callbacki do komunikacji z użytkownikiem.
     """
-    # Krok 1: Parsowanie multimodalne jest teraz domyślnym i jedynym potokiem
+    # Krok 0: Walidacja wejściowa
+    temp_image_path = None
     try:
+        # Waliduj ścieżkę pliku
+        validated_path = validate_file_path(
+            file_path,
+            allowed_extensions=['.png', '.jpg', '.jpeg', '.pdf']
+        )
+        file_path = str(validated_path)
+        
+        # Waliduj model LLM
+        llm_model = validate_llm_model(llm_model)
+        
+        # Krok 1: Parsowanie multimodalne jest teraz domyślnym i jedynym potokiem
         processing_file_path = file_path
-        temp_image_path = None
 
         # Obsługa PDF
         if file_path.lower().endswith(".pdf"):
@@ -76,7 +94,7 @@ def run_processing_pipeline(
             if not temp_image_path:
                 raise Exception("Nie udało się skonwertować pliku PDF na obraz.")
             processing_file_path = temp_image_path
-            _call_log_callback(log_callback, f"INFO: PDF skonwertowany tymczasowo do: {processing_file_path}")
+            _call_log_callback(log_callback, f"INFO: PDF skonwertowany tymczasowo do: {sanitize_path(processing_file_path)}")
 
         if llm_model == "mistral-ocr":
             _call_log_callback(log_callback, "INFO: Używam Mistral OCR do ekstrakcji tekstu...", progress=-1, status="OCR (Mistral)...")
@@ -93,7 +111,9 @@ def run_processing_pipeline(
             # Krok 1.5: Detekcja sklepu (Strategy Pattern) + Hybrid OCR
             _call_log_callback(log_callback, "INFO: Analizuję tekst z OCR (Tesseract)...", progress=-1, status="OCR (Tesseract)...")
             full_ocr_text = extract_text_from_image(processing_file_path)
-            _call_log_callback(log_callback, f"--- WYNIK OCR (Tesseract) ---\n{full_ocr_text}\n-----------------------------")
+            # Sanityzuj tekst OCR przed logowaniem (usuń wrażliwe dane)
+            sanitized_ocr = sanitize_ocr_text(full_ocr_text, max_length=200)
+            _call_log_callback(log_callback, f"--- WYNIK OCR (Tesseract) ---\n{sanitized_ocr}\n-----------------------------")
 
             # Do detekcji sklepu używamy próbki, ale do LLM przekażemy całość
             header_sample = full_ocr_text[:1000]
@@ -126,10 +146,13 @@ def run_processing_pipeline(
                 f"INFO: Wybrano strategię (na podstawie Mistral OCR): {strategy.__class__.__name__}"
             )
 
-        # Sprzątanie po PDF
+        # Sprzątanie po PDF - zawsze wykonaj cleanup, nawet przy błędach
         if temp_image_path and os.path.exists(temp_image_path):
-            os.remove(temp_image_path)
-            _call_log_callback(log_callback, "INFO: Usunięto tymczasowy plik obrazu.")
+            try:
+                os.unlink(temp_image_path)
+                _call_log_callback(log_callback, "INFO: Usunięto tymczasowy plik obrazu.")
+            except Exception as e:
+                _call_log_callback(log_callback, f"OSTRZEŻENIE: Nie udało się usunąć pliku tymczasowego: {e}")
 
         if not parsed_data:
             raise Exception("Parsowanie za pomocą LLM nie zwróciło danych.")
@@ -151,7 +174,13 @@ def run_processing_pipeline(
             _call_log_callback(log_callback, "INFO: Użytkownik zatwierdził dane (ewentualnie po edycji).", progress=80, status="Zapisuję do bazy...")
 
     except Exception as e:
-        _call_log_callback(log_callback, f"BŁĄD KRYTYCZNY na etapie parsowania LLM: {e}")
+        # Cleanup pliku tymczasowego nawet przy błędzie
+        if temp_image_path and os.path.exists(temp_image_path):
+            try:
+                os.unlink(temp_image_path)
+            except Exception:
+                pass
+        _call_log_callback(log_callback, f"BŁĄD KRYTYCZNY na etapie parsowania LLM: {sanitize_log_message(str(e))}")
         _call_log_callback(log_callback, "Upewnij się, że serwer Ollama działa i model jest dostępny.")
         return
 
@@ -433,8 +462,16 @@ def init_db_command():
 )
 def process(file_path: str, llm_model: str):
     """Przetwarza plik z paragonem, parsuje go i zapisuje do bazy danych."""
-    click.secho(f"--- Rozpoczynam przetwarzanie pliku: {file_path} ---", bold=True)
-    run_processing_pipeline(file_path, llm_model, cli_log_callback, cli_prompt_callback)
+    try:
+        # Waliduj model przed rozpoczęciem
+        validated_model = validate_llm_model(llm_model)
+        # Sanityzuj ścieżkę przed wyświetleniem
+        safe_path = sanitize_path(file_path)
+        click.secho(f"--- Rozpoczynam przetwarzanie pliku: {safe_path} ---", bold=True)
+        run_processing_pipeline(file_path, validated_model, cli_log_callback, cli_prompt_callback)
+    except ValueError as e:
+        click.secho(f"BŁĄD WALIDACJI: {e}", fg="red", bold=True)
+        raise click.Abort()
 
 
 if __name__ == "__main__":
