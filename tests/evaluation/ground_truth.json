@@ -1,25 +1,438 @@
 {
-  "sample_receipt.jpg": {
+  "Plik_000.png": {
     "sklep_info": {
-      "nazwa": "Biedronka",
-      "lokalizacja": "Warszawa, ul. Przykładowa 1"
+      "nazwa": "Lidl",
+      "lokalizacja": "Poznańska 48, Jankowice"
     },
     "paragon_info": {
-      "data_zakupu": "2023-10-27",
-      "suma_calkowita": "50.00"
+      "data_zakupu": "2024-12-27",
+      "suma_calkowita": "26.34"
     },
     "pozycje": [
       {
-        "nazwa_raw": "Mleko UHT 3.2%",
-        "ilosc": "2.0",
-        "cena_jedn": "3.50",
-        "cena_calk": "7.00"
+        "nazwa_raw": "Reklamówka mała 80%",
+        "ilosc": "1.0",
+        "cena_jedn": "0.79",
+        "cena_calk": "0.79",
+        "rabat": "0.00",
+        "cena_po_rab": "0.79"
       },
       {
-        "nazwa_raw": "Chleb",
+        "nazwa_raw": "Soczew.,HummusChipsy",
         "ilosc": "1.0",
-        "cena_jedn": "4.00",
-        "cena_calk": "4.00"
+        "cena_jedn": "3.59",
+        "cena_calk": "3.59",
+        "rabat": "0.00",
+        "cena_po_rab": "3.59"
+      },
+      {
+        "nazwa_raw": "Soczew.,HummusChipsy",
+        "ilosc": "2.0",
+        "cena_jedn": "3.59",
+        "cena_calk": "7.18",
+        "rabat": "3.58",
+        "cena_po_rab": "3.60"
+      },
+      {
+        "nazwa_raw": "Kozel 0% piwo",
+        "ilosc": "4.0",
+        "cena_jedn": "4.59",
+        "cena_calk": "18.36",
+        "rabat": "0.00",
+        "cena_po_rab": "18.36"
+      }
+    ]
+  },
+  "Biedra20251118.pdf": {
+    "sklep_info": {
+      "nazwa": "Biedronka",
+      "lokalizacja": "Kostrzyn, ul. Żniwna 5"
+    },
+    "paragon_info": {
+      "data_zakupu": "2025-11-18",
+      "suma_calkowita": "114.14"
+    },
+    "pozycje": [
+      {
+        "nazwa_raw": "Mleko UHT 3,2 1l",
+        "ilosc": "1.0",
+        "cena_jedn": "3.49",
+        "cena_calk": "3.49",
+        "rabat": "0.00",
+        "cena_po_rab": "3.49"
+      },
+      {
+        "nazwa_raw": "KawMiel Rafiin250g",
+        "ilosc": "1.0",
+        "cena_jedn": "18.99",
+        "cena_calk": "18.99",
+        "rabat": "4.00",
+        "cena_po_rab": "14.99"
+      },
+      {
+        "nazwa_raw": "KawMiel Rafiin250g",
+        "ilosc": "1.0",
+        "cena_jedn": "18.99",
+        "cena_calk": "18.99",
+        "rabat": "4.00",
+        "cena_po_rab": "14.99"
+      },
+      {
+        "nazwa_raw": "PiwoPer0 0,5lB BZW",
+        "ilosc": "1.0",
+        "cena_jedn": "3.49",
+        "cena_calk": "3.49",
+        "rabat": "0.00",
+        "cena_po_rab": "3.49"
+      },
+      {
+        "nazwa_raw": "PomysłNaKursWin30g",
+        "ilosc": "1.0",
+        "cena_jedn": "3.59",
+        "cena_calk": "3.59",
+        "rabat": "0.00",
+        "cena_po_rab": "3.59"
+      },
+      {
+        "nazwa_raw": "PączLongStonPistayUc",
+        "ilosc": "2.0",
+        "cena_jedn": "3.99",
+        "cena_calk": "7.98",
+        "rabat": "1.00",
+        "cena_po_rab": "6.98"
+      },
+      {
+        "nazwa_raw": "RyżBiaPlNat4x150g",
+        "ilosc": "1.0",
+        "cena_jedn": "3.49",
+        "cena_calk": "3.49",
+        "rabat": "0.00",
+        "cena_po_rab": "3.49"
+      },
+      {
+        "nazwa_raw": "SerMierzwGouda 1500",
+        "ilosc": "1.0",
+        "cena_jedn": "5.49",
+        "cena_calk": "5.49",
+        "rabat": "1.50",
+        "cena_po_rab": "3.99"
+      },
+      {
+        "nazwa_raw": "SerMierzwGouda 1500",
+        "ilosc": "1.0",
+        "cena_jedn": "5.49",
+        "cena_calk": "5.49",
+        "rabat": "1.50",
+        "cena_po_rab": "3.99"
+      },
+      {
+        "nazwa_raw": "ŚmietMlDol 12 400g",
+        "ilosc": "1.0",
+        "cena_jedn": "3.59",
+        "cena_calk": "3.59",
+        "rabat": "0.00",
+        "cena_po_rab": "3.59"
+      },
+      {
+        "nazwa_raw": "IndykwMaśKoper500g",
+        "ilosc": "1.0",
+        "cena_jedn": "17.99",
+        "cena_calk": "17.99",
+        "rabat": "4.00",
+        "cena_po_rab": "13.99"
+      },
+      {
+        "nazwa_raw": "IndykwMaśKoper500g",
+        "ilosc": "1.0",
+        "cena_jedn": "17.99",
+        "cena_calk": "17.99",
+        "rabat": "4.00",
+        "cena_po_rab": "13.99"
+      },
+      {
+        "nazwa_raw": "Pier z serem 400g",
+        "ilosc": "1.0",
+        "cena_jedn": "7.29",
+        "cena_calk": "7.29",
+        "rabat": "3.65",
+        "cena_po_rab": "3.64"
+      },
+      {
+        "nazwa_raw": "Pierogi Ser Truska400g",
+        "ilosc": "1.0",
+        "cena_jedn": "7.29",
+        "cena_calk": "7.29",
+        "rabat": "0.00",
+        "cena_po_rab": "7.29"
+      }
+    ]
+  },
+  "45124711000057030425.pdf": {
+    "sklep_info": {
+      "nazwa": "Auchan",
+      "lokalizacja": "Warszawa Marki, Al. J.Piłsudskiego 1"
+    },
+    "paragon_info": {
+      "data_zakupu": "2025-03-04",
+      "suma_calkowita": "135.43"
+    },
+    "pozycje": [
+      {
+        "nazwa_raw": "ReWtymOplRec551061",
+        "ilosc": "1.0",
+        "cena_jedn": "3.25",
+        "cena_calk": "3.25",
+        "rabat": "0.00",
+        "cena_po_rab": "3.25"
+      },
+      {
+        "nazwa_raw": "NAPOJ GAZ. 86851A",
+        "ilosc": "1.0",
+        "cena_jedn": "4.48",
+        "cena_calk": "4.48",
+        "rabat": "0.00",
+        "cena_po_rab": "4.48"
+      },
+      {
+        "nazwa_raw": "PAROWKI JAL 32107C",
+        "ilosc": "1.0",
+        "cena_jedn": "6.28",
+        "cena_calk": "6.28",
+        "rabat": "0.00",
+        "cena_po_rab": "6.28"
+      },
+      {
+        "nazwa_raw": "PAPIER TOAL 34663A",
+        "ilosc": "1.0",
+        "cena_jedn": "19.98",
+        "cena_calk": "19.98",
+        "rabat": "0.00",
+        "cena_po_rab": "19.98"
+      },
+      {
+        "nazwa_raw": "MIELONE Z 571950C",
+        "ilosc": "1.0",
+        "cena_jedn": "10.98",
+        "cena_calk": "10.98",
+        "rabat": "0.00",
+        "cena_po_rab": "10.98"
+      },
+      {
+        "nazwa_raw": "SANDWICH P 958560C",
+        "ilosc": "1.0",
+        "cena_jedn": "5.39",
+        "cena_calk": "5.39",
+        "rabat": "0.00",
+        "cena_po_rab": "5.39"
+      },
+      {
+        "nazwa_raw": "ORZESZKI W 492359C",
+        "ilosc": "1.0",
+        "cena_jedn": "3.99",
+        "cena_calk": "3.99",
+        "rabat": "0.80",
+        "cena_po_rab": "3.19"
+      },
+      {
+        "nazwa_raw": "CIASTO FRA 998924C",
+        "ilosc": "1.0",
+        "cena_jedn": "5.99",
+        "cena_calk": "5.99",
+        "rabat": "0.00",
+        "cena_po_rab": "5.99"
+      },
+      {
+        "nazwa_raw": "PASTA MAX F 52829A",
+        "ilosc": "1.0",
+        "cena_jedn": "5.61",
+        "cena_calk": "5.61",
+        "rabat": "0.00",
+        "cena_po_rab": "5.61"
+      },
+      {
+        "nazwa_raw": "SER MOZZAR 751976C",
+        "ilosc": "0.304",
+        "jednostka": "kg",
+        "cena_jedn": "33.89",
+        "cena_calk": "10.30",
+        "rabat": "0.00",
+        "cena_po_rab": "10.30"
+      },
+      {
+        "nazwa_raw": "AWOKADO 34067C",
+        "ilosc": "1.0",
+        "cena_jedn": "2.95",
+        "cena_calk": "2.95",
+        "rabat": "0.00",
+        "cena_po_rab": "2.95"
+      },
+      {
+        "nazwa_raw": "CHIPSY KET 521902C",
+        "ilosc": "1.0",
+        "cena_jedn": "4.99",
+        "cena_calk": "4.99",
+        "rabat": "0.00",
+        "cena_po_rab": "4.99"
+      },
+      {
+        "nazwa_raw": "KRAJALNI 691060A",
+        "ilosc": "1.0",
+        "cena_jedn": "8.99",
+        "cena_calk": "8.99",
+        "rabat": "0.00",
+        "cena_po_rab": "8.99"
+      },
+      {
+        "nazwa_raw": "ZIEMNIAK D 581227C",
+        "ilosc": "1.0",
+        "cena_jedn": "8.98",
+        "cena_calk": "8.98",
+        "rabat": "0.00",
+        "cena_po_rab": "8.98"
+      },
+      {
+        "nazwa_raw": "SZAMPON WL 450850",
+        "ilosc": "1.0",
+        "cena_jedn": "16.99",
+        "cena_calk": "16.99",
+        "rabat": "0.00",
+        "cena_po_rab": "16.99"
+      },
+      {
+        "nazwa_raw": "KAPUSTA BIA 27891C",
+        "ilosc": "1.538",
+        "jednostka": "kg",
+        "cena_jedn": "4.49",
+        "cena_calk": "6.91",
+        "rabat": "0.00",
+        "cena_po_rab": "6.91"
+      },
+      {
+        "nazwa_raw": "JAJA WOLNY 103729C",
+        "ilosc": "1.0",
+        "cena_jedn": "7.69",
+        "cena_calk": "7.69",
+        "rabat": "0.00",
+        "cena_po_rab": "7.69"
+      },
+      {
+        "nazwa_raw": "BATON PAWE 502905A",
+        "ilosc": "1.0",
+        "cena_jedn": "2.48",
+        "cena_calk": "2.48",
+        "rabat": "0.00",
+        "cena_po_rab": "2.48"
+      }
+    ]
+  },
+  "receipt.pdf": {
+    "sklep_info": {
+      "nazwa": "Biedronka",
+      "lokalizacja": "Targowa 4, Kostrzyn"
+    },
+    "paragon_info": {
+      "data_zakupu": "2025-01-13",
+      "suma_calkowita": "29.76"
+    },
+    "pozycje": [
+      {
+        "nazwa_raw": "Mleko UHT 1,5 1l",
+        "ilosc": "1.0",
+        "cena_jedn": "3.29",
+        "cena_calk": "3.29",
+        "rabat": "0.00",
+        "cena_po_rab": "3.29"
+      },
+      {
+        "nazwa_raw": "PomKroNaszSpiż240g",
+        "ilosc": "1.0",
+        "cena_jedn": "2.99",
+        "cena_calk": "2.99",
+        "rabat": "0.00",
+        "cena_po_rab": "2.99"
+      },
+      {
+        "nazwa_raw": "PomKroNaszSpiż240g",
+        "ilosc": "1.0",
+        "cena_jedn": "2.99",
+        "cena_calk": "2.99",
+        "rabat": "0.00",
+        "cena_po_rab": "2.99"
+      },
+      {
+        "nazwa_raw": "Jogurt Nat 190 200g",
+        "ilosc": "1.0",
+        "cena_jedn": "1.05",
+        "cena_calk": "1.05",
+        "rabat": "0.00",
+        "cena_po_rab": "1.05"
+      },
+      {
+        "nazwa_raw": "Jogurt Nat 190 200g",
+        "ilosc": "1.0",
+        "cena_jedn": "1.05",
+        "cena_calk": "1.05",
+        "rabat": "0.00",
+        "cena_po_rab": "1.05"
+      },
+      {
+        "nazwa_raw": "Papryka OstraKamis16",
+        "ilosc": "1.0",
+        "cena_jedn": "1.99",
+        "cena_calk": "1.99",
+        "rabat": "0.00",
+        "cena_po_rab": "1.99"
+      },
+      {
+        "nazwa_raw": "Soczewica PloNa500g",
+        "ilosc": "1.0",
+        "cena_jedn": "5.86",
+        "cena_calk": "5.86",
+        "rabat": "0.00",
+        "cena_po_rab": "5.86"
+      },
+      {
+        "nazwa_raw": "Wafel Estella Des50g",
+        "ilosc": "1.0",
+        "cena_jedn": "1.19",
+        "cena_calk": "1.19",
+        "rabat": "0.00",
+        "cena_po_rab": "1.19"
+      },
+      {
+        "nazwa_raw": "SerTwarPółtłu250g",
+        "ilosc": "1.0",
+        "cena_jedn": "3.95",
+        "cena_calk": "3.95",
+        "rabat": "0.00",
+        "cena_po_rab": "3.95"
+      },
+      {
+        "nazwa_raw": "Marchew Luz",
+        "ilosc": "0.365",
+        "jednostka": "kg",
+        "cena_jedn": "3.69",
+        "cena_calk": "1.35",
+        "rabat": "0.62",
+        "cena_po_rab": "0.73"
+      },
+      {
+        "nazwa_raw": "Papryka Słodka Czerw",
+        "ilosc": "0.220",
+        "jednostka": "kg",
+        "cena_jedn": "13.99",
+        "cena_calk": "3.08",
+        "rabat": "0.00",
+        "cena_po_rab": "3.08"
+      },
+      {
+        "nazwa_raw": "Cebula Żółta Luz",
+        "ilosc": "0.455",
+        "jednostka": "kg",
+        "cena_jedn": "3.49",
+        "cena_calk": "1.59",
+        "rabat": "0.00",
+        "cena_po_rab": "1.59"
       }
     ]
   }

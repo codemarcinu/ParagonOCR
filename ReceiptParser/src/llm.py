@@ -333,6 +333,42 @@ def parse_receipt_from_text(
     2. Jeśli brak ilości, przyjmij 1.0.
     3. Ceny podawaj jako stringi z kropką.
     4. Ignoruj linie, które nie są pozycjami zakupowymi (np. sumy VAT, reklamy).
+    5. RABATY: Jeśli widzisz linię z "Rabat" lub ujemną ceną, traktuj ją jako OSOBNĄ pozycję z ujemną ceną całkowitą.
+       System automatycznie scali to z produktem powyżej w post-processingu.
+    6. Dla produktów ważonych (kg): ilość to waga w kg (np. 0.365), jednostka to "kg".
+    7. Dla produktów sztukowych: ilość to liczba sztuk (np. 2.0), jednostka może być "szt" lub null.
+
+    Przykłady:
+
+    Przykład 1 - Lidl z rabatem:
+    {
+      "sklep_info": {"nazwa": "Lidl", "lokalizacja": "Poznańska 48, Jankowice"},
+      "paragon_info": {"data_zakupu": "2024-12-27", "suma_calkowita": "26.34"},
+      "pozycje": [
+        {"nazwa_raw": "Soczew.,HummusChipsy", "ilosc": "2.0", "cena_jedn": "3.59", "cena_calk": "7.18", "rabat": null, "cena_po_rab": "7.18"},
+        {"nazwa_raw": "950_chipsy_mix", "ilosc": "1.0", "cena_jedn": "-3.58", "cena_calk": "-3.58", "rabat": null, "cena_po_rab": "-3.58"}
+      ]
+    }
+
+    Przykład 2 - Biedronka z rabatami:
+    {
+      "sklep_info": {"nazwa": "Biedronka", "lokalizacja": "Kostrzyn, ul. Żniwna 5"},
+      "paragon_info": {"data_zakupu": "2025-11-18", "suma_calkowita": "114.14"},
+      "pozycje": [
+        {"nazwa_raw": "KawMiel Rafiin250g", "ilosc": "1.0", "cena_jedn": "18.99", "cena_calk": "18.99", "rabat": null, "cena_po_rab": "18.99"},
+        {"nazwa_raw": "Rabat", "ilosc": "1.0", "cena_jedn": "-4.00", "cena_calk": "-4.00", "rabat": null, "cena_po_rab": "-4.00"}
+      ]
+    }
+
+    Przykład 3 - Produkty ważone:
+    {
+      "sklep_info": {"nazwa": "Biedronka", "lokalizacja": "Targowa 4, Kostrzyn"},
+      "paragon_info": {"data_zakupu": "2025-01-13", "suma_calkowita": "29.76"},
+      "pozycje": [
+        {"nazwa_raw": "Marchew Luz", "ilosc": "0.365", "jednostka": "kg", "cena_jedn": "3.69", "cena_calk": "1.35", "rabat": null, "cena_po_rab": "1.35"},
+        {"nazwa_raw": "Rabat", "ilosc": "1.0", "cena_jedn": "-0.62", "cena_calk": "-0.62", "rabat": null, "cena_po_rab": "-0.62"}
+      ]
+    }
     """
 
     try:
