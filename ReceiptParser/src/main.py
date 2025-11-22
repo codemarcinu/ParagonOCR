@@ -487,6 +487,148 @@ def process(file_path: str, llm_model: str):
         raise click.Abort()
 
 
+@cli.command()
+@click.option(
+    "--pytanie",
+    "question",
+    required=True,
+    type=str,
+    help="Pytanie do asystenta Bielik (np. 'co mam do jedzenia?', 'co mogę zrobić na obiad?')",
+)
+def bielik(question: str):
+    """Zadaje pytanie asystentowi AI Bielik o jedzenie, produkty i gotowanie."""
+    from .bielik import ask_bielik
+    
+    click.secho("🦅 Bielik - Asystent Kulinarny", fg="cyan", bold=True)
+    click.echo(f"Pytanie: {question}\n")
+    
+    try:
+        answer = ask_bielik(question)
+        click.echo(answer)
+    except Exception as e:
+        click.secho(f"BŁĄD: {e}", fg="red", bold=True)
+        raise click.Abort()
+
+
+@cli.command()
+@click.option(
+    "--zapytanie",
+    "query",
+    required=False,
+    type=str,
+    help="Opcjonalne zapytanie (np. 'obiad', 'kolacja', 'coś szybkiego')",
+)
+@click.option(
+    "--max",
+    "max_dishes",
+    default=5,
+    type=int,
+    help="Maksymalna liczba potraw do zaproponowania (domyślnie: 5)",
+)
+def potrawy(query: Optional[str], max_dishes: int):
+    """Proponuje potrawy na podstawie dostępnych produktów w magazynie."""
+    from .bielik import get_dish_suggestions
+    
+    click.secho("🍳 Bielik - Propozycje Potraw", fg="cyan", bold=True)
+    if query:
+        click.echo(f"Zapytanie: {query}\n")
+    
+    try:
+        suggestions = get_dish_suggestions(query, max_dishes)
+        
+        if not suggestions:
+            click.secho("Nie znaleziono żadnych propozycji.", fg="yellow")
+            return
+        
+        for i, potrawa in enumerate(suggestions, 1):
+            click.secho(f"\n{i}. {potrawa.get('nazwa', 'Bez nazwy')}", fg="green", bold=True)
+            click.echo(f"   {potrawa.get('opis', 'Brak opisu')}")
+            
+            skladniki = potrawa.get('skladniki', [])
+            if skladniki:
+                click.echo(f"   Składniki: {', '.join(skladniki)}")
+            
+            czas = potrawa.get('czas_przygotowania')
+            if czas:
+                click.echo(f"   ⏱️  {czas}")
+            
+            trudnosc = potrawa.get('trudnosc')
+            if trudnosc:
+                click.echo(f"   📊 Trudność: {trudnosc}")
+                
+    except Exception as e:
+        click.secho(f"BŁĄD: {e}", fg="red", bold=True)
+        raise click.Abort()
+
+
+@cli.command()
+@click.option(
+    "--potrawa",
+    "dish_name",
+    required=False,
+    type=str,
+    help="Nazwa potrawy, dla której generować listę zakupów",
+)
+@click.option(
+    "--zapytanie",
+    "query",
+    required=False,
+    type=str,
+    help="Zapytanie użytkownika (np. 'co potrzebuję na obiad?')",
+)
+def lista_zakupow(dish_name: Optional[str], query: Optional[str]):
+    """Generuje listę zakupów na podstawie potrawy lub zapytania."""
+    from .bielik import get_shopping_list
+    
+    click.secho("🛒 Bielik - Lista Zakupów", fg="cyan", bold=True)
+    
+    if not dish_name and not query:
+        click.secho("BŁĄD: Musisz podać --potrawa lub --zapytanie", fg="red", bold=True)
+        raise click.Abort()
+    
+    try:
+        shopping_list = get_shopping_list(dish_name, query)
+        
+        if dish_name:
+            click.echo(f"Potrawa: {dish_name}\n")
+        
+        produkty = shopping_list.get('produkty', [])
+        
+        if not produkty:
+            click.secho("✅ Masz wszystkie potrzebne produkty w magazynie!", fg="green")
+        else:
+            # Grupuj produkty według kategorii
+            by_category = {}
+            for produkt in produkty:
+                kategoria = produkt.get('kategoria', 'Inne')
+                if kategoria not in by_category:
+                    by_category[kategoria] = []
+                by_category[kategoria].append(produkt)
+            
+            for kategoria, produkty_kat in by_category.items():
+                click.secho(f"\n📦 {kategoria}:", fg="yellow", bold=True)
+                for produkt in produkty_kat:
+                    nazwa = produkt.get('nazwa', '')
+                    ilosc = produkt.get('ilosc', '')
+                    priorytet = produkt.get('priorytet', 'średni')
+                    
+                    priorytet_emoji = {
+                        'wysoki': '🔴',
+                        'średni': '🟡',
+                        'niski': '🟢'
+                    }.get(priorytet, '🟡')
+                    
+                    click.echo(f"   {priorytet_emoji} {nazwa} - {ilosc}")
+        
+        uwagi = shopping_list.get('uwagi')
+        if uwagi:
+            click.secho(f"\n💡 Uwagi: {uwagi}", fg="blue")
+            
+    except Exception as e:
+        click.secho(f"BŁĄD: {e}", fg="red", bold=True)
+        raise click.Abort()
+
+
 if __name__ == "__main__":
     cli.add_command(init_db_command, name="init-db")
     cli()
