@@ -7,3 +7,5 @@ Pillow
 pdf2image
 pytesseract
 mistralai
+pytest
+pytest-cov
