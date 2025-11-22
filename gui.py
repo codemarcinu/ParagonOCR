@@ -634,9 +634,6 @@ class App(ctk.CTk):
         self.receipts_frame.grid_columnconfigure(0, weight=1)
         self.receipts_frame.grid_rowconfigure(5, weight=1)
         
-        # Wczytaj historię plików
-        self.refresh_history()
-
         # Historia plików
         history_frame = ctk.CTkFrame(self.receipts_frame)
         history_frame.grid(row=0, column=0, columnspan=4, padx=10, pady=(10, 5), sticky="ew")
@@ -652,6 +649,9 @@ class App(ctk.CTk):
         )
         self.history_combo.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
         self.history_combo.set("Wybierz z historii...")
+        
+        # Wczytaj historię plików (po utworzeniu history_combo)
+        self.refresh_history()
         
         self.file_button = ctk.CTkButton(
             history_frame, text="📁 Wybierz plik", command=self.select_file, width=150
