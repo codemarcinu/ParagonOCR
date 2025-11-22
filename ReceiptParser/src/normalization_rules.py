@@ -4,21 +4,25 @@ import re
 def clean_raw_name_ocr(raw_name: str) -> str:
     """
     Usuwa typowe śmieci z paragonów przed właściwą normalizacją.
+    Zachowuje oryginalną wielkość liter, aby uniknąć problemów z case-sensitive
+    wyszukiwaniem w bazie danych.
     """
-    name = raw_name.upper()  # Pracuj na UPPERCASE dla spójności
+    name = raw_name  # Zachowujemy oryginalną wielkość liter
 
     # 1. Usuń kody podatkowe i znaki na końcu (np. " A", " B", " 23%")
-    name = re.sub(r'\s+[ABC]\s*$', '', name)
+    # Używamy case-insensitive match dla kodów podatkowych
+    name = re.sub(r'\s+[ABCabc]\s*$', '', name, flags=re.IGNORECASE)
     name = re.sub(r'\s+\d{1,2}%\s*$', '', name)
 
     # 2. Usuń "1 x " lub "1.000 x" z początku (częsty błąd OCR sklejania ilości z nazwą)
-    name = re.sub(r'^\d+([.,]\d+)?\s*[xX*]\s*', '', name)
+    name = re.sub(r'^\d+([.,]\d+)?\s*[xX*]\s*', '', name, flags=re.IGNORECASE)
 
     # 3. Usuń dziwne znaki na początku/końcu (np. kropki, przecinki, myślniki)
     name = name.strip(" .,-_*")
 
     # 4. Usuń słowa "RABAT", "PROMOCJA" jeśli są doklejone do nazwy
-    name = re.sub(r'\s+(RABAT|PROMOCJA|UPUST).*$', '', name)
+    # Case-insensitive match dla słów rabatowych
+    name = re.sub(r'\s+(RABAT|PROMOCJA|UPUST|rabat|promocja|upust).*$', '', name, flags=re.IGNORECASE)
 
     return name
 
