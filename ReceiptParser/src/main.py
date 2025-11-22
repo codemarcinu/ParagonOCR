@@ -12,6 +12,7 @@ from .database import (
     Produkt,
     AliasProduktu,
     KategoriaProduktu,
+    StanMagazynowy,
 )
 from .knowledge_base import get_product_metadata
 from .data_models import ParsedData
@@ -215,10 +216,7 @@ def save_to_database(
             session, item_data["nazwa_raw"], log_callback, prompt_callback
         )
 
-        # Jeśli resolve_product zwrócił None (np. dla śmieci OCR), pomijamy dodawanie
-        if product_id is None and item_data["nazwa_raw"] != "POMIŃ":
-            pass
-
+        # Jeśli resolve_product zwrócił None (np. dla śmieci OCR, PTU, POMIŃ), pomijamy dodawanie
         if product_id is None:
             _call_log_callback(log_callback, f"   -> Pominięto pozycję: {item_data['nazwa_raw']}")
             continue
@@ -236,6 +234,45 @@ def save_to_database(
             cena_po_rabacie=item_data["cena_po_rab"],
         )
         paragon.pozycje.append(pozycja)
+        session.flush()  # Flush aby mieć pozycja.pozycja_id
+        
+        # Dodaj produkt do magazynu (StanMagazynowy)
+        data_waznosci = item_data.get("data_waznosci")
+        # data_waznosci może być już typu date lub None
+        
+        # Sprawdź czy już istnieje stan magazynowy dla tego produktu z tą samą datą ważności
+        # (lub bez daty ważności, jeśli data_waznosci jest None)
+        existing_stan = None
+        if data_waznosci:
+            existing_stan = session.query(StanMagazynowy).filter_by(
+                produkt_id=product_id,
+                data_waznosci=data_waznosci
+            ).first()
+        else:
+            # Jeśli brak daty ważności, szukaj wpisu bez daty ważności dla tego produktu
+            existing_stan = session.query(StanMagazynowy).filter_by(
+                produkt_id=product_id,
+                data_waznosci=None
+            ).first()
+        
+        if existing_stan:
+            # Jeśli istnieje, zwiększ ilość
+            existing_stan.ilosc += item_data["ilosc"]
+            existing_stan.pozycja_paragonu_id = pozycja.pozycja_id
+            jednostka_str = item_data.get("jednostka") or "szt"
+            _call_log_callback(log_callback, f"   -> Zaktualizowano stan magazynowy: +{item_data['ilosc']} {jednostka_str}")
+        else:
+            # Jeśli nie istnieje, utwórz nowy wpis
+            stan = StanMagazynowy(
+                produkt_id=product_id,
+                ilosc=item_data["ilosc"],
+                jednostka_miary=item_data.get("jednostka"),
+                data_waznosci=data_waznosci,
+                pozycja_paragonu_id=pozycja.pozycja_id
+            )
+            session.add(stan)
+            jednostka_str = item_data.get("jednostka") or "szt"
+            _call_log_callback(log_callback, f"   -> Dodano do magazynu: {item_data['ilosc']} {jednostka_str}")
 
     session.add(paragon)
     _call_log_callback(log_callback, f"INFO: Przygotowano do zapisu 1 paragon z {len(paragon.pozycje)} pozycjami.", progress=95, status="Kończenie zapisu...")
@@ -276,17 +313,16 @@ def resolve_product(
     # Obsługa przypadku "POMIŃ" (czy to ze słownika, czy z LLM)
     if suggested_name == "POMIŃ":
         _call_log_callback(log_callback, "   -> System zasugerował pominięcie tej pozycji.")
-        # Opcjonalnie: Możesz tu od razu zwrócić None, jeśli ufasz regułom w 100%
-        # return None
+        # Zwracamy None - pozycja zostanie pominięta
+        return None
 
     # 4. Weryfikacja Użytkownika (Prompt)
     prompt_text = f"Nieznany produkt (Sugerowany przez {source}: {suggested_name or 'Brak'}). Do jakiego produktu go przypisać?"
 
-    # Jeśli mamy sugestię ze słownika, możemy chcieć ją pominąć w pytaniu użytkownika (auto-akceptacja)
-    # Ale dla bezpieczeństwa na początku zostawmy prompt.
     normalized_name = prompt_callback(prompt_text, suggested_name or "", raw_name)
 
-    if not normalized_name:
+    # Jeśli użytkownik nie podał nazwy lub podał "POMIŃ", pomijamy pozycję
+    if not normalized_name or normalized_name.strip().upper() == "POMIŃ":
         _call_log_callback(log_callback, "   -> Pominięto przypisanie produktu dla tej pozycji.")
         return None
 

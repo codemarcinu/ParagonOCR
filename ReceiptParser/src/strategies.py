@@ -38,11 +38,11 @@ class ReceiptStrategy(ABC):
             
             # Wzorce do wykrywania PTU/VAT i innych nieproduktów
             non_product_patterns = [
-                r"^ptu\s*[abc]?\s*$",  # PTU, PTU A, PTU B, PTU C (z możliwymi spacjami)
-                r"^vat\s*[abc]?\s*$",  # VAT, VAT A, VAT B, VAT C (z możliwymi spacjami)
+                r"^ptu\s*[a-z]?\s*$",  # PTU, PTU A, PTU B, PTU C, PTU D, itd. (z możliwymi spacjami)
+                r"^vat\s*[a-z]?\s*$",  # VAT, VAT A, VAT B, VAT C, VAT D, itd. (z możliwymi spacjami)
                 r"podatek\s+vat",  # Podatek VAT
                 r"podatek\s+ptu",  # Podatek PTU
-                r"kwota\s+[abc]\s*$",  # Kwota A, Kwota B, Kwota C
+                r"kwota\s+[a-z]\s*$",  # Kwota A, Kwota B, Kwota C, Kwota D, itd.
                 r"suma\s+pln",  # Suma PLN
                 r"^suma\s*$",  # Suma
                 r"^razem\s*$",  # Razem
@@ -50,8 +50,8 @@ class ReceiptStrategy(ABC):
                 r"ogółem",  # Ogółem
                 r"rozliczenie\s+płatności",  # Rozliczenie płatności
                 r"sprzedaż\s+opodatkowana",  # Sprzedaż opodatkowana
-                r"^ptu\s*[abc]?\s*\d",  # PTU A 25.39 (z liczbą po)
-                r"^kwota\s*[abc]\s*\d",  # Kwota A 23.00% (z liczbą po)
+                r"^ptu\s*[a-z]?\s*\d",  # PTU A 25.39, PTU D 1.50 (z liczbą po)
+                r"^kwota\s*[a-z]\s*\d",  # Kwota A 23.00% (z liczbą po)
             ]
             
             # Sprawdź czy pozycja pasuje do wzorców nieproduktów
