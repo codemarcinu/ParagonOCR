@@ -103,6 +103,9 @@ PRODUCT_METADATA = {
     "Olej": {"kategoria": "Tłuszcze", "can_freeze": True},
     "Ryż": {"kategoria": "Sypkie", "can_freeze": False},  # Surowy zbędne, ugotowany tak
     "Makaron": {"kategoria": "Sypkie", "can_freeze": False},  # Surowy zbędne
+    # --- OPŁATY I KAUCJE ---
+    "Kaucja": {"kategoria": "Inne", "can_freeze": False},
+    "Opłata recyklingowa": {"kategoria": "Inne", "can_freeze": False},
 }
 
 

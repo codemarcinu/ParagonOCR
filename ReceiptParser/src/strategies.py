@@ -140,6 +140,65 @@ class BiedronkaStrategy(ReceiptStrategy):
         }
         """
 
+    def post_process(self, data: Dict) -> Dict:
+        """Scalanie rabatów dla Biedronki (identyczna logika jak Lidl, ale warto mieć osobno na przyszłość)."""
+        if not data or "pozycje" not in data:
+            return data
+
+        cleaned_items = []
+        items = data["pozycje"]
+        skip_indices = set()
+
+        for i in range(len(items)):
+            if i in skip_indices:
+                continue
+
+            current_item = items[i]
+
+            # Sprawdzamy czy następna pozycja to rabat
+            if i + 1 < len(items):
+                next_item = items[i + 1]
+                raw_name = next_item.get("nazwa_raw", "").lower()
+                
+                # Biedronka często pisze "Rabat" albo po prostu ujemna kwota
+                is_discount = "rabat" in raw_name or "upust" in raw_name
+                
+                # Sprawdzenie po cenie (ujemna)
+                try:
+                    price_total = float(str(next_item.get("cena_calk", 0)).replace(",", "."))
+                except (ValueError, TypeError):
+                    price_total = 0.0
+
+                if price_total < 0:
+                    is_discount = True
+
+                if is_discount:
+                    # Mamy rabat!
+                    discount_value = abs(price_total)
+                    
+                    # Aktualizujemy obecny produkt
+                    try:
+                        current_rabat = float(str(current_item.get("rabat", 0)).replace(",", "."))
+                    except (ValueError, TypeError):
+                        current_rabat = 0.0
+                    
+                    current_item["rabat"] = f"{current_rabat + discount_value:.2f}"
+                    
+                    # Przeliczamy cenę końcową
+                    try:
+                        base_price = float(str(current_item.get("cena_calk", 0)).replace(",", "."))
+                        # W Biedrze cena_calk to często cena PRZED rabatem, więc odejmujemy
+                        current_item["cena_po_rab"] = f"{base_price - (current_rabat + discount_value):.2f}"
+                    except (ValueError, TypeError):
+                        pass
+                    
+                    skip_indices.add(i + 1)  # Pomijamy ten wiersz w kolejnym obiegu
+
+            cleaned_items.append(current_item)
+
+        data["pozycje"] = cleaned_items
+        return data
+
 
 class KauflandStrategy(ReceiptStrategy):
     def get_system_prompt(self) -> str:

@@ -115,14 +115,24 @@ STATIC_RULES = {
     "Olej": [r"olej", r"kujawski"],
     "Ryż": [r"ryż", r"risana", r"sonko"],
     "Makaron": [r"makaron", r"lubella"],
+    # --- OPŁATY I KAUCJE ---
+    "Kaucja": [
+        r"kaucja",
+        r"butelka zwrotna",
+        r"zwrot.*butelka",
+        r"depozyt",
+    ],
+    "Opłata recyklingowa": [
+        r"opłata.*recykling",
+        r"recykling",
+        r"bdo",
+        r"oplrec",
+    ],
     # --- ŚMIECI / OPŁATY (Ważne: mapujemy na 'POMIŃ' lub konkretną nazwę) ---
     "POMIŃ": [
         r"torba",
         r"reklamówka",
         r"siatka",  # Opakowania
-        r"butelka zwrotna",
-        r"kaucja",
-        r"zwrot",  # Kaucje
         r"rabat",
         r"upust",  # Rabaty (często łapane przez logikę strategii, ale warto mieć)
         r"sprzedaż opodatkowana",

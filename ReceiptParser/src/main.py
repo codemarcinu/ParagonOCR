@@ -20,9 +20,88 @@ from .ocr import convert_pdf_to_image, extract_text_from_image
 from .strategies import get_strategy_for_store
 from .mistral_ocr import MistralOCRClient
 from .normalization_rules import find_static_match
+from decimal import Decimal, InvalidOperation
 import os
 
 # --- GŁÓWNA LOGIKA PRZETWARZANIA (NIEZALEŻNA OD UI) ---
+
+
+def verify_math_consistency(parsed_data: ParsedData, log_callback: Callable) -> ParsedData:
+    """
+    Weryfikuje matematyczną spójność danych: czy ilość * cena_jedn == cena_calk.
+    Jeśli nie, loguje ostrzeżenie i próbuje naprawić (może być ukryty rabat).
+    """
+    if not parsed_data or "pozycje" not in parsed_data:
+        return parsed_data
+
+    items = parsed_data["pozycje"]
+    fixed_count = 0
+
+    for item in items:
+        try:
+            # Konwersja na Decimal dla precyzji
+            ilosc = Decimal(str(item.get("ilosc", 1.0)).replace(",", "."))
+            cena_jedn = Decimal(str(item.get("cena_jedn", 0)).replace(",", "."))
+            cena_calk = Decimal(str(item.get("cena_calk", 0)).replace(",", "."))
+            rabat = Decimal(str(item.get("rabat", 0)).replace(",", "."))
+
+            # Obliczona wartość
+            obliczona = ilosc * cena_jedn
+
+            # Tolerancja 0.01 PLN (błędy zaokrągleń)
+            roznica = abs(obliczona - cena_calk)
+
+            if roznica > Decimal("0.01"):
+                nazwa = item.get("nazwa_raw", "Nieznany produkt")
+                log_callback(
+                    f"OSTRZEŻENIE: Niezgodność matematyczna dla '{nazwa}': "
+                    f"{ilosc} * {cena_jedn} = {obliczona}, ale cena_calk = {cena_calk} (różnica: {roznica:.2f})"
+                )
+
+                # Jeśli różnica jest ujemna (cena_calk < obliczona), może to być rabat
+                if cena_calk < obliczona:
+                    # Prawdopodobnie jest ukryty rabat
+                    ukryty_rabat = obliczona - cena_calk
+                    if rabat == 0:
+                        # Aktualizuj rabat jeśli był zerowy
+                        item["rabat"] = str(ukryty_rabat)
+                        log_callback(
+                            f"  -> Wykryto ukryty rabat: {ukryty_rabat:.2f} PLN"
+                        )
+                    else:
+                        # Sumuj z istniejącym rabatem
+                        item["rabat"] = str(rabat + ukryty_rabat)
+                        log_callback(
+                            f"  -> Zaktualizowano rabat: {rabat:.2f} -> {rabat + ukryty_rabat:.2f} PLN"
+                        )
+
+                    # Aktualizuj cenę po rabacie
+                    item["cena_po_rab"] = str(cena_calk)
+                    fixed_count += 1
+                else:
+                    # Jeśli cena_calk > obliczona, może być błąd OCR - używamy obliczonej wartości
+                    log_callback(
+                        f"  -> Korekta: ustawiam cena_calk na {obliczona:.2f} (było {cena_calk:.2f})"
+                    )
+                    item["cena_calk"] = str(obliczona)
+                    # Jeśli nie ma rabatu, cena_po_rab = cena_calk
+                    if not item.get("cena_po_rab") or Decimal(str(item.get("cena_po_rab", 0)).replace(",", ".")) == 0:
+                        item["cena_po_rab"] = str(obliczona)
+                    fixed_count += 1
+
+        except (ValueError, TypeError, InvalidOperation) as e:
+            nazwa = item.get("nazwa_raw", "Nieznany produkt")
+            log_callback(
+                f"OSTRZEŻENIE: Nie udało się zweryfikować matematyki dla '{nazwa}': {e}"
+            )
+            continue
+
+    if fixed_count > 0:
+        log_callback(
+            f"INFO: Naprawiono {fixed_count} pozycji z niezgodnościami matematycznymi."
+        )
+
+    return parsed_data
 
 
 def run_processing_pipeline(
@@ -118,6 +197,10 @@ def run_processing_pipeline(
         log_callback("INFO: Uruchamiam post-processing specyficzny dla sklepu...")
         parsed_data = strategy.post_process(parsed_data)
 
+        # Krok 1.6.5: Matematyczna weryfikacja (sanity check)
+        log_callback("INFO: Weryfikuję matematyczną spójność danych...")
+        parsed_data = verify_math_consistency(parsed_data, log_callback)
+
         log_callback("INFO: Dane z paragonu zostały pomyślnie sparsowane przez LLM.")
 
         # Krok 1.7: Manualna weryfikacja przez użytkownika (jeśli dostępna)
@@ -201,17 +284,25 @@ def save_to_database(
             log_callback(f"   -> Pominięto pozycję: {item_data['nazwa_raw']}")
             continue
 
+        # Upewniamy się, że cena_po_rabacie jest zawsze wypełniona
+        cena_calk = item_data["cena_calk"]
+        cena_po_rab = item_data.get("cena_po_rab")
+        
+        # Jeśli cena po rabacie nie została wyliczona (brak rabatu), to jest równa cenie całkowitej
+        if not cena_po_rab or (isinstance(cena_po_rab, (int, float, Decimal)) and float(cena_po_rab) == 0):
+            cena_po_rab = cena_calk
+
         pozycja = PozycjaParagonu(
             produkt_id=product_id,
             nazwa_z_paragonu_raw=item_data["nazwa_raw"],
             ilosc=item_data["ilosc"],
             jednostka_miary=item_data["jednostka"],
             cena_jednostkowa=item_data["cena_jedn"],
-            cena_calkowita=item_data["cena_calk"],
+            cena_calkowita=cena_calk,
             rabat=(
                 item_data["rabat"] if item_data["rabat"] else 0
             ),  # Domyślnie 0 dla bazy
-            cena_po_rabacie=item_data["cena_po_rab"],
+            cena_po_rabacie=cena_po_rab,
         )
         paragon.pozycje.append(pozycja)
 
