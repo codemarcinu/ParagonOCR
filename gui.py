@@ -794,8 +794,8 @@ class App(ctk.CTk):
         scrollable = ctk.CTkScrollableFrame(inv_window)
         scrollable.pack(fill="both", expand=True, padx=10, pady=10)
         
-        # Headers - dodano kolumnę "Akcje"
-        headers = ["Produkt", "Ilość", "Jednostka", "Data ważności", "Status", "Akcje"]
+        # Headers - dodano kolumnę "Zamrożone" i "Akcje"
+        headers = ["Produkt", "Ilość", "Jednostka", "Data ważności", "Zamrożone", "Status", "Akcje"]
         for col, text in enumerate(headers):
             ctk.CTkLabel(
                 scrollable, text=text, font=("Arial", 12, "bold")
@@ -833,6 +833,12 @@ class App(ctk.CTk):
                 data_entry.insert(0, stan.data_waznosci.strftime("%Y-%m-%d"))
             data_entry.grid(row=row, column=3, padx=5, pady=2)
             
+            # Checkbox "Zamrożone"
+            zamrozone_checkbox = ctk.CTkCheckBox(scrollable, text="")
+            zamrozone_checkbox.grid(row=row, column=4, padx=5, pady=2)
+            # Ustaw stan checkboxa na podstawie wartości z bazy (domyślnie False jeśli None)
+            zamrozone_checkbox.select() if getattr(stan, 'zamrozone', False) else zamrozone_checkbox.deselect()
+            
             # Status (tylko do odczytu)
             if stan.data_waznosci:
                 if stan.data_waznosci < date.today():
@@ -854,7 +860,7 @@ class App(ctk.CTk):
                 width=150,
                 text_color=color
             )
-            status_label.grid(row=row, column=4, padx=5, pady=2)
+            status_label.grid(row=row, column=5, padx=5, pady=2)
             
             # Przycisk usuwania
             delete_btn = ctk.CTkButton(
@@ -865,13 +871,14 @@ class App(ctk.CTk):
                 width=80,
                 height=25
             )
-            delete_btn.grid(row=row, column=5, padx=5, pady=2)
+            delete_btn.grid(row=row, column=6, padx=5, pady=2)
             
             inventory_items.append({
                 "stan": stan,
                 "ilosc_entry": ilosc_entry,
                 "jednostka_entry": jednostka_entry,
                 "data_entry": data_entry,
+                "zamrozone_checkbox": zamrozone_checkbox,
                 "status_label": status_label
             })
         
@@ -880,7 +887,7 @@ class App(ctk.CTk):
                 scrollable,
                 text="Brak produktów w magazynie",
                 font=("Arial", 14)
-            ).grid(row=1, column=0, columnspan=6, pady=20)
+            ).grid(row=1, column=0, columnspan=7, pady=20)
         
         # Przechowaj referencje w oknie
         inv_window.inventory_items = inventory_items
@@ -922,6 +929,9 @@ class App(ctk.CTk):
                         return
                 else:
                     stan.data_waznosci = None
+                
+                # Aktualizuj stan zamrożenia
+                stan.zamrozone = item["zamrozone_checkbox"].get()
             
             session.commit()
             messagebox.showinfo("Sukces", "Zmiany zostały zapisane!")

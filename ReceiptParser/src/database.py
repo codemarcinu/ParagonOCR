@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, Numeric, DateTime, Index
+from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey, Numeric, DateTime, Index, Boolean
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
@@ -99,6 +99,7 @@ class StanMagazynowy(Base):
     data_waznosci = Column(Date)  # Data ważności produktu
     data_dodania = Column(DateTime, default=datetime.now)  # Kiedy produkt został dodany do magazynu
     pozycja_paragonu_id = Column(Integer, ForeignKey('pozycje_paragonu.pozycja_id'), nullable=True)  # Opcjonalne powiązanie z paragonem
+    zamrozone = Column(Boolean, default=False, nullable=False)  # Czy produkt jest zamrożony
     
     produkt = relationship("Produkt", back_populates="stan_magazynowy")
     pozycja_paragonu = relationship("PozycjaParagonu")
