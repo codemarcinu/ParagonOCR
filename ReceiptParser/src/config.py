@@ -11,23 +11,13 @@ load_dotenv(env_path)
 
 
 class Config:
-    # OLLAMA_HOST - automatycznie wykrywa czy jesteśmy w Dockerze
-    # W Dockerze używa nazwy serwisu "ollama", lokalnie "localhost"
-    _default_ollama_host = (
-        "http://ollama:11434" if os.getenv("DOCKER_CONTAINER") == "true" 
-        else "http://localhost:11434"
-    )
-    OLLAMA_HOST = os.getenv("OLLAMA_HOST", _default_ollama_host)
-    VISION_MODEL = os.getenv("VISION_MODEL", "llava:latest")
-    TEXT_MODEL = os.getenv("TEXT_MODEL", "SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M")
-    MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "")
-    # Timeout dla zapytań do Ollama (w sekundach)
-    OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "300"))  # Domyślnie 5 minut
+    # --- Konfiguracja Cloud (wymuszona dla wersji webowej) ---
+    # Wersja webowa działa TYLKO z Mistral OCR i OpenAI API
+    # Ollama nie jest obsługiwane w tej wersji
+    USE_CLOUD_AI = True  # Wymuszone na True
+    USE_CLOUD_OCR = True  # Wymuszone na True
     
-    # --- Konfiguracja Cloud vs Local ---
-    # Domyślnie używamy Cloud (Mistral OCR + OpenAI) dla łatwości użycia
-    USE_CLOUD_AI = os.getenv("USE_CLOUD_AI", "true").lower() == "true"
-    USE_CLOUD_OCR = os.getenv("USE_CLOUD_OCR", "true").lower() == "true"
+    MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "")
     
     # Klucze API dla Cloud
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
@@ -56,14 +46,9 @@ class Config:
 
     @staticmethod
     def print_config():
-        print("--- Konfiguracja ---")
-        print(f"USE_CLOUD_AI: {Config.USE_CLOUD_AI}")
-        print(f"USE_CLOUD_OCR: {Config.USE_CLOUD_OCR}")
-        if Config.USE_CLOUD_AI:
-            print(f"OPENAI_VISION_MODEL: {Config.OPENAI_VISION_MODEL}")
-            print(f"OPENAI_TEXT_MODEL: {Config.OPENAI_TEXT_MODEL}")
-        else:
-            print(f"OLLAMA_HOST: {Config.OLLAMA_HOST}")
-            print(f"VISION_MODEL: {Config.VISION_MODEL}")
-            print(f"TEXT_MODEL:  {Config.TEXT_MODEL}")
+        print("--- Konfiguracja (Web - Cloud Only) ---")
+        print(f"USE_CLOUD_AI: {Config.USE_CLOUD_AI} (wymuszone)")
+        print(f"USE_CLOUD_OCR: {Config.USE_CLOUD_OCR} (wymuszone)")
+        print(f"OPENAI_VISION_MODEL: {Config.OPENAI_VISION_MODEL}")
+        print(f"OPENAI_TEXT_MODEL: {Config.OPENAI_TEXT_MODEL}")
         print("--------------------")

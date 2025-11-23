@@ -140,12 +140,9 @@ def get_llm_suggestion(
     Returns:
         Znormalizowana nazwa produktu jako string, lub None w przypadku błędu.
     """
-    # Ustaw domyślny model na podstawie aktualnej konfiguracji (runtime, nie import time)
+    # W wersji webowej zawsze używamy OpenAI
     if model_name is None:
-        if Config.USE_CLOUD_AI:
-            model_name = Config.OPENAI_TEXT_MODEL
-        else:
-            model_name = Config.TEXT_MODEL
+        model_name = Config.OPENAI_TEXT_MODEL
     
     provider = _get_client()
     if not provider.is_available():
@@ -308,12 +305,9 @@ def parse_receipt_with_llm(
     Returns:
         Słownik z danymi w formacie ParsedData, lub None w przypadku błędu.
     """
-    # Ustaw domyślny model na podstawie aktualnej konfiguracji (runtime, nie import time)
+    # W wersji webowej zawsze używamy OpenAI
     if model_name is None:
-        if Config.USE_CLOUD_AI:
-            model_name = Config.OPENAI_VISION_MODEL
-        else:
-            model_name = Config.VISION_MODEL
+        model_name = Config.OPENAI_VISION_MODEL
     
     provider = _get_client()
     if not provider.is_available():
@@ -378,11 +372,8 @@ def parse_receipt_with_llm(
             else "Przeanalizuj ten paragon."
         )
         
-        # Wybierz odpowiedni model w zależności od dostawcy
-        if Config.USE_CLOUD_AI:
-            vision_model = Config.OPENAI_VISION_MODEL
-        else:
-            vision_model = model_name
+        # W wersji webowej zawsze używamy OpenAI
+        vision_model = Config.OPENAI_VISION_MODEL
         
         response = provider.chat(
             model=vision_model,
@@ -442,12 +433,9 @@ def parse_receipt_from_text(
     Returns:
         Słownik z danymi w formacie ParsedData, lub None w przypadku błędu.
     """
-    # Ustaw domyślny model na podstawie aktualnej konfiguracji (runtime, nie import time)
+    # W wersji webowej zawsze używamy OpenAI
     if model_name is None:
-        if Config.USE_CLOUD_AI:
-            model_name = Config.OPENAI_TEXT_MODEL
-        else:
-            model_name = Config.TEXT_MODEL
+        model_name = Config.OPENAI_TEXT_MODEL
     
     provider = _get_client()
     if not provider.is_available():
@@ -536,16 +524,8 @@ def parse_receipt_from_text(
             print(f"OSTRZEŻENIE: Tekst paragonu jest za długi ({len(text_content)} znaków), obcinam do {MAX_TEXT_LENGTH} znaków.")
             text_content = text_content[:MAX_TEXT_LENGTH] + "\n\n[... tekst obcięty ...]"
         
-        # Wybierz odpowiedni model w zależności od dostawcy
-        if Config.USE_CLOUD_AI:
-            text_model = Config.OPENAI_TEXT_MODEL
-        else:
-            # Jeśli model_name nie został podany, użyj domyślnego z Config
-            text_model = model_name or Config.TEXT_MODEL
-        
-        if not text_model:
-            print("BŁĄD: Nie określono modelu tekstowego. Użyj Config.TEXT_MODEL lub przekaż model_name.")
-            return None
+        # W wersji webowej zawsze używamy OpenAI
+        text_model = Config.OPENAI_TEXT_MODEL
         
         response = provider.chat(
             model=text_model,

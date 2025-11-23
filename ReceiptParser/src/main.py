@@ -114,11 +114,8 @@ def run_processing_pipeline(
                 raise Exception("Mistral OCR nie zwrócił wyniku.")
 
             _call_log_callback(log_callback, "INFO: Mistral OCR zakończył pracę. Przesyłam tekst do LLM...", progress=30, status="Przetwarzanie przez LLM...")
-            # Wybierz odpowiedni model tekstowy w zależności od konfiguracji
-            if Config.USE_CLOUD_AI:
-                text_model = Config.OPENAI_TEXT_MODEL
-            else:
-                text_model = Config.TEXT_MODEL
+            # W wersji webowej zawsze używamy OpenAI
+            text_model = Config.OPENAI_TEXT_MODEL
             parsed_data = parse_receipt_from_text(ocr_markdown, model_name=text_model)
 
         else:
@@ -193,7 +190,7 @@ def run_processing_pipeline(
             except Exception:
                 pass
         _call_log_callback(log_callback, f"BŁĄD KRYTYCZNY na etapie parsowania LLM: {sanitize_log_message(str(e))}")
-        _call_log_callback(log_callback, "Upewnij się, że serwer Ollama działa i model jest dostępny.")
+        _call_log_callback(log_callback, "Upewnij się, że klucze API (OpenAI, Mistral) są poprawnie skonfigurowane.")
         return
 
     # Krok 2: Zapis do bazy (ta logika jest już dobra i pozostaje bez zmian)

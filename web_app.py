@@ -723,15 +723,10 @@ async def settings_page():
                     with ui.card():
                         ui.label('Tryb działania').classes('card-title')
                         
-                        use_cloud_ai = ui.switch(
-                            'Użyj Cloud AI (OpenAI)',
-                            value=settings.get("use_cloud_ai", True)
-                        ).style('margin: 12px 0;')
-                        
-                        use_cloud_ocr = ui.switch(
-                            'Użyj Cloud OCR (Mistral)',
-                            value=settings.get("use_cloud_ocr", True)
-                        ).style('margin: 12px 0;')
+                        # W wersji webowej zawsze używamy Cloud (Mistral OCR + OpenAI API)
+                        ui.label('✓ Cloud AI (OpenAI) - zawsze włączone').style('margin: 12px 0; color: var(--text-secondary);')
+                        ui.label('✓ Cloud OCR (Mistral) - zawsze włączone').style('margin: 12px 0; color: var(--text-secondary);')
+                        ui.label('Wersja webowa działa wyłącznie z Mistral OCR i OpenAI API.').style('margin: 12px 0; font-size: 0.9em; color: var(--text-secondary);')
                     
                     with ui.card():
                         ui.label('Klucze API').classes('card-title')
@@ -756,8 +751,9 @@ async def settings_page():
                         
                         async def save_settings():
                             update_data = {
-                                "use_cloud_ai": use_cloud_ai.value,
-                                "use_cloud_ocr": use_cloud_ocr.value,
+                                # W wersji webowej zawsze wymuszamy Cloud
+                                "use_cloud_ai": True,
+                                "use_cloud_ocr": True,
                             }
                             
                             if openai_key.value:

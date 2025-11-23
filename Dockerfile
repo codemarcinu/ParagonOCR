@@ -1,17 +1,12 @@
 # Dockerfile dla ParagonWeb
-# Używa lekkiego obrazu Python
+# Wersja webowa - tylko Cloud (Mistral OCR + OpenAI API)
 
 FROM python:3.13-slim
 
-# Instalujemy zależności systemowe
-# Tesseract i Poppler są opcjonalne (jeśli używamy Cloud OCR, nie są potrzebne)
-# Ale instalujemy je na wszelki wypadek dla trybu lokalnego
+# Instalujemy minimalne zależności systemowe
+# Tesseract i Poppler nie są potrzebne w trybie Cloud OCR
 RUN apt-get update && apt-get install -y \
     curl \
-    tesseract-ocr \
-    tesseract-ocr-pol \
-    poppler-utils \
-    libpoppler-cpp-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -28,13 +23,15 @@ RUN mkdir -p /app/ReceiptParser/data /app/uploads /app/logs
 
 # Wystawiamy porty
 # 8000 - FastAPI backend
-# 8080 - NiceGUI frontend
-EXPOSE 8000 8080
+# 8081 - NiceGUI frontend
+EXPOSE 8000 8081
 
-# Oznaczamy, że jesteśmy w kontenerze Docker (dla automatycznej konfiguracji Ollama)
+# Oznaczamy, że jesteśmy w kontenerze Docker
 ENV DOCKER_CONTAINER=true
+# Wymuszamy tryb Cloud
+ENV USE_CLOUD_AI=true
+ENV USE_CLOUD_OCR=true
 
 # Start - uruchamiamy zarówno backend jak i frontend
-# W produkcji można użyć supervisord lub osobnych kontenerów
 CMD ["sh", "-c", "python server.py & python web_app.py"]
 

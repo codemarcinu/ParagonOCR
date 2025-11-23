@@ -1,7 +1,6 @@
 SQLAlchemy
 click
 python-dotenv
-ollama
 customtkinter
 Pillow
 pdf2image

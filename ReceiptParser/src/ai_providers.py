@@ -2,15 +2,12 @@
 Abstrakcje dla dostawców AI (LLM).
 
 Wspiera:
-- OpenAI (Cloud)
-- Ollama (Local)
+- OpenAI (Cloud) - jedyny obsługiwany dostawca w wersji webowej
 """
 
 from abc import ABC, abstractmethod
 from typing import List, Dict, Optional, Any
 import mimetypes
-import ollama
-import httpx
 from openai import OpenAI
 
 from .config import Config
@@ -47,95 +44,6 @@ class AIProvider(ABC):
     def is_available(self) -> bool:
         """Sprawdza czy dostawca jest dostępny."""
         pass
-
-
-class OllamaProvider(AIProvider):
-    """Dostawca AI używający lokalnego Ollama."""
-    
-    def __init__(self, host: str = None, timeout: int = None):
-        """
-        Inicjalizuje klienta Ollama.
-        
-        Args:
-            host: Adres serwera Ollama (domyślnie z Config)
-            timeout: Timeout w sekundach (domyślnie z Config)
-        """
-        self.host = host or Config.OLLAMA_HOST
-        self.timeout = timeout or Config.OLLAMA_TIMEOUT
-        
-        try:
-            timeout_obj = httpx.Timeout(self.timeout, connect=10.0)
-            self.client = ollama.Client(host=self.host, timeout=timeout_obj)
-        except Exception as e:
-            print(f"BŁĄD: Nie można połączyć się z Ollama na {self.host}: {e}")
-            self.client = None
-    
-    def chat(
-        self,
-        model: str,
-        messages: List[Dict[str, str]],
-        format: Optional[str] = None,
-        options: Optional[Dict[str, Any]] = None,
-        images: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
-        """Wysyła wiadomość do Ollama."""
-        if not self.client:
-            raise RuntimeError("Klient Ollama nie jest dostępny")
-        
-        # Przygotuj wiadomość użytkownika
-        user_message = None
-        for msg in messages:
-            if msg["role"] == "user":
-                user_message = msg
-                break
-        
-        if not user_message:
-            raise ValueError("Brak wiadomości użytkownika")
-        
-        # Ollama wymaga osobnego system promptu
-        system_message = None
-        for msg in messages:
-            if msg["role"] == "system":
-                system_message = msg["content"]
-                break
-        
-        # Przygotuj opcje
-        ollama_options = {}
-        if options:
-            ollama_options.update(options)
-        
-        # Format JSON
-        if format == "json":
-            ollama_options["format"] = "json"
-        
-        # Przygotuj wiadomości z obsługą obrazów (dla modeli multimodalnych)
-        ollama_messages = []
-        for msg in messages:
-            msg_copy = msg.copy()
-            # Jeśli to wiadomość użytkownika i mamy obrazy, dodaj je
-            if msg["role"] == "user" and images:
-                msg_copy["images"] = images
-            ollama_messages.append(msg_copy)
-        
-        # Wywołaj API Ollama
-        response = self.client.chat(
-            model=model,
-            messages=ollama_messages,
-            options=ollama_options if ollama_options else None,
-        )
-        
-        # Ollama zwraca odpowiedź w formacie {"message": {"content": "..."}}
-        return response
-    
-    def is_available(self) -> bool:
-        """Sprawdza czy Ollama jest dostępna."""
-        if not self.client:
-            return False
-        try:
-            self.client.list()
-            return True
-        except Exception:
-            return False
 
 
 class OpenAIProvider(AIProvider):
@@ -252,17 +160,14 @@ def get_ai_provider(use_cloud: bool = None) -> AIProvider:
     """
     Factory function do tworzenia odpowiedniego dostawcy AI.
     
+    W wersji webowej zawsze zwraca OpenAIProvider (Ollama nie jest obsługiwane).
+    
     Args:
-        use_cloud: True dla OpenAI, False dla Ollama (domyślnie z Config)
+        use_cloud: Ignorowane - zawsze używa OpenAI w wersji webowej
         
     Returns:
-        Instancja AIProvider
+        Instancja OpenAIProvider
     """
-    if use_cloud is None:
-        use_cloud = Config.USE_CLOUD_AI
-    
-    if use_cloud:
-        return OpenAIProvider()
-    else:
-        return OllamaProvider()
+    # W wersji webowej zawsze używamy OpenAI
+    return OpenAIProvider()
 

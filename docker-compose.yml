@@ -1,33 +1,14 @@
 version: '3.8'
 
 services:
-  # UWAGA: Jeśli masz już uruchomiony kontener Ollama (np. systemowy),
-  # NIE TWÓRZ DRUGIEGO! Użyj istniejącego, ustawiając OLLAMA_HOST poniżej.
-  #
-  # Jeśli potrzebujesz kontenera Ollama, odkomentuj poniższy serwis:
-  #
-  # ollama:
-  #   image: ollama/ollama:latest
-  #   container_name: paragon_ollama
-  #   restart: unless-stopped
-  #   ports:
-  #     - "11434:11434"  # Ollama API
-  #   volumes:
-  #     - ollama_data:/root/.ollama  # Trwałość modeli
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-
-  # ParagonWeb - Główna aplikacja
+  # ParagonWeb - Wersja webowa (tylko Cloud: Mistral OCR + OpenAI API)
   paragon-web:
     build: .
     container_name: paragon_ocr
     restart: unless-stopped
     ports:
       - "8000:8000"  # FastAPI backend
-      - "8080:8080"  # NiceGUI frontend
+      - "8081:8081"  # NiceGUI frontend
     volumes:
       - ./ReceiptParser/data:/app/ReceiptParser/data  # Trwałość bazy danych
       - ./data/logs:/app/logs                # Logi
@@ -35,29 +16,16 @@ services:
       - ./data/uploads:/app/uploads          # Uploady
     environment:
       - ENABLE_FILE_LOGGING=true
-      - DOCKER_CONTAINER=true  # Oznacza, że działamy w Dockerze
-      # Konfiguracja Ollama:
-      # - Jeśli masz Ollama w osobnym kontenerze Docker, użyj: http://ollama:11434
-      # - Jeśli masz Ollama na hoście (poza Dockerem), użyj: http://host.docker.internal:11434 (Mac/Windows)
-      #   lub http://172.17.0.1:11434 (Linux) - sprawdź IP mostu docker0: ip addr show docker0
-      # - Jeśli masz Ollama w innym kontenerze, użyj nazwy tego kontenera lub IP
-      - OLLAMA_HOST=http://host.docker.internal:11434  # Domyślnie: Ollama na hoście
+      - DOCKER_CONTAINER=true
+      # Wymuszamy tryb Cloud (Mistral OCR + OpenAI API)
+      - USE_CLOUD_AI=true
+      - USE_CLOUD_OCR=true
       # Klucze API można podać tu lub w ustawieniach aplikacji
       # - OPENAI_API_KEY=...
       # - MISTRAL_API_KEY=...
-      # - USE_CLOUD_AI=true
-      # - USE_CLOUD_OCR=true
-    # Jeśli używasz kontenera Ollama z tego docker-compose, odkomentuj:
-    # depends_on:
-    #   ollama:
-    #     condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-
-volumes:
-  ollama_data:
-    # Volume dla modeli Ollama (tylko jeśli używasz kontenera Ollama z tego docker-compose)
 

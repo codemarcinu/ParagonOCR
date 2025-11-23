@@ -38,11 +38,8 @@ class BielikAssistant:
         """
         self.session = session or sessionmaker(bind=engine)()
         self.ai_provider = get_ai_provider()
-        # Wybierz odpowiedni model w zależności od dostawcy
-        if Config.USE_CLOUD_AI:
-            self.model_name = Config.OPENAI_TEXT_MODEL
-        else:
-            self.model_name = Config.TEXT_MODEL
+        # W wersji webowej zawsze używamy OpenAI
+        self.model_name = Config.OPENAI_TEXT_MODEL
 
     def _search_products_rag(
         self, query: str, limit: int = 10, min_similarity: int = 40

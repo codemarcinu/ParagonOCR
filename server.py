@@ -255,17 +255,30 @@ async def health_check():
         health_status["status"] = "unhealthy"
         health_status["checks"]["database"] = f"error: {str(e)}"
     
-    # Sprawdź dostępność AI provider
+    # Sprawdź dostępność AI provider (OpenAI)
     try:
         from ReceiptParser.src.ai_providers import get_ai_provider
         provider = get_ai_provider()
         if provider.is_available():
-            health_status["checks"]["ai_provider"] = "ok"
+            health_status["checks"]["ai_provider"] = "ok (OpenAI)"
         else:
-            health_status["checks"]["ai_provider"] = "unavailable"
+            health_status["checks"]["ai_provider"] = "unavailable (OpenAI API key missing)"
             health_status["status"] = "degraded"
     except Exception as e:
         health_status["checks"]["ai_provider"] = f"error: {str(e)}"
+        health_status["status"] = "degraded"
+    
+    # Sprawdź dostępność OCR provider (Mistral)
+    try:
+        from ReceiptParser.src.ocr_providers import get_ocr_provider
+        ocr_provider = get_ocr_provider()
+        if ocr_provider.is_available():
+            health_status["checks"]["ocr_provider"] = "ok (Mistral)"
+        else:
+            health_status["checks"]["ocr_provider"] = "unavailable (Mistral API key missing)"
+            health_status["status"] = "degraded"
+    except Exception as e:
+        health_status["checks"]["ocr_provider"] = f"error: {str(e)}"
         health_status["status"] = "degraded"
     
     # Sprawdź liczbę aktywnych zadań
@@ -351,11 +364,8 @@ async def upload_receipt(
                 # Dla web app, akceptujemy dane bez weryfikacji (można później dodać UI)
                 return parsed_data
             
-            # Wybierz model w zależności od konfiguracji
-            if Config.USE_CLOUD_OCR:
-                llm_model = "mistral-ocr"
-            else:
-                llm_model = Config.VISION_MODEL
+            # W wersji webowej zawsze używamy Mistral OCR
+            llm_model = "mistral-ocr"
             
             run_processing_pipeline(
                 str(file_path),
