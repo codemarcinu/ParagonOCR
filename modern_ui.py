@@ -135,7 +135,9 @@ class AppState:
         data = await api_call("GET", "/api/inventory")
         if data:
             # API zwraca {"inventory": [...]}, więc pobierz listę
-            cls.inventory = data.get("inventory", []) if isinstance(data, dict) else data
+            cls.inventory = (
+                data.get("inventory", []) if isinstance(data, dict) else data
+            )
             # Przetwórz dane (dodaj days_left i icon)
             for item in cls.inventory:
                 item["days_left"] = calculate_days_left(item.get("data_waznosci"))
@@ -358,10 +360,38 @@ async def main_page():
                     "Generuj z braków", on_click=generate_list, icon="auto_awesome"
                 ).classes(f"flex-1 {Theme.PRIMARY_BTN}")
 
-                # Przycisk dodawania ręcznego do listy (opcjonalnie)
-                ui.button(
-                    icon="add", on_click=lambda: ui.notify("Dodawanie do listy wkrótce")
-                ).classes("bg-slate-200 text-slate-700")
+                # Przycisk dodawania ręcznego do listy
+                async def add_manual_shopping_item():
+                    with ui.dialog() as dialog, ui.card().classes(
+                        "p-6 w-full max-w-xs"
+                    ):
+                        ui.label("Dodaj do listy").classes("text-lg font-bold mb-4")
+                        name_input = ui.input("Nazwa produktu").classes("w-full mb-4")
+
+                        async def add():
+                            if name_input.value:
+                                AppState.shopping_list.append(
+                                    {
+                                        "name": name_input.value,
+                                        "reason": "Ręcznie",
+                                        "checked": False,
+                                    }
+                                )
+                                dialog.close()
+                                await render_shopping_list()
+
+                        with ui.row().classes("w-full justify-end gap-2"):
+                            ui.button("Anuluj", on_click=dialog.close).props(
+                                "flat color=grey"
+                            )
+                            ui.button("Dodaj", on_click=add).classes(
+                                "bg-emerald-600 text-white"
+                            )
+                    dialog.open()
+
+                ui.button(icon="add", on_click=add_manual_shopping_item).classes(
+                    "bg-slate-200 text-slate-700"
+                )
 
             # --- Lista ---
             if not AppState.shopping_list:
@@ -536,20 +566,38 @@ async def main_page():
                 "text-sm font-bold uppercase text-slate-400 tracking-wider ml-1 mb-2"
             )
 
+            # Pobierz ustawienia z backendu
+            settings = await api_call("GET", "/api/settings") or {}
+
+            async def update_setting(key, value):
+                # Aktualizuj lokalnie
+                settings[key] = value
+                # Wyślij do backendu
+                await api_call("POST", "/api/settings", {key: value})
+                ui.notify("Zapisano ustawienia")
+
             with ui.card().classes(f"{Theme.CARD} w-full flex flex-col gap-4"):
                 with ui.row().classes("justify-between items-center w-full"):
                     with ui.row().classes("items-center gap-2"):
-                        ui.icon("dark_mode", size="24px").classes("text-slate-600")
-                        ui.label("Tryb Ciemny").classes("font-medium")
-                    ui.switch(on_change=lambda e: ui.notify("Wkrótce..."))
+                        ui.icon("cloud", size="24px").classes("text-slate-600")
+                        ui.label("Cloud AI (OpenAI)").classes("font-medium")
+                    ui.switch(
+                        value=settings.get("use_cloud_ai", False),
+                        on_change=lambda e: update_setting("use_cloud_ai", e.value),
+                    )
 
                 ui.separator()
 
                 with ui.row().classes("justify-between items-center w-full"):
                     with ui.row().classes("items-center gap-2"):
-                        ui.icon("notifications", size="24px").classes("text-slate-600")
-                        ui.label("Powiadomienia").classes("font-medium")
-                    ui.switch(value=True, on_change=lambda e: ui.notify("Zapisano"))
+                        ui.icon("document_scanner", size="24px").classes(
+                            "text-slate-600"
+                        )
+                        ui.label("Cloud OCR (Mistral)").classes("font-medium")
+                    ui.switch(
+                        value=settings.get("use_cloud_ocr", False),
+                        on_change=lambda e: update_setting("use_cloud_ocr", e.value),
+                    )
 
             ui.button(
                 "Wyloguj", icon="logout", on_click=lambda: ui.notify("Wylogowano")

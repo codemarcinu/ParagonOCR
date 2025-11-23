@@ -205,14 +205,14 @@ start_frontend() {
         mkdir -p "$BASE_DIR/data/logs"
         
         # Uruchom w tle
-        nohup python web_app.py > "$LOG_FRONTEND" 2>&1 &
+        nohup python modern_ui.py > "$LOG_FRONTEND" 2>&1 &
         FRONTEND_PID=$!
         echo $FRONTEND_PID > "$PID_FRONTEND"
         print_success "Frontend uruchomiony w tle (PID: $FRONTEND_PID)"
         print_info "Logi: tail -f $LOG_FRONTEND"
     else
         # Uruchom na pierwszym planie
-        python web_app.py
+        python modern_ui.py
     fi
 }
 
@@ -366,7 +366,7 @@ interactive_mode() {
     echo -e "${GREEN}Terminal 2 - Frontend (NiceGUI):${NC}"
     echo "  cd $BASE_DIR"
     echo "  source venv/bin/activate"
-    echo "  python web_app.py"
+    echo "  python modern_ui.py"
     echo ""
     echo -e "${BLUE}Adresy po uruchomieniu:${NC}"
     echo "  🌐 Frontend: http://localhost:$FRONTEND_PORT"
