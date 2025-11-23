@@ -1,14 +1,11 @@
 import os
 import sys
-from datetime import datetime, date, timedelta
-from typing import Optional
-from nicegui import ui, app
+from datetime import datetime, timedelta, date
+from typing import Optional, List, Dict
 import httpx
+from nicegui import ui, app
 
-# Dodaj ReceiptParser do ścieżki
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "ReceiptParser"))
-
-# URL API
+# --- CONFIG ---
 API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 
@@ -31,7 +28,7 @@ class Theme:
     FRESH_BAD = "bg-red-500"
 
 
-# --- Funkcje pomocnicze API ---
+# --- API HELPERS ---
 async def api_call(
     method: str,
     endpoint: str,
@@ -63,94 +60,20 @@ async def api_call(
                 return {}
             return response.json()
     except Exception as e:
-        print(f"API Error: {e}")
-        return {}
+        ui.notify(f"Błąd API: {str(e)}", type="negative")
+        return None
 
 
-def calculate_freshness_percentage(
-    data_waznosci: Optional[str], typical_shelf_life_days: int = 14
-) -> tuple[int, int]:
-    """
-    Oblicza procent świeżości produktu.
-    Returns: (percentage 0-100, days_left)
-    """
-    if not data_waznosci:
-        return (100, 999)  # Brak daty = zawsze świeże
-
+# --- LOGIC ---
+def calculate_days_left(expiry_date_str: Optional[str]) -> int:
+    if not expiry_date_str:
+        return 999  # Brak daty = świeże
     try:
-        expiry_date = (
-            datetime.fromisoformat(data_waznosci).date()
-            if isinstance(data_waznosci, str)
-            else data_waznosci
-        )
+        expiry = datetime.fromisoformat(expiry_date_str).date()
         today = date.today()
-        days_left = (expiry_date - today).days
-
-        if days_left < 0:
-            return (0, days_left)  # Przeterminowane
-
-        if days_left >= typical_shelf_life_days:
-            return (100, days_left)
-
-        percentage = max(0, min(100, int((days_left / typical_shelf_life_days) * 100)))
-        return (percentage, days_left)
-    except:
-        return (100, 999)
-
-
-def get_category_emoji(kategoria: Optional[str]) -> str:
-    """Zwraca emoji dla kategorii produktu."""
-    if not kategoria:
-        return "📦"
-
-    emoji_map = {
-        "Nabiał": "🥛",
-        "Warzywa": "🥦",
-        "Owoce": "🍎",
-        "Mięso": "🥩",
-        "Pieczywo": "🍞",
-        "Słodycze": "🍫",
-        "Napoje": "🥤",
-        "Chemia": "🧴",
-    }
-    return emoji_map.get(kategoria, "📦")
-
-
-# Mock danych (później podepniesz tu API)
-inventory_mock = [
-    {
-        "name": "Mleko 3.2%",
-        "qty": 1.5,
-        "unit": "l",
-        "days_left": 2,
-        "cat": "Nabiał",
-        "icon": "🥛",
-    },
-    {
-        "name": "Jajka L",
-        "qty": 8,
-        "unit": "szt",
-        "days_left": 10,
-        "cat": "Nabiał",
-        "icon": "🥚",
-    },
-    {
-        "name": "Pomidory",
-        "qty": 0.5,
-        "unit": "kg",
-        "days_left": -1,
-        "cat": "Warzywa",
-        "icon": "🍅",
-    },
-    {
-        "name": "Kurczak",
-        "qty": 1,
-        "unit": "kg",
-        "days_left": 1,
-        "cat": "Mięso",
-        "icon": "🥩",
-    },
-]
+        return (expiry - today).days
+    except ValueError:
+        return 999
 
 
 def get_freshness_color(days):
@@ -161,10 +84,61 @@ def get_freshness_color(days):
     return Theme.FRESH_GOOD
 
 
+def get_category_icon(category_name: str) -> str:
+    icons = {
+        "Nabiał": "🥛",
+        "Warzywa": "🥦",
+        "Owoce": "🍎",
+        "Mięso": "🥩",
+        "Pieczywo": "🍞",
+        "Napoje": "🥤",
+        "Słodycze": "🍫",
+        "Chemia": "🧼",
+        "Inne": "📦",
+    }
+    return icons.get(category_name, "📦")
+
+
+# --- STATE ---
+class AppState:
+    inventory: List[Dict] = []
+    shopping_list: List[Dict] = []
+    chat_history: List[Dict] = []  # {role: 'user'/'bot', content: str}
+    current_view: str = "home"  # home, list, bielik, account
+
+    @classmethod
+    async def refresh_inventory(cls):
+        data = await api_call("GET", "/api/inventory")
+        if data:
+            cls.inventory = data
+            # Przetwórz dane (dodaj days_left i icon)
+            for item in cls.inventory:
+                item["days_left"] = calculate_days_left(item.get("data_waznosci"))
+                item["icon"] = get_category_icon(item.get("kategoria", "Inne"))
+
+    @classmethod
+    def generate_smart_list(cls):
+        """Generuje listę zakupów na podstawie braków i przeterminowanych produktów."""
+        cls.shopping_list = []
+        for item in cls.inventory:
+            # Logika: mało produktu (< 1) lub przeterminowany (<= 0 dni)
+            if item["ilosc"] < 1 or item["days_left"] <= 0:
+                cls.shopping_list.append(
+                    {
+                        "name": item["nazwa"],
+                        "reason": "Kończy się" if item["ilosc"] < 1 else "Po terminie",
+                        "checked": False,
+                    }
+                )
+
+
 @ui.page("/")
 async def main_page():
     # Ustawienia globalne
     ui.query("body").classes("bg-slate-50 font-sans")
+
+    # Załaduj dane
+    await AppState.refresh_inventory()
 
     # --- HEADER ---
     with ui.header().classes(
@@ -179,124 +153,189 @@ async def main_page():
             "flat round color=grey"
         )
 
-    # --- MAIN CONTENT (z paddingiem na header i footer) ---
-    with ui.column().classes("w-full max-w-md mx-auto pt-20 pb-24 px-4 gap-6"):
+    # --- MAIN CONTENT ---
+    # Kontener główny z odświeżaniem
+    content_container = ui.column().classes(
+        "w-full max-w-md mx-auto pt-20 pb-24 px-4 gap-6"
+    )
 
-        # Pobierz dane z API
-        try:
-            inventory_data = await api_call("GET", "/api/inventory")
-            items = inventory_data.get("inventory", [])
-        except Exception:
-            items = []
-            ui.notify("Nie udało się pobrać danych z magazynu", type="negative")
+    async def render_home():
+        content_container.clear()
+        with content_container:
+            # 1. SEKCJA: "ZJEDZ MNIE" (Priority Dashboard)
+            ui.label("⚠️ Do zużycia wkrótce").classes(
+                "text-sm font-bold uppercase text-slate-400 tracking-wider ml-1"
+            )
 
-        # 1. SEKCJA: "ZJEDZ MNIE" (Priority Dashboard)
-        ui.label("⚠️ Do zużycia wkrótce").classes(
-            "text-sm font-bold uppercase text-slate-400 tracking-wider ml-1"
-        )
+            urgent_items = sorted(
+                [i for i in AppState.inventory if i["days_left"] <= 3],
+                key=lambda x: x["days_left"],
+            )
 
-        # Filtrujemy produkty "pilne"
-        urgent_items = []
-        today = date.today()
-
-        for item in items:
-            # Oblicz dni do końca
-            pct, days = calculate_freshness_percentage(item.get("data_waznosci"))
-            if days <= 3:
-                item["days_left"] = days
-                item["freshness_pct"] = pct
-                item["icon"] = get_category_emoji(item.get("kategoria"))
-                urgent_items.append(item)
-
-        if urgent_items:
-            with ui.scroll_area().classes("w-full h-48 whitespace-nowrap"):
-                with ui.row().classes("flex-nowrap gap-4"):
-                    for item in urgent_items:
-                        # Karta Pilnego Produktu
-                        with ui.card().classes(
-                            f"{Theme.CARD} w-40 h-44 flex flex-col justify-between shrink-0 bg-red-50 border-red-100"
-                        ):
-                            with ui.column().classes("gap-0"):
-                                ui.label(item["icon"]).classes("text-4xl mb-2")
-                                ui.label(item.get("nazwa", "Unknown")).classes(
-                                    "font-bold text-slate-800 truncate w-full"
-                                )
-
-                                # Logika tekstu dni
-                                days_left = item["days_left"]
-                                days_text = (
-                                    "Dziś!"
-                                    if days_left == 0
-                                    else (
-                                        "Po terminie!"
-                                        if days_left < 0
-                                        else f"{days_left} dni"
+            if urgent_items:
+                with ui.scroll_area().classes("w-full h-48 whitespace-nowrap"):
+                    with ui.row().classes("flex-nowrap gap-4"):
+                        for item in urgent_items:
+                            # Karta Pilnego Produktu
+                            with ui.card().classes(
+                                f"{Theme.CARD} w-40 h-44 flex flex-col justify-between shrink-0 bg-red-50 border-red-100"
+                            ):
+                                with ui.column().classes("gap-0"):
+                                    ui.label(item["icon"]).classes("text-4xl mb-2")
+                                    ui.label(item["nazwa"]).classes(
+                                        "font-bold text-slate-800 truncate w-full"
                                     )
+
+                                    days = item["days_left"]
+                                    days_text = (
+                                        "Dziś!"
+                                        if days == 0
+                                        else (
+                                            "Po terminie!"
+                                            if days < 0
+                                            else f"{days} dni"
+                                        )
+                                    )
+                                    ui.label(days_text).classes(
+                                        "text-red-600 font-bold text-sm"
+                                    )
+
+                                ui.button(
+                                    "Zużyj",
+                                    on_click=lambda n=item["nazwa"]: ui.notify(
+                                        f"Zużyto: {n}"
+                                    ),
+                                ).classes(
+                                    "w-full bg-white text-red-600 border border-red-200 hover:bg-red-100 text-sm rounded-lg shadow-sm"
                                 )
-                                ui.label(days_text).classes(
-                                    "text-red-600 font-bold text-sm"
+            else:
+                with ui.card().classes(
+                    f"{Theme.CARD} w-full bg-emerald-50 border-emerald-100 flex items-center justify-center p-6"
+                ):
+                    ui.label("🎉 Wszystko świeże!").classes(
+                        "text-emerald-700 font-bold"
+                    )
+
+            # 2. SEKCJA: "WIRTUALNA LODÓWKA" (Grid)
+            ui.label("📦 Wszystkie produkty").classes(
+                "text-sm font-bold uppercase text-slate-400 tracking-wider ml-1 mt-2"
+            )
+
+            # Filtry (Chipsy) - TODO: Implementacja logiki filtrów
+            with ui.row().classes("gap-2 overflow-x-auto pb-2 no-scrollbar"):
+                for cat in ["Wszystkie", "Nabiał", "Warzywa", "Mięso", "Inne"]:
+                    active = (
+                        "bg-slate-800 text-white"
+                        if cat == "Wszystkie"
+                        else "bg-white text-slate-600 border border-slate-200"
+                    )
+                    ui.button(cat).classes(
+                        f"rounded-full px-4 py-1 text-xs shadow-sm {active}"
+                    ).props("unelevated")
+
+            # Grid produktów
+            with ui.grid(columns=2).classes("w-full gap-3"):
+                for item in AppState.inventory:
+                    with ui.card().classes(
+                        f"{Theme.CARD} flex flex-col gap-2 relative overflow-hidden group"
+                    ):
+                        # Ikona i Nazwa
+                        with ui.row().classes("items-center gap-2"):
+                            ui.label(item["icon"]).classes("text-2xl")
+                            with ui.column().classes("gap-0 overflow-hidden"):
+                                ui.label(item["nazwa"]).classes(
+                                    "font-semibold text-sm truncate w-full leading-tight"
                                 )
+                                ui.label(
+                                    f"{item['ilosc']} {item['jednostka']}"
+                                ).classes("text-xs text-slate-400")
+
+                        # Pasek świeżości
+                        days = item["days_left"]
+                        color = get_freshness_color(days)
+                        # Logika szerokości paska: 100% dla > 10 dni, mniej dla krótszych terminów
+                        width = max(10, min(100, days * 10)) if days > 0 else 100
+
+                        with ui.element("div").classes(
+                            "w-full h-1.5 bg-slate-100 rounded-full mt-auto overflow-hidden"
+                        ):
+                            ui.element("div").classes(f"h-full {color}").style(
+                                f"width: {width}%"
+                            )
+
+    async def render_shopping_list():
+        content_container.clear()
+        with content_container:
+            ui.label("🛒 Lista Zakupów").classes(
+                "text-xl font-bold text-slate-800 mb-4"
+            )
+
+            # Przycisk generowania
+            with ui.row().classes("w-full gap-2 mb-4"):
+                ui.button(
+                    "Generuj Smart Listę",
+                    on_click=lambda: [
+                        AppState.generate_smart_list(),
+                        render_shopping_list(),
+                    ],
+                ).classes(f"flex-1 {Theme.PRIMARY_BTN}")
+                ui.button(
+                    icon="add", on_click=lambda: ui.notify("Dodawanie ręczne")
+                ).classes("bg-slate-200 text-slate-700")
+
+            if not AppState.shopping_list:
+                with ui.column().classes(
+                    "w-full items-center justify-center py-12 text-slate-400 gap-4"
+                ):
+                    ui.icon("shopping_cart", size="48px")
+                    ui.label("Lista jest pusta")
+            else:
+                with ui.column().classes("w-full gap-2"):
+                    for i, item in enumerate(AppState.shopping_list):
+                        with ui.card().classes(
+                            f"{Theme.CARD} flex flex-row items-center justify-between py-3"
+                        ):
+                            with ui.row().classes("items-center gap-3"):
+                                ui.checkbox(
+                                    value=item["checked"],
+                                    on_change=lambda e, idx=i: AppState.shopping_list[
+                                        idx
+                                    ].update(checked=e.value),
+                                )
+                                with ui.column().classes("gap-0"):
+                                    ui.label(item["name"]).classes(
+                                        "font-semibold text-slate-800 "
+                                        + (
+                                            "line-through text-slate-400"
+                                            if item["checked"]
+                                            else ""
+                                        )
+                                    )
+                                    ui.label(item["reason"]).classes(
+                                        "text-xs text-orange-500 font-medium"
+                                    )
 
                             ui.button(
-                                "Zużyj",
-                                on_click=lambda n=item.get("nazwa"): ui.notify(
-                                    f"Zużyto: {n}"
-                                ),
-                            ).classes(
-                                "w-full bg-white text-red-600 border border-red-200 hover:bg-red-100 text-sm rounded-lg shadow-sm"
-                            )
-        else:
-            with ui.card().classes(
-                f"{Theme.CARD} w-full bg-emerald-50 border-emerald-100 flex items-center justify-center p-6"
-            ):
-                ui.label("🎉 Wszystko świeże!").classes("text-emerald-700 font-bold")
+                                icon="delete",
+                                on_click=lambda idx=i: [
+                                    AppState.shopping_list.pop(idx),
+                                    render_shopping_list(),
+                                ],
+                            ).props("flat round color=grey size=sm")
 
-        # 2. SEKCJA: "WIRTUALNA LODÓWKA" (Grid)
-        ui.label("📦 Wszystkie produkty").classes(
-            "text-sm font-bold uppercase text-slate-400 tracking-wider ml-1 mt-2"
-        )
+    async def switch_view(view_name):
+        AppState.current_view = view_name
+        if view_name == "home":
+            await render_home()
+        elif view_name == "list":
+            await render_shopping_list()
+        elif view_name == "bielik":
+            ui.notify("Bielik w budowie...")
+        elif view_name == "account":
+            ui.notify("Konto w budowie...")
 
-        # Filtry (Chipsy)
-        with ui.row().classes("gap-2 overflow-x-auto pb-2 no-scrollbar"):
-            for cat in ["Wszystkie", "Nabiał", "Warzywa", "Mięso", "Inne"]:
-                active = (
-                    "bg-slate-800 text-white"
-                    if cat == "Wszystkie"
-                    else "bg-white text-slate-600 border border-slate-200"
-                )
-                ui.button(cat).classes(
-                    f"rounded-full px-4 py-1 text-xs shadow-sm {active}"
-                ).props("unelevated")
-
-        # Grid produktów
-        with ui.grid(columns=2).classes("w-full gap-3"):
-            for item in items:
-                # Oblicz świeżość dla każdego produktu
-                pct, days = calculate_freshness_percentage(item.get("data_waznosci"))
-                color = get_freshness_color(days)
-                emoji = get_category_emoji(item.get("kategoria"))
-
-                with ui.card().classes(
-                    f"{Theme.CARD} flex flex-col gap-2 relative overflow-hidden group"
-                ):
-                    # Ikona i Nazwa
-                    with ui.row().classes("items-center gap-2"):
-                        ui.label(emoji).classes("text-2xl")
-                        with ui.column().classes("gap-0 overflow-hidden"):
-                            ui.label(item.get("nazwa", "Unknown")).classes(
-                                "font-semibold text-sm truncate w-full leading-tight"
-                            )
-                            ui.label(
-                                f"{item.get('ilosc', 0)} {item.get('jednostka', 'szt')}"
-                            ).classes("text-xs text-slate-400")
-
-                    # Pasek świeżości (wizualizacja)
-                    with ui.element("div").classes(
-                        "w-full h-1.5 bg-slate-100 rounded-full mt-auto overflow-hidden"
-                    ):
-                        ui.element("div").classes(f"h-full {color}").style(
-                            f"width: {pct}%"
-                        )
+    # Inicjalny render
+    await switch_view("home")
 
     # --- BOTTOM NAVIGATION (Mobile) ---
     with ui.footer().classes(
@@ -305,14 +344,14 @@ async def main_page():
         with ui.row().classes("w-full justify-around items-center h-full pb-2"):
             # Home
             with ui.column().classes("items-center gap-0 cursor-pointer").on(
-                "click", lambda: ui.open("/")
+                "click", lambda: switch_view("home")
             ):
                 ui.icon("home", size="28px").classes("text-emerald-600")
                 ui.label("Dom").classes("text-[10px] text-emerald-600 font-medium")
 
             # Lista Zakupów
             with ui.column().classes("items-center gap-0 cursor-pointer").on(
-                "click", lambda: ui.open("/lista")
+                "click", lambda: switch_view("list")
             ):
                 ui.icon("checklist", size="28px").classes(
                     "text-slate-400 hover:text-emerald-600 transition-colors"
@@ -328,7 +367,7 @@ async def main_page():
 
             # Przepisy (Bielik)
             with ui.column().classes("items-center gap-0 cursor-pointer").on(
-                "click", lambda: ui.open("/bielik")
+                "click", lambda: switch_view("bielik")
             ):
                 ui.icon("restaurant_menu", size="28px").classes(
                     "text-slate-400 hover:text-emerald-600 transition-colors"
@@ -337,266 +376,7 @@ async def main_page():
 
             # Konto
             with ui.column().classes("items-center gap-0 cursor-pointer").on(
-                "click", lambda: ui.notify("Konto")
-            ):
-                ui.icon("person", size="28px").classes(
-                    "text-slate-400 hover:text-emerald-600 transition-colors"
-                )
-                ui.label("Ja").classes("text-[10px] text-slate-400 font-medium")
-
-
-@ui.page("/lista")
-async def shopping_list_page():
-    """Strona listy zakupów."""
-    ui.query("body").classes("bg-slate-50 font-sans")
-
-    # --- HEADER ---
-    with ui.header().classes(
-        "bg-white text-slate-800 h-16 shadow-sm flex items-center justify-between px-4 fixed top-0 w-full z-50"
-    ):
-        with ui.row().classes("items-center gap-2"):
-            ui.button(icon="arrow_back", on_click=lambda: ui.open("/")).props(
-                "flat round color=black"
-            )
-            ui.label("Lista Zakupów").classes(
-                "text-xl font-bold tracking-tight text-slate-800"
-            )
-        ui.button(icon="share", on_click=lambda: ui.notify("Udostępnij")).props(
-            "flat round color=grey"
-        )
-
-    # --- MAIN CONTENT ---
-    with ui.column().classes("w-full max-w-md mx-auto pt-20 pb-24 px-4 gap-4"):
-
-        # Sugestie (Smart)
-        with ui.card().classes(f"{Theme.SURFACE} p-4 bg-emerald-50 border-emerald-100"):
-            with ui.row().classes("items-center gap-2 mb-2"):
-                ui.label("🧠").classes("text-xl")
-                ui.label("Sugerowane przez AI").classes(
-                    "font-bold text-emerald-800 text-sm"
-                )
-
-            suggestions = [
-                "Mleko (kończy się)",
-                "Masło (często kupujesz)",
-                "Cytryny (do herbaty)",
-            ]
-            for sug in suggestions:
-                with ui.row().classes("w-full items-center justify-between py-1"):
-                    ui.label(sug).classes("text-sm text-emerald-700")
-                    ui.button(
-                        icon="add", on_click=lambda s=sug: ui.notify(f"Dodano: {s}")
-                    ).props("flat round dense color=green")
-
-        # Lista właściwa
-        ui.label("Twoja lista").classes(
-            "text-sm font-bold uppercase text-slate-400 tracking-wider ml-1"
-        )
-
-        shopping_items = [
-            {"name": "Chleb", "checked": False},
-            {"name": "Woda mineralna", "checked": True},
-            {"name": "Ręczniki papierowe", "checked": False},
-        ]
-
-        with ui.column().classes("w-full gap-2"):
-            for item in shopping_items:
-                with ui.card().classes(
-                    f"{Theme.CARD} flex flex-row items-center justify-between p-3"
-                ):
-                    with ui.row().classes("items-center gap-3"):
-                        cb = ui.checkbox(value=item["checked"])
-                        ui.label(item["name"]).classes(
-                            "font-medium text-slate-700"
-                            + (
-                                " line-through text-slate-400"
-                                if item["checked"]
-                                else ""
-                            )
-                        )
-                        cb.on(
-                            "change",
-                            lambda e, i=item: ui.notify(f'Zmieniono: {i["name"]}'),
-                        )
-
-                    ui.button(icon="delete", on_click=lambda: None).props(
-                        "flat round dense color=grey"
-                    )
-
-            # Input na nowy produkt
-            with ui.row().classes("w-full gap-2 mt-2"):
-                ui.input(placeholder="Dodaj produkt...").classes(
-                    "flex-1 bg-white rounded-lg px-2"
-                ).props("outlined dense")
-                ui.button(icon="add").classes(
-                    "bg-emerald-600 text-white rounded-lg shadow-sm"
-                )
-
-    # --- BOTTOM NAVIGATION ---
-    with ui.footer().classes(
-        "bg-white border-t border-slate-200 h-20 fixed bottom-0 w-full z-50"
-    ):
-        with ui.row().classes("w-full justify-around items-center h-full pb-2"):
-            with ui.column().classes("items-center gap-0 cursor-pointer").on(
-                "click", lambda: ui.open("/")
-            ):
-                ui.icon("home", size="28px").classes(
-                    "text-slate-400 hover:text-emerald-600 transition-colors"
-                )
-                ui.label("Dom").classes("text-[10px] text-slate-400 font-medium")
-
-            with ui.column().classes("items-center gap-0 cursor-pointer").on(
-                "click", lambda: ui.open("/lista")
-            ):
-                ui.icon("checklist", size="28px").classes("text-emerald-600")
-                ui.label("Lista").classes("text-[10px] text-emerald-600 font-medium")
-
-            with ui.column().classes("items-center relative -top-6"):
-                with ui.button(on_click=lambda: ui.notify("Skanuj")).classes(
-                    "rounded-full w-16 h-16 shadow-lg shadow-emerald-200 bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center border-4 border-slate-50"
-                ):
-                    ui.icon("document_scanner", size="32px").classes("text-white")
-
-            with ui.column().classes("items-center gap-0 cursor-pointer").on(
-                "click", lambda: ui.open("/bielik")
-            ):
-                ui.icon("restaurant_menu", size="28px").classes(
-                    "text-slate-400 hover:text-emerald-600 transition-colors"
-                )
-                ui.label("Bielik").classes("text-[10px] text-slate-400 font-medium")
-
-            with ui.column().classes("items-center gap-0 cursor-pointer").on(
-                "click", lambda: ui.notify("Konto")
-            ):
-                ui.icon("person", size="28px").classes(
-                    "text-slate-400 hover:text-emerald-600 transition-colors"
-                )
-                ui.label("Ja").classes("text-[10px] text-slate-400 font-medium")
-
-
-@ui.page("/bielik")
-async def bielik_chat_page():
-    """Strona asystenta AI (Bielik)."""
-    ui.query("body").classes("bg-slate-50 font-sans")
-
-    # --- HEADER ---
-    with ui.header().classes(
-        "bg-white text-slate-800 h-16 shadow-sm flex items-center justify-between px-4 fixed top-0 w-full z-50"
-    ):
-        with ui.row().classes("items-center gap-2"):
-            ui.button(icon="arrow_back", on_click=lambda: ui.open("/")).props(
-                "flat round color=black"
-            )
-            ui.label("Szef Bielik 🦅").classes(
-                "text-xl font-bold tracking-tight text-slate-800"
-            )
-        ui.button(icon="more_vert").props("flat round color=grey")
-
-    # --- MAIN CONTENT ---
-    with ui.column().classes(
-        "w-full max-w-md mx-auto pt-20 pb-24 px-4 h-screen flex flex-col"
-    ):
-
-        # Obszar czatu
-        chat_area = ui.column().classes("flex-1 w-full gap-4 overflow-y-auto pb-4")
-
-        with chat_area:
-            # Powitanie
-            with ui.row().classes("w-full justify-start"):
-                with ui.card().classes(
-                    "bg-white rounded-2xl rounded-tl-none p-3 shadow-sm max-w-[80%]"
-                ):
-                    ui.label(
-                        "Cześć Marcin! 👋 Widzę, że masz sporo jajek i pomidorów. Może szakszuka na śniadanie?"
-                    ).classes("text-slate-700 text-sm")
-                    ui.label("10:30").classes(
-                        "text-[10px] text-slate-400 mt-1 text-right"
-                    )
-
-        # Input
-        with ui.row().classes(
-            "w-full gap-2 items-center bg-white p-2 rounded-2xl shadow-sm border border-slate-100 mt-auto"
-        ):
-            ui.button(icon="add").props("flat round dense color=grey")
-            input_field = (
-                ui.input(placeholder="Napisz do Bielika...")
-                .classes("flex-1 border-none")
-                .props("borderless dense")
-            )
-
-            async def send_message():
-                text = input_field.value
-                if not text:
-                    return
-
-                input_field.value = ""
-
-                # User msg
-                with chat_area:
-                    with ui.row().classes("w-full justify-end"):
-                        with ui.card().classes(
-                            "bg-emerald-600 text-white rounded-2xl rounded-tr-none p-3 shadow-sm max-w-[80%]"
-                        ):
-                            ui.label(text).classes("text-sm")
-
-                # Bot typing...
-                with chat_area:
-                    typing = ui.label("Bielik pisze...").classes(
-                        "text-xs text-slate-400 ml-4"
-                    )
-
-                await asyncio.sleep(1.5)
-                typing.delete()
-
-                # Bot response (mock)
-                with chat_area:
-                    with ui.row().classes("w-full justify-start"):
-                        with ui.card().classes(
-                            "bg-white rounded-2xl rounded-tl-none p-3 shadow-sm max-w-[80%]"
-                        ):
-                            ui.label("Brzmi świetnie! Przygotuję przepis.").classes(
-                                "text-slate-700 text-sm"
-                            )
-
-            ui.button(icon="send", on_click=send_message).props(
-                "flat round dense color=green"
-            )
-
-    # --- BOTTOM NAVIGATION ---
-    with ui.footer().classes(
-        "bg-white border-t border-slate-200 h-20 fixed bottom-0 w-full z-50"
-    ):
-        with ui.row().classes("w-full justify-around items-center h-full pb-2"):
-            with ui.column().classes("items-center gap-0 cursor-pointer").on(
-                "click", lambda: ui.open("/")
-            ):
-                ui.icon("home", size="28px").classes(
-                    "text-slate-400 hover:text-emerald-600 transition-colors"
-                )
-                ui.label("Dom").classes("text-[10px] text-slate-400 font-medium")
-
-            with ui.column().classes("items-center gap-0 cursor-pointer").on(
-                "click", lambda: ui.open("/lista")
-            ):
-                ui.icon("checklist", size="28px").classes(
-                    "text-slate-400 hover:text-emerald-600 transition-colors"
-                )
-                ui.label("Lista").classes("text-[10px] text-slate-400 font-medium")
-
-            with ui.column().classes("items-center relative -top-6"):
-                with ui.button(on_click=lambda: ui.notify("Skanuj")).classes(
-                    "rounded-full w-16 h-16 shadow-lg shadow-emerald-200 bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center border-4 border-slate-50"
-                ):
-                    ui.icon("document_scanner", size="32px").classes("text-white")
-
-            with ui.column().classes("items-center gap-0 cursor-pointer").on(
-                "click", lambda: ui.open("/bielik")
-            ):
-                ui.icon("restaurant_menu", size="28px").classes("text-emerald-600")
-                ui.label("Bielik").classes("text-[10px] text-emerald-600 font-medium")
-
-            with ui.column().classes("items-center gap-0 cursor-pointer").on(
-                "click", lambda: ui.notify("Konto")
+                "click", lambda: switch_view("account")
             ):
                 ui.icon("person", size="28px").classes(
                     "text-slate-400 hover:text-emerald-600 transition-colors"
@@ -607,295 +387,182 @@ async def bielik_chat_page():
     with ui.dialog() as upload_dialog, ui.card().classes(
         "w-full max-w-sm p-6 rounded-3xl"
     ):
-        ui.label("Dodaj Paragon").classes("text-xl font-bold text-center mb-6")
+        # Stan wizarda
+        wizard_state = {
+            "step": "upload",  # upload, processing, success, error
+            "logs": [],
+            "progress": 0,
+        }
 
-        # Dropzone
-        with ui.element("div").classes(
-            "w-full h-40 border-2 border-dashed border-emerald-200 bg-emerald-50 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-emerald-100 transition-colors"
-        ):
-            ui.icon("cloud_upload", size="48px").classes("text-emerald-400")
-            ui.label("Dotknij, aby zeskanować").classes("text-emerald-700 font-medium")
-            # Tutaj ukryty ui.upload()
-            ui.upload(auto_upload=True, label="").classes(
-                "absolute opacity-0 w-full h-full"
-            )
+        # Kontener zawartości dialogu
+        dialog_content = ui.column().classes("w-full items-center")
 
-        ui.label("lub").classes("text-center text-slate-400 my-2 text-sm")
-
-        ui.button("Wpisz ręcznie", icon="edit").classes(
-            "w-full bg-slate-100 text-slate-700 hover:bg-slate-200 shadow-none"
-        )
-
-        ui.button("Anuluj", on_click=upload_dialog.close).props(
-            "flat color=grey"
-        ).classes("w-full mt-2")
-
-
-async def handle_receipt_upload(e, container):
-    """Obsługuje upload paragonu z wizardem i animacjami."""
-    try:
-        file_name = getattr(e, "name", "paragon")
-
-        # Pobierz zawartość pliku
-        if hasattr(e, "content"):
-            file_obj = e.content
-        elif hasattr(e, "file"):
-            file_obj = e.file
-        else:
-            raise Exception("Nie znaleziono zawartości pliku")
-
-        file_content = await file_obj.read()
-
-        # Wyślij do API
-        timeout = httpx.Timeout(60.0, connect=10.0)
-        async with httpx.AsyncClient(timeout=timeout) as client:
-            files = {
-                "file": (file_name, file_content, getattr(e, "type", "application/pdf"))
-            }
-            response = await client.post(f"{API_URL}/api/upload", files=files)
-            response.raise_for_status()
-            result = response.json()
-
-        task_id = result.get("task_id")
-        if task_id:
-            # Pokaż wizard z animacjami
-            await show_upload_wizard(task_id, file_name)
-    except Exception as ex:
-        ui.notify(f"Błąd: {str(ex)}", type="negative")
-
-
-async def show_upload_wizard(task_id: str, file_name: str):
-    """Pokazuje wizard uploadu z animacjami postępu."""
-    dialog = ui.dialog()
-    dialog.classes("w-full max-w-2xl")
-
-    with dialog:
-        with ui.card().classes("w-full p-6"):
-            ui.label("🔍 Przetwarzanie paragonu").classes(
-                "text-2xl font-bold text-slate-800 mb-4"
-            )
-
-            # Status message
-            status_label = ui.label("📤 Przesyłanie pliku...").classes(
-                "text-lg text-slate-600 mb-4"
-            )
-
-            # Progress bar
-            progress_bar = ui.linear_progress(value=0.05).classes("w-full mb-4")
-
-            # Steps container
-            steps_container = ui.column().classes("w-full gap-3 mb-4")
-
-            # Human-readable steps
-            steps = [
-                {"icon": "📤", "text": "Przesyłanie pliku...", "done": False},
-                {"icon": "🔍", "text": "Analizuję obraz...", "done": False},
-                {"icon": "🤖", "text": "Asystent czyta produkty...", "done": False},
-                {"icon": "📦", "text": "Układam na półkach...", "done": False},
-            ]
-
-            step_elements = []
-            for step in steps:
-                with steps_container:
-                    step_row = ui.row().classes(
-                        "w-full items-center gap-3 p-3 bg-slate-50 rounded-lg"
+        def render_wizard():
+            dialog_content.clear()
+            with dialog_content:
+                if wizard_state["step"] == "upload":
+                    ui.label("Dodaj Paragon").classes(
+                        "text-xl font-bold text-center mb-6"
                     )
-                    with step_row:
-                        step_icon = ui.label(step["icon"]).classes("text-2xl")
-                        step_text = ui.label(step["text"]).classes("text-slate-600")
-                        step_check = ui.icon("check_circle", size="1.5em").classes(
-                            "text-emerald-600 ml-auto"
+
+                    # Dropzone
+                    with ui.element("div").classes(
+                        "w-full h-40 border-2 border-dashed border-emerald-200 bg-emerald-50 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-emerald-100 transition-colors relative"
+                    ):
+                        ui.icon("cloud_upload", size="48px").classes("text-emerald-400")
+                        ui.label("Dotknij, aby zeskanować").classes(
+                            "text-emerald-700 font-medium"
                         )
-                        step_check.visible = False
-                    step_elements.append(
-                        {
-                            "row": step_row,
-                            "icon": step_icon,
-                            "text": step_text,
-                            "check": step_check,
-                        }
+
+                        async def handle_upload(e):
+                            wizard_state["step"] = "processing"
+                            render_wizard()
+
+                            # Upload pliku
+                            try:
+                                # NiceGUI upload event content is a file-like object
+                                files = {"file": (e.name, e.content, e.type)}
+                                response = await api_call(
+                                    "POST", "/api/upload", files=files
+                                )
+
+                                if response and "task_id" in response:
+                                    await track_progress(response["task_id"])
+                                else:
+                                    raise Exception("Błąd przesyłania pliku")
+                            except Exception as ex:
+                                wizard_state["step"] = "error"
+                                wizard_state["error"] = str(ex)
+                                render_wizard()
+
+                        ui.upload(auto_upload=True, on_upload=handle_upload).classes(
+                            "absolute opacity-0 w-full h-full"
+                        )
+
+                    ui.label("lub").classes("text-center text-slate-400 my-2 text-sm")
+                    ui.button(
+                        "Wpisz ręcznie",
+                        icon="edit",
+                        on_click=lambda: ui.notify("Wkrótce..."),
+                    ).classes(
+                        "w-full bg-slate-100 text-slate-700 hover:bg-slate-200 shadow-none"
+                    )
+                    ui.button("Anuluj", on_click=upload_dialog.close).props(
+                        "flat color=grey"
+                    ).classes("w-full mt-2")
+
+                elif wizard_state["step"] == "processing":
+                    ui.label("Magia się dzieje... ✨").classes(
+                        "text-xl font-bold text-center mb-6 text-emerald-800"
                     )
 
-            # Logs area (optional, collapsible)
-            logs_expanded = {"value": False}
-            logs_container = ui.column().classes("w-full mt-4")
-            logs_area = ui.column().classes(
-                "w-full max-h-48 overflow-y-auto bg-slate-50 p-3 rounded-lg text-xs font-mono"
-            )
-            logs_area.visible = False
-
-            def toggle_logs():
-                logs_expanded["value"] = not logs_expanded["value"]
-                logs_area.visible = logs_expanded["value"]
-
-            with logs_container:
-                ui.button("📋 Pokaż szczegóły", on_click=toggle_logs).props(
-                    "flat"
-                ).classes("text-sm text-slate-500")
-                with logs_area:
-                    pass
-
-            # Track progress
-            await track_upload_progress(
-                task_id, status_label, progress_bar, step_elements, logs_area, dialog
-            )
-
-    dialog.open()
-
-
-async def track_upload_progress(
-    task_id: str, status_label, progress_bar, step_elements, logs_area, dialog
-):
-    """Śledzi postęp przetwarzania z animacjami."""
-    max_attempts = 600  # 10 minut
-    attempt = 0
-    last_log_count = 0
-    current_step = 0
-
-    # Mapowanie statusów na kroki
-    status_to_step = {
-        "uploading": 0,
-        "ocr": 1,
-        "llm": 2,
-        "database": 3,
-    }
-
-    while attempt < max_attempts:
-        try:
-            task_data = await api_call("GET", f"/api/task/{task_id}")
-            status = task_data.get("status", "unknown")
-            progress = task_data.get("progress", 0)
-            message = task_data.get("message", "")
-            recent_logs = task_data.get("recent_logs", [])
-
-            # Aktualizuj postęp
-            progress_bar.value = progress / 100.0 if progress >= 0 else 0.05
-
-            # Aktualizuj status
-            status_emoji = {
-                "processing": "⏳",
-                "completed": "✓",
-                "error": "❌",
-                "timeout": "⏱️",
-                "awaiting_inventory_review": "📝",
-            }.get(status, "⏳")
-
-            status_label.text = f"{status_emoji} {message}"
-
-            # Aktualizuj kroki na podstawie logów
-            for log_entry in recent_logs:
-                log_msg = log_entry.get("message", "").upper()
-
-                # Określ krok na podstawie wiadomości
-                if "OCR" in log_msg or "ANALIZUJĘ" in log_msg:
-                    if current_step < 1:
-                        current_step = 1
-                        mark_step_done(step_elements, 0)
-                        mark_step_active(step_elements, 1)
-                elif (
-                    "LLM" in log_msg
-                    or "ASYSTENT" in log_msg
-                    or "PRZETWARZANIE" in log_msg
-                ):
-                    if current_step < 2:
-                        current_step = 2
-                        mark_step_done(step_elements, 1)
-                        mark_step_active(step_elements, 2)
-                elif "BAZA" in log_msg or "ZAPISUJĘ" in log_msg or "PÓŁKACH" in log_msg:
-                    if current_step < 3:
-                        current_step = 3
-                        mark_step_done(step_elements, 2)
-                        mark_step_active(step_elements, 3)
-
-            # Dodaj nowe logi
-            if len(recent_logs) > last_log_count:
-                new_logs = recent_logs[last_log_count:]
-                for log_entry in new_logs:
-                    log_msg = log_entry.get("message", "")
-                    color = "text-slate-600"
-                    if "BŁĄD" in log_msg.upper() or "ERROR" in log_msg.upper():
-                        color = "text-red-600"
-                    elif "SUKCES" in log_msg.upper() or "✓" in log_msg:
+                    # Animacja / Ikony postępu
+                    with ui.row().classes("justify-center gap-4 mb-6"):
+                        # Ikona zmienia się w zależności od postępu
+                        prog = wizard_state["progress"]
+                        icon = (
+                            "visibility"
+                            if prog < 30
+                            else ("psychology" if prog < 70 else "inventory_2")
+                        )
                         color = "text-emerald-600"
-                    elif "WARNING" in log_msg.upper():
-                        color = "text-orange-600"
+                        ui.icon(icon, size="64px").classes(f"{color} animate-bounce")
 
-                    with logs_area:
-                        ui.label(log_msg).classes(f"{color} mb-1")
+                    # Pasek postępu
+                    ui.linear_progress(value=wizard_state["progress"] / 100).classes(
+                        "w-full text-emerald-600 mb-4"
+                    )
 
-                last_log_count = len(recent_logs)
+                    # Logi "Magiczne"
+                    last_log = (
+                        wizard_state["logs"][-1]
+                        if wizard_state["logs"]
+                        else "Rozpoczynam..."
+                    )
+                    ui.label(last_log).classes(
+                        "text-center text-slate-500 text-sm animate-pulse"
+                    )
 
-                # Przewiń do dołu
-                ui.run_javascript(
-                    """
-                    const area = arguments[0];
-                    if (area) {
-                        area.scrollTop = area.scrollHeight;
-                    }
-                """,
-                    logs_area,
-                )
+                elif wizard_state["step"] == "success":
+                    ui.icon("check_circle", size="64px").classes(
+                        "text-emerald-500 mb-4"
+                    )
+                    ui.label("Gotowe!").classes(
+                        "text-2xl font-bold text-emerald-800 mb-2"
+                    )
+                    ui.label("Produkty zostały dodane do spiżarni.").classes(
+                        "text-center text-slate-500 mb-6"
+                    )
 
-            # Sprawdź czy wymagana edycja magazynu
-            if status == "awaiting_inventory_review":
-                inventory_items = task_data.get("inventory_items", [])
-                if inventory_items:
-                    mark_step_done(step_elements, 3)
-                    status_label.text = "📝 Oczekiwanie na edycję produktów..."
-                    progress_bar.value = 0.95
+                    ui.button(
+                        "Super!",
+                        on_click=lambda: [
+                            upload_dialog.close(),
+                            AppState.refresh_inventory(),
+                            render_home(),
+                        ],
+                    ).classes(f"w-full {Theme.PRIMARY_BTN}")
 
-                    # Pokaż dialog edycji (TODO: Implementacja dialogu edycji)
-                    dialog.close()
-                    # await show_inventory_edit_dialog_modern(task_id, inventory_items)
-                    ui.notify("Edycja produktów w przygotowaniu", type="warning")
+                elif wizard_state["step"] == "error":
+                    ui.icon("error", size="64px").classes("text-red-500 mb-4")
+                    ui.label("Ups, coś poszło nie tak").classes(
+                        "text-xl font-bold text-red-800 mb-2"
+                    )
+                    ui.label(wizard_state.get("error", "Nieznany błąd")).classes(
+                        "text-center text-slate-500 mb-6"
+                    )
+
+                    ui.button(
+                        "Spróbuj ponownie",
+                        on_click=lambda: [
+                            wizard_state.update(step="upload"),
+                            render_wizard(),
+                        ],
+                    ).classes("w-full bg-slate-100 text-slate-800")
+
+        async def track_progress(task_id):
+            import asyncio
+
+            while True:
+                data = await api_call("GET", f"/api/task/{task_id}")
+                if not data:
                     break
 
-            # Sprawdź czy zakończone
-            if status in ["completed", "error", "timeout"]:
-                if status == "completed":
-                    mark_step_done(step_elements, 3)
-                    status_label.text = "✓ Przetwarzanie zakończone pomyślnie!"
-                    progress_bar.value = 1.0
+                status = data.get("status")
+                wizard_state["progress"] = data.get("progress", 0)
 
-                    # Sukces - zamknij dialog i odśwież
-                    await asyncio.sleep(2)
-                    dialog.close()
-                    ui.notify("Paragon został pomyślnie przetworzony!", type="positive")
-                    ui.open("/")
+                # Mapowanie technicznych logów na "magiczne"
+                msg = data.get("message", "")
+                if "OCR" in msg:
+                    magic_msg = "Bielik czyta paragon... 👁️"
+                elif "LLM" in msg or "analiza" in msg.lower():
+                    magic_msg = "Rozpoznaję produkty... 🧠"
+                elif "zapis" in msg.lower():
+                    magic_msg = "Układam na półkach... 📦"
                 else:
-                    status_label.text = f"❌ {message}"
-                    progress_bar.value = 0
-                    ui.notify(f"Błąd: {message}", type="negative")
+                    magic_msg = msg
 
-                break
+                if not wizard_state["logs"] or wizard_state["logs"][-1] != magic_msg:
+                    wizard_state["logs"].append(magic_msg)
 
-            await asyncio.sleep(1)
-            attempt += 1
-        except Exception as e:
-            status_label.text = f"❌ Błąd śledzenia: {str(e)}"
-            break
+                render_wizard()
 
-    if attempt >= max_attempts:
-        status_label.text = "⏱️ Przekroczono limit czasu"
-        ui.notify("Przetwarzanie trwa zbyt długo", type="warning")
+                if status == "completed":
+                    wizard_state["step"] = "success"
+                    render_wizard()
+                    # Odśwież dane w tle
+                    await AppState.refresh_inventory()
+                    break
+                elif status in ["error", "timeout"]:
+                    wizard_state["step"] = "error"
+                    wizard_state["error"] = data.get("message")
+                    render_wizard()
+                    break
 
+                await asyncio.sleep(1)
 
-def mark_step_done(step_elements, index):
-    """Oznacza krok jako zakończony."""
-    if index < len(step_elements):
-        step = step_elements[index]
-        step["row"].classes("bg-emerald-50 border border-emerald-200")
-        step["text"].classes("text-emerald-700 font-semibold")
-        step["check"].visible = True
-
-
-def mark_step_active(step_elements, index):
-    """Oznacza krok jako aktywny."""
-    if index < len(step_elements):
-        step = step_elements[index]
-        step["row"].classes("bg-blue-50 border border-blue-200")
-        step["text"].classes("text-blue-700 font-semibold")
+        render_wizard()
 
 
 # Uruchomienie
-ui.run(title="Spiżarnia AI", port=8082, favicon="🦅")
+ui.run(title="Spiżarnia AI", port=8081, favicon="🦅")
