@@ -4,9 +4,11 @@
 FROM python:3.13-slim
 
 # Instalujemy minimalne zależności systemowe
-# Tesseract i Poppler nie są potrzebne w trybie Cloud OCR
+# Poppler jest potrzebny do konwersji PDF na obraz (nawet w trybie Cloud OCR)
+# Tesseract nie jest potrzebny w trybie Cloud OCR
 RUN apt-get update && apt-get install -y \
     curl \
+    poppler-utils \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
