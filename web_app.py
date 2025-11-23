@@ -304,14 +304,10 @@ async def settings_page():
 async def handle_upload(e):
     """Obsługuje upload pliku."""
     try:
-        # NiceGUI automatycznie zapisuje plik, możemy go odczytać
-        file_path = e.name  # NiceGUI zapisuje plik tymczasowo
-        
-        # Odczytaj plik
-        with open(file_path, 'rb') as f:
-            file_content = f.read()
-        
-        file_name = Path(e.name).name
+        # NiceGUI: e.name zawiera tylko nazwę pliku, nie ścieżkę
+        # e.content jest file-like obiektem z danymi pliku
+        file_name = e.name
+        file_content = await e.content.read()
         
         # Wyślij do API używając httpx
         async with httpx.AsyncClient() as client:

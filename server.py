@@ -153,11 +153,14 @@ async def upload_receipt(
         try:
             def log_callback(message: str, progress: Optional[float] = None, status: Optional[str] = None):
                 if task_id in processing_tasks:
+                    # Zawsze zachowaj szczegółową wiadomość
                     processing_tasks[task_id]["message"] = message
                     if progress is not None:
                         processing_tasks[task_id]["progress"] = int(progress)
                     if status is not None:
-                        processing_tasks[task_id]["message"] = status
+                        # Status jest dodatkową informacją, przechowuj osobno
+                        # Nie nadpisuj wiadomości, która zawiera szczegóły
+                        processing_tasks[task_id]["status_label"] = status
             
             def prompt_callback(prompt_text: str, default_value: str, raw_name: str) -> str:
                 # Dla web app, używamy wartości domyślnej (można później dodać interakcję)
