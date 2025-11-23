@@ -30,7 +30,7 @@ cd ..
 docker-compose up --build
 
 # 4. Otwórz przeglądarkę
-# Frontend: http://localhost:8080
+# Frontend: http://localhost:8081 (lub 8080 jeśli wolny)
 # Backend API: http://localhost:8000
 ```
 

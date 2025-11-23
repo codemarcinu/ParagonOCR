@@ -358,5 +358,6 @@ def menu():
 
 
 if __name__ in {"__main__", "__mp_main__"}:
-    ui.run(port=8080, title="ParagonWeb")
+    # Port 8081, bo 8080 jest zajęty przez open-webui
+    ui.run(port=8081, title="ParagonWeb")
 
