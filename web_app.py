@@ -410,10 +410,17 @@ async def api_call(method: str, endpoint: str, data: Optional[dict] = None, file
                     response = await client.post(url, data=data, files=files)
                 else:
                     response = await client.post(url, json=data)
+            elif method == "PUT":
+                response = await client.put(url, json=data)
+            elif method == "DELETE":
+                response = await client.delete(url)
             else:
                 raise ValueError(f"Nieobsługiwana metoda: {method}")
             
             response.raise_for_status()
+            # DELETE może zwracać 204 No Content
+            if response.status_code == 204:
+                return {}
             return response.json()
     except httpx.TimeoutException:
         raise Exception(f"Przekroczono limit czasu połączenia z API ({API_URL})")
@@ -496,14 +503,65 @@ async def dashboard():
                     
                     status_label = ui.label('Gotowy').style('margin-top: 10px; color: var(--text-secondary);')
                     progress_bar = ui.linear_progress(value=0).style('margin-top: 10px;')
+                    progress_bar.visible = False
                     
                     async def handle_upload_wrapper(e):
-                        """Wrapper dla handle_upload."""
+                        """Wrapper dla handle_upload z śledzeniem postępu."""
                         status_label.text = f"Przesyłanie {e.name}..."
-                        progress_bar.value = 0.3
-                        await handle_upload(e)
-                        progress_bar.value = 1.0
-                        status_label.text = "Gotowy"
+                        progress_bar.visible = True
+                        progress_bar.value = 0.1
+                        
+                        try:
+                            task_id = await handle_upload(e)
+                            if task_id:
+                                # Śledź postęp zadania
+                                await track_task_progress(task_id, status_label, progress_bar)
+                            else:
+                                progress_bar.value = 1.0
+                                status_label.text = "Gotowy"
+                                progress_bar.visible = False
+                        except Exception as ex:
+                            status_label.text = f"Błąd: {str(ex)}"
+                            progress_bar.visible = False
+                            ui.notify(f"Błąd: {str(ex)}", type='negative')
+                    
+                    async def track_task_progress(task_id: str, status_label, progress_bar):
+                        """Śledzi postęp zadania przez polling."""
+                        import asyncio
+                        max_attempts = 600  # 10 minut (1 sekunda * 600)
+                        attempt = 0
+                        
+                        while attempt < max_attempts:
+                            try:
+                                task_data = await api_call("GET", f"/api/task/{task_id}")
+                                status = task_data.get("status", "unknown")
+                                progress = task_data.get("progress", 0)
+                                message = task_data.get("message", "")
+                                
+                                progress_bar.value = progress / 100.0 if progress >= 0 else 0
+                                status_label.text = message or f"Status: {status}"
+                                
+                                if status in ["completed", "error", "timeout"]:
+                                    if status == "completed":
+                                        status_label.text = "✓ Przetwarzanie zakończone!"
+                                        ui.notify("Paragon został pomyślnie przetworzony!", type='positive')
+                                        # Odśwież listę paragonów
+                                        ui.run_javascript('location.reload()')
+                                    else:
+                                        status_label.text = f"❌ {message}"
+                                        ui.notify(f"Błąd przetwarzania: {message}", type='negative')
+                                    progress_bar.visible = False
+                                    break
+                                
+                                await asyncio.sleep(1)  # Polling co 1 sekundę
+                                attempt += 1
+                            except Exception as e:
+                                status_label.text = f"Błąd śledzenia: {str(e)}"
+                                progress_bar.visible = False
+                                break
+                        else:
+                            status_label.text = "Przekroczono limit czasu śledzenia"
+                            progress_bar.visible = False
                     
                     with ui.column().classes('upload-area'):
                         file_upload = ui.upload(
@@ -553,17 +611,20 @@ async def dashboard():
                                                 <th>Sklep</th>
                                                 <th>Suma</th>
                                                 <th>Pozycje</th>
+                                                <th>Akcje</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                 '''
                                 for r in receipt_list:
+                                    receipt_id = r['paragon_id']
                                     table_html += f'''
                                         <tr>
                                             <td>{r['data_zakupu']}</td>
                                             <td>{r['sklep']}</td>
                                             <td><strong>{r['suma_paragonu']:.2f} PLN</strong></td>
                                             <td>{r['liczba_pozycji']}</td>
+                                            <td><a href="/paragon/{receipt_id}" style="color: var(--primary); text-decoration: none;">📝 Szczegóły</a></td>
                                         </tr>
                                     '''
                                 table_html += '</tbody></table>'
@@ -704,6 +765,202 @@ async def bielik_page():
     ui.button('🌙', on_click=toggle_dark_mode).classes('dark-mode-toggle')
 
 
+@ui.page('/paragon/{receipt_id}')
+async def receipt_detail_page(receipt_id: int):
+    """Strona szczegółów paragonu z możliwością edycji."""
+    setup_dark_mode_script()
+    setup_styles(False)
+    
+    with ui.row().classes('app-container'):
+        create_sidebar('/')
+        
+        with ui.column().classes('main-content'):
+            with ui.column().classes('container'):
+                ui.label('📄 Szczegóły paragonu').classes('page-header')
+                
+                try:
+                    receipt = await api_call("GET", f"/api/receipts/{receipt_id}")
+                    
+                    # Informacje o paragonie
+                    with ui.card():
+                        ui.label('Informacje o paragonie').classes('card-title')
+                        
+                        # Pobierz listę sklepów
+                        stores_data = await api_call("GET", "/api/stores")
+                        stores = stores_data.get("stores", [])
+                        store_options = {s["nazwa_sklepu"]: s["sklep_id"] for s in stores}
+                        
+                        with ui.row().classes('w-full gap-4'):
+                            sklep_select = ui.select(
+                                options=store_options,
+                                label='Sklep',
+                                value=receipt.get("sklep_id")
+                            ).classes('flex-1')
+                            
+                            # Pobierz datę z paragonu
+                            receipt_date = receipt.get("data_zakupu")
+                            if receipt_date:
+                                # Jeśli data jest w formacie ISO string, użyj jej bezpośrednio
+                                if isinstance(receipt_date, str):
+                                    data_input = ui.input(
+                                        label='Data zakupu (YYYY-MM-DD)',
+                                        value=receipt_date
+                                    ).classes('flex-1')
+                                else:
+                                    data_input = ui.input(
+                                        label='Data zakupu (YYYY-MM-DD)',
+                                        value=str(receipt_date)
+                                    ).classes('flex-1')
+                            else:
+                                data_input = ui.input(
+                                    label='Data zakupu (YYYY-MM-DD)',
+                                    value=''
+                                ).classes('flex-1')
+                            
+                            suma_input = ui.number(
+                                label='Suma paragonu',
+                                value=float(receipt.get("suma_paragonu", 0)),
+                                format='%.2f'
+                            ).classes('flex-1')
+                        
+                        async def save_receipt():
+                            try:
+                                from datetime import datetime
+                                # Waliduj i przekonwertuj datę
+                                date_value = None
+                                if data_input.value:
+                                    try:
+                                        # Spróbuj sparsować datę
+                                        date_value = datetime.strptime(data_input.value, "%Y-%m-%d").date()
+                                    except ValueError:
+                                        ui.notify("❌ Nieprawidłowy format daty. Użyj YYYY-MM-DD", type='negative')
+                                        return
+                                
+                                update_data = {
+                                    "sklep_id": sklep_select.value,
+                                    "suma_paragonu": float(suma_input.value) if suma_input.value else 0,
+                                }
+                                if date_value:
+                                    update_data["data_zakupu"] = date_value.isoformat()
+                                
+                                await api_call("PUT", f"/api/receipts/{receipt_id}", update_data)
+                                ui.notify("✓ Paragon zaktualizowany!", type='positive')
+                            except Exception as e:
+                                ui.notify(f"❌ Błąd: {str(e)}", type='negative')
+                        
+                        async def delete_receipt():
+                            try:
+                                await api_call("DELETE", f"/api/receipts/{receipt_id}")
+                                ui.notify("✓ Paragon usunięty!", type='positive')
+                                ui.run_javascript('window.location.href = "/"')
+                            except Exception as e:
+                                ui.notify(f"❌ Błąd: {str(e)}", type='negative')
+                        
+                        with ui.row().classes('w-full gap-2').style('margin-top: 16px;'):
+                            ui.button('💾 Zapisz zmiany', on_click=save_receipt).classes('btn-primary')
+                            ui.button('🗑️ Usuń paragon', on_click=delete_receipt).style('background: var(--error); color: white;')
+                    
+                    # Pozycje paragonu
+                    with ui.card():
+                        ui.label('Pozycje paragonu').classes('card-title')
+                        
+                        pozycje = receipt.get("pozycje", [])
+                        if pozycje:
+                            # Pobierz listę produktów
+                            products_data = await api_call("GET", "/api/products")
+                            products = products_data.get("products", [])
+                            product_options = {p["nazwa"]: p["produkt_id"] for p in products}
+                            
+                            with ui.column().classes('table-container'):
+                                table_html = '''
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <thead>
+                                            <tr>
+                                                <th>Nazwa (raw)</th>
+                                                <th>Produkt</th>
+                                                <th>Ilość</th>
+                                                <th>Cena jedn.</th>
+                                                <th>Wartość</th>
+                                                <th>Akcje</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                '''
+                                for pozycja in pozycje:
+                                    pozycja_id = pozycja['pozycja_id']
+                                    nazwa_znormalizowana = pozycja.get('nazwa_znormalizowana', '—')
+                                    table_html += f'''
+                                        <tr id="item-{pozycja_id}">
+                                            <td>{pozycja['nazwa_z_paragonu_raw']}</td>
+                                            <td>{nazwa_znormalizowana}</td>
+                                            <td>{pozycja['ilosc']} {pozycja.get('jednostka_miary', '')}</td>
+                                            <td>{pozycja.get('cena_jednostkowa', 0):.2f} PLN</td>
+                                            <td><strong>{pozycja['cena_calkowita']:.2f} PLN</strong></td>
+                                            <td>
+                                                <button onclick="editItem({pozycja_id}, {receipt_id})" style="background: var(--primary); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">✏️</button>
+                                                <button onclick="deleteItem({pozycja_id}, {receipt_id})" style="background: var(--error); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-left: 4px;">🗑️</button>
+                                            </td>
+                                        </tr>
+                                    '''
+                                table_html += '</tbody></table>'
+                                ui.html(table_html, sanitize=False)
+                                
+                                # JavaScript do edycji/usuwania pozycji
+                                ui.add_head_html(f'''
+                                <script>
+                                async function editItem(itemId, receiptId) {{
+                                    // Prosty prompt do edycji - można rozbudować o modal
+                                    const newQty = prompt("Nowa ilość:", "");
+                                    if (newQty !== null && newQty !== "") {{
+                                        try {{
+                                            const response = await fetch(`${{API_URL}}/api/receipts/${{receiptId}}/items/${{itemId}}`, {{
+                                                method: 'PUT',
+                                                headers: {{ 'Content-Type': 'application/json' }},
+                                                body: JSON.stringify({{ ilosc: parseFloat(newQty) }})
+                                            }});
+                                            if (response.ok) {{
+                                                alert("✓ Pozycja zaktualizowana!");
+                                                location.reload();
+                                            }} else {{
+                                                const error = await response.json();
+                                                alert("❌ Błąd: " + error.detail);
+                                            }}
+                                        }} catch (e) {{
+                                            alert("❌ Błąd: " + e.message);
+                                        }}
+                                    }}
+                                }}
+                                
+                                async function deleteItem(itemId, receiptId) {{
+                                    if (!confirm("Czy na pewno chcesz usunąć tę pozycję?")) return;
+                                    try {{
+                                        const response = await fetch(`${{API_URL}}/api/receipts/${{receiptId}}/items/${{itemId}}`, {{
+                                            method: 'DELETE'
+                                        }});
+                                        if (response.ok) {{
+                                            alert("✓ Pozycja usunięta!");
+                                            location.reload();
+                                        }} else {{
+                                            const error = await response.json();
+                                            alert("❌ Błąd: " + error.detail);
+                                        }}
+                                    }} catch (e) {{
+                                        alert("❌ Błąd: " + e.message);
+                                    }}
+                                }}
+                                </script>
+                                '''.replace('${API_URL}', API_URL))
+                        else:
+                            ui.label('Brak pozycji w paragonie.').style('color: var(--text-secondary); text-align: center; padding: 40px;')
+                    
+                except Exception as e:
+                    ui.label(f'Błąd podczas ładowania paragonu: {str(e)}').style('color: var(--error);')
+                    if "404" in str(e):
+                        ui.link('← Powrót do listy', '/').style('margin-top: 20px; color: var(--primary);')
+    
+    ui.button('🌙', on_click=toggle_dark_mode).classes('dark-mode-toggle')
+
+
 @ui.page('/ustawienia')
 async def settings_page():
     """Strona ustawień."""
@@ -792,12 +1049,10 @@ async def handle_upload(e):
             result = response.json()
         
         task_id = result.get("task_id")
-        ui.notify(f"Plik {file_name} został przesłany! ID zadania: {task_id}", type='positive')
-        
-        # Można tutaj dodać śledzenie postępu zadania
-        # np. przez polling /api/task/{task_id}
+        return task_id  # Zwróć task_id do śledzenia postępu
     except Exception as ex:
         ui.notify(f"Błąd podczas przesyłania pliku: {str(ex)}", type='negative')
+        return None
 
 
 

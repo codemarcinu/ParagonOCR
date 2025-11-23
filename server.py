@@ -31,7 +31,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'ReceiptParser'))
 
 from ReceiptParser.src.database import (
     engine, init_db,
-    Paragon, Produkt, StanMagazynowy, Sklep, KategoriaProduktu, AliasProduktu
+    Paragon, Produkt, StanMagazynowy, Sklep, KategoriaProduktu, AliasProduktu, PozycjaParagonu
 )
 from ReceiptParser.src.main import run_processing_pipeline
 from ReceiptParser.src.bielik import BielikAssistant
@@ -173,6 +173,34 @@ class SettingsUpdate(BaseModel):
         if len(v) < 20:
             raise ValueError("Nieprawidłowy format klucza Mistral API (za krótki)")
         return v
+
+class ReceiptItemUpdate(BaseModel):
+    nazwa_z_paragonu_raw: Optional[str] = None
+    ilosc: Optional[Decimal] = None
+    jednostka_miary: Optional[str] = None
+    cena_jednostkowa: Optional[Decimal] = None
+    cena_calkowita: Optional[Decimal] = None
+    rabat: Optional[Decimal] = None
+    cena_po_rabacie: Optional[Decimal] = None
+    produkt_id: Optional[int] = None
+
+class ReceiptUpdate(BaseModel):
+    sklep_id: Optional[int] = None
+    data_zakupu: Optional[str] = None  # ISO format string (YYYY-MM-DD)
+    suma_paragonu: Optional[Decimal] = None
+    
+    @field_validator('data_zakupu')
+    @classmethod
+    def validate_date(cls, v: Optional[str]) -> Optional[date]:
+        """Konwertuje string ISO na date."""
+        if v is None:
+            return None
+        if isinstance(v, date):
+            return v
+        try:
+            return datetime.strptime(v, "%Y-%m-%d").date()
+        except ValueError:
+            raise ValueError("Nieprawidłowy format daty. Użyj YYYY-MM-DD")
 
 
 # --- Endpointy API ---
@@ -479,6 +507,201 @@ async def get_receipts(skip: int = 0, limit: int = 50):
         session.close()
 
 
+@app.get("/api/receipts/{receipt_id}")
+async def get_receipt(receipt_id: int):
+    """Zwraca szczegóły paragonu z wszystkimi pozycjami."""
+    session = SessionLocal()
+    try:
+        paragon = (
+            session.query(Paragon)
+            .options(joinedload(Paragon.sklep), joinedload(Paragon.pozycje).joinedload(PozycjaParagonu.produkt))
+            .filter(Paragon.paragon_id == receipt_id)
+            .first()
+        )
+        
+        if not paragon:
+            raise HTTPException(status_code=404, detail="Paragon nie znaleziony")
+        
+        pozycje = []
+        for pozycja in paragon.pozycje:
+            pozycje.append({
+                "pozycja_id": pozycja.pozycja_id,
+                "produkt_id": pozycja.produkt_id,
+                "nazwa_z_paragonu_raw": pozycja.nazwa_z_paragonu_raw,
+                "nazwa_znormalizowana": pozycja.produkt.znormalizowana_nazwa if pozycja.produkt else None,
+                "ilosc": float(pozycja.ilosc),
+                "jednostka_miary": pozycja.jednostka_miary,
+                "cena_jednostkowa": float(pozycja.cena_jednostkowa) if pozycja.cena_jednostkowa else None,
+                "cena_calkowita": float(pozycja.cena_calkowita),
+                "rabat": float(pozycja.rabat) if pozycja.rabat else None,
+                "cena_po_rabacie": float(pozycja.cena_po_rabacie) if pozycja.cena_po_rabacie else None,
+            })
+        
+        return {
+            "paragon_id": paragon.paragon_id,
+            "sklep_id": paragon.sklep_id,
+            "sklep": paragon.sklep.nazwa_sklepu,
+            "data_zakupu": paragon.data_zakupu.isoformat() if paragon.data_zakupu else None,
+            "suma_paragonu": float(paragon.suma_paragonu),
+            "plik_zrodlowy": paragon.plik_zrodlowy,
+            "pozycje": pozycje,
+        }
+    finally:
+        session.close()
+
+
+@app.put("/api/receipts/{receipt_id}")
+async def update_receipt(receipt_id: int, receipt_update: ReceiptUpdate):
+    """Aktualizuje dane paragonu."""
+    session = SessionLocal()
+    try:
+        paragon = session.query(Paragon).filter(Paragon.paragon_id == receipt_id).first()
+        if not paragon:
+            raise HTTPException(status_code=404, detail="Paragon nie znaleziony")
+        
+        if receipt_update.sklep_id is not None:
+            sklep = session.query(Sklep).filter(Sklep.sklep_id == receipt_update.sklep_id).first()
+            if not sklep:
+                raise HTTPException(status_code=404, detail="Sklep nie znaleziony")
+            paragon.sklep_id = receipt_update.sklep_id
+        
+        if receipt_update.data_zakupu is not None:
+            paragon.data_zakupu = receipt_update.data_zakupu
+        
+        if receipt_update.suma_paragonu is not None:
+            paragon.suma_paragonu = receipt_update.suma_paragonu
+        
+        session.commit()
+        return {"message": "Paragon zaktualizowany", "paragon_id": receipt_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"Błąd podczas aktualizacji paragonu: {str(e)}")
+    finally:
+        session.close()
+
+
+@app.delete("/api/receipts/{receipt_id}")
+async def delete_receipt(receipt_id: int):
+    """Usuwa paragon i wszystkie powiązane pozycje."""
+    session = SessionLocal()
+    try:
+        paragon = session.query(Paragon).filter(Paragon.paragon_id == receipt_id).first()
+        if not paragon:
+            raise HTTPException(status_code=404, detail="Paragon nie znaleziony")
+        
+        # Usuń powiązane stany magazynowe (jeśli istnieją)
+        for pozycja in paragon.pozycje:
+            stany = session.query(StanMagazynowy).filter(
+                StanMagazynowy.pozycja_paragonu_id == pozycja.pozycja_id
+            ).all()
+            for stan in stany:
+                session.delete(stan)
+        
+        session.delete(paragon)
+        session.commit()
+        return {"message": "Paragon usunięty", "paragon_id": receipt_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"Błąd podczas usuwania paragonu: {str(e)}")
+    finally:
+        session.close()
+
+
+@app.put("/api/receipts/{receipt_id}/items/{item_id}")
+async def update_receipt_item(receipt_id: int, item_id: int, item_update: ReceiptItemUpdate):
+    """Aktualizuje pozycję paragonu."""
+    session = SessionLocal()
+    try:
+        pozycja = (
+            session.query(PozycjaParagonu)
+            .filter(
+                PozycjaParagonu.pozycja_id == item_id,
+                PozycjaParagonu.paragon_id == receipt_id
+            )
+            .first()
+        )
+        
+        if not pozycja:
+            raise HTTPException(status_code=404, detail="Pozycja paragonu nie znaleziona")
+        
+        if item_update.nazwa_z_paragonu_raw is not None:
+            pozycja.nazwa_z_paragonu_raw = item_update.nazwa_z_paragonu_raw
+        
+        if item_update.ilosc is not None:
+            pozycja.ilosc = item_update.ilosc
+        
+        if item_update.jednostka_miary is not None:
+            pozycja.jednostka_miary = item_update.jednostka_miary
+        
+        if item_update.cena_jednostkowa is not None:
+            pozycja.cena_jednostkowa = item_update.cena_jednostkowa
+        
+        if item_update.cena_calkowita is not None:
+            pozycja.cena_calkowita = item_update.cena_calkowita
+        
+        if item_update.rabat is not None:
+            pozycja.rabat = item_update.rabat
+        
+        if item_update.cena_po_rabacie is not None:
+            pozycja.cena_po_rabacie = item_update.cena_po_rabacie
+        
+        if item_update.produkt_id is not None:
+            produkt = session.query(Produkt).filter(Produkt.produkt_id == item_update.produkt_id).first()
+            if not produkt:
+                raise HTTPException(status_code=404, detail="Produkt nie znaleziony")
+            pozycja.produkt_id = item_update.produkt_id
+        
+        session.commit()
+        return {"message": "Pozycja zaktualizowana", "item_id": item_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"Błąd podczas aktualizacji pozycji: {str(e)}")
+    finally:
+        session.close()
+
+
+@app.delete("/api/receipts/{receipt_id}/items/{item_id}")
+async def delete_receipt_item(receipt_id: int, item_id: int):
+    """Usuwa pozycję z paragonu."""
+    session = SessionLocal()
+    try:
+        pozycja = (
+            session.query(PozycjaParagonu)
+            .filter(
+                PozycjaParagonu.pozycja_id == item_id,
+                PozycjaParagonu.paragon_id == receipt_id
+            )
+            .first()
+        )
+        
+        if not pozycja:
+            raise HTTPException(status_code=404, detail="Pozycja paragonu nie znaleziona")
+        
+        # Usuń powiązane stany magazynowe
+        stany = session.query(StanMagazynowy).filter(
+            StanMagazynowy.pozycja_paragonu_id == item_id
+        ).all()
+        for stan in stany:
+            session.delete(stan)
+        
+        session.delete(pozycja)
+        session.commit()
+        return {"message": "Pozycja usunięta", "item_id": item_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"Błąd podczas usuwania pozycji: {str(e)}")
+    finally:
+        session.close()
+
+
 @app.get("/api/stats")
 async def get_stats():
     """Zwraca statystyki zakupów."""
@@ -543,6 +766,49 @@ async def get_inventory():
             })
         
         return {"inventory": results}
+    finally:
+        session.close()
+
+
+@app.get("/api/stores")
+async def get_stores():
+    """Zwraca listę wszystkich sklepów."""
+    session = SessionLocal()
+    try:
+        sklepy = session.query(Sklep).order_by(Sklep.nazwa_sklepu).all()
+        results = [
+            {
+                "sklep_id": sklep.sklep_id,
+                "nazwa_sklepu": sklep.nazwa_sklepu,
+                "lokalizacja": sklep.lokalizacja,
+            }
+            for sklep in sklepy
+        ]
+        return {"stores": results}
+    finally:
+        session.close()
+
+
+@app.get("/api/products")
+async def get_products():
+    """Zwraca listę wszystkich produktów."""
+    session = SessionLocal()
+    try:
+        produkty = (
+            session.query(Produkt)
+            .options(joinedload(Produkt.kategoria))
+            .order_by(Produkt.znormalizowana_nazwa)
+            .all()
+        )
+        results = [
+            {
+                "produkt_id": produkt.produkt_id,
+                "nazwa": produkt.znormalizowana_nazwa,
+                "kategoria": produkt.kategoria.nazwa_kategorii if produkt.kategoria else None,
+            }
+            for produkt in produkty
+        ]
+        return {"products": results}
     finally:
         session.close()
 
