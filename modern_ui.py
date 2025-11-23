@@ -183,6 +183,38 @@ async def main_page():
         "w-full max-w-md mx-auto pt-20 pb-24 px-4 gap-6"
     )
 
+    async def show_consume_dialog(
+        item_name: str, item_id: int, current_qty: float, unit: str
+    ):
+        """Pokazuje dialog do zużycia produktu."""
+        with ui.dialog() as dialog, ui.card().classes("p-6 w-full max-w-xs"):
+            ui.label(f"Zużyj: {item_name}").classes("text-lg font-bold mb-4")
+
+            qty_input = ui.number(
+                "Ile zużyłeś?", value=current_qty, min=0, max=current_qty, step=0.1
+            ).classes("w-full mb-4")
+
+            async def consume():
+                if qty_input.value > 0:
+                    res = await api_call(
+                        "POST",
+                        "/api/inventory/consume",
+                        {"produkt_id": item_id, "ilosc": qty_input.value},
+                    )
+                    if res:
+                        ui.notify(f"Zużyto {qty_input.value} {unit}!", type="positive")
+                        dialog.close()
+                        await AppState.refresh_inventory()  # Odśwież stan
+                        # Odśwież widok (brutalne ale skuteczne, w SPA można lepiej)
+                        ui.open("/")
+
+            with ui.row().classes("w-full justify-end gap-2"):
+                ui.button("Anuluj", on_click=dialog.close).props("flat color=grey")
+                ui.button("Zużyj", on_click=consume).classes(
+                    "bg-emerald-600 text-white"
+                )
+        dialog.open()
+
     async def render_home():
         content_container.clear()
         with content_container:
@@ -226,8 +258,11 @@ async def main_page():
 
                                 ui.button(
                                     "Zużyj",
-                                    on_click=lambda n=item["nazwa"]: ui.notify(
-                                        f"Zużyto: {n}"
+                                    on_click=lambda i=item: show_consume_dialog(
+                                        i["nazwa"],
+                                        i["produkt_id"],
+                                        i["ilosc"],
+                                        i["jednostka"],
                                     ),
                                 ).classes(
                                     "w-full bg-white text-red-600 border border-red-200 hover:bg-red-100 text-sm rounded-lg shadow-sm"
@@ -293,58 +328,104 @@ async def main_page():
                 "text-xl font-bold text-slate-800 mb-4"
             )
 
-            # Przycisk generowania
+            # --- Toolbar ---
             with ui.row().classes("w-full gap-2 mb-4"):
+
+                async def generate_list():
+                    spinner = ui.spinner("dots").classes("ml-2")
+                    ui.notify("Bielik analizuje braki...", type="info")
+
+                    # Strzał do API (Bielik generuje listę)
+                    data = await api_call("POST", "/api/shopping-list/generate", {})
+                    spinner.delete()
+
+                    if data and "produkty" in data:
+                        # Konwersja na format UI
+                        AppState.shopping_list = [
+                            {
+                                "name": p["nazwa"],
+                                "reason": "Sugerowane",
+                                "checked": False,
+                            }
+                            for p in data["produkty"]
+                        ]
+                        await render_shopping_list()  # Przeładuj widok
+                    else:
+                        ui.notify("Nie udało się wygenerować listy", type="negative")
+
                 ui.button(
-                    "Generuj Smart Listę",
-                    on_click=lambda: [
-                        AppState.generate_smart_list(),
-                        render_shopping_list(),
-                    ],
+                    "Generuj z braków", on_click=generate_list, icon="auto_awesome"
                 ).classes(f"flex-1 {Theme.PRIMARY_BTN}")
+
+                # Przycisk dodawania ręcznego do listy (opcjonalnie)
                 ui.button(
-                    icon="add", on_click=lambda: ui.notify("Dodawanie ręczne")
+                    icon="add", on_click=lambda: ui.notify("Dodawanie do listy wkrótce")
                 ).classes("bg-slate-200 text-slate-700")
 
+            # --- Lista ---
             if not AppState.shopping_list:
                 with ui.column().classes(
                     "w-full items-center justify-center py-12 text-slate-400 gap-4"
                 ):
                     ui.icon("shopping_cart", size="48px")
-                    ui.label("Lista jest pusta")
+                    ui.label("Lista jest pusta.").classes("text-sm")
+                    ui.label('Kliknij "Generuj", aby Bielik sprawdził zapasy.').classes(
+                        "text-xs"
+                    )
             else:
                 with ui.column().classes("w-full gap-2"):
                     for i, item in enumerate(AppState.shopping_list):
+                        # Karta produktu na liście
+                        card_color = (
+                            "bg-slate-100 opacity-75" if item["checked"] else "bg-white"
+                        )
+                        text_style = (
+                            "line-through text-slate-400"
+                            if item["checked"]
+                            else "text-slate-800 font-medium"
+                        )
+
                         with ui.card().classes(
-                            f"{Theme.CARD} flex flex-row items-center justify-between py-3"
+                            f"w-full p-3 flex-row items-center justify-between shadow-sm rounded-xl border border-slate-100 {card_color} transition-all"
                         ):
                             with ui.row().classes("items-center gap-3"):
-                                ui.checkbox(
-                                    value=item["checked"],
-                                    on_change=lambda e, idx=i: AppState.shopping_list[
-                                        idx
-                                    ].update(checked=e.value),
+                                # Checkbox (Customowy dla wyglądu)
+                                state_icon = (
+                                    "check_circle"
+                                    if item["checked"]
+                                    else "radio_button_unchecked"
                                 )
-                                with ui.column().classes("gap-0"):
-                                    ui.label(item["name"]).classes(
-                                        "font-semibold text-slate-800 "
-                                        + (
-                                            "line-through text-slate-400"
-                                            if item["checked"]
-                                            else ""
-                                        )
-                                    )
-                                    ui.label(item["reason"]).classes(
-                                        "text-xs text-orange-500 font-medium"
-                                    )
+                                state_color = (
+                                    "text-emerald-500"
+                                    if item["checked"]
+                                    else "text-slate-400"
+                                )
 
+                                ui.icon(state_icon).classes(
+                                    f"cursor-pointer text-2xl {state_color}"
+                                ).on("click", lambda idx=i: toggle_item(idx))
+
+                                with ui.column().classes("gap-0"):
+                                    ui.label(item["name"]).classes(text_style)
+                                    if item.get("reason"):
+                                        ui.label(item["reason"]).classes(
+                                            "text-xs text-orange-400"
+                                        )
+
+                            # Przycisk usuwania
                             ui.button(
-                                icon="delete",
-                                on_click=lambda idx=i: [
-                                    AppState.shopping_list.pop(idx),
-                                    render_shopping_list(),
-                                ],
+                                icon="close", on_click=lambda idx=i: remove_item(idx)
                             ).props("flat round color=grey size=sm")
+
+            async def toggle_item(index):
+                AppState.shopping_list[index]["checked"] = not AppState.shopping_list[
+                    index
+                ]["checked"]
+                await render_shopping_list()
+
+            async def remove_item(index):
+                AppState.shopping_list.pop(index)
+                await render_shopping_list()
 
     async def render_bielik():
         content_container.clear()
@@ -590,10 +671,57 @@ async def main_page():
                         )
 
                     ui.label("lub").classes("text-center text-slate-400 my-2 text-sm")
+
+                    async def open_manual_add():
+                        upload_dialog.close()
+
+                        with ui.dialog() as manual_dialog, ui.card().classes(
+                            "w-full max-w-sm p-6"
+                        ):
+                            ui.label("Dodaj produkt").classes("text-xl font-bold mb-4")
+                            name = ui.input("Nazwa produktu").classes("w-full")
+                            qty = ui.number("Ilość", value=1.0, min=0.1).classes(
+                                "w-full"
+                            )
+                            unit = ui.select(
+                                ["szt", "kg", "l", "op"], value="szt", label="Jednostka"
+                            ).classes("w-full")
+                            date_inp = (
+                                ui.input("Data ważności (opcjonalnie)")
+                                .props("type=date")
+                                .classes("w-full")
+                            )
+
+                            async def save_manual():
+                                if not name.value:
+                                    ui.notify("Podaj nazwę!", type="warning")
+                                    return
+
+                                await api_call(
+                                    "POST",
+                                    "/api/products/add_manual",
+                                    {
+                                        "nazwa": name.value,
+                                        "ilosc": qty.value,
+                                        "jednostka": unit.value,
+                                        "data_waznosci": (
+                                            date_inp.value if date_inp.value else None
+                                        ),
+                                    },
+                                )
+                                manual_dialog.close()
+                                ui.notify(f"Dodano: {name.value}", type="positive")
+                                await AppState.refresh_inventory()
+                                await render_home()
+
+                            ui.button("Zapisz", on_click=save_manual).classes(
+                                f"w-full mt-4 {Theme.PRIMARY_BTN}"
+                            )
+
+                        manual_dialog.open()
+
                     ui.button(
-                        "Wpisz ręcznie",
-                        icon="edit",
-                        on_click=lambda: ui.notify("Wkrótce..."),
+                        "Wpisz ręcznie", icon="edit", on_click=open_manual_add
                     ).classes(
                         "w-full bg-slate-100 text-slate-700 hover:bg-slate-200 shadow-none"
                     )
@@ -715,4 +843,4 @@ async def main_page():
 
 
 # Uruchomienie
-ui.run(title="Spiżarnia AI", port=8081, favicon="🦅")
+ui.run(title="Spiżarnia AI", port=8082, favicon="🦅")
