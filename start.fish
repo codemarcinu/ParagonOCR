@@ -53,3 +53,4 @@ function paragon -d "Zarządzanie aplikacją ParagonOCR"
 end
 
 
+

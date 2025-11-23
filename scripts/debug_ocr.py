@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'ReceiptParser'
 
 from src.ocr import convert_pdf_to_image, extract_text_from_image
 
-pdf_path = "/home/marcin/Projekty/ParagonOCR/paragony/Biedra20251118.pdf"
+pdf_path = "/home/marcin/Projekty/ParagonOCR/data/paragony/Biedra20251118.pdf"
 
 print(f"Testing PDF: {pdf_path}")
 try:

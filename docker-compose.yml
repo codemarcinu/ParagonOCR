@@ -1,22 +1,24 @@
 version: '3.8'
 
 services:
-  # Ollama - Lokalny serwer AI (opcjonalny, tylko dla trybu lokalnego)
-  ollama:
-    image: ollama/ollama:latest
-    container_name: paragon_ollama
-    restart: unless-stopped
-    ports:
-      - "11434:11434"  # Ollama API
-    volumes:
-      - ollama_data:/root/.ollama  # Trwałość modeli
-    # Ollama nie wymaga żadnych zmiennych środowiskowych
-    # Modele są pobierane automatycznie przy pierwszym użyciu
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+  # UWAGA: Jeśli masz już uruchomiony kontener Ollama (np. systemowy),
+  # NIE TWÓRZ DRUGIEGO! Użyj istniejącego, ustawiając OLLAMA_HOST poniżej.
+  #
+  # Jeśli potrzebujesz kontenera Ollama, odkomentuj poniższy serwis:
+  #
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: paragon_ollama
+  #   restart: unless-stopped
+  #   ports:
+  #     - "11434:11434"  # Ollama API
+  #   volumes:
+  #     - ollama_data:/root/.ollama  # Trwałość modeli
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
 
   # ParagonWeb - Główna aplikacja
   paragon-web:
@@ -28,21 +30,27 @@ services:
       - "8080:8080"  # NiceGUI frontend
     volumes:
       - ./ReceiptParser/data:/app/ReceiptParser/data  # Trwałość bazy danych
-      - ./logs:/app/logs                # Logi
-      - ./paragony:/app/paragony        # Pliki paragonów
-      - ./uploads:/app/uploads          # Uploady
+      - ./data/logs:/app/logs                # Logi
+      - ./data/paragony:/app/paragony        # Pliki paragonów
+      - ./data/uploads:/app/uploads          # Uploady
     environment:
       - ENABLE_FILE_LOGGING=true
       - DOCKER_CONTAINER=true  # Oznacza, że działamy w Dockerze
-      # Automatyczna konfiguracja Ollama w Dockerze (używa nazwy serwisu)
-      - OLLAMA_HOST=http://ollama:11434
+      # Konfiguracja Ollama:
+      # - Jeśli masz Ollama w osobnym kontenerze Docker, użyj: http://ollama:11434
+      # - Jeśli masz Ollama na hoście (poza Dockerem), użyj: http://host.docker.internal:11434 (Mac/Windows)
+      #   lub http://172.17.0.1:11434 (Linux) - sprawdź IP mostu docker0: ip addr show docker0
+      # - Jeśli masz Ollama w innym kontenerze, użyj nazwy tego kontenera lub IP
+      - OLLAMA_HOST=http://host.docker.internal:11434  # Domyślnie: Ollama na hoście
       # Klucze API można podać tu lub w ustawieniach aplikacji
       # - OPENAI_API_KEY=...
       # - MISTRAL_API_KEY=...
       # - USE_CLOUD_AI=true
       # - USE_CLOUD_OCR=true
-    # depends_on jest opcjonalne - Ollama nie jest wymagane w trybie Cloud
-    # Jeśli używasz trybu lokalnego, upewnij się, że Ollama jest uruchomione
+    # Jeśli używasz kontenera Ollama z tego docker-compose, odkomentuj:
+    # depends_on:
+    #   ollama:
+    #     condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/"]
       interval: 30s
@@ -51,5 +59,5 @@ services:
 
 volumes:
   ollama_data:
-    # Volume dla modeli Ollama (zachowuje modele między restartami)
+    # Volume dla modeli Ollama (tylko jeśli używasz kontenera Ollama z tego docker-compose)
 

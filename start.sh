@@ -27,8 +27,8 @@ VENV_DIR="$BASE_DIR/venv"
 REQUIREMENTS_PATH="$BASE_DIR/ReceiptParser/requirements.txt"
 PID_BACKEND="$BASE_DIR/.paragon_backend.pid"
 PID_FRONTEND="$BASE_DIR/.paragon_frontend.pid"
-LOG_BACKEND="$BASE_DIR/logs/backend.log"
-LOG_FRONTEND="$BASE_DIR/logs/frontend.log"
+LOG_BACKEND="$BASE_DIR/data/logs/backend.log"
+LOG_FRONTEND="$BASE_DIR/data/logs/frontend.log"
 
 # Porty
 BACKEND_PORT=8000
@@ -178,7 +178,7 @@ start_backend() {
     
     if [ "$mode" = "background" ]; then
         # Utwórz katalog na logi
-        mkdir -p "$BASE_DIR/logs"
+        mkdir -p "$BASE_DIR/data/logs"
         
         # Uruchom w tle
         nohup python server.py > "$LOG_BACKEND" 2>&1 &
@@ -202,7 +202,7 @@ start_frontend() {
     
     if [ "$mode" = "background" ]; then
         # Utwórz katalog na logi
-        mkdir -p "$BASE_DIR/logs"
+        mkdir -p "$BASE_DIR/data/logs"
         
         # Uruchom w tle
         nohup python web_app.py > "$LOG_FRONTEND" 2>&1 &

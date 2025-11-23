@@ -113,3 +113,4 @@ Projekt został przekształcony z aplikacji desktopowej (CustomTkinter) w nowocz
 
 
 
+

@@ -2,9 +2,13 @@ version: '3.8'
 
 # Alternatywny docker-compose dla trybu lokalnego (Ollama + Tesseract)
 # Użyj: docker-compose -f docker-compose.local.yml up
+#
+# UWAGA: Jeśli masz już uruchomiony kontener Ollama, NIE TWÓRZ DRUGIEGO!
+# Ustaw OLLAMA_HOST poniżej na adres istniejącego Ollama.
 
 services:
-  # Ollama - Lokalny serwer AI
+  # Ollama - Lokalny serwer AI (opcjonalny - tylko jeśli nie masz już Ollama)
+  # Jeśli masz już Ollama, zakomentuj ten serwis i ustaw OLLAMA_HOST poniżej
   ollama:
     image: ollama/ollama:latest
     container_name: paragon_ollama
@@ -29,17 +33,23 @@ services:
       - "8080:8080"
     volumes:
       - ./ReceiptParser/data:/app/ReceiptParser/data
-      - ./logs:/app/logs
-      - ./paragony:/app/paragony
-      - ./uploads:/app/uploads
+      - ./data/logs:/app/logs
+      - ./data/paragony:/app/paragony
+      - ./data/uploads:/app/uploads
     environment:
       - ENABLE_FILE_LOGGING=true
       - DOCKER_CONTAINER=true  # Oznacza, że działamy w Dockerze
-      - OLLAMA_HOST=http://ollama:11434
+      # Konfiguracja Ollama:
+      # - Jeśli używasz kontenera Ollama z tego docker-compose: http://ollama:11434
+      # - Jeśli masz Ollama na hoście: http://host.docker.internal:11434 (Mac/Windows)
+      #   lub http://172.17.0.1:11434 (Linux) - sprawdź: ip addr show docker0
+      # - Jeśli masz Ollama w innym kontenerze, użyj nazwy kontenera lub IP
+      - OLLAMA_HOST=http://ollama:11434  # Domyślnie: kontener z tego docker-compose
       - USE_CLOUD_AI=false
       - USE_CLOUD_OCR=false
       - VISION_MODEL=llava:latest
       - TEXT_MODEL=SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M
+    # Jeśli używasz zewnętrznego Ollama (nie z tego docker-compose), zakomentuj depends_on:
     depends_on:
       ollama:
         condition: service_healthy  # W trybie lokalnym Ollama jest wymagane

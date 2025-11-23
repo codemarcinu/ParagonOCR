@@ -2,7 +2,7 @@
 
 ## 🎯 Szybki Start
 
-- **[README.md](README.md)** - Główny plik README z szybkim startem
+- **[README.md](../README.md)** - Główny plik README z szybkim startem
 - **[README_WEB.md](README_WEB.md)** - Szybki przewodnik dla wersji webowej
 
 ## 📖 Pełna Dokumentacja
@@ -73,12 +73,12 @@ ParagonWeb Documentation
 ### Chcę...
 
 **...zainstalować aplikację:**
-→ [README.md - Szybki Start](README.md#-szybki-start)  
+→ [README.md - Szybki Start](../README.md#-szybki-start)  
 → [DEPLOYMENT.md - Instalacja](DEPLOYMENT.md#deployment-lokalny)
 
 **...skonfigurować klucze API:**
 → [DOCUMENTATION.md - Konfiguracja](DOCUMENTATION.md#konfiguracja)  
-→ [README.md - Konfiguracja](README.md#-konfiguracja)
+→ [README.md - Konfiguracja](../README.md#-konfiguracja)
 
 **...użyć API:**
 → [API_DOCUMENTATION.md](API_DOCUMENTATION.md)  
@@ -102,7 +102,7 @@ ParagonWeb Documentation
 
 ## 📋 Checklist dla Nowych Użytkowników
 
-- [ ] Przeczytaj [README.md](README.md)
+- [ ] Przeczytaj [README.md](../README.md)
 - [ ] Zainstaluj aplikację ([DEPLOYMENT.md](DEPLOYMENT.md))
 - [ ] Skonfiguruj klucze API ([DOCUMENTATION.md - Konfiguracja](DOCUMENTATION.md#konfiguracja))
 - [ ] Przetestuj upload paragonu ([EXAMPLES.md](EXAMPLES.md))
@@ -110,7 +110,7 @@ ParagonWeb Documentation
 
 ## 📋 Checklist dla Deweloperów
 
-- [ ] Przeczytaj [README.md](README.md)
+- [ ] Przeczytaj [README.md](../README.md)
 - [ ] Zapoznaj się z architekturą ([DOCUMENTATION.md - Architektura](DOCUMENTATION.md#architektura))
 - [ ] Przeczytaj [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
 - [ ] Sprawdź przykłady kodu ([EXAMPLES.md](EXAMPLES.md))

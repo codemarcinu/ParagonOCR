@@ -110,3 +110,4 @@ python manager.py
 Następnie otwórz: http://localhost:8082
 
 
+

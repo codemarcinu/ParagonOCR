@@ -14,8 +14,8 @@
 - **Użycie:** `paragon start`, `paragon stop`, `paragon manager`, etc.
 
 ### 3. Dokumentacja
-- **Utworzony:** `INSTALACJA_CACHYOS.md` - instrukcje dla CachyOS
-- **Utworzony:** `DOSTOSOWANIE_CACHYOS.md` - ten plik
+- **Utworzony:** [INSTALACJA_CACHYOS.md](INSTALACJA_CACHYOS.md) - instrukcje dla CachyOS
+- **Utworzony:** [DOSTOSOWANIE_CACHYOS.md](DOSTOSOWANIE_CACHYOS.md) - ten plik
 
 ## Jak używać
 
@@ -93,5 +93,6 @@ Wszystkie skrypty zostały przetestowane:
 - Fish wrapper wywołuje bash skrypty
 - `ss` jest częścią iproute2 (domyślnie w CachyOS)
 - Manager wymaga aktywnego venv (automatycznie w `paragon manager`)
+
 
 

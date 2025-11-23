@@ -6,10 +6,33 @@ ParagonWeb może działać w dwóch trybach:
 1. **Cloud** (domyślny) - OpenAI + Mistral OCR
 2. **Lokalny** - Ollama + Tesseract
 
-W trybie lokalnym, Ollama działa w osobnym kontenerze Docker i komunikuje się z ParagonWeb przez sieć Docker.
+W trybie lokalnym, ParagonWeb może używać Ollama na kilka sposobów:
+- **Istniejący kontener Ollama** (zalecane) - jeśli masz już uruchomiony Ollama
+- **Nowy kontener Ollama** - jeśli potrzebujesz osobnego kontenera dla tego projektu
+- **Ollama na hoście** - jeśli Ollama działa bezpośrednio na systemie (poza Dockerem)
+
+## ⚠️ Ważne: Nie twórz drugiego kontenera Ollama!
+
+Jeśli masz już uruchomiony kontener Ollama (np. systemowy), **NIE TWÓRZ DRUGIEGO**! 
+Użyj istniejącego, ustawiając odpowiedni `OLLAMA_HOST` w docker-compose.yml.
 
 ## Architektura Docker
 
+### Opcja 1: Istniejący kontener Ollama (zalecane)
+```
+┌─────────────────────────────────────────┐
+│         Docker Network                  │
+│                                         │
+│  ┌──────────────┐                      │
+│  │  ParagonWeb  │───▶ (istniejący)     │
+│  │  Container   │    Ollama Container  │
+│  │  :8000, :8080│    :11434            │
+│  └──────────────┘                      │
+│                                         │
+└─────────────────────────────────────────┘
+```
+
+### Opcja 2: Nowy kontener Ollama (tylko jeśli potrzebny)
 ```
 ┌─────────────────────────────────────────┐
 │         Docker Network                  │
@@ -23,17 +46,58 @@ W trybie lokalnym, Ollama działa w osobnym kontenerze Docker i komunikuje się 
 └─────────────────────────────────────────┘
 ```
 
+### Opcja 3: Ollama na hoście
+```
+┌─────────────────────────────────────────┐
+│         Docker Network                  │
+│                                         │
+│  ┌──────────────┐                      │
+│  │  ParagonWeb  │───▶ host.docker.     │
+│  │  Container   │    internal:11434    │
+│  │  :8000, :8080│    (Ollama na hoście)│
+│  └──────────────┘                      │
+│                                         │
+└─────────────────────────────────────────┘
+```
+
 ## Konfiguracja
 
-### Automatyczna konfiguracja
+### Użycie istniejącego kontenera Ollama
 
-W Dockerze, `OLLAMA_HOST` jest automatycznie ustawiane na `http://ollama:11434` (nazwa serwisu Docker).
+Jeśli masz już uruchomiony kontener Ollama, znajdź jego nazwę lub IP:
 
-**Nie musisz tego konfigurować ręcznie!**
+```bash
+# Sprawdź uruchomione kontenery Ollama
+docker ps | grep ollama
 
-### Ręczna konfiguracja (opcjonalnie)
+# Sprawdź IP kontenera
+docker inspect <nazwa_kontenera> | grep IPAddress
+```
 
-Jeśli chcesz użyć zewnętrznego Ollama (poza Dockerem):
+Następnie w `docker-compose.yml` ustaw:
+
+```yaml
+services:
+  paragon-web:
+    environment:
+      # Jeśli kontener jest w tej samej sieci Docker:
+      - OLLAMA_HOST=http://<nazwa_kontenera>:11434
+      # Lub użyj IP kontenera:
+      - OLLAMA_HOST=http://<IP_kontenera>:11434
+```
+
+**WAŻNE:** Upewnij się, że oba kontenery są w tej samej sieci Docker:
+```bash
+# Sprawdź sieć istniejącego kontenera
+docker inspect <nazwa_kontenera> | grep NetworkMode
+
+# Jeśli są w różnych sieciach, połącz je:
+docker network connect <nazwa_sieci> <nazwa_kontenera_ollama>
+```
+
+### Użycie Ollama na hoście (poza Dockerem)
+
+Jeśli Ollama działa bezpośrednio na systemie:
 
 ```yaml
 # docker-compose.yml
@@ -41,9 +105,45 @@ services:
   paragon-web:
     environment:
       - OLLAMA_HOST=http://host.docker.internal:11434  # Windows/Mac
-      # lub
+      # lub dla Linuxa (sprawdź IP mostu docker0):
       - OLLAMA_HOST=http://172.17.0.1:11434  # Linux (docker0 bridge)
 ```
+
+Aby znaleźć IP mostu docker0 na Linuxie:
+```bash
+ip addr show docker0 | grep inet
+```
+
+### Utworzenie nowego kontenera Ollama (tylko jeśli potrzebny)
+
+Jeśli naprawdę potrzebujesz nowego kontenera, odkomentuj serwis `ollama` w `docker-compose.yml`:
+```yaml
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: paragon_ollama
+    # ... reszta konfiguracji
+```
+
+## Sprawdzanie istniejącego Ollama
+
+**PRZED uruchomieniem ParagonWeb, sprawdź czy masz już Ollama:**
+
+```bash
+# Sprawdź kontenery Docker z Ollama
+docker ps -a | grep ollama
+
+# Sprawdź czy Ollama działa na hoście (port 11434)
+curl http://localhost:11434/api/tags
+
+# Sprawdź wszystkie kontenery Ollama (również zatrzymane)
+docker ps -a --filter "ancestor=ollama/ollama"
+```
+
+Jeśli masz już Ollama:
+1. **Kontener Docker:** Ustaw `OLLAMA_HOST` na nazwę kontenera lub jego IP (patrz sekcja "Konfiguracja" wyżej)
+2. **Na hoście:** Ustaw `OLLAMA_HOST` na `http://host.docker.internal:11434` (Mac/Windows) lub `http://172.17.0.1:11434` (Linux)
+3. **NIE TWÓRZ** nowego kontenera Ollama w docker-compose.yml!
 
 ## Uruchomienie
 
@@ -53,10 +153,19 @@ services:
 docker-compose up -d
 ```
 
-Kontener Ollama jest uruchamiany, ale nie jest używany (chyba że przełączysz na tryb lokalny).
+W trybie Cloud, Ollama nie jest używane (nawet jeśli jest uruchomione).
 
 ### Tryb Lokalny
 
+**Jeśli masz już Ollama:**
+1. Ustaw `OLLAMA_HOST` w `docker-compose.local.yml` (patrz sekcję "Konfiguracja")
+2. Zakomentuj serwis `ollama` w `docker-compose.local.yml` (lub usuń `depends_on`)
+3. Uruchom:
+```bash
+docker-compose -f docker-compose.local.yml up -d
+```
+
+**Jeśli potrzebujesz nowego kontenera Ollama:**
 ```bash
 # Użyj specjalnego docker-compose dla trybu lokalnego
 docker-compose -f docker-compose.local.yml up -d

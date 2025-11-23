@@ -55,12 +55,12 @@ python web_app.py
 
 ## 📚 Dokumentacja
 
-- **[📖 Pełna Dokumentacja](DOCUMENTATION.md)** - Kompleksowy przewodnik użytkownika i dewelopera
-- **[🔌 Dokumentacja API](API_DOCUMENTATION.md)** - Szczegółowa dokumentacja REST API
-- **[🚀 Przewodnik Deployment](DEPLOYMENT.md)** - Instrukcje wdrożenia na różnych platformach
-- **[🐳 Ollama w Dockerze](DOCKER_OLLAMA.md)** - Konfiguracja i użycie Ollama w Dockerze
-- **[📝 Changelog](CHANGELOG_WEB.md)** - Lista zmian w transformacji do wersji webowej
-- **[🌐 README Web](README_WEB.md)** - Szybki przewodnik dla wersji webowej
+- **[📖 Pełna Dokumentacja](docs/DOCUMENTATION.md)** - Kompleksowy przewodnik użytkownika i dewelopera
+- **[🔌 Dokumentacja API](docs/API_DOCUMENTATION.md)** - Szczegółowa dokumentacja REST API
+- **[🚀 Przewodnik Deployment](docs/DEPLOYMENT.md)** - Instrukcje wdrożenia na różnych platformach
+- **[🐳 Ollama w Dockerze](docs/DOCKER_OLLAMA.md)** - Konfiguracja i użycie Ollama w Dockerze
+- **[📝 Changelog](docs/CHANGELOG_WEB.md)** - Lista zmian w transformacji do wersji webowej
+- **[🌐 README Web](docs/README_WEB.md)** - Szybki przewodnik dla wersji webowej
 
 ## ✨ Funkcjonalności
 
@@ -202,7 +202,10 @@ ParagonOCR/
 │   │   ├── bielik.py          # Bielik assistant
 │   │   └── ...
 │   └── requirements.txt
-└── docs/                  # Dokumentacja
+├── docs/                  # Dokumentacja
+├── data/                  # Dane aplikacji (paragony, uploads, logs)
+├── scripts/               # Skrypty pomocnicze
+└── tests/                 # Testy jednostkowe
 ```
 
 ### Testowanie
@@ -266,9 +269,9 @@ print(f"Wydatki: {stats['total_statistics']['total_spent']} PLN")
 
 **Rozwiązanie:**
 - Sprawdź czy backend działa: `curl http://localhost:8000/`
-- Sprawdź logi: `docker-compose logs` lub `./logs/`
+- Sprawdź logi: `docker-compose logs` lub `./data/logs/`
 
-Więcej w [Dokumentacji](DOCUMENTATION.md#troubleshooting).
+Więcej w [Dokumentacji](docs/DOCUMENTATION.md#troubleshooting).
 
 ## 📝 Licencja
 
@@ -285,7 +288,7 @@ Więcej w [Dokumentacji](DOCUMENTATION.md#troubleshooting).
 ## 📞 Kontakt
 
 - **Issues:** GitHub Issues
-- **Dokumentacja:** [DOCUMENTATION.md](DOCUMENTATION.md)
+- **Dokumentacja:** [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md)
 - **API Docs:** http://localhost:8000/docs (po uruchomieniu)
 
 ---

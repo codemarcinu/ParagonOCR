@@ -195,7 +195,7 @@ def cleanup_old_tasks():
                 del processing_tasks[task_id]
     
     # Dodatkowo: usuń stare pliki z katalogu uploads (starsze niż 24 godziny)
-    upload_dir = Path("uploads")
+    upload_dir = Path("data/uploads")
     if upload_dir.exists():
         for file_path in upload_dir.glob("*"):
             if file_path.is_file():
@@ -309,8 +309,8 @@ async def upload_receipt(
         )
     
     # Utwórz katalog na uploady jeśli nie istnieje
-    upload_dir = Path("uploads")
-    upload_dir.mkdir(exist_ok=True)
+    upload_dir = Path("data/uploads")
+    upload_dir.mkdir(parents=True, exist_ok=True)
     
     # Zapisz plik
     file_path = upload_dir / f"{task_id}{file_ext}"
