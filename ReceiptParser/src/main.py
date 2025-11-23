@@ -97,16 +97,15 @@ def run_processing_pipeline(
             _call_log_callback(log_callback, f"INFO: PDF skonwertowany tymczasowo do: {sanitize_path(processing_file_path)}")
 
         # Użyj abstrakcji OCRProvider
-        ocr_provider = get_ocr_provider()
+        # Jeśli llm_model == "mistral-ocr", wymuś Cloud OCR niezależnie od konfiguracji
+        from .config import Config
+        use_cloud_ocr = Config.USE_CLOUD_OCR or (llm_model == "mistral-ocr")
+        ocr_provider = get_ocr_provider(use_cloud=use_cloud_ocr)
         
         if not ocr_provider.is_available():
             raise Exception(f"Dostawca OCR nie jest dostępny. Sprawdź konfigurację.")
         
-        # Sprawdź czy używamy Cloud OCR (Mistral) czy Local (Tesseract)
-        from .config import Config
-        use_cloud_ocr = Config.USE_CLOUD_OCR
-        
-        if use_cloud_ocr or llm_model == "mistral-ocr":
+        if use_cloud_ocr:
             # Użyj Cloud OCR (Mistral)
             _call_log_callback(log_callback, "INFO: Używam Mistral OCR do ekstrakcji tekstu...", progress=-1, status="OCR (Mistral)...")
             ocr_markdown = ocr_provider.extract_text(processing_file_path)

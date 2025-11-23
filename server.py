@@ -310,13 +310,16 @@ async def get_inventory():
 @app.post("/api/chat")
 async def chat_with_bielik(message: ChatMessage):
     """Wysyła wiadomość do asystenta Bielik."""
+    assistant = None
     try:
         assistant = BielikAssistant()
         answer = assistant.answer_question(message.question)
-        assistant.close()
         return {"answer": answer}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Błąd podczas komunikacji z Bielikiem: {str(e)}")
+    finally:
+        if assistant is not None:
+            assistant.close()
 
 
 @app.get("/api/settings")
