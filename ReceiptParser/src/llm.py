@@ -125,7 +125,7 @@ def get_learning_examples(
 
 def get_llm_suggestion(
     raw_name: str, 
-    model_name: str = Config.TEXT_MODEL,
+    model_name: str = None,
     learning_examples: Optional[List[Tuple[str, str]]] = None
 ) -> str | None:
     """
@@ -140,6 +140,13 @@ def get_llm_suggestion(
     Returns:
         Znormalizowana nazwa produktu jako string, lub None w przypadku błędu.
     """
+    # Ustaw domyślny model na podstawie aktualnej konfiguracji (runtime, nie import time)
+    if model_name is None:
+        if Config.USE_CLOUD_AI:
+            model_name = Config.OPENAI_TEXT_MODEL
+        else:
+            model_name = Config.TEXT_MODEL
+    
     provider = _get_client()
     if not provider.is_available():
         print("BŁĄD: Dostawca AI nie jest dostępny.")
@@ -286,7 +293,7 @@ def _convert_types(data: dict) -> dict:
 
 def parse_receipt_with_llm(
     image_path: str,
-    model_name: str = Config.VISION_MODEL,
+    model_name: str = None,
     system_prompt_override: str = None,
     ocr_text: str = None,
 ) -> dict | None:
@@ -301,6 +308,13 @@ def parse_receipt_with_llm(
     Returns:
         Słownik z danymi w formacie ParsedData, lub None w przypadku błędu.
     """
+    # Ustaw domyślny model na podstawie aktualnej konfiguracji (runtime, nie import time)
+    if model_name is None:
+        if Config.USE_CLOUD_AI:
+            model_name = Config.OPENAI_VISION_MODEL
+        else:
+            model_name = Config.VISION_MODEL
+    
     provider = _get_client()
     if not provider.is_available():
         print("BŁĄD: Dostawca AI nie jest dostępny.")
@@ -414,7 +428,7 @@ def parse_receipt_with_llm(
 
 def parse_receipt_from_text(
     text_content: str,
-    model_name: str = Config.TEXT_MODEL,
+    model_name: str = None,
     system_prompt_override: str = None,
 ) -> dict | None:
     """
@@ -428,6 +442,13 @@ def parse_receipt_from_text(
     Returns:
         Słownik z danymi w formacie ParsedData, lub None w przypadku błędu.
     """
+    # Ustaw domyślny model na podstawie aktualnej konfiguracji (runtime, nie import time)
+    if model_name is None:
+        if Config.USE_CLOUD_AI:
+            model_name = Config.OPENAI_TEXT_MODEL
+        else:
+            model_name = Config.TEXT_MODEL
+    
     provider = _get_client()
     if not provider.is_available():
         print("BŁĄD: Dostawca AI nie jest dostępny.")

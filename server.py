@@ -228,7 +228,7 @@ async def get_receipts(skip: int = 0, limit: int = 50):
             results.append({
                 "paragon_id": paragon.paragon_id,
                 "sklep": paragon.sklep.nazwa_sklepu,
-                "data_zakupu": paragon.data_zakupu.isoformat(),
+                "data_zakupu": paragon.data_zakupu.isoformat() if paragon.data_zakupu else None,
                 "suma_paragonu": float(paragon.suma_paragonu),
                 "liczba_pozycji": len(paragon.pozycje),
                 "plik_zrodlowy": paragon.plik_zrodlowy,
