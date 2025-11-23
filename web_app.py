@@ -54,13 +54,8 @@ class AppColors:
 
 # --- Stylowanie ---
 
-def setup_styles(dark_mode: bool = False):
+def setup_styles():
     """Konfiguruje style CSS dla aplikacji."""
-    bg_color = AppColors.BG_DARK if dark_mode else AppColors.BG_LIGHT
-    card_color = AppColors.CARD_DARK if dark_mode else AppColors.CARD_LIGHT
-    text_primary = AppColors.TEXT_DARK if dark_mode else AppColors.TEXT_PRIMARY
-    text_secondary = AppColors.TEXT_SECONDARY
-    
     ui.add_head_html(f"""
     <style>
         :root {{
@@ -70,10 +65,13 @@ def setup_styles(dark_mode: bool = False):
             --success: {AppColors.SUCCESS};
             --warning: {AppColors.WARNING};
             --error: {AppColors.ERROR};
-            --bg: {bg_color};
-            --card: {card_color};
-            --text-primary: {text_primary};
-            --text-secondary: {text_secondary};
+            --info: {AppColors.INFO};
+            
+            /* Light mode (domyślne) */
+            --bg: {AppColors.BG_LIGHT};
+            --card: {AppColors.CARD_LIGHT};
+            --text-primary: {AppColors.TEXT_PRIMARY};
+            --text-secondary: {AppColors.TEXT_SECONDARY};
         }}
         
         * {{
@@ -375,6 +373,37 @@ def setup_styles(dark_mode: bool = False):
             border-right-color: rgba(255,255,255,0.1);
         }}
         
+        body.dark-mode .upload-area {{
+            border-color: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.02);
+        }}
+        
+        body.dark-mode .upload-area:hover {{
+            border-color: var(--primary);
+            background: rgba(255,255,255,0.05);
+        }}
+        
+        body.dark-mode .table-container th {{
+            background: rgba(255,255,255,0.05);
+            border-bottom-color: var(--primary);
+        }}
+        
+        body.dark-mode .table-container td {{
+            border-bottom-color: rgba(255,255,255,0.1);
+        }}
+        
+        body.dark-mode .table-container tr:hover {{
+            background: rgba(255,255,255,0.05);
+        }}
+        
+        body.dark-mode .card {{
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2);
+        }}
+        
+        body.dark-mode .card:hover {{
+            box-shadow: 0 10px 15px rgba(0,0,0,0.4), 0 4px 6px rgba(0,0,0,0.3);
+        }}
+        
         @media (max-width: 768px) {{
             .sidebar {{
                 transform: translateX(-100%);
@@ -467,19 +496,52 @@ def setup_dark_mode_script():
     ui.add_head_html('''
     <script>
         // Sprawdź localStorage przy ładowaniu
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark-mode');
-        }
+        (function() {
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+        })();
     </script>
     ''')
 
-def toggle_dark_mode():
-    """Przełącza tryb ciemny."""
+def create_dark_mode_toggle():
+    """Tworzy przycisk przełączania dark mode z dynamiczną ikoną."""
+    # Domyślnie light mode (🌙 oznacza "przełącz na dark")
+    initial_icon = '🌙'
+    
+    toggle_button = ui.button(initial_icon)
+    toggle_button.classes('dark-mode-toggle')
+    
+    def toggle_handler():
+        """Przełącza tryb ciemny bez przeładowania strony."""
+        ui.run_javascript('''
+            (function() {
+                const body = document.body;
+                const isDark = body.classList.toggle('dark-mode');
+                localStorage.setItem('darkMode', isDark);
+                
+                // Zaktualizuj ikonę wszystkich przycisków dark mode
+                const toggleButtons = document.querySelectorAll('.dark-mode-toggle');
+                toggleButtons.forEach(button => {
+                    button.textContent = isDark ? '☀️' : '🌙';
+                });
+            })();
+        ''')
+    
+    toggle_button.on('click', toggle_handler)
+    
+    # Ustaw początkową ikonę na podstawie localStorage
     ui.run_javascript('''
-        const isDark = document.body.classList.toggle('dark-mode');
-        localStorage.setItem('darkMode', isDark);
-        location.reload();
+        (function() {
+            const isDark = localStorage.getItem('darkMode') === 'true';
+            const buttons = document.querySelectorAll('.dark-mode-toggle');
+            buttons.forEach(button => {
+                button.textContent = isDark ? '☀️' : '🌙';
+            });
+        })();
     ''')
+    
+    return toggle_button
 
 
 # --- Strony ---
@@ -488,7 +550,7 @@ def toggle_dark_mode():
 async def dashboard():
     """Strona główna - Dashboard."""
     setup_dark_mode_script()
-    setup_styles(False)  # Dark mode jest obsługiwany przez CSS i JavaScript
+    setup_styles()
     
     with ui.row().classes('app-container'):
         create_sidebar('/')
@@ -635,14 +697,14 @@ async def dashboard():
                         ui.label(f'Błąd podczas ładowania paragonów: {str(e)}').style('color: var(--error);')
     
     # Dark mode toggle
-    ui.button('🌙', on_click=toggle_dark_mode).classes('dark-mode-toggle')
+    create_dark_mode_toggle()
 
 
 @ui.page('/magazyn')
 async def inventory_page():
     """Strona magazynu."""
     setup_dark_mode_script()
-    setup_styles(False)
+    setup_styles()
     
     with ui.row().classes('app-container'):
         create_sidebar('/magazyn')
@@ -691,14 +753,14 @@ async def inventory_page():
                 except Exception as e:
                     ui.label(f'Błąd podczas ładowania magazynu: {str(e)}').style('color: var(--error);')
     
-    ui.button('🌙', on_click=toggle_dark_mode).classes('dark-mode-toggle')
+    create_dark_mode_toggle()
 
 
 @ui.page('/bielik')
 async def bielik_page():
     """Strona czatu z Bielikiem."""
     setup_dark_mode_script()
-    setup_styles(False)
+    setup_styles()
     
     with ui.row().classes('app-container'):
         create_sidebar('/bielik')
@@ -762,14 +824,14 @@ async def bielik_page():
                         
                         ui.button('Wyślij ➤', on_click=send_message).classes('btn-primary')
     
-    ui.button('🌙', on_click=toggle_dark_mode).classes('dark-mode-toggle')
+    create_dark_mode_toggle()
 
 
 @ui.page('/paragon/{receipt_id}')
 async def receipt_detail_page(receipt_id: int):
     """Strona szczegółów paragonu z możliwością edycji."""
     setup_dark_mode_script()
-    setup_styles(False)
+    setup_styles()
     
     with ui.row().classes('app-container'):
         create_sidebar('/')
@@ -958,14 +1020,14 @@ async def receipt_detail_page(receipt_id: int):
                     if "404" in str(e):
                         ui.link('← Powrót do listy', '/').style('margin-top: 20px; color: var(--primary);')
     
-    ui.button('🌙', on_click=toggle_dark_mode).classes('dark-mode-toggle')
+    create_dark_mode_toggle()
 
 
 @ui.page('/ustawienia')
 async def settings_page():
     """Strona ustawień."""
     setup_dark_mode_script()
-    setup_styles(False)
+    setup_styles()
     
     with ui.row().classes('app-container'):
         create_sidebar('/ustawienia')
@@ -1029,7 +1091,7 @@ async def settings_page():
                 except Exception as e:
                     ui.label(f'Błąd podczas ładowania ustawień: {str(e)}').style('color: var(--error);')
     
-    ui.button('🌙', on_click=toggle_dark_mode).classes('dark-mode-toggle')
+    create_dark_mode_toggle()
 
 
 async def handle_upload(e):
