@@ -326,8 +326,9 @@ async def handle_upload(e):
         file_name = e.name
         file_content = await e.content.read()
         
-        # Wyślij do API używając httpx
-        async with httpx.AsyncClient() as client:
+        # Wyślij do API używając httpx z timeout (spójnie z api_call)
+        timeout = httpx.Timeout(30.0, connect=10.0)  # 30s timeout, 10s na połączenie
+        async with httpx.AsyncClient(timeout=timeout) as client:
             files = {"file": (file_name, file_content, e.type)}
             response = await client.post(f"{API_URL}/api/upload", files=files)
             response.raise_for_status()

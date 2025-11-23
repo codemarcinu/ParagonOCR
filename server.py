@@ -67,6 +67,8 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Przechowywanie zadań przetwarzania (w produkcji użyj Redis/DB)
 processing_tasks: Dict[str, Dict[str, Any]] = {}
+# Lock dla bezpiecznego dostępu do processing_tasks z wielu wątków
+processing_tasks_lock = threading.Lock()
 
 # Stałe konfiguracyjne
 MAX_UPLOAD_SIZE = 50 * 1024 * 1024  # 50 MB
@@ -152,7 +154,20 @@ def cleanup_old_tasks():
     tasks_to_remove = []
     files_removed = 0
     
-    for task_id, task_data in processing_tasks.items():
+    # Użyj locka i skopiuj klucze przed iteracją, aby uniknąć RuntimeError
+    # gdy słownik jest modyfikowany przez inne wątki
+    with processing_tasks_lock:
+        # Skopiuj klucze przed iteracją, aby uniknąć "dictionary changed size during iteration"
+        task_ids = list(processing_tasks.keys())
+    
+    # Iteruj po skopiowanych kluczach (bez locka, aby nie blokować innych operacji)
+    for task_id in task_ids:
+        # Pobierz dane zadania z lockiem
+        with processing_tasks_lock:
+            task_data = processing_tasks.get(task_id)
+            if not task_data:
+                continue  # Zadanie już zostało usunięte przez inny wątek
+        
         start_time = task_data.get("start_time", current_time)
         elapsed = current_time - start_time
         
@@ -164,18 +179,20 @@ def cleanup_old_tasks():
             if current_time - end_time > 600:  # 10 minut po zakończeniu
                 tasks_to_remove.append(task_id)
     
+    # Usuń zadania z lockiem
     for task_id in tasks_to_remove:
         # Usuń plik jeśli istnieje
-        task_data = processing_tasks.get(task_id)
-        if task_data:
-            file_path = task_data.get("file_path")
-            if file_path and os.path.exists(file_path):
-                try:
-                    os.unlink(file_path)
-                    files_removed += 1
-                except Exception:
-                    pass
-        del processing_tasks[task_id]
+        with processing_tasks_lock:
+            task_data = processing_tasks.get(task_id)
+            if task_data:
+                file_path = task_data.get("file_path")
+                if file_path and os.path.exists(file_path):
+                    try:
+                        os.unlink(file_path)
+                        files_removed += 1
+                    except Exception:
+                        pass
+                del processing_tasks[task_id]
     
     # Dodatkowo: usuń stare pliki z katalogu uploads (starsze niż 24 godziny)
     upload_dir = Path("uploads")
@@ -300,29 +317,31 @@ async def upload_receipt(
     with open(file_path, "wb") as f:
         f.write(content)
     
-    # Inicjalizuj zadanie z timestamp
-    processing_tasks[task_id] = {
-        "status": "processing",
-        "progress": 0,
-        "message": "Rozpoczynam przetwarzanie...",
-        "file_path": str(file_path),
-        "start_time": time.time(),
-    }
+    # Inicjalizuj zadanie z timestamp (z lockiem)
+    with processing_tasks_lock:
+        processing_tasks[task_id] = {
+            "status": "processing",
+            "progress": 0,
+            "message": "Rozpoczynam przetwarzanie...",
+            "file_path": str(file_path),
+            "start_time": time.time(),
+        }
     
     # Uruchom przetwarzanie w tle
     def process_receipt():
         start_time = time.time()
         try:
             def log_callback(message: str, progress: Optional[float] = None, status: Optional[str] = None):
-                if task_id in processing_tasks:
-                    # Zawsze zachowaj szczegółową wiadomość
-                    processing_tasks[task_id]["message"] = message
-                    if progress is not None:
-                        processing_tasks[task_id]["progress"] = int(progress)
-                    if status is not None:
-                        # Status jest dodatkową informacją, przechowuj osobno
-                        # Nie nadpisuj wiadomości, która zawiera szczegóły
-                        processing_tasks[task_id]["status_label"] = status
+                with processing_tasks_lock:
+                    if task_id in processing_tasks:
+                        # Zawsze zachowaj szczegółową wiadomość
+                        processing_tasks[task_id]["message"] = message
+                        if progress is not None:
+                            processing_tasks[task_id]["progress"] = int(progress)
+                        if status is not None:
+                            # Status jest dodatkową informacją, przechowuj osobno
+                            # Nie nadpisuj wiadomości, która zawiera szczegóły
+                            processing_tasks[task_id]["status_label"] = status
             
             def prompt_callback(prompt_text: str, default_value: str, raw_name: str) -> str:
                 # Dla web app, używamy wartości domyślnej (można później dodać interakcję)
@@ -348,20 +367,25 @@ async def upload_receipt(
             
             # Sprawdź timeout przed oznaczeniem jako completed
             elapsed_time = time.time() - start_time
-            if elapsed_time > TASK_TIMEOUT:
-                processing_tasks[task_id]["status"] = "timeout"
-                processing_tasks[task_id]["message"] = f"Przetwarzanie przekroczyło limit czasu ({TASK_TIMEOUT}s)"
-            else:
-                processing_tasks[task_id]["status"] = "completed"
-                processing_tasks[task_id]["progress"] = 100
-                processing_tasks[task_id]["message"] = "Przetwarzanie zakończone!"
+            with processing_tasks_lock:
+                if task_id in processing_tasks:
+                    if elapsed_time > TASK_TIMEOUT:
+                        processing_tasks[task_id]["status"] = "timeout"
+                        processing_tasks[task_id]["message"] = f"Przetwarzanie przekroczyło limit czasu ({TASK_TIMEOUT}s)"
+                    else:
+                        processing_tasks[task_id]["status"] = "completed"
+                        processing_tasks[task_id]["progress"] = 100
+                        processing_tasks[task_id]["message"] = "Przetwarzanie zakończone!"
         except Exception as e:
-            processing_tasks[task_id]["status"] = "error"
-            processing_tasks[task_id]["message"] = f"Błąd: {str(e)}"
+            with processing_tasks_lock:
+                if task_id in processing_tasks:
+                    processing_tasks[task_id]["status"] = "error"
+                    processing_tasks[task_id]["message"] = f"Błąd: {str(e)}"
         finally:
             # Oznacz czas zakończenia
-            if task_id in processing_tasks:
-                processing_tasks[task_id]["end_time"] = time.time()
+            with processing_tasks_lock:
+                if task_id in processing_tasks:
+                    processing_tasks[task_id]["end_time"] = time.time()
     
     # Uruchom w osobnym wątku
     import threading
@@ -379,18 +403,25 @@ async def get_task_status(task_id: str):
     if len(task_id) != 36 or task_id.count("-") != 4:
         raise HTTPException(status_code=400, detail="Nieprawidłowy format ID zadania")
     
-    if task_id not in processing_tasks:
-        raise HTTPException(status_code=404, detail="Zadanie nie znalezione")
+    # Pobierz dane zadania z lockiem
+    with processing_tasks_lock:
+        if task_id not in processing_tasks:
+            raise HTTPException(status_code=404, detail="Zadanie nie znalezione")
+        
+        task_data = processing_tasks[task_id].copy()
     
-    task_data = processing_tasks[task_id].copy()
-    
-    # Sprawdź timeout dla aktywnych zadań
+    # Sprawdź timeout dla aktywnych zadań (bez locka, bo tylko czytamy kopię)
     if task_data.get("status") == "processing":
         start_time = task_data.get("start_time", time.time())
         elapsed = time.time() - start_time
         if elapsed > TASK_TIMEOUT:
             task_data["status"] = "timeout"
             task_data["message"] = f"Przetwarzanie przekroczyło limit czasu ({TASK_TIMEOUT}s)"
+            # Zaktualizuj status w słowniku (z lockiem)
+            with processing_tasks_lock:
+                if task_id in processing_tasks:
+                    processing_tasks[task_id]["status"] = "timeout"
+                    processing_tasks[task_id]["message"] = task_data["message"]
     
     return task_data
 

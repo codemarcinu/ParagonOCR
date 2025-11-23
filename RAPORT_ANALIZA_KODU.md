@@ -718,6 +718,26 @@ Projekt jest **dobrze napisany** i **dobrze zorganizowany**. **Wszystkie krytycz
 
 ## 📅 Historia Zmian
 
+### 2025-11-23 (popołudnie) - Naprawa błędów race condition i timeout
+
+**Naprawione błędy:**
+
+1. ✅ **Race condition w `cleanup_old_tasks()`**
+   - Problem: Iteracja po `processing_tasks.items()` podczas gdy słownik był modyfikowany przez inne wątki powodowała `RuntimeError: dictionary changed size during iteration`
+   - Rozwiązanie: Dodano `threading.Lock()` (`processing_tasks_lock`) i kopiowanie kluczy przed iteracją
+   - Wpływ: Zapobiega crashowaniu aplikacji przy równoczesnym dostępie do `processing_tasks`
+
+2. ✅ **Brak timeout w `handle_upload()`**
+   - Problem: `httpx.AsyncClient()` w `handle_upload` nie miał timeout, podczas gdy `api_call` miał 30s timeout
+   - Rozwiązanie: Dodano timeout `httpx.Timeout(30.0, connect=10.0)` do `handle_upload`
+   - Wpływ: Zapobiega zawieszeniu klienta przy nieodpowiadającym API
+
+**Pliki zmodyfikowane:**
+- `server.py` - dodano `processing_tasks_lock`, zabezpieczono wszystkie modyfikacje `processing_tasks`
+- `web_app.py` - dodano timeout do `handle_upload`
+
+---
+
 ### 2025-11-23 - Wdrożenie ulepszeń bezpieczeństwa i stabilności
 
 **Wykonane zadania:**
