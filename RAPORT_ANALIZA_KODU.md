@@ -1,6 +1,7 @@
 # 📋 Raport Analizy Kodu - ParagonOCR
 
-**Data analizy:** 2025-01-XX  
+**Data analizy:** 2025-11-23  
+**Data ostatniej aktualizacji:** 2025-11-23  
 **Wersja projektu:** 2.0.0 (Web)  
 **Branch:** feature/web-app-transformation
 
@@ -18,7 +19,7 @@
 - **Sugestie ulepszeń:** 12 (do realizacji w przyszłości)
 
 ### Ogólna ocena
-Kod jest **dobrze zorganizowany** i **modularny**, z wyraźną separacją odpowiedzialności. Większość krytycznych problemów została już naprawiona (zgodnie z ANALIZA_KODU.md). Pozostałe problemy to głównie drobne błędy i możliwości optymalizacji.
+Kod jest **dobrze zorganizowany** i **modularny**, z wyraźną separacją odpowiedzialności. **Wszystkie krytyczne i średnie problemy zostały naprawione** (2025-11-23). Pozostałe problemy to głównie drobne ulepszenia i możliwości optymalizacji (niski priorytet).
 
 ---
 
@@ -556,31 +557,32 @@ Użyć `dateutil.parser` do automatycznego parsowania dat.
 ## 🔍 Szczegółowa Analiza Plików
 
 ### server.py
-**Status:** ✅ Dobry, ale wymaga poprawek
+**Status:** ✅ **Znacznie ulepszony** - Wszystkie główne problemy naprawione
 
-**Problemy:**
-- Resource leak w upload (naprawione w main.py, ale nie w server.py)
-- CORS dla wszystkich domen
-- Brak walidacji rozmiaru pliku
-- Brak timeout dla zadań
+**Naprawione problemy:**
+- ✅ CORS dla produkcji - dodano sprawdzanie ENVIRONMENT
+- ✅ Walidacja rozmiaru pliku - limit 50MB
+- ✅ Timeout dla zadań - 10 minut + automatyczny cleanup
+- ✅ Walidacja danych wejściowych - Pydantic validators
+- ✅ Cleanup starych plików - automatyczny co 5 minut
+- ✅ Health check endpoint - `/health` z pełnym statusem
 
-**Rekomendacje:**
-- Dodać walidację i rate limiting
-- Dodać logowanie requestów
+**Pozostałe rekomendacje:**
+- Dodać rate limiting (niski priorytet)
+- Dodać logowanie requestów (niski priorytet)
 
 ---
 
 ### web_app.py
-**Status:** ✅ Dobry, ale wymaga ulepszeń
+**Status:** ✅ **Ulepszony** - Obsługa błędów znacznie poprawiona
 
-**Problemy:**
-- Brak obsługi wszystkich typów błędów HTTP
-- Hardcoded wartości
-- Duplikacja kodu
+**Naprawione problemy:**
+- ✅ Obsługa błędów HTTP - dodano timeout, ConnectError, HTTPStatusError
+- ✅ Lepsze komunikaty błędów dla użytkownika
 
-**Rekomendacje:**
-- Refaktoryzacja funkcji pomocniczych
-- Lepsza obsługa błędów
+**Pozostałe rekomendacje:**
+- Refaktoryzacja duplikacji kodu (niski priorytet)
+- Usunięcie hardcoded wartości (niski priorytet)
 
 ---
 
@@ -611,13 +613,13 @@ Użyć `dateutil.parser` do automatycznego parsowania dat.
 ---
 
 ### ReceiptParser/src/mistral_ocr.py
-**Status:** ⚠️ Wymaga naprawy
+**Status:** ✅ **Naprawiony** - Resource leak usunięty
 
-**Problemy:**
-- 🔴 **KRYTYCZNY:** Resource leak (niezamknięty plik)
+**Naprawione problemy:**
+- ✅ Resource leak - użyto context manager (`with open`)
 
 **Rekomendacje:**
-- Naprawić natychmiast
+- Wszystkie krytyczne problemy naprawione
 
 ---
 
@@ -714,6 +716,70 @@ Projekt jest **dobrze napisany** i **dobrze zorganizowany**. **Wszystkie krytycz
 
 ---
 
+## 📅 Historia Zmian
+
+### 2025-11-23 - Wdrożenie ulepszeń bezpieczeństwa i stabilności
+
+**Wykonane zadania:**
+
+1. ✅ **Naprawiono resource leak w `mistral_ocr.py`**
+   - Użyto context manager (`with open`) zamiast bezpośredniego `open()`
+   - Zapobiega wyczerpaniu deskryptorów plików
+
+2. ✅ **Usunięto nieużywany import `asyncio` w `server.py`**
+   - Oczyszczenie namespace
+
+3. ✅ **Dodano walidację rozmiaru pliku w `/api/upload`**
+   - Limit 50MB z czytelnym komunikatem błędu
+   - Zapobiega DoS przez upload bardzo dużych plików
+
+4. ✅ **Naprawiono CORS dla produkcji**
+   - Sprawdzanie zmiennej `ENVIRONMENT`
+   - Konfiguracja przez `ALLOWED_ORIGINS`
+   - Blokada `allow_origins=["*"]` w produkcji
+
+5. ✅ **Dodano timeout dla zadań przetwarzania**
+   - Timeout 10 minut (600 sekund)
+   - Automatyczny cleanup starych zadań co 5 minut
+   - Tracking czasu rozpoczęcia i zakończenia
+
+6. ✅ **Dodano walidację danych wejściowych w API endpoints**
+   - Pydantic validators dla `ChatMessage` (max 2000 znaków)
+   - Walidacja formatu kluczy API (OpenAI: `sk-`, Mistral: min 20 znaków)
+   - Walidacja UUID w `get_task_status`
+
+7. ✅ **Dodano automatyczny cleanup starych plików upload**
+   - Usuwanie plików starszych niż 24 godziny
+   - Cleanup zadań zakończonych starszych niż 10 minut
+   - Cleanup aktywnych zadań starszych niż 1 godzina
+
+8. ✅ **Dodano health check endpoint `/health`**
+   - Sprawdzanie stanu bazy danych
+   - Sprawdzanie dostępności AI provider
+   - Informacje o aktywnych zadaniach
+   - Status HTTP 200 (healthy) / 503 (unhealthy/degraded)
+
+9. ✅ **Poprawiono obsługę błędów w `web_app.py`**
+   - Obsługa `httpx.TimeoutException` (30s timeout)
+   - Obsługa `httpx.ConnectError`
+   - Obsługa `httpx.HTTPStatusError` z szczegółowymi komunikatami
+   - Obsługa innych błędów requestu
+
+**Wpływ na jakość kodu:**
+- ✅ Wszystkie błędy krytyczne naprawione
+- ✅ Wszystkie błędy średnie naprawione
+- ✅ Zwiększone bezpieczeństwo (CORS, walidacja)
+- ✅ Lepsza stabilność (timeout, cleanup)
+- ✅ Lepsze monitorowanie (health check)
+
+**Pliki zmodyfikowane:**
+- `ReceiptParser/src/mistral_ocr.py` - naprawiono resource leak
+- `server.py` - dodano walidację, CORS, timeout, cleanup, health check
+- `web_app.py` - poprawiono obsługę błędów
+
+---
+
 *Raport wygenerowany automatycznie na podstawie analizy kodu źródłowego.*  
-*Data analizy: 2025-01-XX*
+*Data analizy: 2025-11-23*  
+*Ostatnia aktualizacja: 2025-11-23*
 
