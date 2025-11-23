@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # ParagonWeb - Wersja webowa (tylko Cloud: Mistral OCR + OpenAI API)
   paragon-web:
@@ -14,6 +12,9 @@ services:
       - ./data/logs:/app/logs                # Logi
       - ./data/paragony:/app/paragony        # Pliki paragonów
       - ./data/uploads:/app/uploads          # Uploady
+      - ./server.py:/app/server.py           # Kod źródłowy - hot reload
+      - ./web_app.py:/app/web_app.py         # Kod źródłowy - hot reload
+      - ./ReceiptParser/src:/app/ReceiptParser/src  # Kod źródłowy - hot reload
     environment:
       - ENABLE_FILE_LOGGING=true
       - DOCKER_CONTAINER=true
