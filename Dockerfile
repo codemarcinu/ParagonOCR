@@ -25,8 +25,9 @@ RUN mkdir -p /app/ReceiptParser/data /app/uploads /app/logs
 
 # Wystawiamy porty
 # 8000 - FastAPI backend
-# 8081 - NiceGUI frontend
-EXPOSE 8000 8081
+# 8081 - NiceGUI frontend (web_app.py)
+# 8082 - NiceGUI frontend (modern_ui.py)
+EXPOSE 8000 8081 8082
 
 # Oznaczamy, że jesteśmy w kontenerze Docker
 ENV DOCKER_CONTAINER=true
@@ -34,6 +35,6 @@ ENV DOCKER_CONTAINER=true
 ENV USE_CLOUD_AI=true
 ENV USE_CLOUD_OCR=true
 
-# Start - uruchamiamy zarówno backend jak i frontend
-CMD ["sh", "-c", "python server.py & python web_app.py"]
+# Start - uruchamiamy backend i oba frontendy
+CMD ["sh", "-c", "python server.py & python web_app.py & python modern_ui.py"]
 
