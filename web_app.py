@@ -1214,24 +1214,43 @@ async def settings_page():
 
 
 async def handle_upload(e):
-    """Obsługuje upload pliku."""
+    """Obsługuje upload pliku w NiceGUI."""
     try:
-        # NiceGUI: upload event może mieć różne atrybuty
-        # Sprawdź różne możliwe atrybuty
-        file_name = getattr(e, 'name', None)
-        if not file_name:
-            # Spróbuj pobrać z innych atrybutów
-            file_name = getattr(e, 'filename', 'paragon')
+        # NiceGUI upload event ma atrybuty: name, content, type
+        # content jest file-like objectem z metodą read()
         
-        # Pobierz zawartość pliku
-        if hasattr(e, 'content'):
-            file_content = await e.content.read()
-        elif hasattr(e, 'read'):
-            file_content = await e.read()
+        # Pobierz nazwę pliku
+        file_name = getattr(e, 'name', None) or getattr(e, 'filename', 'paragon')
+        
+        # Pobierz zawartość pliku - w NiceGUI e.content jest file-like objectem
+        if not hasattr(e, 'content'):
+            raise Exception("Brak atrybutu 'content' w obiekcie upload")
+        
+        # Przeczytaj zawartość pliku
+        # e.content może być bytes lub file-like objectem
+        if isinstance(e.content, bytes):
+            file_content = e.content
+        elif hasattr(e.content, 'read'):
+            # Jeśli to file-like object, przeczytaj go
+            # Sprawdź czy read() jest async czy sync
+            if hasattr(e.content.read, '__call__'):
+                try:
+                    # Spróbuj async read
+                    file_content = await e.content.read()
+                except TypeError:
+                    # Jeśli nie jest async, użyj sync read
+                    file_content = e.content.read()
+            else:
+                file_content = e.content.read()
         else:
-            raise Exception("Nie można odczytać zawartości pliku")
+            # Spróbuj konwersji
+            file_content = bytes(e.content) if e.content else None
         
-        # Pobierz typ MIME jeśli dostępny
+        # Sprawdź czy udało się odczytać
+        if file_content is None or len(file_content) == 0:
+            raise Exception("Plik jest pusty lub nie można go odczytać")
+        
+        # Pobierz typ MIME
         file_type = getattr(e, 'type', None) or 'application/octet-stream'
         
         # Wyślij do API używając httpx z timeout (spójnie z api_call)
@@ -1245,6 +1264,16 @@ async def handle_upload(e):
         task_id = result.get("task_id")
         return task_id  # Zwróć task_id do śledzenia postępu
     except Exception as ex:
+        import traceback
+        error_details = traceback.format_exc()
+        # Loguj szczegóły błędu do konsoli (w kontenerze Docker)
+        print(f"DEBUG Upload Error: {str(ex)}")
+        print(f"DEBUG Upload Traceback:\n{error_details}")
+        print(f"DEBUG Upload Event Type: {type(e)}")
+        print(f"DEBUG Upload Event Attributes: {dir(e)}")
+        if hasattr(e, 'content'):
+            print(f"DEBUG Content Type: {type(e.content)}")
+            print(f"DEBUG Content Attributes: {dir(e.content)}")
         ui.notify(f"Błąd podczas przesyłania pliku: {str(ex)}", type='negative')
         return None
 
