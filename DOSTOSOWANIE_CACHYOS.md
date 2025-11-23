@@ -94,3 +94,4 @@ Wszystkie skrypty zostały przetestowane:
 - `ss` jest częścią iproute2 (domyślnie w CachyOS)
 - Manager wymaga aktywnego venv (automatycznie w `paragon manager`)
 
+

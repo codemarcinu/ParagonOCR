@@ -107,3 +107,4 @@ def get_ocr_provider(use_cloud: bool = None) -> OCRProvider:
         return LocalTesseractOCR()
 
 
+
