@@ -1,0 +1,33 @@
+services:
+  # ParagonWeb - Wersja webowa (tylko Cloud: Mistral OCR + OpenAI API)
+  paragon-web:
+    build: .
+    container_name: paragon_ocr
+    restart: unless-stopped
+    ports:
+      - "8000:8000"  # FastAPI backend
+      - "8081:8081"  # NiceGUI frontend
+    volumes:
+      - ./ReceiptParser/data:/app/ReceiptParser/data  # Trwałość bazy danych
+      - ./data/logs:/app/logs                # Logi
+      - ./data/paragony:/app/paragony        # Pliki paragonów
+      - ./data/uploads:/app/uploads          # Uploady
+      - ./server.py:/app/server.py           # Kod źródłowy - hot reload
+      - ./web_app.py:/app/web_app.py         # Kod źródłowy - hot reload
+      - ./ReceiptParser/src:/app/ReceiptParser/src  # Kod źródłowy - hot reload
+    environment:
+      - ENABLE_FILE_LOGGING=true
+      - DOCKER_CONTAINER=true
+      # Wymuszamy tryb Cloud (Mistral OCR + OpenAI API)
+      - USE_CLOUD_AI=true
+      - USE_CLOUD_OCR=true
+      # Klucze API można podać tu lub w ustawieniach aplikacji
+      # Odkomentuj i wpisz swoje klucze:
+      # - OPENAI_API_KEY=sk-twoj-klucz-tutaj
+      # - MISTRAL_API_KEY=twoj-klucz-mistral-tutaj
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+

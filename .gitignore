@@ -2,6 +2,9 @@
 .env
 .env.local
 
+# Docker (zawiera klucze API)
+docker-compose.yml
+
 # Python
 __pycache__/
 *.pyc
