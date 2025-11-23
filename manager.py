@@ -52,8 +52,13 @@ def run_command(cmd: list, check: bool = False) -> tuple[int, str, str]:
 
 
 def check_port(port: int) -> bool:
-    """Sprawdza czy port jest zajęty."""
-    code, _, _ = run_command(["lsof", "-i", f":{port}"])
+    """Sprawdza czy port jest zajęty (używa ss zamiast lsof dla CachyOS/Arch)."""
+    # ss jest dostępne w CachyOS/Arch (iproute2)
+    code, stdout, _ = run_command(["ss", "-tlnp"])
+    if code == 0:
+        return f":{port} " in stdout
+    # Fallback: spróbuj fuser jeśli ss nie działa
+    code, _, _ = run_command(["fuser", f"{port}/tcp"])
     return code == 0
 
 

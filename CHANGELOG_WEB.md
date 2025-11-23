@@ -111,3 +111,4 @@ Projekt został przekształcony z aplikacji desktopowej (CustomTkinter) w nowocz
 - `http://localhost:8000/docs` - Swagger UI (po uruchomieniu)
 - `http://localhost:8000/redoc` - ReDoc (po uruchomieniu)
 
+

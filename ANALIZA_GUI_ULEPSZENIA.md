@@ -354,3 +354,4 @@ ctk.CTkButton(
 **Rekomendacja:** Zacząć od FAZY 1, która da natychmiastową, widoczną poprawę przy relatywnie małym nakładzie pracy.
 
 
+

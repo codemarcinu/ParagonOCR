@@ -115,8 +115,8 @@ check_requirements() {
 check_ports() {
     print_header "Sprawdzanie portów"
     
-    # Sprawdź port backendu
-    if lsof -i :$BACKEND_PORT 2>/dev/null | grep -q LISTEN; then
+    # Sprawdź port backendu (używamy ss zamiast lsof - dostępne w CachyOS/Arch)
+    if ss -tlnp 2>/dev/null | grep -q ":$BACKEND_PORT "; then
         print_error "Port $BACKEND_PORT jest zajęty!"
         print_info "Uruchom: ./start.sh --stop aby zatrzymać działające procesy"
         return 1
@@ -125,7 +125,7 @@ check_ports() {
     fi
     
     # Sprawdź port frontendu
-    if lsof -i :$FRONTEND_PORT 2>/dev/null | grep -q LISTEN; then
+    if ss -tlnp 2>/dev/null | grep -q ":$FRONTEND_PORT "; then
         print_error "Port $FRONTEND_PORT jest zajęty!"
         print_info "Uruchom: ./start.sh --stop aby zatrzymać działające procesy"
         return 1
@@ -252,11 +252,13 @@ stop_processes() {
     fi
     
     # Zatrzymaj procesy na portach (na wypadek gdyby PID nie działały)
+    # Używamy ss zamiast lsof (dostępne w CachyOS/Arch)
     for port in $BACKEND_PORT $FRONTEND_PORT; do
-        PID=$(lsof -ti :$port 2>/dev/null || true)
+        # ss zwraca PID w formacie: pid=12345,fd=3
+        PID=$(ss -tlnp 2>/dev/null | grep ":$port " | grep -oP 'pid=\K[0-9]+' | head -1 || true)
         if [ -n "$PID" ]; then
             kill "$PID" 2>/dev/null || true
-            print_info "Proces na porcie $port zatrzymany"
+            print_info "Proces na porcie $port zatrzymany (PID: $PID)"
             stopped=$((stopped + 1))
         fi
     done

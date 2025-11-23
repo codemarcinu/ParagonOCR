@@ -1,3 +1,4 @@
+szy$pec2025!/
 # 📋 Raport Analizy Kodu - ParagonOCR
 
 **Data analizy:** 2025-11-23  
