@@ -12,7 +12,8 @@ Endpointy API:
 
 import os
 import sys
-import asyncio
+import time
+import threading
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 from datetime import datetime, date
@@ -21,7 +22,7 @@ from decimal import Decimal
 from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from sqlalchemy.orm import sessionmaker, joinedload
 
 # Dodaj ReceiptParser do ścieżki
@@ -39,10 +40,23 @@ from ReceiptParser.src.config import Config
 # Inicjalizacja FastAPI
 app = FastAPI(title="ParagonWeb API", version="1.0.0")
 
-# CORS - pozwól na dostęp z frontendu
+# CORS - konfiguracja z obsługą produkcji
+environment = os.getenv("ENVIRONMENT", "development").lower()
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "*")
+
+if allowed_origins_env == "*":
+    if environment == "production":
+        raise ValueError(
+            "CORS allow_origins=['*'] nie jest dozwolone w produkcji! "
+            "Ustaw zmienną środowiskową ALLOWED_ORIGINS z listą dozwolonych domen."
+        )
+    allowed_origins = ["*"]
+else:
+    allowed_origins = [origin.strip() for origin in allowed_origins_env.split(",")]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # W produkcji ustaw konkretne domeny
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -53,6 +67,10 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Przechowywanie zadań przetwarzania (w produkcji użyj Redis/DB)
 processing_tasks: Dict[str, Dict[str, Any]] = {}
+
+# Stałe konfiguracyjne
+MAX_UPLOAD_SIZE = 50 * 1024 * 1024  # 50 MB
+TASK_TIMEOUT = 600  # 10 minut w sekundach
 
 
 # --- Modele Pydantic ---
@@ -76,6 +94,15 @@ class InventoryItem(BaseModel):
 
 class ChatMessage(BaseModel):
     question: str
+    
+    @validator('question')
+    def validate_question(cls, v: str) -> str:
+        """Waliduje pytanie użytkownika."""
+        if not v or not v.strip():
+            raise ValueError("Pytanie nie może być puste")
+        if len(v) > 2000:
+            raise ValueError("Pytanie jest za długie (max 2000 znaków)")
+        return v.strip()
 
 class ChatResponse(BaseModel):
     answer: str
@@ -91,15 +118,97 @@ class SettingsUpdate(BaseModel):
     use_cloud_ocr: Optional[bool] = None
     openai_api_key: Optional[str] = None
     mistral_api_key: Optional[str] = None
+    
+    @validator('openai_api_key')
+    def validate_openai_key(cls, v: Optional[str]) -> Optional[str]:
+        """Waliduje format klucza OpenAI API."""
+        if v is None:
+            return None
+        v = v.strip()
+        if not v:
+            return None
+        if not v.startswith("sk-"):
+            raise ValueError("Nieprawidłowy format klucza OpenAI API (powinien zaczynać się od 'sk-')")
+        return v
+    
+    @validator('mistral_api_key')
+    def validate_mistral_key(cls, v: Optional[str]) -> Optional[str]:
+        """Waliduje format klucza Mistral API."""
+        if v is None:
+            return None
+        v = v.strip()
+        if not v:
+            return None
+        if len(v) < 20:
+            raise ValueError("Nieprawidłowy format klucza Mistral API (za krótki)")
+        return v
 
 
 # --- Endpointy API ---
+
+def cleanup_old_tasks():
+    """Usuwa stare zadania z processing_tasks i pliki upload (starsze niż 1 godzina)."""
+    current_time = time.time()
+    tasks_to_remove = []
+    files_removed = 0
+    
+    for task_id, task_data in processing_tasks.items():
+        start_time = task_data.get("start_time", current_time)
+        elapsed = current_time - start_time
+        
+        # Usuń zadania starsze niż 1 godzina lub zakończone (completed/error/timeout) starsze niż 10 minut
+        if elapsed > 3600:  # 1 godzina
+            tasks_to_remove.append(task_id)
+        elif task_data.get("status") in ["completed", "error", "timeout"]:
+            end_time = task_data.get("end_time", start_time)
+            if current_time - end_time > 600:  # 10 minut po zakończeniu
+                tasks_to_remove.append(task_id)
+    
+    for task_id in tasks_to_remove:
+        # Usuń plik jeśli istnieje
+        task_data = processing_tasks.get(task_id)
+        if task_data:
+            file_path = task_data.get("file_path")
+            if file_path and os.path.exists(file_path):
+                try:
+                    os.unlink(file_path)
+                    files_removed += 1
+                except Exception:
+                    pass
+        del processing_tasks[task_id]
+    
+    # Dodatkowo: usuń stare pliki z katalogu uploads (starsze niż 24 godziny)
+    upload_dir = Path("uploads")
+    if upload_dir.exists():
+        for file_path in upload_dir.glob("*"):
+            if file_path.is_file():
+                file_age = current_time - file_path.stat().st_mtime
+                if file_age > 86400:  # 24 godziny
+                    try:
+                        file_path.unlink()
+                        files_removed += 1
+                    except Exception:
+                        pass
+    
+    if tasks_to_remove or files_removed > 0:
+        print(f"INFO: Usunięto {len(tasks_to_remove)} starych zadań i {files_removed} plików")
+
 
 @app.on_event("startup")
 async def startup_event():
     """Inicjalizacja przy starcie aplikacji."""
     # Upewnij się, że baza danych istnieje
     init_db()
+    
+    # Uruchom cleanup starych zadań co 5 minut
+    def periodic_cleanup():
+        while True:
+            time.sleep(300)  # 5 minut
+            cleanup_old_tasks()
+    
+    cleanup_thread = threading.Thread(target=periodic_cleanup, daemon=True)
+    cleanup_thread.start()
+    
     print("ParagonWeb API uruchomione!")
 
 
@@ -107,6 +216,48 @@ async def startup_event():
 async def root():
     """Endpoint główny."""
     return {"message": "ParagonWeb API", "version": "1.0.0"}
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint - sprawdza stan aplikacji."""
+    health_status = {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "checks": {}
+    }
+    
+    # Sprawdź bazę danych
+    try:
+        from sqlalchemy import text
+        session = SessionLocal()
+        session.execute(text("SELECT 1"))
+        session.close()
+        health_status["checks"]["database"] = "ok"
+    except Exception as e:
+        health_status["status"] = "unhealthy"
+        health_status["checks"]["database"] = f"error: {str(e)}"
+    
+    # Sprawdź dostępność AI provider
+    try:
+        from ReceiptParser.src.ai_providers import get_ai_provider
+        provider = get_ai_provider()
+        if provider.is_available():
+            health_status["checks"]["ai_provider"] = "ok"
+        else:
+            health_status["checks"]["ai_provider"] = "unavailable"
+            health_status["status"] = "degraded"
+    except Exception as e:
+        health_status["checks"]["ai_provider"] = f"error: {str(e)}"
+        health_status["status"] = "degraded"
+    
+    # Sprawdź liczbę aktywnych zadań
+    active_tasks = sum(1 for task in processing_tasks.values() if task.get("status") == "processing")
+    health_status["checks"]["active_tasks"] = active_tasks
+    health_status["checks"]["total_tasks"] = len(processing_tasks)
+    
+    status_code = 200 if health_status["status"] == "healthy" else 503
+    return JSONResponse(content=health_status, status_code=status_code)
 
 
 @app.post("/api/upload")
@@ -125,10 +276,20 @@ async def upload_receipt(
     # Generuj unikalne ID zadania
     task_id = str(uuid.uuid4())
     
-    # Zapisz plik tymczasowo
+    # Walidacja formatu pliku
     file_ext = Path(file.filename).suffix.lower()
     if file_ext not in ['.png', '.jpg', '.jpeg', '.pdf']:
         raise HTTPException(status_code=400, detail="Nieobsługiwany format pliku")
+    
+    # Wczytaj zawartość pliku do pamięci (do walidacji rozmiaru)
+    content = await file.read()
+    
+    # Walidacja rozmiaru pliku
+    if len(content) > MAX_UPLOAD_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail=f"Plik za duży. Maksymalny rozmiar: {MAX_UPLOAD_SIZE / 1024 / 1024:.0f} MB. Otrzymano: {len(content) / 1024 / 1024:.2f} MB"
+        )
     
     # Utwórz katalog na uploady jeśli nie istnieje
     upload_dir = Path("uploads")
@@ -137,19 +298,20 @@ async def upload_receipt(
     # Zapisz plik
     file_path = upload_dir / f"{task_id}{file_ext}"
     with open(file_path, "wb") as f:
-        content = await file.read()
         f.write(content)
     
-    # Inicjalizuj zadanie
+    # Inicjalizuj zadanie z timestamp
     processing_tasks[task_id] = {
         "status": "processing",
         "progress": 0,
         "message": "Rozpoczynam przetwarzanie...",
         "file_path": str(file_path),
+        "start_time": time.time(),
     }
     
     # Uruchom przetwarzanie w tle
     def process_receipt():
+        start_time = time.time()
         try:
             def log_callback(message: str, progress: Optional[float] = None, status: Optional[str] = None):
                 if task_id in processing_tasks:
@@ -184,12 +346,22 @@ async def upload_receipt(
                 review_callback,
             )
             
-            processing_tasks[task_id]["status"] = "completed"
-            processing_tasks[task_id]["progress"] = 100
-            processing_tasks[task_id]["message"] = "Przetwarzanie zakończone!"
+            # Sprawdź timeout przed oznaczeniem jako completed
+            elapsed_time = time.time() - start_time
+            if elapsed_time > TASK_TIMEOUT:
+                processing_tasks[task_id]["status"] = "timeout"
+                processing_tasks[task_id]["message"] = f"Przetwarzanie przekroczyło limit czasu ({TASK_TIMEOUT}s)"
+            else:
+                processing_tasks[task_id]["status"] = "completed"
+                processing_tasks[task_id]["progress"] = 100
+                processing_tasks[task_id]["message"] = "Przetwarzanie zakończone!"
         except Exception as e:
             processing_tasks[task_id]["status"] = "error"
             processing_tasks[task_id]["message"] = f"Błąd: {str(e)}"
+        finally:
+            # Oznacz czas zakończenia
+            if task_id in processing_tasks:
+                processing_tasks[task_id]["end_time"] = time.time()
     
     # Uruchom w osobnym wątku
     import threading
@@ -203,10 +375,24 @@ async def upload_receipt(
 @app.get("/api/task/{task_id}")
 async def get_task_status(task_id: str):
     """Sprawdza status zadania przetwarzania."""
+    # Walidacja formatu UUID (podstawowa)
+    if len(task_id) != 36 or task_id.count("-") != 4:
+        raise HTTPException(status_code=400, detail="Nieprawidłowy format ID zadania")
+    
     if task_id not in processing_tasks:
         raise HTTPException(status_code=404, detail="Zadanie nie znalezione")
     
-    return processing_tasks[task_id]
+    task_data = processing_tasks[task_id].copy()
+    
+    # Sprawdź timeout dla aktywnych zadań
+    if task_data.get("status") == "processing":
+        start_time = task_data.get("start_time", time.time())
+        elapsed = time.time() - start_time
+        if elapsed > TASK_TIMEOUT:
+            task_data["status"] = "timeout"
+            task_data["message"] = f"Przetwarzanie przekroczyło limit czasu ({TASK_TIMEOUT}s)"
+    
+    return task_data
 
 
 @app.get("/api/receipts")
@@ -310,6 +496,7 @@ async def get_inventory():
 @app.post("/api/chat")
 async def chat_with_bielik(message: ChatMessage):
     """Wysyła wiadomość do asystenta Bielik."""
+    # Walidacja jest już wykonana przez Pydantic
     assistant = None
     try:
         assistant = BielikAssistant()
@@ -340,6 +527,8 @@ async def update_settings(settings: SettingsUpdate):
     
     Uwaga: W produkcji zapisz to w bazie danych lub pliku konfiguracyjnym.
     """
+    # Walidacja jest już wykonana przez Pydantic
+    
     # Tymczasowo aktualizujemy tylko zmienne środowiskowe
     # W produkcji powinno to być zapisane w bazie danych lub pliku .env
     

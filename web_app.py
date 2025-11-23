@@ -69,21 +69,38 @@ def setup_styles():
 # --- Funkcje pomocnicze ---
 
 async def api_call(method: str, endpoint: str, data: Optional[dict] = None, files: Optional[dict] = None):
-    """Wykonuje wywołanie API."""
+    """Wykonuje wywołanie API z obsługą błędów."""
     url = f"{API_URL}{endpoint}"
-    async with httpx.AsyncClient() as client:
-        if method == "GET":
-            response = await client.get(url)
-        elif method == "POST":
-            if files:
-                response = await client.post(url, data=data, files=files)
+    timeout = httpx.Timeout(30.0, connect=10.0)  # 30s timeout, 10s na połączenie
+    
+    try:
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            if method == "GET":
+                response = await client.get(url)
+            elif method == "POST":
+                if files:
+                    response = await client.post(url, data=data, files=files)
+                else:
+                    response = await client.post(url, json=data)
             else:
-                response = await client.post(url, json=data)
-        else:
-            raise ValueError(f"Nieobsługiwana metoda: {method}")
-        
-        response.raise_for_status()
-        return response.json()
+                raise ValueError(f"Nieobsługiwana metoda: {method}")
+            
+            response.raise_for_status()
+            return response.json()
+    except httpx.TimeoutException:
+        raise Exception(f"Przekroczono limit czasu połączenia z API ({API_URL})")
+    except httpx.ConnectError:
+        raise Exception(f"Nie można połączyć się z API ({API_URL}). Sprawdź czy serwer działa.")
+    except httpx.HTTPStatusError as e:
+        error_detail = "Błąd serwera"
+        try:
+            error_data = e.response.json()
+            error_detail = error_data.get("detail", error_detail)
+        except:
+            error_detail = e.response.text or error_detail
+        raise Exception(f"Błąd HTTP {e.response.status_code}: {error_detail}")
+    except httpx.RequestError as e:
+        raise Exception(f"Błąd podczas wykonywania requestu: {str(e)}")
 
 
 # --- Strony ---

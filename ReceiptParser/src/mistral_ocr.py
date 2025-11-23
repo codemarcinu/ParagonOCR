@@ -34,13 +34,14 @@ class MistralOCRClient:
             
             print(f"INFO: Wysyłanie pliku do Mistral OCR: {sanitize_path(image_path)}")
 
-            uploaded_file = self.client.files.upload(
-                file={
-                    "file_name": os.path.basename(image_path),
-                    "content": open(image_path, "rb"),
-                },
-                purpose="ocr",
-            )
+            with open(image_path, "rb") as f:
+                uploaded_file = self.client.files.upload(
+                    file={
+                        "file_name": os.path.basename(image_path),
+                        "content": f,
+                    },
+                    purpose="ocr",
+                )
 
             signed_url = self.client.files.get_signed_url(file_id=uploaded_file.id)
 
