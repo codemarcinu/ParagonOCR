@@ -606,8 +606,14 @@ async def dashboard():
                     
                     async def handle_upload_wrapper(e):
                         """Wrapper dla handle_upload z śledzeniem postępu."""
+                        # Pobierz nazwę pliku z obiektu upload
+                        file_name = getattr(e, 'name', None) or 'paragon'
+                        if hasattr(e, 'content'):
+                            # NiceGUI upload event
+                            file_name = getattr(e, 'name', 'paragon')
+                        
                         # Reset UI
-                        status_label.text = f"📤 Przesyłanie pliku: {e.name}..."
+                        status_label.text = f"📤 Przesyłanie pliku: {file_name}..."
                         progress_bar.visible = True
                         progress_bar.value = 0.05
                         logs_container.style('display: block;')
@@ -616,7 +622,7 @@ async def dashboard():
                         
                         # Dodaj początkową wiadomość
                         with logs_area:
-                            ui.html('<div style="color: var(--info);">📤 Rozpoczynam przetwarzanie paragonu...</div>', sanitize=False)
+                            ui.html(f'<div style="color: var(--info);">📤 Rozpoczynam przetwarzanie paragonu: {file_name}...</div>', sanitize=False)
                         
                         try:
                             task_id = await handle_upload(e)
@@ -1210,15 +1216,28 @@ async def settings_page():
 async def handle_upload(e):
     """Obsługuje upload pliku."""
     try:
-        # NiceGUI: e.name zawiera tylko nazwę pliku, nie ścieżkę
-        # e.content jest file-like obiektem z danymi pliku
-        file_name = e.name
-        file_content = await e.content.read()
+        # NiceGUI: upload event może mieć różne atrybuty
+        # Sprawdź różne możliwe atrybuty
+        file_name = getattr(e, 'name', None)
+        if not file_name:
+            # Spróbuj pobrać z innych atrybutów
+            file_name = getattr(e, 'filename', 'paragon')
+        
+        # Pobierz zawartość pliku
+        if hasattr(e, 'content'):
+            file_content = await e.content.read()
+        elif hasattr(e, 'read'):
+            file_content = await e.read()
+        else:
+            raise Exception("Nie można odczytać zawartości pliku")
+        
+        # Pobierz typ MIME jeśli dostępny
+        file_type = getattr(e, 'type', None) or 'application/octet-stream'
         
         # Wyślij do API używając httpx z timeout (spójnie z api_call)
         timeout = httpx.Timeout(30.0, connect=10.0)  # 30s timeout, 10s na połączenie
         async with httpx.AsyncClient(timeout=timeout) as client:
-            files = {"file": (file_name, file_content, e.type)}
+            files = {"file": (file_name, file_content, file_type)}
             response = await client.post(f"{API_URL}/api/upload", files=files)
             response.raise_for_status()
             result = response.json()
