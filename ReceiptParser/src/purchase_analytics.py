@@ -81,7 +81,8 @@ class PurchaseAnalytics:
                 Sklep.nazwa_sklepu,
                 func.sum(Paragon.suma_paragonu).label("total")
             )
-            .join(Paragon)
+            .select_from(Sklep)
+            .join(Paragon, Sklep.sklep_id == Paragon.sklep_id)
             .group_by(Sklep.nazwa_sklepu)
             .order_by(func.sum(Paragon.suma_paragonu).desc())
             .limit(limit)
@@ -105,8 +106,9 @@ class PurchaseAnalytics:
                 KategoriaProduktu.nazwa_kategorii,
                 func.sum(PozycjaParagonu.cena_po_rabacie).label("total")
             )
-            .join(Produkt)
-            .join(PozycjaParagonu)
+            .select_from(KategoriaProduktu)
+            .join(Produkt, KategoriaProduktu.kategoria_id == Produkt.kategoria_id)
+            .join(PozycjaParagonu, Produkt.produkt_id == PozycjaParagonu.produkt_id)
             .group_by(KategoriaProduktu.nazwa_kategorii)
             .order_by(func.sum(PozycjaParagonu.cena_po_rabacie).desc())
             .limit(limit)
@@ -131,7 +133,8 @@ class PurchaseAnalytics:
                 func.count(PozycjaParagonu.pozycja_id).label("count"),
                 func.sum(PozycjaParagonu.cena_po_rabacie).label("total")
             )
-            .join(PozycjaParagonu)
+            .select_from(Produkt)
+            .join(PozycjaParagonu, Produkt.produkt_id == PozycjaParagonu.produkt_id)
             .group_by(Produkt.produkt_id, Produkt.znormalizowana_nazwa)
             .order_by(func.count(PozycjaParagonu.pozycja_id).desc())
             .limit(limit)
