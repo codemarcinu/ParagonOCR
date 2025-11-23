@@ -156,3 +156,4 @@ class TestTypeConversion:
         assert result["pozycje"][0]["jednostka"] == "kg"
 
 
+

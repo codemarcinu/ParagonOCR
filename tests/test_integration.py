@@ -130,3 +130,4 @@ class TestFullPipeline:
         assert float(final_data["pozycje"][0]["rabat"]) == 2.00
 
 
+

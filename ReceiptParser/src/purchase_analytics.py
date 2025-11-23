@@ -268,3 +268,4 @@ class PurchaseAnalytics:
         self.close()
 
 
+

@@ -153,3 +153,4 @@ class TestMathVerification:
         # Funkcja powinna obsłużyć stringi (konwersja w _convert_types)
 
 
+

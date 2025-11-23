@@ -136,3 +136,4 @@ class TestExtractTextFromImage:
             assert isinstance(result, str)
 
 
+

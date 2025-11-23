@@ -80,3 +80,4 @@ class TestShopNormalization:
         assert normalize_shop_name("Nieznany Sklep XYZ") == "Nieznany Sklep"
 
 
+
