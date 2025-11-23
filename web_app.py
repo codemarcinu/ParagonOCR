@@ -1216,35 +1216,20 @@ async def settings_page():
 async def handle_upload(e):
     """Obsługuje upload pliku w NiceGUI."""
     try:
-        # NiceGUI upload event ma atrybuty: name, content, type
-        # content jest file-like objectem z metodą read()
+        # NiceGUI: UploadEventArguments ma atrybuty: name, file, type
+        # file jest instancją SmallFileUpload z metodą read()
         
         # Pobierz nazwę pliku
-        file_name = getattr(e, 'name', None) or getattr(e, 'filename', 'paragon')
+        file_name = getattr(e, 'name', None) or 'paragon'
         
-        # Pobierz zawartość pliku - w NiceGUI e.content jest file-like objectem
-        if not hasattr(e, 'content'):
-            raise Exception("Brak atrybutu 'content' w obiekcie upload")
+        # Pobierz zawartość pliku - w NiceGUI użyj e.file.read()
+        if not hasattr(e, 'file'):
+            raise Exception("Brak atrybutu 'file' w obiekcie upload. Dostępne atrybuty: " + 
+                          str([attr for attr in dir(e) if not attr.startswith('_')]))
         
-        # Przeczytaj zawartość pliku
-        # e.content może być bytes lub file-like objectem
-        if isinstance(e.content, bytes):
-            file_content = e.content
-        elif hasattr(e.content, 'read'):
-            # Jeśli to file-like object, przeczytaj go
-            # Sprawdź czy read() jest async czy sync
-            if hasattr(e.content.read, '__call__'):
-                try:
-                    # Spróbuj async read
-                    file_content = await e.content.read()
-                except TypeError:
-                    # Jeśli nie jest async, użyj sync read
-                    file_content = e.content.read()
-            else:
-                file_content = e.content.read()
-        else:
-            # Spróbuj konwersji
-            file_content = bytes(e.content) if e.content else None
+        # e.file jest SmallFileUpload - użyj await read() do odczytania zawartości (async)
+        file_obj = e.file
+        file_content = await file_obj.read()
         
         # Sprawdź czy udało się odczytać
         if file_content is None or len(file_content) == 0:
@@ -1270,10 +1255,7 @@ async def handle_upload(e):
         print(f"DEBUG Upload Error: {str(ex)}")
         print(f"DEBUG Upload Traceback:\n{error_details}")
         print(f"DEBUG Upload Event Type: {type(e)}")
-        print(f"DEBUG Upload Event Attributes: {dir(e)}")
-        if hasattr(e, 'content'):
-            print(f"DEBUG Content Type: {type(e.content)}")
-            print(f"DEBUG Content Attributes: {dir(e.content)}")
+        print(f"DEBUG Upload Event Attributes: {[attr for attr in dir(e) if not attr.startswith('_')]}")
         ui.notify(f"Błąd podczas przesyłania pliku: {str(ex)}", type='negative')
         return None
 
