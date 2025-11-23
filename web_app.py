@@ -404,6 +404,33 @@ def setup_styles():
             box-shadow: 0 10px 15px rgba(0,0,0,0.4), 0 4px 6px rgba(0,0,0,0.3);
         }}
         
+        body.dark-mode .upload-area {{
+            border-color: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.02);
+        }}
+        
+        body.dark-mode .upload-area:hover {{
+            border-color: var(--primary);
+            background: rgba(255,255,255,0.05);
+        }}
+        
+        /* Styl dla obszaru logów */
+        .process-logs {{
+            max-height: 300px;
+            overflow-y: auto;
+            background: var(--bg);
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+        }}
+        
+        body.dark-mode .process-logs {{
+            border-color: rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.2);
+        }}
+        
         @media (max-width: 768px) {{
             .sidebar {{
                 transform: translateX(-100%);
@@ -563,35 +590,61 @@ async def dashboard():
                 with ui.card():
                     ui.label('Dodaj nowy paragon').classes('card-title')
                     
-                    status_label = ui.label('Gotowy').style('margin-top: 10px; color: var(--text-secondary);')
-                    progress_bar = ui.linear_progress(value=0).style('margin-top: 10px;')
-                    progress_bar.visible = False
+                    # Status i postęp
+                    status_container = ui.column().style('margin-top: 10px;')
+                    with status_container:
+                        status_label = ui.label('Gotowy').style('color: var(--text-secondary); font-weight: 600; margin-bottom: 8px;')
+                        progress_bar = ui.linear_progress(value=0).style('margin-bottom: 8px;')
+                        progress_bar.visible = False
+                    
+                    # Obszar z logami procesu
+                    logs_container = ui.column().style('display: none; margin-top: 16px;')
+                    with logs_container:
+                        ui.label('📋 Szczegóły procesu').style('font-weight: 600; margin-bottom: 8px; color: var(--text-primary);')
+                        logs_area = ui.column().classes('process-logs')
+                        logs_area.visible = False
                     
                     async def handle_upload_wrapper(e):
                         """Wrapper dla handle_upload z śledzeniem postępu."""
-                        status_label.text = f"Przesyłanie {e.name}..."
+                        # Reset UI
+                        status_label.text = f"📤 Przesyłanie pliku: {e.name}..."
                         progress_bar.visible = True
-                        progress_bar.value = 0.1
+                        progress_bar.value = 0.05
+                        logs_container.style('display: block;')
+                        logs_area.visible = True
+                        logs_area.clear()
+                        
+                        # Dodaj początkową wiadomość
+                        with logs_area:
+                            ui.html('<div style="color: var(--info);">📤 Rozpoczynam przetwarzanie paragonu...</div>', sanitize=False)
                         
                         try:
                             task_id = await handle_upload(e)
                             if task_id:
+                                # Dodaj informację o rozpoczęciu
+                                with logs_area:
+                                    ui.html('<div style="color: var(--success);">✓ Plik przesłany pomyślnie. Rozpoczynam przetwarzanie...</div>', sanitize=False)
+                                
                                 # Śledź postęp zadania
-                                await track_task_progress(task_id, status_label, progress_bar)
+                                await track_task_progress(task_id, status_label, progress_bar, logs_area)
                             else:
                                 progress_bar.value = 1.0
                                 status_label.text = "Gotowy"
                                 progress_bar.visible = False
+                                logs_area.visible = False
                         except Exception as ex:
-                            status_label.text = f"Błąd: {str(ex)}"
+                            status_label.text = f"❌ Błąd: {str(ex)}"
                             progress_bar.visible = False
+                            with logs_area:
+                                ui.html(f'<div style="color: var(--error);">❌ Błąd: {str(ex)}</div>', sanitize=False)
                             ui.notify(f"Błąd: {str(ex)}", type='negative')
                     
-                    async def track_task_progress(task_id: str, status_label, progress_bar):
-                        """Śledzi postęp zadania przez polling."""
+                    async def track_task_progress(task_id: str, status_label, progress_bar, logs_area):
+                        """Śledzi postęp zadania przez polling z wyświetlaniem logów."""
                         import asyncio
                         max_attempts = 600  # 10 minut (1 sekunda * 600)
                         attempt = 0
+                        last_log_count = 0
                         
                         while attempt < max_attempts:
                             try:
@@ -599,30 +652,90 @@ async def dashboard():
                                 status = task_data.get("status", "unknown")
                                 progress = task_data.get("progress", 0)
                                 message = task_data.get("message", "")
+                                recent_logs = task_data.get("recent_logs", [])
                                 
-                                progress_bar.value = progress / 100.0 if progress >= 0 else 0
-                                status_label.text = message or f"Status: {status}"
+                                # Aktualizuj postęp
+                                if progress >= 0:
+                                    progress_bar.value = progress / 100.0
+                                else:
+                                    progress_bar.value = 0  # Indeterminate
                                 
+                                # Aktualizuj status
+                                status_emoji = {
+                                    "processing": "⏳",
+                                    "completed": "✓",
+                                    "error": "❌",
+                                    "timeout": "⏱️"
+                                }.get(status, "⏳")
+                                status_label.text = f"{status_emoji} {message}"
+                                
+                                # Dodaj nowe logi
+                                if len(recent_logs) > last_log_count:
+                                    new_logs = recent_logs[last_log_count:]
+                                    for log_entry in new_logs:
+                                        log_msg = log_entry.get("message", "")
+                                        log_progress = log_entry.get("progress")
+                                        log_status = log_entry.get("status")
+                                        
+                                        # Określ kolor na podstawie typu wiadomości
+                                        color = "var(--text-secondary)"
+                                        if "BŁĄD" in log_msg.upper() or "ERROR" in log_msg.upper():
+                                            color = "var(--error)"
+                                        elif "INFO" in log_msg.upper() or "SUKCES" in log_msg.upper() or "✓" in log_msg:
+                                            color = "var(--success)"
+                                        elif "WARNING" in log_msg.upper() or "OSTRZEŻENIE" in log_msg.upper():
+                                            color = "var(--warning)"
+                                        elif "OCR" in log_msg.upper():
+                                            color = "var(--info)"
+                                        
+                                        # Formatuj wiadomość
+                                        progress_text = f" [{log_progress}%]" if log_progress is not None else ""
+                                        formatted_msg = f"{log_msg}{progress_text}"
+                                        
+                                        with logs_area:
+                                            ui.html(f'<div style="color: {color}; margin: 2px 0;">{formatted_msg}</div>', sanitize=False)
+                                        
+                                        # Przewiń do dołu
+                                        ui.run_javascript('''
+                                            const logsArea = document.querySelector('.process-logs');
+                                            if (logsArea) {
+                                                logsArea.scrollTop = logsArea.scrollHeight;
+                                            }
+                                        ''')
+                                    
+                                    last_log_count = len(recent_logs)
+                                
+                                # Sprawdź czy zakończone
                                 if status in ["completed", "error", "timeout"]:
                                     if status == "completed":
-                                        status_label.text = "✓ Przetwarzanie zakończone!"
+                                        status_label.text = "✓ Przetwarzanie zakończone pomyślnie!"
+                                        with logs_area:
+                                            ui.html('<div style="color: var(--success); font-weight: 600; margin-top: 8px;">✓ ✓ ✓ Paragon został pomyślnie przetworzony i zapisany w bazie danych!</div>', sanitize=False)
                                         ui.notify("Paragon został pomyślnie przetworzony!", type='positive')
-                                        # Odśwież listę paragonów
+                                        
+                                        # Odśwież listę paragonów po 2 sekundach
+                                        await asyncio.sleep(2)
                                         ui.run_javascript('location.reload()')
                                     else:
                                         status_label.text = f"❌ {message}"
+                                        with logs_area:
+                                            ui.html(f'<div style="color: var(--error); font-weight: 600; margin-top: 8px;">❌ Błąd przetwarzania: {message}</div>', sanitize=False)
                                         ui.notify(f"Błąd przetwarzania: {message}", type='negative')
-                                    progress_bar.visible = False
+                                    progress_bar.value = 1.0 if status == "completed" else 0
                                     break
                                 
                                 await asyncio.sleep(1)  # Polling co 1 sekundę
                                 attempt += 1
                             except Exception as e:
-                                status_label.text = f"Błąd śledzenia: {str(e)}"
+                                status_label.text = f"❌ Błąd śledzenia: {str(e)}"
+                                with logs_area:
+                                    ui.html(f'<div style="color: var(--error);">❌ Błąd śledzenia postępu: {str(e)}</div>', sanitize=False)
                                 progress_bar.visible = False
                                 break
                         else:
-                            status_label.text = "Przekroczono limit czasu śledzenia"
+                            status_label.text = "⏱️ Przekroczono limit czasu śledzenia"
+                            with logs_area:
+                                ui.html('<div style="color: var(--warning);">⏱️ Przekroczono limit czasu śledzenia postępu</div>', sanitize=False)
                             progress_bar.visible = False
                     
                     with ui.column().classes('upload-area'):

@@ -379,6 +379,7 @@ async def upload_receipt(
             "message": "Rozpoczynam przetwarzanie...",
             "file_path": str(file_path),
             "start_time": time.time(),
+            "logs": [],  # Historia logów procesu
         }
     
     # Uruchom przetwarzanie w tle
@@ -396,6 +397,18 @@ async def upload_receipt(
                             # Status jest dodatkową informacją, przechowuj osobno
                             # Nie nadpisuj wiadomości, która zawiera szczegóły
                             processing_tasks[task_id]["status_label"] = status
+                        
+                        # Dodaj do historii logów (maksymalnie 100 wpisów)
+                        log_entry = {
+                            "timestamp": time.time(),
+                            "message": message,
+                            "progress": int(progress) if progress is not None else None,
+                            "status": status,
+                        }
+                        processing_tasks[task_id]["logs"].append(log_entry)
+                        # Ogranicz do ostatnich 100 wpisów
+                        if len(processing_tasks[task_id]["logs"]) > 100:
+                            processing_tasks[task_id]["logs"] = processing_tasks[task_id]["logs"][-100:]
             
             def prompt_callback(prompt_text: str, default_value: str, raw_name: str) -> str:
                 # Dla web app, używamy wartości domyślnej (można później dodać interakcję)
@@ -460,6 +473,9 @@ async def get_task_status(task_id: str):
             raise HTTPException(status_code=404, detail="Zadanie nie znalezione")
         
         task_data = processing_tasks[task_id].copy()
+        # Zwróć ostatnie logi (ostatnie 50 wpisów)
+        logs = task_data.get("logs", [])
+        task_data["recent_logs"] = logs[-50:] if len(logs) > 50 else logs
     
     # Sprawdź timeout dla aktywnych zadań (bez locka, bo tylko czytamy kopię)
     if task_data.get("status") == "processing":
