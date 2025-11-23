@@ -1219,48 +1219,41 @@ async def handle_upload(e):
         # Pobierz nazwę pliku
         file_name = getattr(e, 'name', None) or 'paragon'
         
-        # Weryfikacja czy mamy obiekt pliku
-        # NiceGUI używa e.file jako głównego atrybutu dla SmallFileUpload
-        if hasattr(e, 'file'):
-            file_obj = e.file
-        elif hasattr(e, 'content'):
-            # Fallback dla innych wersji NiceGUI
+        # Weryfikacja obiektu pliku (kompatybilność wsteczna NiceGUI)
+        if hasattr(e, 'content'):
             file_obj = e.content
+        elif hasattr(e, 'file'):
+            file_obj = e.file
         else:
-            raise Exception("Nie znaleziono zawartości pliku w zdarzeniu uploadu. Dostępne atrybuty: " + 
-                          str([attr for attr in dir(e) if not attr.startswith('_')]))
+            raise Exception("Nie znaleziono zawartości pliku")
 
-        # --- POPRAWKA BEZPIECZEŃSTWA PAMIĘCI ---
-        # Sprawdź rozmiar PRZED wczytaniem do RAM, aby uniknąć OOM (Out Of Memory)
-        # NiceGUI SmallFileUpload trzyma plik w pamięci, ale musimy sprawdzić rozmiar
-        # przed próbą wczytania całej zawartości do zmiennej file_content
+        # --- ZABEZPIECZENIE PRZED OOM (Out Of Memory) ---
+        # Sprawdzamy rozmiar PRZED wczytaniem do RAM
         try:
-            file_obj.seek(0, 2)  # Idź na koniec pliku
-            size = file_obj.tell()  # Pobierz pozycję (rozmiar w bajtach)
+            file_obj.seek(0, 2)  # Idź na koniec
+            size = file_obj.tell()  # Sprawdź pozycję
             file_obj.seek(0)  # Wróć na początek
             
-            # Limit 50MB (dostosuj do swoich potrzeb i limitu w docker-compose.yml)
             MAX_SIZE_MB = 50
             if size > MAX_SIZE_MB * 1024 * 1024:
-                raise Exception(f"Plik jest za duży (> {MAX_SIZE_MB}MB). Anulowano.")
+                ui.notify(f"Plik jest za duży (> {MAX_SIZE_MB}MB). Odrzucono.", type='negative')
+                return None
         except (AttributeError, ValueError):
-            # Jeśli obiekt nie obsługuje seek/tell, pomijamy sprawdzenie tutaj
-            # Backend (server.py) również sprawdzi rozmiar przed przetworzeniem
+            # Jeśli obiekt nie obsługuje seek, ryzykujemy
             pass
 
-        # Teraz bezpieczniej czytamy zawartość - TO JEST KLUCZOWA LINIA DLA BŁĘDU RUNTIME WARNING
-        # Upewnij się, że używasz await, inaczej otrzymasz RuntimeWarning o nieoczekiwanej korutynie
+        # --- KLUCZOWA POPRAWKA ASYNC ---
+        # Musi być await, inaczej leci RuntimeWarning i błąd 400
         file_content = await file_obj.read()
         
         if not file_content:
             raise Exception("Pusty plik")
 
-        # Wyślij do API
-        # Zwiększony timeout, bo upload dużego pliku trwa
+        # Wyślij do API z timeoutem (bo duże pliki idą długo)
         timeout = httpx.Timeout(60.0, connect=10.0) 
         async with httpx.AsyncClient(timeout=timeout) as client:
-            # Używamy file_name z rozszerzeniem, żeby backend rozpoznał typ
-            files = {"file": (file_name, file_content, getattr(e, 'type', 'application/octet-stream'))}
+            # Jawnie podajemy typ content-type, żeby FastAPI nie zgłupiało
+            files = {"file": (file_name, file_content, getattr(e, 'type', 'application/pdf'))}
             response = await client.post(f"{API_URL}/api/upload", files=files)
             
             if response.status_code == 400:
@@ -1273,8 +1266,7 @@ async def handle_upload(e):
         return result.get("task_id")
 
     except Exception as ex:
-        # Logowanie błędu, żeby widzieć co się stało w konsoli
-        print(f"UPLOAD ERROR: {str(ex)}")
+        print(f"UPLOAD ERROR: {str(ex)}")  # Log do konsoli Dockera
         ui.notify(f"Błąd przesyłania: {str(ex)}", type='negative')
         return None
 
