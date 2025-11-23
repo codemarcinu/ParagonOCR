@@ -17,9 +17,9 @@ from .database import (
 from .knowledge_base import get_product_metadata
 from .data_models import ParsedData
 from .llm import get_llm_suggestion, parse_receipt_with_llm, parse_receipt_from_text
-from .ocr import convert_pdf_to_image, extract_text_from_image
+from .ocr import convert_pdf_to_image
 from .strategies import get_strategy_for_store
-from .mistral_ocr import MistralOCRClient
+from .ocr_providers import get_ocr_provider
 from .normalization_rules import find_static_match
 from .security import (
     validate_file_path,
@@ -96,21 +96,31 @@ def run_processing_pipeline(
             processing_file_path = temp_image_path
             _call_log_callback(log_callback, f"INFO: PDF skonwertowany tymczasowo do: {sanitize_path(processing_file_path)}")
 
-        if llm_model == "mistral-ocr":
+        # Użyj abstrakcji OCRProvider
+        ocr_provider = get_ocr_provider()
+        
+        if not ocr_provider.is_available():
+            raise Exception(f"Dostawca OCR nie jest dostępny. Sprawdź konfigurację.")
+        
+        # Sprawdź czy używamy Cloud OCR (Mistral) czy Local (Tesseract)
+        from .config import Config
+        use_cloud_ocr = Config.USE_CLOUD_OCR
+        
+        if use_cloud_ocr or llm_model == "mistral-ocr":
+            # Użyj Cloud OCR (Mistral)
             _call_log_callback(log_callback, "INFO: Używam Mistral OCR do ekstrakcji tekstu...", progress=-1, status="OCR (Mistral)...")
-            mistral_client = MistralOCRClient()
-            ocr_markdown = mistral_client.process_image(processing_file_path)
+            ocr_markdown = ocr_provider.extract_text(processing_file_path)
 
             if not ocr_markdown:
                 raise Exception("Mistral OCR nie zwrócił wyniku.")
 
-            _call_log_callback(log_callback, "INFO: Mistral OCR zakończył pracę. Przesyłam tekst do LLM (Bielik)...", progress=30, status="Przetwarzanie przez LLM...")
+            _call_log_callback(log_callback, "INFO: Mistral OCR zakończył pracę. Przesyłam tekst do LLM...", progress=30, status="Przetwarzanie przez LLM...")
             parsed_data = parse_receipt_from_text(ocr_markdown)
 
         else:
             # Krok 1.5: Detekcja sklepu (Strategy Pattern) + Hybrid OCR
             _call_log_callback(log_callback, "INFO: Analizuję tekst z OCR (Tesseract)...", progress=-1, status="OCR (Tesseract)...")
-            full_ocr_text = extract_text_from_image(processing_file_path)
+            full_ocr_text = ocr_provider.extract_text(processing_file_path)
             # Sanityzuj tekst OCR przed logowaniem (usuń wrażliwe dane)
             sanitized_ocr = sanitize_ocr_text(full_ocr_text, max_length=200)
             _call_log_callback(log_callback, f"--- WYNIK OCR (Tesseract) ---\n{sanitized_ocr}\n-----------------------------")
@@ -123,7 +133,7 @@ def run_processing_pipeline(
 
             system_prompt = strategy.get_system_prompt()
 
-            _call_log_callback(log_callback, f"INFO: Używam modelu LLM '{llm_model}' do przetworzenia obrazu (wspaganego OCR).", progress=30, status="Przetwarzanie przez LLM...")
+            _call_log_callback(log_callback, f"INFO: Używam modelu LLM do przetworzenia obrazu (wspaganego OCR).", progress=30, status="Przetwarzanie przez LLM...")
             parsed_data = parse_receipt_with_llm(
                 processing_file_path,
                 llm_model,
@@ -142,9 +152,7 @@ def run_processing_pipeline(
                 else ""
             )
             strategy = get_strategy_for_store(header_sample)
-            log_callback(
-                f"INFO: Wybrano strategię (na podstawie Mistral OCR): {strategy.__class__.__name__}"
-            )
+            _call_log_callback(log_callback, f"INFO: Wybrano strategię (na podstawie Mistral OCR): {strategy.__class__.__name__}")
 
         # Sprzątanie po PDF - zawsze wykonaj cleanup, nawet przy błędach
         if temp_image_path and os.path.exists(temp_image_path):

@@ -18,6 +18,18 @@ class Config:
     # Timeout dla zapytań do Ollama (w sekundach)
     OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "300"))  # Domyślnie 5 minut
     
+    # --- Konfiguracja Cloud vs Local ---
+    # Domyślnie używamy Cloud (Mistral OCR + OpenAI) dla łatwości użycia
+    USE_CLOUD_AI = os.getenv("USE_CLOUD_AI", "true").lower() == "true"
+    USE_CLOUD_OCR = os.getenv("USE_CLOUD_OCR", "true").lower() == "true"
+    
+    # Klucze API dla Cloud
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+    
+    # Modele OpenAI (domyślne)
+    OPENAI_VISION_MODEL = os.getenv("OPENAI_VISION_MODEL", "gpt-4o-mini")  # Tani i szybki
+    OPENAI_TEXT_MODEL = os.getenv("OPENAI_TEXT_MODEL", "gpt-4o-mini")  # Tani i szybki
+    
     # --- Stałe matematyczne dla weryfikacji paragonów ---
     # Tolerancja dla błędów zaokrągleń w weryfikacji matematycznej (w PLN)
     MATH_TOLERANCE = Decimal("0.01")
@@ -39,7 +51,13 @@ class Config:
     @staticmethod
     def print_config():
         print("--- Konfiguracja ---")
-        print(f"OLLAMA_HOST: {Config.OLLAMA_HOST}")
-        print(f"VISION_MODEL: {Config.VISION_MODEL}")
-        print(f"TEXT_MODEL:  {Config.TEXT_MODEL}")
+        print(f"USE_CLOUD_AI: {Config.USE_CLOUD_AI}")
+        print(f"USE_CLOUD_OCR: {Config.USE_CLOUD_OCR}")
+        if Config.USE_CLOUD_AI:
+            print(f"OPENAI_VISION_MODEL: {Config.OPENAI_VISION_MODEL}")
+            print(f"OPENAI_TEXT_MODEL: {Config.OPENAI_TEXT_MODEL}")
+        else:
+            print(f"OLLAMA_HOST: {Config.OLLAMA_HOST}")
+            print(f"VISION_MODEL: {Config.VISION_MODEL}")
+            print(f"TEXT_MODEL:  {Config.TEXT_MODEL}")
         print("--------------------")

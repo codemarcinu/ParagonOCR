@@ -1,6 +1,3 @@
-import ollama
-import httpx
-
 import json
 import re
 from pathlib import Path
@@ -10,29 +7,42 @@ from typing import List, Tuple, Optional
 from rapidfuzz import fuzz
 from .config import Config
 from .security import sanitize_path, sanitize_log_message
+from .ai_providers import get_ai_provider
 
 # Import sanitize_log_message dla użycia w globalnym except
 def _sanitize_error(e: Exception) -> str:
     """Pomocnicza funkcja do sanityzacji błędów."""
     return sanitize_log_message(str(e))
 
-# --- Klient Ollama ---
-# Globalny klient do komunikacji z serwerem Ollama.
-# Upewnij się, że kontener Docker z Ollamą jest uruchomiony.
-try:
-    # Tworzymy timeout i przekazujemy go bezpośrednio do ollama.Client
-    # ollama.Client przyjmuje **kwargs, które są przekazywane do httpx.Client
-    timeout = httpx.Timeout(Config.OLLAMA_TIMEOUT, connect=10.0)
-    client = ollama.Client(host=Config.OLLAMA_HOST, timeout=timeout)
-    # Sprawdzenie połączenia przy starcie
-    # client.list()
-except Exception as e:
-    # Import tutaj, żeby uniknąć circular import
-    from .security import sanitize_log_message
-    print(
-        f"BŁĄD: Nie można połączyć się z Ollama na {Config.OLLAMA_HOST}. Upewnij się, że usługa działa. Szczegóły: {sanitize_log_message(str(e))}"
-    )
-    client = None
+# --- Globalny dostawca AI ---
+# Używamy abstrakcji AIProvider zamiast bezpośrednio klienta Ollama
+# Dla kompatybilności wstecznej, eksportujemy 'client' jako alias
+_ai_provider = None
+
+def _get_client():
+    """Zwraca globalny dostawcę AI (dla kompatybilności wstecznej)."""
+    global _ai_provider
+    if _ai_provider is None:
+        _ai_provider = get_ai_provider()
+    return _ai_provider
+
+# Dla kompatybilności wstecznej - eksportujemy 'client' jako obiekt z metodą chat
+class _ClientWrapper:
+    """Wrapper dla kompatybilności wstecznej z starym kodem używającym client.chat()."""
+    def chat(self, model, messages, format=None, options=None, **kwargs):
+        provider = _get_client()
+        # Obsługa parametru 'images' z kwargs
+        images = kwargs.get('images', None)
+        return provider.chat(
+            model=model,
+            messages=messages,
+            format=format,
+            options=options or {},
+            images=images,
+        )
+
+# Eksportujemy 'client' dla kompatybilności wstecznej
+client = _ClientWrapper()
 
 # --- Normalizacja Nazw Produktów ---
 
@@ -130,8 +140,9 @@ def get_llm_suggestion(
     Returns:
         Znormalizowana nazwa produktu jako string, lub None w przypadku błędu.
     """
-    if not client:
-        print("BŁĄD: Klient Ollama nie jest skonfigurowany.")
+    provider = _get_client()
+    if not provider.is_available():
+        print("BŁĄD: Dostawca AI nie jest dostępny.")
         return None
 
     system_prompt = """
@@ -169,7 +180,7 @@ def get_llm_suggestion(
     """
 
     try:
-        response = client.chat(
+        response = provider.chat(
             model=model_name,
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -290,8 +301,9 @@ def parse_receipt_with_llm(
     Returns:
         Słownik z danymi w formacie ParsedData, lub None w przypadku błędu.
     """
-    if not client:
-        print("BŁĄD: Klient Ollama nie jest skonfigurowany.")
+    provider = _get_client()
+    if not provider.is_available():
+        print("BŁĄD: Dostawca AI nie jest dostępny.")
         return None
 
     image_p = Path(image_path)
@@ -345,25 +357,31 @@ def parse_receipt_with_llm(
             print(f"OSTRZEŻENIE: Tekst OCR jest za długi ({len(ocr_text)} znaków), obcinam do {MAX_OCR_TEXT_LENGTH} znaków.")
             ocr_text = ocr_text[:MAX_OCR_TEXT_LENGTH] + "\n\n[... tekst OCR obcięty ...]"
 
-        response = client.chat(
-            model=model_name,
+        # Przygotuj wiadomość użytkownika
+        user_content = (
+            f"Przeanalizuj ten paragon.\n\nWspomóż się tekstem odczytanym przez OCR (może zawierać błędy, ale układ jest zachowany):\n---\n{ocr_text}\n---"
+            if ocr_text
+            else "Przeanalizuj ten paragon."
+        )
+        
+        # Wybierz odpowiedni model w zależności od dostawcy
+        if Config.USE_CLOUD_AI:
+            vision_model = Config.OPENAI_VISION_MODEL
+        else:
+            vision_model = model_name
+        
+        response = provider.chat(
+            model=vision_model,
             format="json",  # WYMUSZENIE FORMATU JSON
             messages=[
                 {"role": "system", "content": system_prompt},
-                {
-                    "role": "user",
-                    "content": (
-                        f"Przeanalizuj ten paragon.\n\nWspomóż się tekstem odczytanym przez OCR (może zawierać błędy, ale układ jest zachowany):\n---\n{ocr_text}\n---"
-                        if ocr_text
-                        else "Przeanalizuj ten paragon."
-                    ),
-                    "images": [image_path],  # Ollama python client obsługuje ścieżki
-                },
+                {"role": "user", "content": user_content},
             ],
             options={
                 "temperature": 0,
                 "num_predict": 4000,  # Limit tokenów zwiększony dla długich paragonów
-            },  # Zmniejszamy losowość dla większej deterministyczności
+            },
+            images=[image_path],  # Obrazy dla modeli multimodalnych
         )
 
         raw_response_text = response["message"]["content"]
@@ -410,8 +428,9 @@ def parse_receipt_from_text(
     Returns:
         Słownik z danymi w formacie ParsedData, lub None w przypadku błędu.
     """
-    if not client:
-        print("BŁĄD: Klient Ollama nie jest skonfigurowany.")
+    provider = _get_client()
+    if not provider.is_available():
+        print("BŁĄD: Dostawca AI nie jest dostępny.")
         return None
 
     if system_prompt_override:
@@ -496,8 +515,14 @@ def parse_receipt_from_text(
             print(f"OSTRZEŻENIE: Tekst paragonu jest za długi ({len(text_content)} znaków), obcinam do {MAX_TEXT_LENGTH} znaków.")
             text_content = text_content[:MAX_TEXT_LENGTH] + "\n\n[... tekst obcięty ...]"
         
-        response = client.chat(
-            model=model_name,
+        # Wybierz odpowiedni model w zależności od dostawcy
+        if Config.USE_CLOUD_AI:
+            text_model = Config.OPENAI_TEXT_MODEL
+        else:
+            text_model = model_name
+        
+        response = provider.chat(
+            model=text_model,
             format="json",
             messages=[
                 {"role": "system", "content": system_prompt},

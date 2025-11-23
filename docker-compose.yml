@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  paragon-web:
+    build: .
+    container_name: paragon_ocr
+    restart: unless-stopped
+    ports:
+      - "8000:8000"  # FastAPI backend
+      - "8080:8080"  # NiceGUI frontend
+    volumes:
+      - ./ReceiptParser/data:/app/ReceiptParser/data  # Trwałość bazy danych
+      - ./logs:/app/logs                # Logi
+      - ./paragony:/app/paragony        # Pliki paragonów
+      - ./uploads:/app/uploads          # Uploady
+    environment:
+      - ENABLE_FILE_LOGGING=true
+      # Klucze API można podać tu lub w ustawieniach aplikacji
+      # - OPENAI_API_KEY=...
+      # - MISTRAL_API_KEY=...
+      # - USE_CLOUD_AI=true
+      # - USE_CLOUD_OCR=true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+

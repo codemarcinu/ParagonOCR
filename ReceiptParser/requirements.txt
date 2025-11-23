@@ -10,3 +10,9 @@ mistralai
 pytest
 pytest-cov
 rapidfuzz
+# Web framework
+fastapi
+uvicorn[standard]
+nicegui
+openai
+python-multipart

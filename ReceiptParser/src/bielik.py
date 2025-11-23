@@ -8,7 +8,6 @@ Funkcjonalności:
 - Wyszukiwanie produktów w bazie danych (RAG)
 """
 
-import ollama
 from typing import List, Dict, Optional, Tuple
 from sqlalchemy.orm import Session, joinedload
 from rapidfuzz import fuzz
@@ -23,7 +22,7 @@ from .database import (
     sessionmaker,
 )
 from .config import Config
-from .llm import client
+from .ai_providers import get_ai_provider
 from .config_prompts import get_prompt
 
 
@@ -38,7 +37,12 @@ class BielikAssistant:
             session: Opcjonalna sesja SQLAlchemy. Jeśli None, tworzy nową.
         """
         self.session = session or sessionmaker(bind=engine)()
-        self.model_name = Config.TEXT_MODEL
+        self.ai_provider = get_ai_provider()
+        # Wybierz odpowiedni model w zależności od dostawcy
+        if Config.USE_CLOUD_AI:
+            self.model_name = Config.OPENAI_TEXT_MODEL
+        else:
+            self.model_name = Config.TEXT_MODEL
 
     def _search_products_rag(
         self, query: str, limit: int = 10, min_similarity: int = 40
@@ -233,16 +237,16 @@ class BielikAssistant:
 Zwróć propozycje w formacie JSON."""
 
         try:
-            if not client:
+            if not self.ai_provider.is_available():
                 return [
                     {
                         "nazwa": "Błąd połączenia",
-                        "opis": "Nie można połączyć się z serwerem Ollama.",
+                        "opis": "Nie można połączyć się z dostawcą AI.",
                         "skladniki": [],
                     }
                 ]
 
-            response = client.chat(
+            response = self.ai_provider.chat(
                 model=self.model_name,
                 format="json",
                 messages=[
@@ -312,14 +316,14 @@ Dostępne produkty w magazynie (NIE dodawaj ich do listy zakupów):
 {available_text}"""
 
         try:
-            if not client:
+            if not self.ai_provider.is_available():
                 return {
                     "potrawa": dish_name or "",
                     "produkty": [],
-                    "uwagi": "Nie można połączyć się z serwerem Ollama.",
+                    "uwagi": "Nie można połączyć się z dostawcą AI.",
                 }
 
-            response = client.chat(
+            response = self.ai_provider.chat(
                 model=self.model_name,
                 format="json",
                 messages=[
@@ -392,10 +396,10 @@ Dostępne produkty w magazynie (NIE dodawaj ich do listy zakupów):
 Odpowiedz na pytanie użytkownika, korzystając z dostępnych informacji o produktach."""
 
         try:
-            if not client:
-                return "Przepraszam, nie mogę połączyć się z serwerem Ollama. Sprawdź, czy serwer działa."
+            if not self.ai_provider.is_available():
+                return "Przepraszam, nie mogę połączyć się z dostawcą AI. Sprawdź konfigurację."
 
-            response = client.chat(
+            response = self.ai_provider.chat(
                 model=self.model_name,
                 messages=[
                     {"role": "system", "content": system_prompt},
