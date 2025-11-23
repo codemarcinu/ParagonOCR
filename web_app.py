@@ -1216,47 +1216,66 @@ async def settings_page():
 async def handle_upload(e):
     """Obsługuje upload pliku w NiceGUI."""
     try:
-        # NiceGUI: UploadEventArguments ma atrybuty: name, file, type
-        # file jest instancją SmallFileUpload z metodą read()
-        
         # Pobierz nazwę pliku
         file_name = getattr(e, 'name', None) or 'paragon'
         
-        # Pobierz zawartość pliku - w NiceGUI użyj e.file.read()
-        if not hasattr(e, 'file'):
-            raise Exception("Brak atrybutu 'file' w obiekcie upload. Dostępne atrybuty: " + 
+        # Weryfikacja czy mamy obiekt pliku
+        # NiceGUI używa e.file jako głównego atrybutu dla SmallFileUpload
+        if hasattr(e, 'file'):
+            file_obj = e.file
+        elif hasattr(e, 'content'):
+            # Fallback dla innych wersji NiceGUI
+            file_obj = e.content
+        else:
+            raise Exception("Nie znaleziono zawartości pliku w zdarzeniu uploadu. Dostępne atrybuty: " + 
                           str([attr for attr in dir(e) if not attr.startswith('_')]))
-        
-        # e.file jest SmallFileUpload - użyj await read() do odczytania zawartości (async)
-        file_obj = e.file
+
+        # --- POPRAWKA BEZPIECZEŃSTWA PAMIĘCI ---
+        # Sprawdź rozmiar PRZED wczytaniem do RAM, aby uniknąć OOM (Out Of Memory)
+        # NiceGUI SmallFileUpload trzyma plik w pamięci, ale musimy sprawdzić rozmiar
+        # przed próbą wczytania całej zawartości do zmiennej file_content
+        try:
+            file_obj.seek(0, 2)  # Idź na koniec pliku
+            size = file_obj.tell()  # Pobierz pozycję (rozmiar w bajtach)
+            file_obj.seek(0)  # Wróć na początek
+            
+            # Limit 50MB (dostosuj do swoich potrzeb i limitu w docker-compose.yml)
+            MAX_SIZE_MB = 50
+            if size > MAX_SIZE_MB * 1024 * 1024:
+                raise Exception(f"Plik jest za duży (> {MAX_SIZE_MB}MB). Anulowano.")
+        except (AttributeError, ValueError):
+            # Jeśli obiekt nie obsługuje seek/tell, pomijamy sprawdzenie tutaj
+            # Backend (server.py) również sprawdzi rozmiar przed przetworzeniem
+            pass
+
+        # Teraz bezpieczniej czytamy zawartość - TO JEST KLUCZOWA LINIA DLA BŁĘDU RUNTIME WARNING
+        # Upewnij się, że używasz await, inaczej otrzymasz RuntimeWarning o nieoczekiwanej korutynie
         file_content = await file_obj.read()
         
-        # Sprawdź czy udało się odczytać
-        if file_content is None or len(file_content) == 0:
-            raise Exception("Plik jest pusty lub nie można go odczytać")
-        
-        # Pobierz typ MIME
-        file_type = getattr(e, 'type', None) or 'application/octet-stream'
-        
-        # Wyślij do API używając httpx z timeout (spójnie z api_call)
-        timeout = httpx.Timeout(30.0, connect=10.0)  # 30s timeout, 10s na połączenie
+        if not file_content:
+            raise Exception("Pusty plik")
+
+        # Wyślij do API
+        # Zwiększony timeout, bo upload dużego pliku trwa
+        timeout = httpx.Timeout(60.0, connect=10.0) 
         async with httpx.AsyncClient(timeout=timeout) as client:
-            files = {"file": (file_name, file_content, file_type)}
+            # Używamy file_name z rozszerzeniem, żeby backend rozpoznał typ
+            files = {"file": (file_name, file_content, getattr(e, 'type', 'application/octet-stream'))}
             response = await client.post(f"{API_URL}/api/upload", files=files)
+            
+            if response.status_code == 400:
+                error_detail = response.json().get('detail', 'Błąd walidacji')
+                raise Exception(f"Backend odrzucił plik: {error_detail}")
+                
             response.raise_for_status()
             result = response.json()
         
-        task_id = result.get("task_id")
-        return task_id  # Zwróć task_id do śledzenia postępu
+        return result.get("task_id")
+
     except Exception as ex:
-        import traceback
-        error_details = traceback.format_exc()
-        # Loguj szczegóły błędu do konsoli (w kontenerze Docker)
-        print(f"DEBUG Upload Error: {str(ex)}")
-        print(f"DEBUG Upload Traceback:\n{error_details}")
-        print(f"DEBUG Upload Event Type: {type(e)}")
-        print(f"DEBUG Upload Event Attributes: {[attr for attr in dir(e) if not attr.startswith('_')]}")
-        ui.notify(f"Błąd podczas przesyłania pliku: {str(ex)}", type='negative')
+        # Logowanie błędu, żeby widzieć co się stało w konsoli
+        print(f"UPLOAD ERROR: {str(ex)}")
+        ui.notify(f"Błąd przesyłania: {str(ex)}", type='negative')
         return None
 
 
