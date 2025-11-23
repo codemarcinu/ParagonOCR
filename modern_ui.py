@@ -85,18 +85,42 @@ def get_freshness_color(days):
 
 
 def get_category_icon(category_name: str) -> str:
-    icons = {
-        "Nabiał": "🥛",
-        "Warzywa": "🥦",
-        "Owoce": "🍎",
-        "Mięso": "🥩",
-        "Pieczywo": "🍞",
-        "Napoje": "🥤",
-        "Słodycze": "🍫",
-        "Chemia": "🧼",
-        "Inne": "📦",
+    if not category_name:
+        return "📦"
+
+    cat = category_name.lower()
+
+    mapping = {
+        "nabiał": "🥛",
+        "mleko": "🥛",
+        "ser": "🧀",
+        "jogurt": "🥣",
+        "warzywa": "🥦",
+        "owoce": "🍎",
+        "mięso": "🥩",
+        "wędliny": "🥓",
+        "ryby": "🐟",
+        "pieczywo": "🍞",
+        "napoje": "🥤",
+        "soki": "🧃",
+        "alkohol": "🍷",
+        "słodycze": "🍫",
+        "przekąski": "🍿",
+        "chemia": "🧼",
+        "kosmetyki": "🧴",
+        "mrożonki": "❄️",
+        "przyprawy": "🧂",
+        "sosy": "🥫",
+        "dania gotowe": "🍱",
+        "inne": "📦",
     }
-    return icons.get(category_name, "📦")
+
+    # Przeszukaj mapowanie (partial match)
+    for key, icon in mapping.items():
+        if key in cat:
+            return icon
+
+    return "📦"
 
 
 # --- STATE ---
@@ -149,7 +173,7 @@ async def main_page():
             ui.label("Spiżarnia AI").classes(
                 "text-xl font-bold tracking-tight text-emerald-800"
             )
-        ui.button(icon="settings", on_click=lambda: ui.notify("Ustawienia")).props(
+        ui.button(icon="settings", on_click=lambda: switch_view("account")).props(
             "flat round color=grey"
         )
 
@@ -221,7 +245,7 @@ async def main_page():
                 "text-sm font-bold uppercase text-slate-400 tracking-wider ml-1 mt-2"
             )
 
-            # Filtry (Chipsy) - TODO: Implementacja logiki filtrów
+            # Filtry (Chipsy)
             with ui.row().classes("gap-2 overflow-x-auto pb-2 no-scrollbar"):
                 for cat in ["Wszystkie", "Nabiał", "Warzywa", "Mięso", "Inne"]:
                     active = (
@@ -253,7 +277,6 @@ async def main_page():
                         # Pasek świeżości
                         days = item["days_left"]
                         color = get_freshness_color(days)
-                        # Logika szerokości paska: 100% dla > 10 dni, mniej dla krótszych terminów
                         width = max(10, min(100, days * 10)) if days > 0 else 100
 
                         with ui.element("div").classes(
@@ -323,6 +346,133 @@ async def main_page():
                                 ],
                             ).props("flat round color=grey size=sm")
 
+    async def render_bielik():
+        content_container.clear()
+        with content_container:
+            ui.label("🦅 Bielik AI").classes("text-xl font-bold text-slate-800 mb-4")
+
+            # Obszar czatu
+            chat_area = ui.column().classes("w-full gap-4 mb-20")
+
+            def render_messages():
+                chat_area.clear()
+                with chat_area:
+                    if not AppState.chat_history:
+                        with ui.column().classes(
+                            "w-full items-center justify-center py-12 text-slate-400 gap-2"
+                        ):
+                            ui.label("🦅").classes("text-4xl")
+                            ui.label("W czym mogę pomóc?").classes("text-sm")
+
+                    for msg in AppState.chat_history:
+                        is_user = msg["role"] == "user"
+                        align = "items-end" if is_user else "items-start"
+                        bg = (
+                            "bg-emerald-100 text-emerald-900"
+                            if is_user
+                            else "bg-white border border-slate-200 text-slate-800"
+                        )
+
+                        with ui.column().classes(f"w-full {align}"):
+                            ui.label(msg["content"]).classes(
+                                f"px-4 py-2 rounded-2xl max-w-[80%] text-sm {bg}"
+                            )
+
+            render_messages()
+
+            # Input (fixed bottom)
+            with ui.footer().classes(
+                "bg-white border-t border-slate-200 p-3 fixed bottom-20 w-full z-40"
+            ):
+                with ui.row().classes("w-full max-w-md mx-auto gap-2 items-center"):
+                    input_field = (
+                        ui.input(placeholder="Zapytaj o przepis...")
+                        .classes("w-full")
+                        .props("rounded outlined dense")
+                    )
+
+                    async def send():
+                        text = input_field.value
+                        if not text:
+                            return
+
+                        # User msg
+                        AppState.chat_history.append({"role": "user", "content": text})
+                        input_field.value = ""
+                        render_messages()
+
+                        # API call
+                        with chat_area:
+                            spinner = ui.spinner("dots", size="lg").classes(
+                                "text-emerald-500 ml-4"
+                            )
+
+                        response = await api_call(
+                            "POST", "/api/chat", {"question": text}
+                        )
+                        spinner.delete()
+
+                        if response:
+                            AppState.chat_history.append(
+                                {
+                                    "role": "bot",
+                                    "content": response.get(
+                                        "answer", "Brak odpowiedzi"
+                                    ),
+                                }
+                            )
+                        else:
+                            AppState.chat_history.append(
+                                {
+                                    "role": "bot",
+                                    "content": "Przepraszam, wystąpił błąd połączenia.",
+                                }
+                            )
+
+                        render_messages()
+
+                    ui.button(icon="send", on_click=send).props(
+                        "round flat color=emerald"
+                    )
+                    input_field.on("keydown.enter", send)
+
+    async def render_account():
+        content_container.clear()
+        with content_container:
+            ui.label("👤 Moje Konto").classes("text-xl font-bold text-slate-800 mb-4")
+
+            with ui.card().classes(f"{Theme.CARD} w-full mb-4"):
+                with ui.row().classes("items-center gap-4"):
+                    ui.avatar(
+                        "person", color="emerald-600", text_color="white"
+                    ).classes("text-2xl")
+                    with ui.column().classes("gap-0"):
+                        ui.label("Marcin").classes("font-bold text-lg")
+                        ui.label("Szef Kuchni").classes("text-sm text-slate-500")
+
+            ui.label("Ustawienia").classes(
+                "text-sm font-bold uppercase text-slate-400 tracking-wider ml-1 mb-2"
+            )
+
+            with ui.card().classes(f"{Theme.CARD} w-full flex flex-col gap-4"):
+                with ui.row().classes("justify-between items-center w-full"):
+                    with ui.row().classes("items-center gap-2"):
+                        ui.icon("dark_mode", size="24px").classes("text-slate-600")
+                        ui.label("Tryb Ciemny").classes("font-medium")
+                    ui.switch(on_change=lambda e: ui.notify("Wkrótce..."))
+
+                ui.separator()
+
+                with ui.row().classes("justify-between items-center w-full"):
+                    with ui.row().classes("items-center gap-2"):
+                        ui.icon("notifications", size="24px").classes("text-slate-600")
+                        ui.label("Powiadomienia").classes("font-medium")
+                    ui.switch(value=True, on_change=lambda e: ui.notify("Zapisano"))
+
+            ui.button(
+                "Wyloguj", icon="logout", on_click=lambda: ui.notify("Wylogowano")
+            ).classes("w-full bg-red-50 text-red-600 hover:bg-red-100 shadow-none mt-4")
+
     async def switch_view(view_name):
         AppState.current_view = view_name
         if view_name == "home":
@@ -330,9 +480,9 @@ async def main_page():
         elif view_name == "list":
             await render_shopping_list()
         elif view_name == "bielik":
-            ui.notify("Bielik w budowie...")
+            await render_bielik()
         elif view_name == "account":
-            ui.notify("Konto w budowie...")
+            await render_account()
 
     # Inicjalny render
     await switch_view("home")
