@@ -115,7 +115,12 @@ def run_processing_pipeline(
                 raise Exception("Mistral OCR nie zwrócił wyniku.")
 
             _call_log_callback(log_callback, "INFO: Mistral OCR zakończył pracę. Przesyłam tekst do LLM...", progress=30, status="Przetwarzanie przez LLM...")
-            parsed_data = parse_receipt_from_text(ocr_markdown)
+            # Wybierz odpowiedni model tekstowy w zależności od konfiguracji
+            if Config.USE_CLOUD_AI:
+                text_model = Config.OPENAI_TEXT_MODEL
+            else:
+                text_model = Config.TEXT_MODEL
+            parsed_data = parse_receipt_from_text(ocr_markdown, model_name=text_model)
 
         else:
             # Krok 1.5: Detekcja sklepu (Strategy Pattern) + Hybrid OCR

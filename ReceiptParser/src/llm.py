@@ -519,7 +519,12 @@ def parse_receipt_from_text(
         if Config.USE_CLOUD_AI:
             text_model = Config.OPENAI_TEXT_MODEL
         else:
-            text_model = model_name
+            # Jeśli model_name nie został podany, użyj domyślnego z Config
+            text_model = model_name or Config.TEXT_MODEL
+        
+        if not text_model:
+            print("BŁĄD: Nie określono modelu tekstowego. Użyj Config.TEXT_MODEL lub przekaż model_name.")
+            return None
         
         response = provider.chat(
             model=text_model,

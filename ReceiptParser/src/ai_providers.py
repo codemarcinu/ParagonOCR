@@ -107,10 +107,19 @@ class OllamaProvider(AIProvider):
         if format == "json":
             ollama_options["format"] = "json"
         
+        # Przygotuj wiadomości z obsługą obrazów (dla modeli multimodalnych)
+        ollama_messages = []
+        for msg in messages:
+            msg_copy = msg.copy()
+            # Jeśli to wiadomość użytkownika i mamy obrazy, dodaj je
+            if msg["role"] == "user" and images:
+                msg_copy["images"] = images
+            ollama_messages.append(msg_copy)
+        
         # Wywołaj API Ollama
         response = self.client.chat(
             model=model,
-            messages=messages,
+            messages=ollama_messages,
             options=ollama_options if ollama_options else None,
         )
         
