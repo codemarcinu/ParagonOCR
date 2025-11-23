@@ -6,6 +6,7 @@ Prosty, nowoczesny interfejs webowy dla osoby nietechnicznej.
 
 import os
 import sys
+import asyncio
 from pathlib import Path
 from typing import Optional
 from datetime import datetime
@@ -503,7 +504,7 @@ def create_sidebar(current_page: str = '/'):
         
         nav_items = [
             ('/', '🏠', 'Dashboard'),
-            ('/magazyn', '📦', 'Magazyn'),
+            ('/magazyn', '📦', 'Spiżarnia'),
             ('/bielik', '🦅', 'Bielik'),
             ('/ustawienia', '⚙️', 'Ustawienia'),
         ]
@@ -711,6 +712,17 @@ async def dashboard():
                                     
                                     last_log_count = len(recent_logs)
                                 
+                                # Sprawdź czy wymagana edycja magazynu
+                                if status == "awaiting_inventory_review":
+                                    inventory_items = task_data.get("inventory_items", [])
+                                    if inventory_items:
+                                        status_label.text = "📝 Oczekiwanie na edycję produktów do spiżarni"
+                                        progress_bar.value = 0.95
+                                        
+                                        # Pokaż interfejs edycji
+                                        await show_inventory_edit_dialog(task_id, inventory_items, status_label, progress_bar, logs_area)
+                                        break
+                                
                                 # Sprawdź czy zakończone
                                 if status in ["completed", "error", "timeout"]:
                                     if status == "completed":
@@ -821,7 +833,7 @@ async def dashboard():
 
 @ui.page('/magazyn')
 async def inventory_page():
-    """Strona magazynu."""
+    """Strona spiżarni."""
     setup_dark_mode_script()
     setup_styles()
     
@@ -830,7 +842,7 @@ async def inventory_page():
         
         with ui.column().classes('main-content'):
             with ui.column().classes('container'):
-                ui.label('📦 Magazyn').classes('page-header')
+                ui.label('📦 Spiżarnia').classes('page-header')
                 
                 try:
                     inventory_data = await api_call("GET", "/api/inventory")
@@ -838,7 +850,7 @@ async def inventory_page():
                     
                     if items:
                         with ui.card():
-                            ui.label('Stan magazynu').classes('card-title')
+                            ui.label('Stan spiżarni').classes('card-title')
                             
                             with ui.column().classes('table-container'):
                                 table_html = '''
@@ -868,9 +880,9 @@ async def inventory_page():
                                 ui.html(table_html, sanitize=False)
                     else:
                         with ui.card():
-                            ui.label('Magazyn jest pusty. Dodaj paragony, aby wypełnić magazyn!').style('color: var(--text-secondary); text-align: center; padding: 40px;')
+                            ui.label('Spiżarnia jest pusta. Dodaj paragony, aby wypełnić spiżarnię!').style('color: var(--text-secondary); text-align: center; padding: 40px;')
                 except Exception as e:
-                    ui.label(f'Błąd podczas ładowania magazynu: {str(e)}').style('color: var(--error);')
+                    ui.label(f'Błąd podczas ładowania spiżarni: {str(e)}').style('color: var(--error);')
     
     create_dark_mode_toggle()
 
@@ -1211,6 +1223,94 @@ async def settings_page():
                     ui.label(f'Błąd podczas ładowania ustawień: {str(e)}').style('color: var(--error);')
     
     create_dark_mode_toggle()
+
+
+async def show_inventory_edit_dialog(task_id: str, inventory_items: list, status_label, progress_bar, logs_area):
+    """Pokazuje dialog edycji produktów przed dodaniem do spiżarni."""
+    dialog = ui.dialog()
+    dialog.classes('w-full max-w-4xl')
+    
+    with dialog:
+        with ui.card().classes('w-full'):
+            ui.label('📦 Edycja produktów przed dodaniem do spiżarni').classes('text-2xl font-bold mb-4')
+            ui.label('Sprawdź i edytuj produkty przed dodaniem do spiżarni:').classes('text-lg mb-4')
+            
+            # Tabelka edycji
+            edit_items = []
+            with ui.column().classes('w-full gap-2'):
+                for item in inventory_items:
+                    with ui.row().classes('w-full items-center gap-4 p-3 border rounded'):
+                        # Nazwa produktu (nieedytowalna)
+                        ui.label(item['nazwa']).classes('flex-1 font-semibold')
+                        
+                        # Ilość
+                        ilosc_input = ui.number(
+                            label='Ilość',
+                            value=item['ilosc'],
+                            format='%.2f'
+                        ).classes('w-32')
+                        
+                        # Jednostka
+                        jednostka_input = ui.input(
+                            label='Jednostka',
+                            value=item.get('jednostka', 'szt')
+                        ).classes('w-32')
+                        
+                        # Data ważności
+                        data_waznosci = item.get('data_waznosci')
+                        data_input = ui.input(
+                            label='Data ważności (YYYY-MM-DD)',
+                            value=data_waznosci or ''
+                        ).classes('w-40')
+                        
+                        edit_items.append({
+                            'produkt_id': item['produkt_id'],
+                            'ilosc_input': ilosc_input,
+                            'jednostka_input': jednostka_input,
+                            'data_input': data_input,
+                        })
+            
+            # Przyciski
+            with ui.row().classes('w-full justify-end gap-2 mt-4'):
+                async def confirm_edit():
+                    try:
+                        # Przygotuj dane do zapisu
+                        items_to_save = []
+                        for edit_item in edit_items:
+                            ilosc = edit_item['ilosc_input'].value
+                            jednostka = edit_item['jednostka_input'].value or 'szt'
+                            data_waznosci = edit_item['data_input'].value or None
+                            
+                            items_to_save.append({
+                                'produkt_id': edit_item['produkt_id'],
+                                'ilosc': float(ilosc) if ilosc else 0,
+                                'jednostka': jednostka,
+                                'data_waznosci': data_waznosci,
+                            })
+                        
+                        # Wyślij do API
+                        await api_call("POST", "/api/inventory/confirm", {
+                            "task_id": task_id,
+                            "items": items_to_save
+                        })
+                        
+                        dialog.close()
+                        status_label.text = "✓ Produkty dodane do spiżarni!"
+                        progress_bar.value = 1.0
+                        with logs_area:
+                            ui.html('<div style="color: var(--success); font-weight: 600; margin-top: 8px;">✓ ✓ ✓ Produkty zostały dodane do spiżarni!</div>', sanitize=False)
+                        ui.notify("Produkty zostały dodane do spiżarni!", type='positive')
+                        
+                        # Odśwież stronę po 2 sekundach
+                        await asyncio.sleep(2)
+                        ui.run_javascript('location.reload()')
+                    except Exception as e:
+                        ui.notify(f"Błąd podczas zapisu: {str(e)}", type='negative')
+                
+                ui.button('✓ Zatwierdź i dodaj do spiżarni', on_click=confirm_edit).classes('btn-primary')
+                ui.button('Anuluj', on_click=dialog.close).style('background: var(--error); color: white;')
+    
+    dialog.open()
 
 
 async def handle_upload(e):

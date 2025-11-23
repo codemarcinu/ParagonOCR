@@ -66,6 +66,7 @@ def run_processing_pipeline(
     log_callback: Callable[[str], None],
     prompt_callback: Callable[[str, str, str], str],
     review_callback: Callable[[dict], dict | None] = None,
+    inventory_callback: Callable[[list], None] = None,  # Callback do przekazania danych do edycji
 ) -> None:
     """
     Uruchamia pełny potok przetwarzania paragonu, od odczytu po zapis do bazy.
@@ -198,10 +199,34 @@ def run_processing_pipeline(
         SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
         session = SessionLocal()
         try:
-            save_to_database(
-                session, parsed_data, file_path, log_callback, prompt_callback
+            # W trybie webowym pomijamy zapis do magazynu - będzie edycja przed zapisem
+            paragon_id = save_to_database(
+                session, parsed_data, file_path, log_callback, prompt_callback, skip_inventory=True
             )
             session.commit()
+            
+            # Przygotuj dane do edycji magazynu (będą przechowane w processing_tasks)
+            inventory_items = []
+            for item_data in parsed_data["pozycje"]:
+                product_id = resolve_product(session, item_data["nazwa_raw"], log_callback, prompt_callback)
+                if product_id is None:
+                    continue
+                produkt = session.query(Produkt).filter_by(produkt_id=product_id).first()
+                if produkt:
+                    data_waznosci = item_data.get("data_waznosci")
+                    inventory_items.append({
+                        "produkt_id": product_id,
+                        "nazwa": produkt.znormalizowana_nazwa,
+                        "ilosc": float(item_data["ilosc"]),
+                        "jednostka": item_data.get("jednostka", "szt"),
+                        "data_waznosci": data_waznosci.isoformat() if data_waznosci and hasattr(data_waznosci, 'isoformat') else (data_waznosci if isinstance(data_waznosci, str) else None),
+                    })
+            
+            # Przekaż dane do edycji przez callback (będzie dostępne w processing_tasks)
+            if inventory_items and inventory_callback:
+                inventory_callback(inventory_items, paragon_id)
+                _call_log_callback(log_callback, f"INFO: Przygotowano {len(inventory_items)} produktów do edycji przed dodaniem do spiżarni.", progress=95, status="Oczekiwanie na edycję...")
+            
             _call_log_callback(log_callback, "--- Sukces! Dane zostały zapisane w bazie danych. ---", progress=100, status="Gotowy")
         except Exception as e:
             session.rollback()
@@ -218,6 +243,7 @@ def save_to_database(
     file_path: str,
     log_callback: Callable,
     prompt_callback: Callable,
+    skip_inventory: bool = False,
 ):
     _call_log_callback(log_callback, "INFO: Rozpoczynam zapis do bazy danych...", progress=80, status="Zapisuję do bazy...")
     sklep_name = parsed_data["sklep_info"]["nazwa"]
@@ -274,46 +300,49 @@ def save_to_database(
         paragon.pozycje.append(pozycja)
         session.flush()  # Flush aby mieć pozycja.pozycja_id
         
-        # Dodaj produkt do magazynu (StanMagazynowy)
-        data_waznosci = item_data.get("data_waznosci")
-        # data_waznosci może być już typu date lub None
-        
-        # Sprawdź czy już istnieje stan magazynowy dla tego produktu z tą samą datą ważności
-        # (lub bez daty ważności, jeśli data_waznosci jest None)
-        existing_stan = None
-        if data_waznosci:
-            existing_stan = session.query(StanMagazynowy).filter_by(
-                produkt_id=product_id,
-                data_waznosci=data_waznosci
-            ).first()
-        else:
-            # Jeśli brak daty ważności, szukaj wpisu bez daty ważności dla tego produktu
-            existing_stan = session.query(StanMagazynowy).filter_by(
-                produkt_id=product_id,
-                data_waznosci=None
-            ).first()
-        
-        if existing_stan:
-            # Jeśli istnieje, zwiększ ilość
-            existing_stan.ilosc += item_data["ilosc"]
-            existing_stan.pozycja_paragonu_id = pozycja.pozycja_id
-            jednostka_str = item_data.get("jednostka") or "szt"
-            _call_log_callback(log_callback, f"   -> Zaktualizowano stan magazynowy: +{item_data['ilosc']} {jednostka_str}")
-        else:
-            # Jeśli nie istnieje, utwórz nowy wpis
-            stan = StanMagazynowy(
-                produkt_id=product_id,
-                ilosc=item_data["ilosc"],
-                jednostka_miary=item_data.get("jednostka"),
-                data_waznosci=data_waznosci,
-                pozycja_paragonu_id=pozycja.pozycja_id
-            )
-            session.add(stan)
-            jednostka_str = item_data.get("jednostka") or "szt"
-            _call_log_callback(log_callback, f"   -> Dodano do magazynu: {item_data['ilosc']} {jednostka_str}")
+        # Dodaj produkt do magazynu (StanMagazynowy) - tylko jeśli nie pomijamy
+        if not skip_inventory:
+            data_waznosci = item_data.get("data_waznosci")
+            # data_waznosci może być już typu date lub None
+            
+            # Sprawdź czy już istnieje stan magazynowy dla tego produktu z tą samą datą ważności
+            # (lub bez daty ważności, jeśli data_waznosci jest None)
+            existing_stan = None
+            if data_waznosci:
+                existing_stan = session.query(StanMagazynowy).filter_by(
+                    produkt_id=product_id,
+                    data_waznosci=data_waznosci
+                ).first()
+            else:
+                # Jeśli brak daty ważności, szukaj wpisu bez daty ważności dla tego produktu
+                existing_stan = session.query(StanMagazynowy).filter_by(
+                    produkt_id=product_id,
+                    data_waznosci=None
+                ).first()
+            
+            if existing_stan:
+                # Jeśli istnieje, zwiększ ilość
+                existing_stan.ilosc += item_data["ilosc"]
+                existing_stan.pozycja_paragonu_id = pozycja.pozycja_id
+                jednostka_str = item_data.get("jednostka") or "szt"
+                _call_log_callback(log_callback, f"   -> Zaktualizowano stan magazynowy: +{item_data['ilosc']} {jednostka_str}")
+            else:
+                # Jeśli nie istnieje, utwórz nowy wpis
+                stan = StanMagazynowy(
+                    produkt_id=product_id,
+                    ilosc=item_data["ilosc"],
+                    jednostka_miary=item_data.get("jednostka"),
+                    data_waznosci=data_waznosci,
+                    pozycja_paragonu_id=pozycja.pozycja_id
+                )
+                session.add(stan)
+                jednostka_str = item_data.get("jednostka") or "szt"
+                _call_log_callback(log_callback, f"   -> Dodano do magazynu: {item_data['ilosc']} {jednostka_str}")
 
-    session.add(paragon)
-    _call_log_callback(log_callback, f"INFO: Przygotowano do zapisu 1 paragon z {len(paragon.pozycje)} pozycjami.", progress=95, status="Kończenie zapisu...")
+            session.add(paragon)
+            session.flush()  # Flush aby mieć paragon.paragon_id
+            _call_log_callback(log_callback, f"INFO: Przygotowano do zapisu 1 paragon z {len(paragon.pozycje)} pozycjami.", progress=95, status="Kończenie zapisu...")
+            return paragon.paragon_id  # Zwróć ID paragonu
 
 
 def resolve_product(

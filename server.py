@@ -430,12 +430,21 @@ async def upload_receipt(
             # W wersji webowej zawsze używamy Mistral OCR
             llm_model = "mistral-ocr"
             
+            # Callback do przechowania danych do edycji magazynu
+            def inventory_callback(inventory_items: list, paragon_id: int):
+                with processing_tasks_lock:
+                    if task_id in processing_tasks:
+                        processing_tasks[task_id]["inventory_items"] = inventory_items
+                        processing_tasks[task_id]["paragon_id"] = paragon_id
+                        processing_tasks[task_id]["status"] = "awaiting_inventory_review"
+            
             run_processing_pipeline(
                 str(file_path),
                 llm_model,
                 log_callback,
                 prompt_callback,
                 review_callback,
+                inventory_callback,
             )
             
             # Sprawdź timeout przed oznaczeniem jako completed
@@ -791,6 +800,99 @@ async def get_inventory():
             })
         
         return {"inventory": results}
+    finally:
+        session.close()
+
+
+class InventoryItemConfirm(BaseModel):
+    produkt_id: int
+    ilosc: Decimal
+    jednostka: Optional[str] = None
+    data_waznosci: Optional[str] = None  # ISO format string (YYYY-MM-DD)
+
+
+class InventoryConfirmRequest(BaseModel):
+    task_id: str
+    items: List[InventoryItemConfirm]
+
+
+@app.post("/api/inventory/confirm")
+async def confirm_inventory(request: InventoryConfirmRequest):
+    """Zapisuje produkty do magazynu po edycji użytkownika."""
+    session = SessionLocal()
+    try:
+        # Pobierz dane zadania
+        with processing_tasks_lock:
+            if request.task_id not in processing_tasks:
+                raise HTTPException(status_code=404, detail="Zadanie nie znalezione")
+            task_data = processing_tasks[request.task_id]
+            paragon_id = task_data.get("paragon_id")
+            if not paragon_id:
+                raise HTTPException(status_code=400, detail="Brak ID paragonu w zadaniu")
+        
+        # Pobierz paragon i jego pozycje
+        paragon = session.query(Paragon).filter(Paragon.paragon_id == paragon_id).first()
+        if not paragon:
+            raise HTTPException(status_code=404, detail="Paragon nie znaleziony")
+        
+        pozycje = {pozycja.produkt_id: pozycja for pozycja in paragon.pozycje}
+        
+        # Zapisz produkty do magazynu
+        for item in request.items:
+            pozycja = pozycje.get(item.produkt_id)
+            if not pozycja:
+                continue
+            
+            # Konwertuj datę ważności
+            data_waznosci = None
+            if item.data_waznosci:
+                try:
+                    data_waznosci = datetime.strptime(item.data_waznosci, "%Y-%m-%d").date()
+                except ValueError:
+                    pass
+            
+            # Sprawdź czy istnieje stan magazynowy
+            existing_stan = None
+            if data_waznosci:
+                existing_stan = session.query(StanMagazynowy).filter_by(
+                    produkt_id=item.produkt_id,
+                    data_waznosci=data_waznosci
+                ).first()
+            else:
+                existing_stan = session.query(StanMagazynowy).filter_by(
+                    produkt_id=item.produkt_id,
+                    data_waznosci=None
+                ).first()
+            
+            if existing_stan:
+                # Zaktualizuj istniejący stan
+                existing_stan.ilosc += item.ilosc
+                existing_stan.pozycja_paragonu_id = pozycja.pozycja_id
+            else:
+                # Utwórz nowy stan
+                stan = StanMagazynowy(
+                    produkt_id=item.produkt_id,
+                    ilosc=item.ilosc,
+                    jednostka_miary=item.jednostka or "szt",
+                    data_waznosci=data_waznosci,
+                    pozycja_paragonu_id=pozycja.pozycja_id
+                )
+                session.add(stan)
+        
+        session.commit()
+        
+        # Oznacz zadanie jako zakończone
+        with processing_tasks_lock:
+            if request.task_id in processing_tasks:
+                processing_tasks[request.task_id]["status"] = "completed"
+                processing_tasks[request.task_id]["inventory_confirmed"] = True
+        
+        return {"message": "Produkty zostały dodane do spiżarni"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"Błąd podczas zapisu do magazynu: {str(e)}")
     finally:
         session.close()
 
