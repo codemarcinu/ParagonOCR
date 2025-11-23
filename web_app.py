@@ -1216,8 +1216,28 @@ async def settings_page():
 async def handle_upload(e):
     """Obsługuje upload pliku w NiceGUI."""
     try:
-        # Pobierz nazwę pliku
-        file_name = getattr(e, 'name', None) or 'paragon'
+        # Pobierz nazwę pliku z rozszerzeniem
+        file_name = getattr(e, 'name', None)
+        file_type = getattr(e, 'type', 'application/pdf')
+        
+        # Mapowanie typu MIME do rozszerzeń
+        mime_to_ext = {
+            'application/pdf': '.pdf',
+            'image/png': '.png',
+            'image/jpeg': '.jpg',
+            'image/jpg': '.jpg',
+        }
+        
+        # Jeśli brak nazwy lub nazwa bez rozszerzenia, użyj typu MIME
+        if not file_name or file_name == 'paragon':
+            ext = mime_to_ext.get(file_type, '.pdf')
+            file_name = f'paragon{ext}'
+        elif not Path(file_name).suffix:
+            # Jeśli nazwa istnieje ale brak rozszerzenia, dodaj na podstawie typu MIME
+            ext = mime_to_ext.get(file_type, '.pdf')
+            file_name = f"{file_name}{ext}"
+        
+        print(f"DEBUG UPLOAD: file_name={file_name}, type={file_type}")
         
         # Weryfikacja obiektu pliku (kompatybilność wsteczna NiceGUI)
         if hasattr(e, 'content'):

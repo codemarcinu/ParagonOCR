@@ -347,10 +347,19 @@ async def upload_receipt(
     # Generuj unikalne ID zadania
     task_id = str(uuid.uuid4())
     
+    # Debug: loguj informacje o pliku
+    print(f"DEBUG UPLOAD: filename={file.filename}, content_type={file.content_type}")
+    
     # Walidacja formatu pliku
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Brak nazwy pliku")
+    
     file_ext = Path(file.filename).suffix.lower()
     if file_ext not in ['.png', '.jpg', '.jpeg', '.pdf']:
-        raise HTTPException(status_code=400, detail="Nieobsługiwany format pliku")
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Nieobsługiwany format pliku. Otrzymano: {file_ext or 'brak rozszerzenia'}. Oczekiwane: .png, .jpg, .jpeg, .pdf"
+        )
     
     # Wczytaj zawartość pliku do pamięci (do walidacji rozmiaru)
     content = await file.read()
