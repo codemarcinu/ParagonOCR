@@ -134,7 +134,8 @@ class AppState:
     async def refresh_inventory(cls):
         data = await api_call("GET", "/api/inventory")
         if data:
-            cls.inventory = data
+            # API zwraca {"inventory": [...]}, więc pobierz listę
+            cls.inventory = data.get("inventory", []) if isinstance(data, dict) else data
             # Przetwórz dane (dodaj days_left i icon)
             for item in cls.inventory:
                 item["days_left"] = calculate_days_left(item.get("data_waznosci"))
