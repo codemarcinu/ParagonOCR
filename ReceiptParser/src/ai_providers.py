@@ -8,6 +8,7 @@ Wspiera:
 
 from abc import ABC, abstractmethod
 from typing import List, Dict, Optional, Any
+import mimetypes
 import ollama
 import httpx
 from openai import OpenAI
@@ -183,9 +184,23 @@ class OpenAIProvider(AIProvider):
                     import base64
                     with open(img_path, "rb") as f:
                         img_data = base64.b64encode(f.read()).decode('utf-8')
+                    
+                    # Określ typ MIME na podstawie rozszerzenia pliku
+                    mime_type, _ = mimetypes.guess_type(img_path)
+                    if not mime_type or not mime_type.startswith('image/'):
+                        # Fallback: sprawdź rozszerzenie ręcznie
+                        img_path_lower = img_path.lower()
+                        if img_path_lower.endswith('.png'):
+                            mime_type = 'image/png'
+                        elif img_path_lower.endswith(('.jpg', '.jpeg')):
+                            mime_type = 'image/jpeg'
+                        else:
+                            # Domyślnie JPEG jeśli nie można określić
+                            mime_type = 'image/jpeg'
+                    
                     content_parts.append({
                         "type": "image_url",
-                        "image_url": {"url": f"data:image/jpeg;base64,{img_data}"}
+                        "image_url": {"url": f"data:{mime_type};base64,{img_data}"}
                     })
                 openai_messages.append({"role": role, "content": content_parts})
             else:
