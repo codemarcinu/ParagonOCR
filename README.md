@@ -58,6 +58,7 @@ python web_app.py
 - **[📖 Pełna Dokumentacja](DOCUMENTATION.md)** - Kompleksowy przewodnik użytkownika i dewelopera
 - **[🔌 Dokumentacja API](API_DOCUMENTATION.md)** - Szczegółowa dokumentacja REST API
 - **[🚀 Przewodnik Deployment](DEPLOYMENT.md)** - Instrukcje wdrożenia na różnych platformach
+- **[🐳 Ollama w Dockerze](DOCKER_OLLAMA.md)** - Konfiguracja i użycie Ollama w Dockerze
 - **[📝 Changelog](CHANGELOG_WEB.md)** - Lista zmian w transformacji do wersji webowej
 - **[🌐 README Web](README_WEB.md)** - Szybki przewodnik dla wersji webowej
 
@@ -77,6 +78,10 @@ python web_app.py
 - **Hybrydowy tryb działania:**
   - **Cloud:** Mistral OCR + OpenAI (domyślny, łatwy w użyciu)
   - **Lokalny:** Tesseract + Ollama (bez kosztów, pełna kontrola)
+- **Docker ready:**
+  - Ollama w osobnym kontenerze (automatyczna konfiguracja)
+  - Komunikacja między kontenerami przez sieć Docker
+  - Volume dla modeli Ollama (zachowuje modele między restartami)
 - **REST API** - Pełne API dla integracji z innymi aplikacjami
 - **SQLite Database** - Lekka baza danych, łatwa kopia zapasowa
 - **Modularna architektura** - Łatwe rozszerzanie i utrzymanie

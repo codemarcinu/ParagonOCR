@@ -31,6 +31,9 @@ RUN mkdir -p /app/ReceiptParser/data /app/uploads /app/logs
 # 8080 - NiceGUI frontend
 EXPOSE 8000 8080
 
+# Oznaczamy, że jesteśmy w kontenerze Docker (dla automatycznej konfiguracji Ollama)
+ENV DOCKER_CONTAINER=true
+
 # Start - uruchamiamy zarówno backend jak i frontend
 # W produkcji można użyć supervisord lub osobnych kontenerów
 CMD ["sh", "-c", "python server.py & python web_app.py"]

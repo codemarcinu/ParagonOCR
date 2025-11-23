@@ -477,5 +477,5 @@ async function getTaskStatus(taskId: string) {
 ---
 
 **Wersja API:** 1.0.0  
-**Ostatnia aktualizacja:** 2025-01-XX
+**Ostatnia aktualizacja:** 2025-11-23
 

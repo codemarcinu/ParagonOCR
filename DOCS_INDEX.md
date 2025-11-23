@@ -133,5 +133,5 @@ ParagonWeb Documentation
 
 ---
 
-**Ostatnia aktualizacja:** 2025-01-XX
+**Ostatnia aktualizacja:** 2025-11-23
 

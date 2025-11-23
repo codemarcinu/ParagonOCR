@@ -1,6 +1,24 @@
 version: '3.8'
 
 services:
+  # Ollama - Lokalny serwer AI (opcjonalny, tylko dla trybu lokalnego)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: paragon_ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"  # Ollama API
+    volumes:
+      - ollama_data:/root/.ollama  # Trwałość modeli
+    # Ollama nie wymaga żadnych zmiennych środowiskowych
+    # Modele są pobierane automatycznie przy pierwszym użyciu
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ParagonWeb - Główna aplikacja
   paragon-web:
     build: .
     container_name: paragon_ocr
@@ -15,14 +33,23 @@ services:
       - ./uploads:/app/uploads          # Uploady
     environment:
       - ENABLE_FILE_LOGGING=true
+      - DOCKER_CONTAINER=true  # Oznacza, że działamy w Dockerze
+      # Automatyczna konfiguracja Ollama w Dockerze (używa nazwy serwisu)
+      - OLLAMA_HOST=http://ollama:11434
       # Klucze API można podać tu lub w ustawieniach aplikacji
       # - OPENAI_API_KEY=...
       # - MISTRAL_API_KEY=...
       # - USE_CLOUD_AI=true
       # - USE_CLOUD_OCR=true
+    # depends_on jest opcjonalne - Ollama nie jest wymagane w trybie Cloud
+    # Jeśli używasz trybu lokalnego, upewnij się, że Ollama jest uruchomione
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/"]
       interval: 30s
       timeout: 10s
       retries: 3
+
+volumes:
+  ollama_data:
+    # Volume dla modeli Ollama (zachowuje modele między restartami)
 

@@ -128,7 +128,7 @@ sudo systemctl start paragonweb
 
 ## Deployment Docker
 
-### Podstawowy deployment
+### Podstawowy deployment (Tryb Cloud)
 
 **Krok 1:** Sklonuj repozytorium
 ```bash
@@ -158,6 +158,24 @@ docker-compose up -d --build
 ```bash
 docker-compose logs -f
 ```
+
+### Deployment trybu lokalnego (Ollama + Tesseract)
+
+**Krok 1-2:** Jak wyżej
+
+**Krok 3:** Uruchom z konfiguracją lokalną
+```bash
+docker-compose -f docker-compose.local.yml up -d --build
+```
+
+**Krok 4:** Pobierz modele Ollama (pierwszy raz)
+```bash
+# Połącz się z kontenerem Ollama
+docker exec -it paragon_ollama ollama pull llava:latest
+docker exec -it paragon_ollama ollama pull SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M
+```
+
+**Uwaga:** W trybie lokalnym kontener Ollama jest wymagany. W trybie Cloud jest opcjonalny (można go wyłączyć).
 
 ### Production deployment
 
@@ -551,5 +569,5 @@ docker-compose up (bez -d)
 
 ---
 
-**Ostatnia aktualizacja:** 2025-01-XX
+**Ostatnia aktualizacja:** 2025-11-23
 

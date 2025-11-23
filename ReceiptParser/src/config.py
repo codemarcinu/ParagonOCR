@@ -11,7 +11,13 @@ load_dotenv(env_path)
 
 
 class Config:
-    OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+    # OLLAMA_HOST - automatycznie wykrywa czy jesteśmy w Dockerze
+    # W Dockerze używa nazwy serwisu "ollama", lokalnie "localhost"
+    _default_ollama_host = (
+        "http://ollama:11434" if os.getenv("DOCKER_CONTAINER") == "true" 
+        else "http://localhost:11434"
+    )
+    OLLAMA_HOST = os.getenv("OLLAMA_HOST", _default_ollama_host)
     VISION_MODEL = os.getenv("VISION_MODEL", "llava:latest")
     TEXT_MODEL = os.getenv("TEXT_MODEL", "SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M")
     MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "")

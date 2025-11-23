@@ -172,6 +172,25 @@ python web_app.py
 
 ### Metoda 3: Tryb lokalny (bez Cloud API)
 
+#### Opcja A: Docker (Zalecane)
+
+**Krok 1:** Uruchom z konfiguracją lokalną
+```bash
+docker-compose -f docker-compose.local.yml up -d --build
+```
+
+**Krok 2:** Pobierz modele Ollama (pierwszy raz)
+```bash
+# Ollama automatycznie pobierze modele przy pierwszym użyciu
+# Lub ręcznie:
+docker exec -it paragon_ollama ollama pull llava:latest
+docker exec -it paragon_ollama ollama pull SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M
+```
+
+**Uwaga:** W Dockerze Ollama jest w osobnym kontenerze i komunikuje się przez sieć Docker.
+
+#### Opcja B: Lokalna instalacja
+
 **Wymagania:**
 - Tesseract OCR: `sudo apt-get install tesseract-ocr tesseract-ocr-pol`
 - Ollama: https://ollama.ai/download
@@ -206,6 +225,11 @@ Plik `.env` w katalogu `ReceiptParser/`:
 # === Tryb działania ===
 USE_CLOUD_AI=true          # true = OpenAI, false = Ollama
 USE_CLOUD_OCR=true        # true = Mistral OCR, false = Tesseract
+
+# === Ollama (tylko dla USE_CLOUD_AI=false) ===
+# W Dockerze automatycznie ustawiane na http://ollama:11434
+# Lokalnie: http://localhost:11434
+OLLAMA_HOST=http://localhost:11434
 
 # === Cloud API Keys ===
 OPENAI_API_KEY=sk-...     # Wymagane jeśli USE_CLOUD_AI=true
@@ -566,8 +590,13 @@ python web_app.py --reload
    - Sprawdź czy klucz jest poprawny: `curl https://api.openai.com/v1/models -H "Authorization: Bearer $OPENAI_API_KEY"`
 
 2. **Tryb Lokalny:**
-   - Sprawdź czy Ollama działa: `curl http://localhost:11434/api/tags`
-   - Sprawdź czy model jest pobrany: `ollama list`
+   - **W Dockerze:**
+     - Sprawdź czy kontener Ollama działa: `docker ps | grep ollama`
+     - Sprawdź logi: `docker logs paragon_ollama`
+     - Sprawdź dostępność: `docker exec paragon_ollama curl http://localhost:11434/api/tags`
+   - **Lokalnie:**
+     - Sprawdź czy Ollama działa: `curl http://localhost:11434/api/tags`
+     - Sprawdź czy model jest pobrany: `ollama list`
 
 ### Problem: "Dostawca OCR nie jest dostępny"
 
@@ -694,5 +723,5 @@ TEXT_MODEL=twoj-model:latest
 ---
 
 **Wersja dokumentacji:** 1.0.0  
-**Ostatnia aktualizacja:** 2025-01-XX
+**Ostatnia aktualizacja:** 2025-11-23
 
