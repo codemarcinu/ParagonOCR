@@ -652,8 +652,27 @@ async def dashboard():
                         max_attempts = 600  # 10 minut (1 sekunda * 600)
                         attempt = 0
                         last_log_count = 0
+                        client_active = True  # Flaga do śledzenia czy klient jest aktywny
                         
-                        while attempt < max_attempts:
+                        def safe_ui_update(update_func):
+                            """Bezpiecznie wykonuje aktualizację UI, zwraca False jeśli klient został usunięty."""
+                            nonlocal client_active
+                            if not client_active:
+                                return False
+                            try:
+                                update_func()
+                                return True
+                            except Exception as e:
+                                # Sprawdź czy to błąd związany z usuniętym klientem
+                                error_msg = str(e).lower()
+                                if "client has been deleted" in error_msg or "client" in error_msg and "deleted" in error_msg:
+                                    client_active = False
+                                    return False
+                                # Inne błędy - loguj ale kontynuuj
+                                print(f"UI update warning: {e}")
+                                return True
+                        
+                        while attempt < max_attempts and client_active:
                             try:
                                 task_data = await api_call("GET", f"/api/task/{task_id}")
                                 status = task_data.get("status", "unknown")
@@ -662,10 +681,8 @@ async def dashboard():
                                 recent_logs = task_data.get("recent_logs", [])
                                 
                                 # Aktualizuj postęp
-                                if progress >= 0:
-                                    progress_bar.value = progress / 100.0
-                                else:
-                                    progress_bar.value = 0  # Indeterminate
+                                if not safe_ui_update(lambda: setattr(progress_bar, 'value', progress / 100.0 if progress >= 0 else 0)):
+                                    break
                                 
                                 # Aktualizuj status
                                 status_emoji = {
@@ -674,7 +691,8 @@ async def dashboard():
                                     "error": "❌",
                                     "timeout": "⏱️"
                                 }.get(status, "⏳")
-                                status_label.text = f"{status_emoji} {message}"
+                                if not safe_ui_update(lambda: setattr(status_label, 'text', f"{status_emoji} {message}")):
+                                    break
                                 
                                 # Dodaj nowe logi
                                 if len(recent_logs) > last_log_count:
@@ -699,16 +717,21 @@ async def dashboard():
                                         progress_text = f" [{log_progress}%]" if log_progress is not None else ""
                                         formatted_msg = f"{log_msg}{progress_text}"
                                         
-                                        with logs_area:
-                                            ui.html(f'<div style="color: {color}; margin: 2px 0;">{formatted_msg}</div>', sanitize=False)
+                                        # Bezpiecznie dodaj log
+                                        def add_log():
+                                            with logs_area:
+                                                ui.html(f'<div style="color: {color}; margin: 2px 0;">{formatted_msg}</div>', sanitize=False)
+                                        
+                                        if not safe_ui_update(add_log):
+                                            break
                                         
                                         # Przewiń do dołu
-                                        ui.run_javascript('''
+                                        safe_ui_update(lambda: ui.run_javascript('''
                                             const logsArea = document.querySelector('.process-logs');
                                             if (logsArea) {
                                                 logsArea.scrollTop = logsArea.scrollHeight;
                                             }
-                                        ''')
+                                        '''))
                                     
                                     last_log_count = len(recent_logs)
                                 
@@ -716,45 +739,82 @@ async def dashboard():
                                 if status == "awaiting_inventory_review":
                                     inventory_items = task_data.get("inventory_items", [])
                                     if inventory_items:
-                                        status_label.text = "📝 Oczekiwanie na edycję produktów do spiżarni"
-                                        progress_bar.value = 0.95
+                                        if not safe_ui_update(lambda: setattr(status_label, 'text', "📝 Oczekiwanie na edycję produktów do spiżarni")):
+                                            break
+                                        if not safe_ui_update(lambda: setattr(progress_bar, 'value', 0.95)):
+                                            break
                                         
                                         # Pokaż interfejs edycji
-                                        await show_inventory_edit_dialog(task_id, inventory_items, status_label, progress_bar, logs_area)
+                                        try:
+                                            await show_inventory_edit_dialog(task_id, inventory_items, status_label, progress_bar, logs_area)
+                                        except Exception as e:
+                                            if "client has been deleted" in str(e).lower():
+                                                client_active = False
+                                                break
                                         break
                                 
                                 # Sprawdź czy zakończone
                                 if status in ["completed", "error", "timeout"]:
                                     if status == "completed":
-                                        status_label.text = "✓ Przetwarzanie zakończone pomyślnie!"
-                                        with logs_area:
-                                            ui.html('<div style="color: var(--success); font-weight: 600; margin-top: 8px;">✓ ✓ ✓ Paragon został pomyślnie przetworzony i zapisany w bazie danych!</div>', sanitize=False)
-                                        ui.notify("Paragon został pomyślnie przetworzony!", type='positive')
+                                        if not safe_ui_update(lambda: setattr(status_label, 'text', "✓ Przetwarzanie zakończone pomyślnie!")):
+                                            break
+                                        
+                                        def add_success_log():
+                                            with logs_area:
+                                                ui.html('<div style="color: var(--success); font-weight: 600; margin-top: 8px;">✓ ✓ ✓ Paragon został pomyślnie przetworzony i zapisany w bazie danych!</div>', sanitize=False)
+                                        
+                                        if not safe_ui_update(add_success_log):
+                                            break
+                                        
+                                        safe_ui_update(lambda: ui.notify("Paragon został pomyślnie przetworzony!", type='positive'))
                                         
                                         # Odśwież listę paragonów po 2 sekundach
                                         await asyncio.sleep(2)
-                                        ui.run_javascript('location.reload()')
+                                        safe_ui_update(lambda: ui.run_javascript('location.reload()'))
                                     else:
-                                        status_label.text = f"❌ {message}"
-                                        with logs_area:
-                                            ui.html(f'<div style="color: var(--error); font-weight: 600; margin-top: 8px;">❌ Błąd przetwarzania: {message}</div>', sanitize=False)
-                                        ui.notify(f"Błąd przetwarzania: {message}", type='negative')
-                                    progress_bar.value = 1.0 if status == "completed" else 0
+                                        if not safe_ui_update(lambda: setattr(status_label, 'text', f"❌ {message}")):
+                                            break
+                                        
+                                        def add_error_log():
+                                            with logs_area:
+                                                ui.html(f'<div style="color: var(--error); font-weight: 600; margin-top: 8px;">❌ Błąd przetwarzania: {message}</div>', sanitize=False)
+                                        
+                                        if not safe_ui_update(add_error_log):
+                                            break
+                                        
+                                        safe_ui_update(lambda: ui.notify(f"Błąd przetwarzania: {message}", type='negative'))
+                                    
+                                    safe_ui_update(lambda: setattr(progress_bar, 'value', 1.0 if status == "completed" else 0))
                                     break
                                 
                                 await asyncio.sleep(1)  # Polling co 1 sekundę
                                 attempt += 1
                             except Exception as e:
-                                status_label.text = f"❌ Błąd śledzenia: {str(e)}"
-                                with logs_area:
-                                    ui.html(f'<div style="color: var(--error);">❌ Błąd śledzenia postępu: {str(e)}</div>', sanitize=False)
-                                progress_bar.visible = False
+                                # Sprawdź czy to błąd związany z usuniętym klientem
+                                error_msg = str(e).lower()
+                                if "client has been deleted" in error_msg:
+                                    client_active = False
+                                    break
+                                
+                                # Inne błędy - spróbuj zaktualizować UI
+                                def update_error():
+                                    status_label.text = f"❌ Błąd śledzenia: {str(e)}"
+                                    with logs_area:
+                                        ui.html(f'<div style="color: var(--error);">❌ Błąd śledzenia postępu: {str(e)}</div>', sanitize=False)
+                                    progress_bar.visible = False
+                                
+                                if not safe_ui_update(update_error):
+                                    break
                                 break
                         else:
-                            status_label.text = "⏱️ Przekroczono limit czasu śledzenia"
-                            with logs_area:
-                                ui.html('<div style="color: var(--warning);">⏱️ Przekroczono limit czasu śledzenia postępu</div>', sanitize=False)
-                            progress_bar.visible = False
+                            if client_active:
+                                def update_timeout():
+                                    status_label.text = "⏱️ Przekroczono limit czasu śledzenia"
+                                    with logs_area:
+                                        ui.html('<div style="color: var(--warning);">⏱️ Przekroczono limit czasu śledzenia postępu</div>', sanitize=False)
+                                    progress_bar.visible = False
+                                
+                                safe_ui_update(update_timeout)
                     
                     with ui.column().classes('upload-area'):
                         file_upload = ui.upload(
@@ -1294,18 +1354,28 @@ async def show_inventory_edit_dialog(task_id: str, inventory_items: list, status
                             "items": items_to_save
                         })
                         
-                        dialog.close()
-                        status_label.text = "✓ Produkty dodane do spiżarni!"
-                        progress_bar.value = 1.0
-                        with logs_area:
-                            ui.html('<div style="color: var(--success); font-weight: 600; margin-top: 8px;">✓ ✓ ✓ Produkty zostały dodane do spiżarni!</div>', sanitize=False)
-                        ui.notify("Produkty zostały dodane do spiżarni!", type='positive')
-                        
-                        # Odśwież stronę po 2 sekundach
-                        await asyncio.sleep(2)
-                        ui.run_javascript('location.reload()')
+                        # Bezpiecznie zaktualizuj UI
+                        try:
+                            dialog.close()
+                            status_label.text = "✓ Produkty dodane do spiżarni!"
+                            progress_bar.value = 1.0
+                            with logs_area:
+                                ui.html('<div style="color: var(--success); font-weight: 600; margin-top: 8px;">✓ ✓ ✓ Produkty zostały dodane do spiżarni!</div>', sanitize=False)
+                            ui.notify("Produkty zostały dodane do spiżarni!", type='positive')
+                            
+                            # Odśwież stronę po 2 sekundach
+                            await asyncio.sleep(2)
+                            ui.run_javascript('location.reload()')
+                        except Exception as ui_error:
+                            # Jeśli klient został usunięty, po prostu zignoruj błąd UI
+                            if "client has been deleted" not in str(ui_error).lower():
+                                raise
                     except Exception as e:
-                        ui.notify(f"Błąd podczas zapisu: {str(e)}", type='negative')
+                        try:
+                            ui.notify(f"Błąd podczas zapisu: {str(e)}", type='negative')
+                        except:
+                            # Ignoruj błędy UI jeśli klient został usunięty
+                            pass
                 
                 ui.button('✓ Zatwierdź i dodaj do spiżarni', on_click=confirm_edit).classes('btn-primary')
                 ui.button('Anuluj', on_click=dialog.close).style('background: var(--error); color: white;')
