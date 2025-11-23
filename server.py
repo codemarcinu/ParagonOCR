@@ -14,6 +14,7 @@ import os
 import sys
 import time
 import threading
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 from datetime import datetime, date
@@ -22,7 +23,7 @@ from decimal import Decimal
 from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from sqlalchemy.orm import sessionmaker, joinedload
 
 # Dodaj ReceiptParser do ścieżki
@@ -37,8 +38,33 @@ from ReceiptParser.src.bielik import BielikAssistant
 from ReceiptParser.src.purchase_analytics import PurchaseAnalytics
 from ReceiptParser.src.config import Config
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Zarządza cyklem życia aplikacji (startup/shutdown)."""
+    # Startup
+    # Upewnij się, że baza danych istnieje
+    init_db()
+    
+    # Uruchom cleanup starych zadań co 5 minut
+    def periodic_cleanup():
+        while True:
+            time.sleep(300)  # 5 minut
+            cleanup_old_tasks()
+    
+    cleanup_thread = threading.Thread(target=periodic_cleanup, daemon=True)
+    cleanup_thread.start()
+    
+    print("ParagonWeb API uruchomione!")
+    
+    yield
+    
+    # Shutdown (jeśli potrzebne)
+    pass
+
+
 # Inicjalizacja FastAPI
-app = FastAPI(title="ParagonWeb API", version="1.0.0")
+app = FastAPI(title="ParagonWeb API", version="1.0.0", lifespan=lifespan)
 
 # CORS - konfiguracja z obsługą produkcji
 environment = os.getenv("ENVIRONMENT", "development").lower()
@@ -97,7 +123,8 @@ class InventoryItem(BaseModel):
 class ChatMessage(BaseModel):
     question: str
     
-    @validator('question')
+    @field_validator('question')
+    @classmethod
     def validate_question(cls, v: str) -> str:
         """Waliduje pytanie użytkownika."""
         if not v or not v.strip():
@@ -121,7 +148,8 @@ class SettingsUpdate(BaseModel):
     openai_api_key: Optional[str] = None
     mistral_api_key: Optional[str] = None
     
-    @validator('openai_api_key')
+    @field_validator('openai_api_key')
+    @classmethod
     def validate_openai_key(cls, v: Optional[str]) -> Optional[str]:
         """Waliduje format klucza OpenAI API."""
         if v is None:
@@ -133,7 +161,8 @@ class SettingsUpdate(BaseModel):
             raise ValueError("Nieprawidłowy format klucza OpenAI API (powinien zaczynać się od 'sk-')")
         return v
     
-    @validator('mistral_api_key')
+    @field_validator('mistral_api_key')
+    @classmethod
     def validate_mistral_key(cls, v: Optional[str]) -> Optional[str]:
         """Waliduje format klucza Mistral API."""
         if v is None:
@@ -211,22 +240,6 @@ def cleanup_old_tasks():
         print(f"INFO: Usunięto {len(tasks_to_remove)} starych zadań i {files_removed} plików")
 
 
-@app.on_event("startup")
-async def startup_event():
-    """Inicjalizacja przy starcie aplikacji."""
-    # Upewnij się, że baza danych istnieje
-    init_db()
-    
-    # Uruchom cleanup starych zadań co 5 minut
-    def periodic_cleanup():
-        while True:
-            time.sleep(300)  # 5 minut
-            cleanup_old_tasks()
-    
-    cleanup_thread = threading.Thread(target=periodic_cleanup, daemon=True)
-    cleanup_thread.start()
-    
-    print("ParagonWeb API uruchomione!")
 
 
 @app.get("/")

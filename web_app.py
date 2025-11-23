@@ -567,7 +567,7 @@ async def dashboard():
                                         </tr>
                                     '''
                                 table_html += '</tbody></table>'
-                                ui.html(table_html)
+                                ui.html(table_html, sanitize=False)
                         else:
                             ui.label('Brak paragonów. Dodaj pierwszy paragon!').style('color: var(--text-secondary); text-align: center; padding: 40px;')
                     except Exception as e:
@@ -623,7 +623,7 @@ async def inventory_page():
                                         </tr>
                                     '''
                                 table_html += '</tbody></table>'
-                                ui.html(table_html)
+                                ui.html(table_html, sanitize=False)
                     else:
                         with ui.card():
                             ui.label('Magazyn jest pusty. Dodaj paragony, aby wypełnić magazyn!').style('color: var(--text-secondary); text-align: center; padding: 40px;')
@@ -653,7 +653,7 @@ async def bielik_page():
                     
                     # Wiadomość powitalna
                     with chat_container:
-                        with ui.html('<div class="chat-message bot">🦅 Cześć! Jestem Bielik, Twój asystent kulinarny. Jak mogę Ci pomóc?</div>'):
+                        with ui.html('<div class="chat-message bot">🦅 Cześć! Jestem Bielik, Twój asystent kulinarny. Jak mogę Ci pomóc?</div>', sanitize=False):
                             pass
                     
                     async def send_message():
@@ -663,7 +663,7 @@ async def bielik_page():
                         
                         # Dodaj wiadomość użytkownika
                         with chat_container:
-                            with ui.html(f'<div class="chat-message user"><strong>Ty:</strong> {question}</div>'):
+                            with ui.html(f'<div class="chat-message user"><strong>Ty:</strong> {question}</div>', sanitize=False):
                                 pass
                         
                         input_field.value = ""
@@ -671,7 +671,7 @@ async def bielik_page():
                         # Pokaż wskaźnik ładowania
                         loading_msg = None
                         with chat_container:
-                            loading_msg = ui.html('<div class="chat-message bot">⏳ Bielik myśli...</div>')
+                            loading_msg = ui.html('<div class="chat-message bot">⏳ Bielik myśli...</div>', sanitize=False)
                         
                         # Wyślij do API
                         try:
@@ -681,7 +681,7 @@ async def bielik_page():
                             # Usuń wskaźnik ładowania i dodaj odpowiedź
                             loading_msg.delete()
                             with chat_container:
-                                with ui.html(f'<div class="chat-message bot"><strong>🦅 Bielik:</strong> {answer}</div>'):
+                                with ui.html(f'<div class="chat-message bot"><strong>🦅 Bielik:</strong> {answer}</div>', sanitize=False):
                                     pass
                             
                             # Przewiń do dołu
@@ -692,7 +692,7 @@ async def bielik_page():
                         except Exception as e:
                             loading_msg.delete()
                             with chat_container:
-                                with ui.html(f'<div class="chat-message bot" style="background: var(--error);"><strong>❌ Błąd:</strong> {str(e)}</div>'):
+                                with ui.html(f'<div class="chat-message bot" style="background: var(--error);"><strong>❌ Błąd:</strong> {str(e)}</div>', sanitize=False):
                                     pass
                     
                     with ui.row().classes('w-full gap-2').style('margin-top: 16px;'):
