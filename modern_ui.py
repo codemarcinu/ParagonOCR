@@ -114,13 +114,28 @@ def get_category_emoji(kategoria: Optional[str]) -> str:
     return emoji_map.get(kategoria, '📦')
 
 
-def get_freshness_color(data_waznosci: Optional[str]) -> tuple[str, str]:
+def get_freshness_color(days_left: int) -> tuple[str, str]:
     """
-    Zwraca kolor paska świeżości na podstawie daty ważności.
+    Zwraca kolor paska świeżości na podstawie liczby dni do końca.
     Returns: (bg_color, border_color)
     """
+    if days_left < 0:
+        return ('bg-red-500', 'border-red-600')  # Przeterminowane
+    elif days_left <= 3:
+        return ('bg-orange-500', 'border-orange-600')  # Wkrótce przeterminowane
+    elif days_left <= 7:
+        return ('bg-yellow-400', 'border-yellow-500')  # Tydzień do końca
+    else:
+        return ('bg-green-500', 'border-green-600')  # OK
+
+
+def calculate_freshness_percentage(data_waznosci: Optional[str], typical_shelf_life_days: int = 14) -> tuple[int, int]:
+    """
+    Oblicza procent świeżości produktu.
+    Returns: (percentage 0-100, days_left)
+    """
     if not data_waznosci:
-        return ('bg-gray-200', 'border-gray-300')
+        return (100, 999)  # Brak daty = zawsze świeże
     
     try:
         expiry_date = datetime.fromisoformat(data_waznosci).date() if isinstance(data_waznosci, str) else data_waznosci
@@ -128,15 +143,18 @@ def get_freshness_color(data_waznosci: Optional[str]) -> tuple[str, str]:
         days_left = (expiry_date - today).days
         
         if days_left < 0:
-            return ('bg-red-500', 'border-red-600')  # Przeterminowane
-        elif days_left <= 3:
-            return ('bg-orange-500', 'border-orange-600')  # Wkrótce przeterminowane
-        elif days_left <= 7:
-            return ('bg-yellow-400', 'border-yellow-500')  # Tydzień do końca
-        else:
-            return ('bg-green-500', 'border-green-600')  # OK
+            return (0, days_left)  # Przeterminowane
+        
+        # Zakładamy typowy okres przydatności (np. 14 dni)
+        # Jeśli produkt ma więcej niż typowy okres, traktujemy jako 100%
+        if days_left >= typical_shelf_life_days:
+            return (100, days_left)
+        
+        # Oblicz procent: (dni_pozostałe / typowy_okres) * 100
+        percentage = max(0, min(100, int((days_left / typical_shelf_life_days) * 100)))
+        return (percentage, days_left)
     except:
-        return ('bg-gray-200', 'border-gray-300')
+        return (100, 999)
 
 
 def format_date_relative(data_str: Optional[str]) -> str:
@@ -161,6 +179,29 @@ def format_date_relative(data_str: Optional[str]) -> str:
             return expiry_date.strftime("%d.%m.%Y")
     except:
         return data_str if isinstance(data_str, str) else "—"
+
+
+def create_compact_product_card(item):
+    """Tworzy kompaktową kartę produktu dla dashboardu."""
+    kategoria = item.get('kategoria', 'Inne')
+    emoji = get_category_emoji(kategoria)
+    
+    # Oblicz świeżość
+    freshness_pct, days_left = calculate_freshness_percentage(item.get('data_waznosci'))
+    freshness_bg, _ = get_freshness_color(days_left)
+    
+    with ui.card().classes(f'{Theme.SURFACE} p-3 flex flex-col gap-2 relative overflow-hidden'):
+        # Ikona i Nazwa
+        with ui.row().classes('items-center gap-2'):
+            ui.label(emoji).classes('text-2xl')
+            with ui.column().classes('gap-0 overflow-hidden flex-1'):
+                ui.label(item.get('nazwa', '—')).classes('font-semibold text-sm truncate leading-tight')
+                ui.label(f"{item.get('ilosc', 0)} {item.get('jednostka', 'szt')}").classes('text-xs text-slate-400')
+        
+        # Pasek świeżości (wizualizacja)
+        if item.get('data_waznosci'):
+            with ui.element('div').classes('w-full h-1.5 bg-slate-100 rounded-full mt-auto overflow-hidden'):
+                ui.element('div').classes(f'h-full {freshness_bg}').style(f'width: {freshness_pct}%')
 
 
 # --- Setup Global Styles ---
@@ -306,126 +347,162 @@ async def modern_dashboard():
         with ui.row().classes('items-center gap-2 hidden md:flex'):
             ui.button(icon='settings', on_click=lambda: ui.open('/ustawienia')).props('flat round color=grey')
     
-    # Main Content (z paddingiem dla fixed header)
-    with ui.column().classes('w-full max-w-4xl mx-auto p-4 gap-6 mt-16 mb-20'):
+    # Main Content (z paddingiem dla fixed header i bottom nav)
+    with ui.column().classes('w-full max-w-md mx-auto pt-20 pb-24 px-4 gap-6'):
         
-        # 1. Sekcja powitalna / Status
-        ui.label('Dzień dobry! 👋').classes('text-2xl font-bold text-slate-800 mt-4')
+        # 1. Sekcja powitalna
+        ui.label('Cześć! 👋').classes('text-2xl font-bold text-slate-800 mt-4')
         
-        # Karty szybkiego statusu
-        with ui.row().classes('w-full gap-4 grid grid-cols-2 sm:grid-cols-4'):
-            # Karta "Do zużycia"
-            try:
-                inventory_data = await api_call("GET", "/api/inventory")
-                items = inventory_data.get("inventory", [])
-                
-                # Policz produkty do zużycia (w ciągu 3 dni)
-                today = date.today()
-                expiring_soon = 0
-                for item in items:
-                    if item.get('data_waznosci'):
-                        try:
-                            expiry = datetime.fromisoformat(item['data_waznosci']).date() if isinstance(item['data_waznosci'], str) else item['data_waznosci']
-                            days_left = (expiry - today).days
-                            if 0 <= days_left <= 3:
-                                expiring_soon += 1
-                        except:
-                            pass
-                
-                with ui.card().classes(f'{Theme.SURFACE} p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-transform hover:scale-105'):
-                    ui.label(str(expiring_soon)).classes('text-3xl font-bold text-orange-500')
-                    ui.label('Do zużycia').classes('text-sm text-slate-500 uppercase tracking-wider font-semibold')
-            except:
-                with ui.card().classes(f'{Theme.SURFACE} p-4 flex flex-col items-center justify-center gap-2'):
-                    ui.label('0').classes('text-3xl font-bold text-slate-400')
-                    ui.label('Do zużycia').classes('text-sm text-slate-500 uppercase tracking-wider font-semibold')
-            
-            # Karta Magazynu
-            with ui.card().classes(f'{Theme.SURFACE} p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-transform hover:scale-105').on('click', lambda: ui.open('/magazyn')):
-                ui.icon('inventory_2', size='2em').classes('text-emerald-600')
-                ui.label('Magazyn').classes('text-sm text-slate-500 uppercase tracking-wider font-semibold')
-            
-            # Karta Zakupów
-            with ui.card().classes(f'{Theme.SURFACE} p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-transform hover:scale-105').on('click', lambda: ui.open('/lista')):
-                ui.icon('shopping_cart', size='2em').classes('text-blue-600')
-                ui.label('Lista').classes('text-sm text-slate-500 uppercase tracking-wider font-semibold')
-            
-            # Karta Asystenta
-            with ui.card().classes(f'{Theme.SURFACE} p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-transform hover:scale-105').on('click', lambda: ui.open('/chat')):
-                ui.icon('restaurant_menu', size='2em').classes('text-purple-600')
-                ui.label('Co zjeść?').classes('text-sm text-slate-500 uppercase tracking-wider font-semibold')
-        
-        # 2. Sekcja "Szybka Akcja" - Upload Paragonu
-        ui.label('Szybkie dodawanie').classes('text-lg font-semibold text-slate-700 mt-4')
-        
-        with ui.card().classes(f'w-full {Theme.SURFACE} border-2 border-dashed border-slate-300 p-8 flex flex-col items-center gap-4 group hover:border-emerald-400 transition-colors'):
-            ui.icon('cloud_upload', size='4em').classes('text-slate-300 group-hover:text-emerald-500 transition-colors')
-            with ui.column().classes('items-center gap-1'):
-                ui.label('Zeskanuj paragon').classes('text-lg font-medium text-slate-700')
-                ui.label('Obsługujemy PDF, JPG, PNG').classes('text-sm text-slate-400')
-            
-            # Upload component (ukryty pod ładnym przyciskiem)
-            upload_container = ui.column().classes('w-full max-w-xs')
-            file_upload_ref = {'upload': None}
-            
-            with upload_container:
-                file_upload = ui.upload(
-                    label='Wybierz plik',
-                    auto_upload=True,
-                ).props('flat color=green accept=".png,.jpg,.jpeg,.pdf"').classes('w-full')
-                file_upload_ref['upload'] = file_upload
-                
-                # Handler dla uploadu
-                async def handle_upload_wrapper(e):
-                    await handle_receipt_upload(e, upload_container)
-                
-                file_upload.on_upload(handle_upload_wrapper)
-        
-        # 3. Sekcja "Ostatnie Wydarzenia"
-        ui.label('Ostatnia aktywność').classes('text-lg font-semibold text-slate-700 mt-4')
+        # 2. SEKCJA: "ZJEDZ MNIE TERAZ" (Priority Dashboard - Karuzela)
+        ui.label('⚠️ Do zużycia wkrótce').classes('text-xs font-bold uppercase text-slate-400 tracking-wider ml-1')
         
         try:
-            receipts = await api_call("GET", "/api/receipts?limit=5")
-            receipt_list = receipts.get("receipts", [])
+            inventory_data = await api_call("GET", "/api/inventory")
+            items = inventory_data.get("inventory", [])
             
-            if receipt_list:
-                with ui.column().classes(f'w-full {Theme.SURFACE} divide-y divide-slate-100'):
-                    for r in receipt_list:
-                        with ui.row().classes('w-full p-4 items-center justify-between hover:bg-slate-50 cursor-pointer').on('click', lambda r=r: ui.open(f'/paragon/{r["paragon_id"]}')):
-                            with ui.row().classes('items-center gap-3'):
-                                ui.icon('receipt', size='1.5em').classes('text-slate-400 bg-slate-100 p-2 rounded-full')
-                                with ui.column().classes('gap-0'):
-                                    ui.label(r.get('sklep', 'Nieznany sklep')).classes('font-medium text-slate-800')
-                                    ui.label(r.get('data_zakupu', '—')).classes('text-xs text-slate-400')
-                            ui.label(f'{r.get("suma_paragonu", 0):.2f} PLN').classes('font-bold text-emerald-600')
+            # Filtruj produkty pilne (do 3 dni)
+            today = date.today()
+            urgent_items = []
+            for item in items:
+                if item.get('data_waznosci'):
+                    try:
+                        expiry = datetime.fromisoformat(item['data_waznosci']).date() if isinstance(item['data_waznosci'], str) else item['data_waznosci']
+                        days_left = (expiry - today).days
+                        if days_left <= 3:
+                            item_copy = item.copy()
+                            item_copy['days_left'] = days_left
+                            item_copy['emoji'] = get_category_emoji(item.get('kategoria'))
+                            urgent_items.append(item_copy)
+                    except:
+                        pass
+            
+            if urgent_items:
+                # Scroll area dla karuzeli
+                with ui.scroll_area().classes('w-full h-48'):
+                    with ui.row().classes('flex-nowrap gap-4 pb-2'):
+                        for item in urgent_items:
+                            days_left = item.get('days_left', 0)
+                            days_text = "Dziś!" if days_left == 0 else ("Po terminie!" if days_left < 0 else f"{days_left} dni")
+                            
+                            # Karta pilnego produktu
+                            with ui.card().classes(f'{Theme.SURFACE} w-40 h-44 flex flex-col justify-between shrink-0 bg-red-50 border-red-200 p-4'):
+                                with ui.column().classes('gap-2'):
+                                    ui.label(item.get('emoji', '📦')).classes('text-4xl')
+                                    ui.label(item.get('nazwa', '—')).classes('font-bold text-slate-800 text-sm truncate')
+                                    ui.label(days_text).classes('text-red-600 font-bold text-xs')
+                                    ui.label(f"{item.get('ilosc', 0)} {item.get('jednostka', 'szt')}").classes('text-xs text-slate-500')
+                                
+                                with ui.row().classes('w-full gap-2'):
+                                    ui.button('🍽️ Zużyj', on_click=lambda n=item.get('nazwa'): ui.notify(f'Zużyto: {n}')).classes('flex-1 bg-white text-red-600 border border-red-200 hover:bg-red-100 text-xs rounded-lg')
+                                    ui.button('❄️', on_click=lambda n=item.get('nazwa'): ui.notify(f'Zamrożono: {n}')).classes('bg-white text-blue-600 border border-blue-200 hover:bg-blue-100 text-xs rounded-lg px-2')
             else:
-                with ui.card().classes(f'{Theme.SURFACE} p-8'):
-                    ui.label('Brak paragonów. Dodaj pierwszy paragon!').classes('text-center text-slate-400')
+                with ui.card().classes(f'{Theme.SURFACE} w-full bg-emerald-50 border-emerald-200 flex items-center justify-center p-6'):
+                    ui.label('🎉 Wszystko świeże!').classes('text-emerald-700 font-bold')
+        
         except Exception as e:
             with ui.card().classes(f'{Theme.SURFACE} p-4'):
                 ui.label(f'Błąd: {str(e)}').classes('text-red-600')
+        
+        # 3. SEKCJA: "WIRTUALNA LODÓWKA" (Podgląd - ostatnie produkty)
+        ui.label('📦 Ostatnie produkty').classes('text-xs font-bold uppercase text-slate-400 tracking-wider ml-1 mt-2')
+        
+        try:
+            # Pokaż ostatnie 4 produkty
+            recent_items = items[:4] if items else []
+            
+            if recent_items:
+                with ui.grid(columns=2).classes('w-full gap-3'):
+                    for item in recent_items:
+                        create_compact_product_card(item)
+            else:
+                with ui.card().classes(f'{Theme.SURFACE} p-6'):
+                    ui.label('Brak produktów w magazynie').classes('text-center text-slate-400 text-sm')
+        except:
+            pass
+        
+        # 4. Sekcja "Ostatnie Paragony"
+        ui.label('Ostatnia aktywność').classes('text-xs font-bold uppercase text-slate-400 tracking-wider ml-1 mt-2')
+        
+        try:
+            receipts = await api_call("GET", "/api/receipts?limit=3")
+            receipt_list = receipts.get("receipts", [])
+            
+            if receipt_list:
+                with ui.column().classes(f'w-full {Theme.SURFACE} divide-y divide-slate-100 rounded-xl'):
+                    for r in receipt_list:
+                        with ui.row().classes('w-full p-3 items-center justify-between hover:bg-slate-50 cursor-pointer').on('click', lambda r=r: ui.open(f'/paragon/{r["paragon_id"]}')):
+                            with ui.row().classes('items-center gap-2'):
+                                ui.icon('receipt', size='1.2em').classes('text-slate-400')
+                                with ui.column().classes('gap-0'):
+                                    ui.label(r.get('sklep', 'Nieznany sklep')).classes('font-medium text-slate-800 text-sm')
+                                    ui.label(r.get('data_zakupu', '—')).classes('text-xs text-slate-400')
+                            ui.label(f'{r.get("suma_paragonu", 0):.2f} PLN').classes('font-bold text-emerald-600 text-sm')
+            else:
+                with ui.card().classes(f'{Theme.SURFACE} p-6'):
+                    ui.label('Brak paragonów').classes('text-center text-slate-400 text-sm')
+        except Exception as e:
+            pass
     
-    # Floating Action Button (FAB)
-    def trigger_upload():
-        """Wywołuje kliknięcie na ukrytym input file."""
-        ui.run_javascript('''
-            const upload = document.querySelector('input[type="file"]');
-            if (upload) {
-                upload.click();
-            }
-        ''')
+    # Dialog Uploadu (Wizard)
+    upload_dialog = ui.dialog()
+    with upload_dialog, ui.card().classes('w-full max-w-sm p-6 rounded-3xl'):
+        ui.label('Dodaj Paragon').classes('text-xl font-bold text-center mb-6 text-slate-800')
+        
+        # Dropzone - ładny wizualny obszar
+        dropzone_container = ui.column().classes('w-full relative')
+        with dropzone_container:
+            # Wizualny dropzone
+            dropzone_visual = ui.element('div').classes('w-full h-40 border-2 border-dashed border-emerald-200 bg-emerald-50 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-emerald-100 transition-colors group')
+            with dropzone_visual:
+                ui.icon('cloud_upload', size='48px').classes('text-emerald-400 group-hover:text-emerald-500')
+                ui.label('Dotknij, aby zeskanować').classes('text-emerald-700 font-medium text-sm')
+            
+            # Ukryty upload (na wierzchu dropzone)
+            file_upload = ui.upload(
+                label='',
+                auto_upload=True,
+            ).props('accept=".png,.jpg,.jpeg,.pdf"').classes('absolute inset-0 opacity-0 cursor-pointer')
+            
+            # Handler dla uploadu
+            async def handle_upload_wrapper(e):
+                upload_dialog.close()
+                await handle_receipt_upload(e, dropzone_container)
+            
+            file_upload.on_upload(handle_upload_wrapper)
+        
+        ui.label('lub').classes('text-center text-slate-400 my-2 text-xs')
+        
+        ui.button('✍️ Wpisz ręcznie', icon='edit', on_click=lambda: ui.notify('Funkcja w przygotowaniu')).classes('w-full bg-slate-100 text-slate-700 hover:bg-slate-200 shadow-none')
+        
+        ui.button('Anuluj', on_click=upload_dialog.close).props('flat color=grey').classes('w-full mt-2')
     
-    with ui.button(icon='add', on_click=trigger_upload).classes('fab bg-emerald-600 text-white'):
-        pass
-    
-    # Bottom Navigation (Mobile)
-    with ui.row().classes('bottom-nav'):
-        ui.button(icon='home', on_click=lambda: ui.open('/')).props('flat round color=green')
-        ui.button(icon='inventory', on_click=lambda: ui.open('/magazyn')).props('flat round color=grey')
-        # FAB na środku (duży)
-        ui.button(icon='add', on_click=trigger_upload).props('round color=green').classes('-mt-8 shadow-lg border-4 border-slate-50 scale-125')
-        ui.button(icon='shopping_cart', on_click=lambda: ui.open('/lista')).props('flat round color=grey')
-        ui.button(icon='chat', on_click=lambda: ui.open('/chat')).props('flat round color=grey')
+    # Bottom Navigation (Mobile) - z FAB na środku
+    with ui.footer().classes('bg-white border-t border-slate-200 h-20 fixed bottom-0 w-full z-50'):
+        with ui.row().classes('w-full justify-around items-center h-full pb-2'):
+            # Home
+            with ui.column().classes('items-center gap-0 cursor-pointer').on('click', lambda: ui.open('/')):
+                ui.icon('home', size='28px').classes('text-emerald-600')
+                ui.label('Dom').classes('text-[10px] text-emerald-600 font-medium')
+            
+            # Lista Zakupów
+            with ui.column().classes('items-center gap-0 cursor-pointer').on('click', lambda: ui.open('/lista')):
+                ui.icon('checklist', size='28px').classes('text-slate-400 hover:text-emerald-600 transition-colors')
+                ui.label('Lista').classes('text-[10px] text-slate-400 font-medium')
+            
+            # FAB (Floating Action Button) - SCAN
+            with ui.column().classes('items-center relative -top-6'):
+                with ui.button(on_click=upload_dialog.open).classes('rounded-full w-16 h-16 shadow-lg shadow-emerald-200 bg-emerald-600 hover:bg-emerald-700 flex items-center justify-center border-4 border-slate-50'):
+                    ui.icon('document_scanner', size='32px').classes('text-white')
+            
+            # Asystent (Chat)
+            with ui.column().classes('items-center gap-0 cursor-pointer').on('click', lambda: ui.open('/chat')):
+                ui.icon('restaurant_menu', size='28px').classes('text-slate-400 hover:text-emerald-600 transition-colors')
+                ui.label('Asystent').classes('text-[10px] text-slate-400 font-medium')
+            
+            # Magazyn
+            with ui.column().classes('items-center gap-0 cursor-pointer').on('click', lambda: ui.open('/magazyn')):
+                ui.icon('inventory_2', size='28px').classes('text-slate-400 hover:text-emerald-600 transition-colors')
+                ui.label('Magazyn').classes('text-[10px] text-slate-400 font-medium')
 
 
 async def handle_receipt_upload(e, container):
@@ -823,15 +900,18 @@ async def modern_inventory():
                     # Ilość i jednostka
                     ui.label(f"{item.get('ilosc', 0)} {item.get('jednostka', 'szt')}").classes('text-sm text-slate-500 mb-2')
                     
-                    # Pasek świeżości
+                    # Pasek świeżości z obliczaniem procentu
                     if item.get('data_waznosci'):
+                        freshness_pct, days_left = calculate_freshness_percentage(item.get('data_waznosci'))
+                        freshness_bg, _ = get_freshness_color(days_left)
+                        
                         with ui.row().classes('w-full items-center gap-2 mb-2'):
                             ui.label('📅').classes('text-xs')
                             ui.label(format_date_relative(item.get('data_waznosci'))).classes('text-xs text-slate-600')
                         
-                        # Wizualny pasek
+                        # Wizualny pasek z procentem
                         with ui.row().classes('w-full h-2 bg-slate-200 rounded-full overflow-hidden'):
-                            ui.element('div').classes(f'freshness-bar {freshness_bg}').style(f'width: 100%')
+                            ui.element('div').classes(f'freshness-bar {freshness_bg}').style(f'width: {freshness_pct}%')
                     
                     # Kategoria (chip)
                     if kategoria:
