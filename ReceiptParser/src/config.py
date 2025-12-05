@@ -17,7 +17,7 @@ class Config:
     MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "")
     # Timeout dla zapytań do Ollama (w sekundach)
     OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "300"))  # Domyślnie 5 minut
-    
+
     # --- Stałe matematyczne dla weryfikacji paragonów ---
     # Tolerancja dla błędów zaokrągleń w weryfikacji matematycznej (w PLN)
     MATH_TOLERANCE = Decimal("0.01")
@@ -25,16 +25,22 @@ class Config:
     SIGNIFICANT_DIFFERENCE = Decimal("1.00")
     # Minimalna cena produktu, poniżej której pozycja jest traktowana jako błąd OCR (w PLN)
     MIN_PRODUCT_PRICE = Decimal("0.01")
-    
+
     # --- Stałe dla strategii Kaufland ---
     # Typowe rabaty z karty Kaufland Card (w PLN)
     KAUFLAND_TYPICAL_DISCOUNTS = [Decimal("5.0"), Decimal("10.0"), Decimal("15.0")]
     # Tolerancja dla wykrywania rabatów z karty (w PLN)
     KAUFLAND_DISCOUNT_TOLERANCE = Decimal("1.0")
-    
+
     # --- Konfiguracja logowania ---
     # Włącza logowanie do pliku (domyślnie wyłączone)
     ENABLE_FILE_LOGGING = os.getenv("ENABLE_FILE_LOGGING", "false").lower() == "true"
+
+    # --- Konfiguracja OCR ---
+    # Silnik OCR: 'tesseract' (CPU) lub 'easyocr' (GPU/CPU)
+    OCR_ENGINE = os.getenv("OCR_ENGINE", "tesseract")
+    # Czy używać GPU dla EasyOCR (jeśli dostępne)
+    USE_GPU_OCR = os.getenv("USE_GPU_OCR", "true").lower() == "true"
 
     @staticmethod
     def print_config():
@@ -42,4 +48,6 @@ class Config:
         print(f"OLLAMA_HOST: {Config.OLLAMA_HOST}")
         print(f"VISION_MODEL: {Config.VISION_MODEL}")
         print(f"TEXT_MODEL:  {Config.TEXT_MODEL}")
+        print(f"OCR_ENGINE:  {Config.OCR_ENGINE}")
+        print(f"USE_GPU_OCR: {Config.USE_GPU_OCR}")
         print("--------------------")

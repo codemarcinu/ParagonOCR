@@ -33,20 +33,20 @@ def setup_logging(enable_file: bool = None) -> None:
         logger = logging.getLogger("ParagonOCR")
         logger.setLevel(logging.DEBUG)
         
-        # Handler do pliku
-        file_handler = logging.FileHandler(LOG_FILE, encoding='utf-8')
-        file_handler.setLevel(logging.DEBUG)
-        
-        # Format logów
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S'
-        )
-        file_handler.setFormatter(formatter)
-        
-        # Dodaj handler tylko jeśli nie został już dodany
-        if not logger.handlers:
-            logger.addHandler(file_handler)
+        # Handler do pliku (jeśli włączone)
+        if ENABLE_FILE_LOGGING:
+            file_handler = logging.FileHandler(LOG_FILE, encoding='utf-8')
+            file_handler.setLevel(logging.DEBUG)
+            file_handler.setFormatter(formatter)
+            if file_handler not in logger.handlers: # Zapobiegaj dodawaniu wielu razy
+                logger.addHandler(file_handler)
+
+        # Handler do konsoli (zawsze włączony dla verbose output)
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.DEBUG)
+        console_handler.setFormatter(formatter)
+        if console_handler not in logger.handlers: # Zapobiegaj dodawaniu wielu razy
+            logger.addHandler(console_handler)
 
 
 def log_message(message: str, level: str = "INFO", callback: Optional[Callable[[str], None]] = None) -> None:
@@ -81,9 +81,10 @@ def log_message(message: str, level: str = "INFO", callback: Optional[Callable[[
             logger.info(message)  # Domyślnie INFO
 
 
-# Inicjalizacja przy imporcie (jeśli zmienna środowiskowa jest ustawiona)
-if ENABLE_FILE_LOGGING:
-    setup_logging()
+# Inicjalizacja przy imporcie - zawsze konfiguruj logger
+setup_logging()
+
+
 
 
 
