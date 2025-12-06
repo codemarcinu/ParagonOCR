@@ -329,16 +329,21 @@ def save_to_database(
     unknown_products = []
     product_to_item_map = {}  # Mapowanie raw_name -> item_data
     
+    # Batch load all aliases at once to avoid N+1 query problem
+    raw_names = [item["nazwa_raw"] for item in parsed_data["pozycje"]]
+    aliases = (
+        session.query(AliasProduktu)
+        .options(joinedload(AliasProduktu.produkt))
+        .filter(AliasProduktu.nazwa_z_paragonu.in_(raw_names))
+        .all()
+    )
+    alias_map = {a.nazwa_z_paragonu: a for a in aliases}
+    
     for idx, item_data in enumerate(parsed_data["pozycje"]):
         raw_name = item_data["nazwa_raw"]
         
-        # Sprawdź czy produkt jest już w bazie (alias)
-        alias = (
-            session.query(AliasProduktu)
-            .options(joinedload(AliasProduktu.produkt))
-            .filter_by(nazwa_z_paragonu=raw_name)
-            .first()
-        )
+        # Sprawdź czy produkt jest już w bazie (alias) - O(1) lookup
+        alias = alias_map.get(raw_name)
         
         # Jeśli nie ma aliasu i nie ma w regułach statycznych, dodaj do batcha
         if not alias:
