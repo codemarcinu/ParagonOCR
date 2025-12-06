@@ -12,12 +12,15 @@ import json
 import zipfile
 import shutil
 import sqlite3
+import logging
 from datetime import datetime, date
 from pathlib import Path
 from typing import List, Dict, Optional, Any
 from decimal import Decimal
 from sqlalchemy.orm import Session
 from sqlalchemy import text, create_engine
+
+logger = logging.getLogger(__name__)
 
 from .database import (
     engine,
@@ -420,8 +423,11 @@ class DatabaseBackup:
             if os.path.exists(old_backup):
                 try:
                     shutil.move(old_backup, db_path)
-                except Exception:
-                    pass
+                    logger.info("Przywrócono stary backup bazy danych")
+                except Exception as restore_error:
+                    logger.error(f"Nie udało się przywrócić starego backupu: {restore_error}")
+                    # Re-raise to ensure caller knows about the failure
+                    raise RuntimeError(f"Nie udało się przywrócić backupu: {restore_error}") from restore_error
             return False
 
 
