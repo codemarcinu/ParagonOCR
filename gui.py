@@ -560,46 +560,52 @@ class CookingDialog(ctk.CTkToplevel):
     def consume_products(self):
         """Zużywa zaznaczone produkty"""
         consumed = []
-        for item in self.checkboxes:
-            if item["checkbox"].get():
-                try:
-                    ilosc_do_zuzycia = Decimal(
-                        item["ilosc_entry"].get().replace(",", ".")
-                    )
-                    if ilosc_do_zuzycia <= 0:
-                        continue
-                    if ilosc_do_zuzycia > item["max_ilosc"]:
+        try:
+            for item in self.checkboxes:
+                if item["checkbox"].get():
+                    try:
+                        ilosc_do_zuzycia = Decimal(
+                            item["ilosc_entry"].get().replace(",", ".")
+                        )
+                        if ilosc_do_zuzycia <= 0:
+                            continue
+                        if ilosc_do_zuzycia > item["max_ilosc"]:
+                            self.session.rollback()
+                            messagebox.showerror(
+                                "Błąd",
+                                f"Nie można zużyć więcej niż dostępne {item['max_ilosc']} dla produktu {item['stan'].produkt.znormalizowana_nazwa}",
+                            )
+                            return
+
+                        # Zmniejsz ilość w magazynie
+                        item["stan"].ilosc -= ilosc_do_zuzycia
+                        if item["stan"].ilosc <= 0:
+                            self.session.delete(item["stan"])
+
+                        consumed.append(
+                            {
+                                "produkt": item["stan"].produkt.znormalizowana_nazwa,
+                                "ilosc": ilosc_do_zuzycia,
+                            }
+                        )
+                    except (ValueError, InvalidOperation):
+                        self.session.rollback()
                         messagebox.showerror(
                             "Błąd",
-                            f"Nie można zużyć więcej niż dostępne {item['max_ilosc']} dla produktu {item['stan'].produkt.znormalizowana_nazwa}",
+                            f"Nieprawidłowa ilość dla produktu {item['stan'].produkt.znormalizowana_nazwa}",
                         )
                         return
 
-                    # Zmniejsz ilość w magazynie
-                    item["stan"].ilosc -= ilosc_do_zuzycia
-                    if item["stan"].ilosc <= 0:
-                        self.session.delete(item["stan"])
-
-                    consumed.append(
-                        {
-                            "produkt": item["stan"].produkt.znormalizowana_nazwa,
-                            "ilosc": ilosc_do_zuzycia,
-                        }
-                    )
-                except ValueError:
-                    messagebox.showerror(
-                        "Błąd",
-                        f"Nieprawidłowa ilość dla produktu {item['stan'].produkt.znormalizowana_nazwa}",
-                    )
-                    return
-
-        if consumed:
-            self.session.commit()
-            messagebox.showinfo("Sukces", f"Zużyto {len(consumed)} produktów")
-            self.result = consumed
-            self.destroy()
-        else:
-            messagebox.showwarning("Uwaga", "Nie zaznaczono żadnych produktów")
+            if consumed:
+                self.session.commit()
+                messagebox.showinfo("Sukces", f"Zużyto {len(consumed)} produktów")
+                self.result = consumed
+                self.destroy()
+            else:
+                messagebox.showwarning("Uwaga", "Nie zaznaczono żadnych produktów")
+        except Exception as e:
+            self.session.rollback()
+            messagebox.showerror("Błąd", f"Nie udało się zużyć produktów: {e}")
 
     def on_cancel(self):
         self.session.close()
