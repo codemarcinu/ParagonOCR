@@ -15,6 +15,7 @@ from rapidfuzz import fuzz
 from .config import Config
 from .security import sanitize_path, sanitize_log_message
 from .retry_handler import retry_with_backoff
+from .llm_cache import get_llm_cache
 
 logger = logging.getLogger(__name__)
 
