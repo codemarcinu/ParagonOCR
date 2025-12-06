@@ -172,20 +172,33 @@
 
 ## 🔄 W TRAKCIE / DO ZROBIENIA
 
-### Phase 5: Performance & Polish (0% - 3 zadania)
+### Phase 5: Performance & Polish (67% - 2/3 zadań)
 
-- **Phase 5.1** ⏳ - Database optimization (indices, caching)
-- **Phase 5.2** ⏳ - LLM response optimization
+19. **Phase 5.1** ✅ - Database Optimization
+    - Dodano composite indices dla częstych zapytań:
+      - pozycje_paragonu: paragon_id, produkt_id, composite
+      - stan_magazynowy: produkt_id, data_waznosci, ilosc, priorytet, composite
+      - paragony: sklep_id, data_zakupu, composite
+      - chat_messages: conversation_id, timestamp, composite
+    - Utworzono db_cache.py z LRU cache (max 200 items)
+    - Commit: `2b72183`
+
+20. **Phase 5.2** ✅ - LLM Response Optimization
+    - Utworzono llm_cache.py z LLMResponseCache (max 100 responses)
+    - Zintegrowano cache z get_llm_suggestion()
+    - Redukcja wywołań API dla często zadawanych pytań
+    - Commit: `576fa0d`
+
 - **Phase 5.3** ⏳ - GUI performance optimization
 
 ---
 
 ## 📊 STATYSTYKI
 
-- **Zakończone pliki:** 18/21 (86%)
-- **Zakończone fazy:** 4/5 (80%)
-- **Commity:** 20
-- **Linie kodu dodane:** ~20000+
+- **Zakończone pliki:** 20/21 (95%)
+- **Zakończone fazy:** 4.67/5 (93%)
+- **Commity:** 24
+- **Linie kodu dodane:** ~22000+
 
 ---
 
