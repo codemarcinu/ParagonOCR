@@ -498,10 +498,10 @@ def _convert_types(data: dict) -> dict:
         if parsed_date:
             data["paragon_info"]["data_zakupu"] = parsed_date
         else:
-            print(
-                f"OSTRZEŻENIE: Nieprawidłowy format daty '{raw_date}'. Ustawiam dzisiejszą datę."
-            )
-            data["paragon_info"]["data_zakupu"] = datetime.now()
+            # Log error and raise exception instead of silently using today's date
+            error_msg = f"Nieprawidłowy format daty: '{raw_date}'. Nie można sparsować daty."
+            logger.error(error_msg)
+            raise ValueError(f"Nie można sparsować daty: {raw_date}. Obsługiwane formaty: {', '.join(date_formats)}")
 
         try:
             data["paragon_info"]["suma_calkowita"] = Decimal(
