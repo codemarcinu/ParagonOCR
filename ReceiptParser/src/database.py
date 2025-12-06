@@ -100,6 +100,7 @@ class StanMagazynowy(Base):
     data_dodania = Column(DateTime, default=datetime.now)  # Kiedy produkt został dodany do magazynu
     pozycja_paragonu_id = Column(Integer, ForeignKey('pozycje_paragonu.pozycja_id'), nullable=True)  # Opcjonalne powiązanie z paragonem
     zamrozone = Column(Boolean, default=False, nullable=False)  # Czy produkt jest zamrożony
+    priorytet_konsumpcji = Column(Integer, default=0, nullable=False)  # 0=normal, 1=warning (3 dni), 2=critical (dziś), 3=expired
     
     produkt = relationship("Produkt", back_populates="stan_magazynowy")
     pozycja_paragonu = relationship("PozycjaParagonu")

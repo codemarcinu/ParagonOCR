@@ -354,6 +354,60 @@ Dostępne produkty w magazynie (NIE dodawaj ich do listy zakupów):
                 "uwagi": f"Błąd podczas generowania listy: {str(e)}",
             }
 
+    def suggest_use_expiring_products(self) -> str:
+        """
+        Sugeruje jak wykorzystać wygasające produkty.
+        
+        Returns:
+            Sugestia od Bielika
+        """
+        from .food_waste_tracker import FoodWasteTracker
+
+        with FoodWasteTracker(self.session) as tracker:
+            tracker.update_priorities()
+            expiring = tracker.get_expiring_products(priority=tracker.PRIORITY_CRITICAL)
+            expiring.extend(tracker.get_expiring_products(priority=tracker.PRIORITY_WARNING))
+
+            if not expiring:
+                return "✅ Nie masz produktów wymagających pilnego zużycia. Wszystko w porządku!"
+
+            # Przygotuj listę wygasających produktów
+            expiring_text = "\n".join(
+                [
+                    f"- {p['nazwa']} ({p['ilosc']} {p['jednostka']}) - wygasa za {p['days_until_expiry']} dni"
+                    if p['days_until_expiry'] is not None and p['days_until_expiry'] >= 0
+                    else f"- {p['nazwa']} ({p['ilosc']} {p['jednostka']}) - już przeterminowany"
+                    for p in expiring[:10]
+                ]
+            )
+
+            system_prompt = get_prompt("answer_question")
+
+            user_prompt = f"""Użytkownik ma następujące produkty wygasające w najbliższych dniach:
+
+{expiring_text}
+
+Sugeruj konkretne potrawy lub sposoby wykorzystania tych produktów, aby uniknąć marnotrawstwa. 
+Bądź konkretny i praktyczny. Jeśli produkt jest już przeterminowany, zasugeruj bezpieczne sposoby sprawdzenia czy nadal nadaje się do spożycia."""
+
+            try:
+                if not client:
+                    return "Przepraszam, nie mogę połączyć się z serwerem Ollama."
+
+                response = client.chat(
+                    model=self.model_name,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt},
+                    ],
+                    options={"temperature": 0.7, "num_predict": 2000},
+                )
+
+                return response["message"]["content"].strip()
+
+            except Exception as e:
+                return f"Przepraszam, wystąpił błąd: {str(e)}"
+
     def answer_question(self, question: str) -> str:
         """
         Odpowiada na pytania użytkownika o jedzenie, produkty, gotowanie.

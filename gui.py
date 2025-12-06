@@ -31,6 +31,9 @@ from src.config_prompts import (
     DEFAULT_PROMPTS,
 )
 from src.purchase_analytics import PurchaseAnalytics
+from src.food_waste_tracker import FoodWasteTracker, get_expiring_products_summary
+from src.quick_add import QuickAddHelper
+from src.meal_planner import MealPlanner
 from history_manager import load_history, add_to_history
 
 
@@ -89,6 +92,7 @@ class Icons:
     PRODUCT = "🛒"
     CALENDAR = "📅"
     FILE = "📁"
+    MEAL_PLANNER = "🍽️"
 
 
 class ToolTip:
@@ -642,6 +646,185 @@ class CookingDialog(ctk.CTkToplevel):
 
     def on_cancel(self):
         self.session.close()
+        self.destroy()
+
+
+class QuickAddDialog(ctk.CTkToplevel):
+    """Okno Quick Add - szybkie dodawanie produktu z autocomplete"""
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("⚡ Quick Add - Szybkie Dodawanie")
+        self.geometry("500x400")
+        self.result = None
+
+        # Header
+        header_frame = ctk.CTkFrame(self)
+        header_frame.pack(fill="x", padx=10, pady=10)
+        ctk.CTkLabel(
+            header_frame,
+            text="⚡ Quick Add - Dodaj produkt w 5 sekund",
+            font=("Arial", 16, "bold"),
+        ).pack(pady=10)
+
+        # Form
+        form_frame = ctk.CTkFrame(self)
+        form_frame.pack(fill="both", expand=True, padx=20, pady=10)
+
+        # Nazwa produktu z autocomplete
+        ctk.CTkLabel(form_frame, text="Nazwa produktu:", font=("Arial", 14)).grid(
+            row=0, column=0, sticky="w", pady=10
+        )
+        self.name_entry = ctk.CTkEntry(form_frame, width=300, font=("Arial", 14))
+        self.name_entry.grid(row=0, column=1, pady=10, padx=10, sticky="ew")
+        self.name_entry.focus_set()
+        form_frame.grid_columnconfigure(1, weight=1)
+
+        # Bind autocomplete
+        self.name_entry.bind("<KeyRelease>", self.on_name_changed)
+        self.autocomplete_listbox = None
+
+        # Ilość
+        ctk.CTkLabel(form_frame, text="Ilość:", font=("Arial", 14)).grid(
+            row=1, column=0, sticky="w", pady=10
+        )
+        self.quantity_entry = ctk.CTkEntry(form_frame, width=300)
+        self.quantity_entry.insert(0, "1.0")
+        self.quantity_entry.grid(row=1, column=1, pady=10, padx=10, sticky="ew")
+
+        # Jednostka
+        ctk.CTkLabel(form_frame, text="Jednostka:", font=("Arial", 14)).grid(
+            row=2, column=0, sticky="w", pady=10
+        )
+        self.unit_entry = ctk.CTkEntry(form_frame, width=300)
+        self.unit_entry.insert(0, "szt")
+        self.unit_entry.grid(row=2, column=1, pady=10, padx=10, sticky="ew")
+
+        # Data ważności (opcjonalna)
+        ctk.CTkLabel(
+            form_frame, text="Data ważności (opcjonalna):", font=("Arial", 14)
+        ).grid(row=3, column=0, sticky="w", pady=10)
+        self.expiry_entry = ctk.CTkEntry(
+            form_frame, width=300, placeholder_text="YYYY-MM-DD"
+        )
+        self.expiry_entry.grid(row=3, column=1, pady=10, padx=10, sticky="ew")
+
+        # Buttons
+        button_frame = ctk.CTkFrame(self)
+        button_frame.pack(fill="x", padx=20, pady=10)
+
+        ctk.CTkButton(
+            button_frame,
+            text="⚡ Dodaj (Enter)",
+            command=self.quick_add,
+            fg_color=AppColors.SUCCESS,
+            hover_color=App._adjust_color(AppColors.SUCCESS, -15),
+            width=200,
+        ).pack(side="right", padx=AppSpacing.SM)
+
+        ctk.CTkButton(
+            button_frame, text="Anuluj (Esc)", command=self.on_cancel, width=200
+        ).pack(side="left", padx=AppSpacing.SM)
+
+        self.bind("<Return>", lambda event: self.quick_add())
+        self.bind("<Escape>", lambda event: self.on_cancel())
+        self.protocol("WM_DELETE_WINDOW", self.on_cancel)
+        self.after(100, self.grab_set)
+
+    def on_name_changed(self, event=None):
+        """Obsługuje zmiany w polu nazwy - pokazuje autocomplete"""
+        query = self.name_entry.get().strip()
+
+        # Usuń poprzednią listę autocomplete
+        if self.autocomplete_listbox:
+            self.autocomplete_listbox.destroy()
+            self.autocomplete_listbox = None
+
+        if len(query) < 2:
+            return
+
+        # Pobierz sugestie
+        try:
+            with QuickAddHelper() as helper:
+                suggestions = helper.get_autocomplete_suggestions(query, limit=5)
+
+            if suggestions:
+                # Utwórz listbox z sugestiami
+                self.autocomplete_listbox = ctk.CTkFrame(self)
+                self.autocomplete_listbox.place(
+                    x=self.name_entry.winfo_x() + 20,
+                    y=self.name_entry.winfo_y() + 30,
+                    width=300,
+                )
+
+                for i, suggestion in enumerate(suggestions):
+                    btn = ctk.CTkButton(
+                        self.autocomplete_listbox,
+                        text=suggestion["nazwa"],
+                        command=lambda s=suggestion: self.select_suggestion(s),
+                        anchor="w",
+                        fg_color="transparent",
+                        hover_color=AppColors.PRIMARY,
+                    )
+                    btn.pack(fill="x", padx=2, pady=1)
+
+        except Exception:
+            pass  # Ignoruj błędy autocomplete
+
+    def select_suggestion(self, suggestion):
+        """Wybiera sugestię z autocomplete"""
+        self.name_entry.delete(0, "end")
+        self.name_entry.insert(0, suggestion["nazwa"])
+        if self.autocomplete_listbox:
+            self.autocomplete_listbox.destroy()
+            self.autocomplete_listbox = None
+        self.quantity_entry.focus_set()
+
+    def quick_add(self):
+        """Szybko dodaje produkt"""
+        nazwa = self.name_entry.get().strip()
+        if not nazwa:
+            messagebox.showerror("Błąd", "Nazwa produktu nie może być pusta")
+            return
+
+        try:
+            ilosc = Decimal(self.quantity_entry.get().replace(",", "."))
+            if ilosc <= 0:
+                messagebox.showerror("Błąd", "Ilość musi być większa od zera")
+                return
+        except ValueError:
+            messagebox.showerror("Błąd", "Nieprawidłowa ilość")
+            return
+
+        jednostka = self.unit_entry.get().strip() or "szt"
+
+        data_waznosci = None
+        expiry_str = self.expiry_entry.get().strip()
+        if expiry_str:
+            try:
+                data_waznosci = datetime.strptime(expiry_str, "%Y-%m-%d")
+            except ValueError:
+                messagebox.showerror(
+                    "Błąd", "Nieprawidłowy format daty. Użyj YYYY-MM-DD"
+                )
+                return
+
+        try:
+            with QuickAddHelper() as helper:
+                result = helper.quick_add_product(nazwa, ilosc, jednostka, data_waznosci)
+                messagebox.showinfo(
+                    "Sukces",
+                    f"⚡ Produkt '{result['nazwa']}' dodany w trybie Quick Add!",
+                )
+                self.result = result
+                self.destroy()
+        except Exception as e:
+            messagebox.showerror("Błąd", f"Nie udało się dodać produktu: {str(e)}")
+
+    def on_cancel(self):
+        """Anuluje dodawanie"""
+        if self.autocomplete_listbox:
+            self.autocomplete_listbox.destroy()
         self.destroy()
 
 
@@ -1200,6 +1383,17 @@ class App(ctk.CTk):
         btn_bielik.pack(side="left", padx=AppSpacing.XS)
         ToolTip(btn_bielik, "Otwórz czat z asystentem kulinarnym Bielik")
 
+        btn_meal_planner = ctk.CTkButton(
+            menu_buttons_frame,
+            text=f"{Icons.MEAL_PLANNER} Plan Posiłków",
+            command=self.show_meal_planner,
+            width=120,
+            fg_color=AppColors.PRIMARY,
+            hover_color=App._adjust_color(AppColors.PRIMARY, -15),
+        )
+        btn_meal_planner.pack(side="left", padx=AppSpacing.XS)
+        ToolTip(btn_meal_planner, "Tygodniowy planer posiłków")
+
         btn_settings = ctk.CTkButton(
             menu_buttons_frame,
             text=f"{Icons.SETTINGS} Ustawienia",
@@ -1221,7 +1415,7 @@ class App(ctk.CTk):
         self.receipts_frame = ctk.CTkFrame(self.content_frame)
         self.receipts_frame.grid(row=0, column=0, sticky="nsew")
         self.receipts_frame.grid_columnconfigure(0, weight=1)
-        self.receipts_frame.grid_rowconfigure(1, weight=1)
+        self.receipts_frame.grid_rowconfigure(2, weight=1)  # Zmieniono z 1 na 2 dla alertów
 
         # Header z przyciskami
         header_frame = ctk.CTkFrame(self.receipts_frame)
@@ -1261,9 +1455,13 @@ class App(ctk.CTk):
         btn_refresh.pack(side="left", padx=AppSpacing.XS)
         ToolTip(btn_refresh, "Odśwież dane analityki")
 
+        # Frame dla alertów wygasających produktów
+        self.expiry_alert_frame = ctk.CTkFrame(self.receipts_frame)
+        self.expiry_alert_frame.grid(row=1, column=0, sticky="ew", padx=10, pady=5)
+
         # Scrollable area dla analityki
         self.analytics_scrollable = ctk.CTkScrollableFrame(self.receipts_frame)
-        self.analytics_scrollable.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+        self.analytics_scrollable.grid(row=2, column=0, sticky="nsew", padx=10, pady=10)
         self.analytics_scrollable.grid_columnconfigure(0, weight=1)
 
         # Stary widok przetwarzania (ukryty, dostępny przez dialog)
@@ -1356,6 +1554,22 @@ class App(ctk.CTk):
 
         self.after(100, self.process_log_queue)
 
+        # --- FAB BUTTON (Floating Action Button) ---
+        self.fab_button = ctk.CTkButton(
+            self,
+            text="⚡",
+            width=60,
+            height=60,
+            font=("Arial", 24, "bold"),
+            fg_color=AppColors.SUCCESS,
+            hover_color=self._adjust_color(AppColors.SUCCESS, -20),
+            corner_radius=30,
+            command=self.show_quick_add_dialog,
+        )
+        # FAB będzie pozycjonowany absolutnie (overlay)
+        self.fab_button.place(relx=0.95, rely=0.95, anchor="se")
+        ToolTip(self.fab_button, "⚡ Quick Add - Dodaj produkt w 5 sekund")
+
         # Show receipts tab by default
         self.show_receipts_tab()
 
@@ -1369,10 +1583,30 @@ class App(ctk.CTk):
         self.receipts_frame.grid(row=0, column=0, sticky="nsew")
         self.refresh_analytics()
 
+    def show_meal_planner(self):
+        """Pokazuje zakładkę planera posiłków"""
+        # Ukryj wszystkie inne widoki
+        for widget in self.content_frame.winfo_children():
+            widget.grid_remove()
+
+        # Pokaż widok meal planera
+        self.meal_planner_frame.grid(row=0, column=0, sticky="nsew")
+        self.refresh_meal_planner()
+
     def show_cooking_dialog(self):
         """Otwiera okno gotowania"""
         dialog = CookingDialog(self)
         dialog.wait_window()
+
+    def show_quick_add_dialog(self):
+        """Otwiera okno Quick Add"""
+        dialog = QuickAddDialog(self)
+        dialog.wait_window()
+        if dialog.result:
+            self.log("INFO: Produkt został dodany w trybie Quick Add")
+            # Odśwież widoki jeśli są otwarte
+            if hasattr(self, "receipts_frame") and self.receipts_frame.winfo_viewable():
+                self.refresh_analytics()
 
     def show_add_product_dialog(self):
         """Otwiera okno dodawania produktu"""
@@ -1499,9 +1733,25 @@ class App(ctk.CTk):
             )
             status_label.grid(row=row, column=5, padx=5, pady=2)
 
+            # Frame dla przycisków akcji
+            actions_frame = ctk.CTkFrame(scrollable)
+            actions_frame.grid(row=row, column=6, padx=AppSpacing.XS, pady=2)
+
+            # Przycisk zmarnowany
+            waste_btn = ctk.CTkButton(
+                actions_frame,
+                text="🗑️",
+                command=lambda s=stan: self.mark_as_waste(inv_window, session, s),
+                fg_color="#8b4513",
+                hover_color="#654321",
+                width=40,
+                height=25,
+            )
+            waste_btn.pack(side="left", padx=2)
+
             # Przycisk usuwania
             delete_btn = ctk.CTkButton(
-                scrollable,
+                actions_frame,
                 text=f"{Icons.DELETE} Usuń",
                 command=lambda s=stan: self.delete_inventory_item(
                     inv_window, session, s
@@ -1511,7 +1761,7 @@ class App(ctk.CTk):
                 width=80,
                 height=25,
             )
-            delete_btn.grid(row=row, column=6, padx=AppSpacing.XS, pady=2)
+            delete_btn.pack(side="left", padx=2)
 
             inventory_items.append(
                 {
@@ -1594,6 +1844,60 @@ class App(ctk.CTk):
             session.rollback()
             messagebox.showerror("Błąd", f"Nie udało się zapisać zmian: {e}")
 
+    def mark_as_waste(self, inv_window, session, stan):
+        """Oznacza produkt jako zmarnowany"""
+        import sqlite3
+        from datetime import date
+
+        if messagebox.askyesno(
+            "Potwierdzenie",
+            f"Czy na pewno chcesz oznaczyć {stan.produkt.znormalizowana_nazwa} jako zmarnowany?",
+        ):
+            try:
+                # Zapisz do tabeli zmarnowane_produkty
+                project_root = os.path.dirname(
+                    os.path.dirname(os.path.abspath(__file__))
+                )
+                db_path = os.path.join(project_root, "ReceiptParser", "data", "receipts.db")
+
+                conn = sqlite3.connect(db_path)
+                cursor = conn.cursor()
+
+                # Przybliżona wartość (można rozszerzyć o rzeczywiste ceny)
+                wartosc = float(stan.ilosc) * 5.0  # Przybliżenie
+
+                cursor.execute(
+                    """
+                    INSERT INTO zmarnowane_produkty (produkt_id, data_zmarnowania, powod, wartosc)
+                    VALUES (?, ?, ?, ?)
+                    """,
+                    (
+                        stan.produkt_id,
+                        date.today().isoformat(),
+                        "Oznaczony przez użytkownika",
+                        wartosc,
+                    ),
+                )
+
+                conn.commit()
+                conn.close()
+
+                # Usuń z magazynu
+                session.delete(stan)
+                session.commit()
+
+                messagebox.showinfo(
+                    "Sukces",
+                    f"Produkt '{stan.produkt.znormalizowana_nazwa}' został oznaczony jako zmarnowany",
+                )
+                # Odśwież okno
+                self.refresh_inventory_window(inv_window, session)
+            except Exception as e:
+                session.rollback()
+                messagebox.showerror(
+                    "Błąd", f"Nie udało się oznaczyć produktu jako zmarnowany: {e}"
+                )
+
     def delete_inventory_item(self, inv_window, session, stan):
         """Usuwa produkt z magazynu"""
         if messagebox.askyesno(
@@ -1637,8 +1941,301 @@ class App(ctk.CTk):
         self.receipts_frame.grid_remove()
         self.processing_frame.grid(row=0, column=0, sticky="nsew")
 
+    def refresh_expiry_alerts(self):
+        """Odświeża alerty wygasających produktów"""
+        # Wyczyść poprzednią zawartość
+        for widget in self.expiry_alert_frame.winfo_children():
+            widget.destroy()
+
+        try:
+            with FoodWasteTracker() as tracker:
+                tracker.update_priorities()
+                alerts = tracker.get_expiry_alerts()
+
+                # Kolory zgodnie z specyfikacją
+                colors = {
+                    "expired": "#ff4444",  # critical
+                    "critical": "#ff4444",  # critical
+                    "warning": "#ff8800",  # warning
+                    "normal": "#44ff44",  # success
+                }
+
+                # Liczniki
+                expired_count = len(alerts["expired"])
+                critical_count = len(alerts["critical"])
+                warning_count = len(alerts["warning"])
+
+                if expired_count == 0 and critical_count == 0 and warning_count == 0:
+                    # Brak alertów - pokaż zielony status
+                    status_label = ctk.CTkLabel(
+                        self.expiry_alert_frame,
+                        text="✅ Wszystkie produkty są w porządku",
+                        font=("Arial", 14),
+                        text_color=colors["normal"],
+                    )
+                    status_label.pack(pady=10, padx=10)
+                    return
+
+                # Frame dla alertów
+                alerts_container = ctk.CTkFrame(self.expiry_alert_frame)
+                alerts_container.pack(fill="x", padx=10, pady=10)
+
+                # Nagłówek
+                header_label = ctk.CTkLabel(
+                    alerts_container,
+                    text="🚨 Alerty Wygasających Produktów",
+                    font=("Arial", 16, "bold"),
+                )
+                header_label.pack(pady=5)
+
+                # Przeterminowane
+                if expired_count > 0:
+                    expired_frame = ctk.CTkFrame(alerts_container)
+                    expired_frame.pack(fill="x", padx=10, pady=5)
+                    expired_frame.configure(fg_color=colors["expired"])
+
+                    expired_label = ctk.CTkLabel(
+                        expired_frame,
+                        text=f"❌ PRZETERMINOWANE: {expired_count} produktów",
+                        font=("Arial", 14, "bold"),
+                        text_color="white",
+                    )
+                    expired_label.pack(pady=5)
+
+                    # Lista produktów
+                    for product in alerts["expired"][:5]:  # Maksymalnie 5
+                        product_text = f"  • {product['nazwa']} ({product['ilosc']} {product['jednostka']})"
+                        if product["data_waznosci"]:
+                            product_text += f" - wygasł {abs(product['days_until_expiry'])} dni temu"
+                        product_label = ctk.CTkLabel(
+                            expired_frame,
+                            text=product_text,
+                            font=("Arial", 12),
+                            text_color="white",
+                            anchor="w",
+                        )
+                        product_label.pack(padx=10, pady=2, anchor="w")
+
+                # Krytyczne (dziś)
+                if critical_count > 0:
+                    critical_frame = ctk.CTkFrame(alerts_container)
+                    critical_frame.pack(fill="x", padx=10, pady=5)
+                    critical_frame.configure(fg_color=colors["critical"])
+
+                    critical_label = ctk.CTkLabel(
+                        critical_frame,
+                        text=f"🔴 KRYTYCZNE (dziś): {critical_count} produktów",
+                        font=("Arial", 14, "bold"),
+                        text_color="white",
+                    )
+                    critical_label.pack(pady=5)
+
+                    for product in alerts["critical"][:5]:
+                        product_text = f"  • {product['nazwa']} ({product['ilosc']} {product['jednostka']})"
+                        product_label = ctk.CTkLabel(
+                            critical_frame,
+                            text=product_text,
+                            font=("Arial", 12),
+                            text_color="white",
+                            anchor="w",
+                        )
+                        product_label.pack(padx=10, pady=2, anchor="w")
+
+                # Ostrzeżenia (3 dni)
+                if warning_count > 0:
+                    warning_frame = ctk.CTkFrame(alerts_container)
+                    warning_frame.pack(fill="x", padx=10, pady=5)
+                    warning_frame.configure(fg_color=colors["warning"])
+
+                    warning_label = ctk.CTkLabel(
+                        warning_frame,
+                        text=f"⚠️ OSTRZEŻENIE (≤3 dni): {warning_count} produktów",
+                        font=("Arial", 14, "bold"),
+                        text_color="white",
+                    )
+                    warning_label.pack(pady=5)
+
+                    for product in alerts["warning"][:5]:
+                        product_text = f"  • {product['nazwa']} ({product['ilosc']} {product['jednostka']})"
+                        if product["days_until_expiry"] is not None:
+                            product_text += f" - {product['days_until_expiry']} dni do wygaśnięcia"
+                        product_label = ctk.CTkLabel(
+                            warning_frame,
+                            text=product_text,
+                            font=("Arial", 12),
+                            text_color="white",
+                            anchor="w",
+                        )
+                        product_label.pack(padx=10, pady=2, anchor="w")
+
+                # Przycisk do otwarcia szczegółów
+                if expired_count + critical_count + warning_count > 0:
+                    buttons_frame = ctk.CTkFrame(alerts_container)
+                    buttons_frame.pack(pady=10)
+
+                    btn_details = ctk.CTkButton(
+                        buttons_frame,
+                        text="📋 Zobacz wszystkie wygasające produkty",
+                        command=self.show_expiring_products_details,
+                        fg_color=AppColors.INFO,
+                        hover_color=self._adjust_color(AppColors.INFO, -15),
+                    )
+                    btn_details.pack(side="left", padx=5)
+
+                    btn_bielik_suggest = ctk.CTkButton(
+                        buttons_frame,
+                        text="🦅 Zapytaj Bielika: Co zrobić z wygasającymi?",
+                        command=self.ask_bielik_about_expiring,
+                        fg_color=AppColors.PRIMARY,
+                        hover_color=self._adjust_color(AppColors.PRIMARY, -15),
+                    )
+                    btn_bielik_suggest.pack(side="left", padx=5)
+
+        except Exception as e:
+            error_label = ctk.CTkLabel(
+                self.expiry_alert_frame,
+                text=f"Błąd podczas ładowania alertów: {str(e)}",
+                font=("Arial", 12),
+                text_color="red",
+            )
+            error_label.pack(pady=10, padx=10)
+
+    def ask_bielik_about_expiring(self):
+        """Zadaje Bielikowi pytanie o wygasające produkty"""
+        try:
+            with BielikAssistant() as assistant:
+                suggestion = assistant.suggest_use_expiring_products()
+
+                # Pokaż odpowiedź w oknie dialogowym
+                dialog = ctk.CTkToplevel(self)
+                dialog.title("🦅 Bielik - Sugestie dla wygasających produktów")
+                dialog.geometry("800x500")
+
+                header = ctk.CTkLabel(
+                    dialog,
+                    text="🦅 Bielik - Sugestie",
+                    font=("Arial", 18, "bold"),
+                )
+                header.pack(pady=10)
+
+                scrollable = ctk.CTkScrollableFrame(dialog)
+                scrollable.pack(fill="both", expand=True, padx=20, pady=10)
+
+                suggestion_label = ctk.CTkLabel(
+                    scrollable,
+                    text=suggestion,
+                    font=("Arial", 12),
+                    wraplength=700,
+                    justify="left",
+                    anchor="w",
+                )
+                suggestion_label.pack(pady=10, padx=10, anchor="w")
+
+                ctk.CTkButton(
+                    dialog,
+                    text="Zamknij",
+                    command=dialog.destroy,
+                    width=150,
+                ).pack(pady=10)
+
+        except Exception as e:
+            messagebox.showerror(
+                "Błąd",
+                f"Nie udało się uzyskać sugestii od Bielika: {str(e)}",
+            )
+
+    def show_expiring_products_details(self):
+        """Pokazuje szczegółowy widok wygasających produktów"""
+        details_window = ctk.CTkToplevel(self)
+        details_window.title("Wygasające Produkty - Szczegóły")
+        details_window.geometry("1000x600")
+
+        # Scrollable frame
+        scrollable = ctk.CTkScrollableFrame(details_window)
+        scrollable.pack(fill="both", expand=True, padx=10, pady=10)
+
+        try:
+            with FoodWasteTracker() as tracker:
+                tracker.update_priorities()
+                alerts = tracker.get_expiry_alerts()
+
+                # Nagłówek
+                ctk.CTkLabel(
+                    scrollable,
+                    text="🚨 Wygasające Produkty",
+                    font=("Arial", 18, "bold"),
+                ).pack(pady=10)
+
+                # Przeterminowane
+                if alerts["expired"]:
+                    ctk.CTkLabel(
+                        scrollable,
+                        text="❌ PRZETERMINOWANE",
+                        font=("Arial", 16, "bold"),
+                        text_color="#ff4444",
+                    ).pack(pady=10, anchor="w")
+
+                    for product in alerts["expired"]:
+                        product_text = f"• {product['nazwa']} - {product['ilosc']} {product['jednostka']}"
+                        if product["data_waznosci"]:
+                            product_text += f" (wygasł {abs(product['days_until_expiry'])} dni temu)"
+                        ctk.CTkLabel(
+                            scrollable, text=product_text, font=("Arial", 12)
+                        ).pack(padx=20, pady=2, anchor="w")
+
+                # Krytyczne
+                if alerts["critical"]:
+                    ctk.CTkLabel(
+                        scrollable,
+                        text="🔴 KRYTYCZNE (dziś wygasa)",
+                        font=("Arial", 16, "bold"),
+                        text_color="#ff4444",
+                    ).pack(pady=10, anchor="w")
+
+                    for product in alerts["critical"]:
+                        product_text = f"• {product['nazwa']} - {product['ilosc']} {product['jednostka']}"
+                        ctk.CTkLabel(
+                            scrollable, text=product_text, font=("Arial", 12)
+                        ).pack(padx=20, pady=2, anchor="w")
+
+                # Ostrzeżenia
+                if alerts["warning"]:
+                    ctk.CTkLabel(
+                        scrollable,
+                        text="⚠️ OSTRZEŻENIE (≤3 dni)",
+                        font=("Arial", 16, "bold"),
+                        text_color="#ff8800",
+                    ).pack(pady=10, anchor="w")
+
+                    for product in alerts["warning"]:
+                        product_text = f"• {product['nazwa']} - {product['ilosc']} {product['jednostka']}"
+                        if product["days_until_expiry"] is not None:
+                            product_text += f" ({product['days_until_expiry']} dni do wygaśnięcia)"
+                        ctk.CTkLabel(
+                            scrollable, text=product_text, font=("Arial", 12)
+                        ).pack(padx=20, pady=2, anchor="w")
+
+                if not alerts["expired"] and not alerts["critical"] and not alerts["warning"]:
+                    ctk.CTkLabel(
+                        scrollable,
+                        text="✅ Brak wygasających produktów",
+                        font=("Arial", 14),
+                        text_color="#44ff44",
+                    ).pack(pady=20)
+
+        except Exception as e:
+            ctk.CTkLabel(
+                scrollable,
+                text=f"Błąd: {str(e)}",
+                font=("Arial", 12),
+                text_color="red",
+            ).pack(pady=20)
+
     def refresh_analytics(self):
         """Odświeża widok analityki zakupów"""
+        # Odśwież alerty wygasających produktów
+        self.refresh_expiry_alerts()
+
         # Wyczyść poprzednią zawartość
         for widget in self.analytics_scrollable.winfo_children():
             widget.destroy()
@@ -1845,6 +2442,171 @@ class App(ctk.CTk):
                 font=("Arial", 12),
                 text_color="red",
             ).grid(row=0, column=0, padx=20, pady=20)
+
+    def refresh_meal_planner(self):
+        """Odświeża widok planera posiłków"""
+        # Wyczyść poprzednią zawartość
+        for widget in self.meal_planner_frame.winfo_children():
+            widget.destroy()
+
+        # Header
+        header_frame = ctk.CTkFrame(self.meal_planner_frame)
+        header_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
+        header_frame.grid_columnconfigure(1, weight=1)
+
+        ctk.CTkLabel(
+            header_frame,
+            text=f"{Icons.MEAL_PLANNER} Tygodniowy Planer Posiłków",
+            font=("Arial", 20, "bold"),
+        ).grid(row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w")
+
+        buttons_frame = ctk.CTkFrame(header_frame)
+        buttons_frame.grid(
+            row=0, column=1, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="e"
+        )
+
+        btn_generate = ctk.CTkButton(
+            buttons_frame,
+            text=f"{Icons.REFRESH} Wygeneruj Plan",
+            command=self.generate_meal_plan,
+            width=150,
+            fg_color=AppColors.SUCCESS,
+            hover_color=self._adjust_color(AppColors.SUCCESS, -15),
+        )
+        btn_generate.pack(side="left", padx=AppSpacing.XS)
+        ToolTip(btn_generate, "Wygeneruj nowy plan posiłków na 7 dni")
+
+        # Scrollable area
+        scrollable = ctk.CTkScrollableFrame(self.meal_planner_frame)
+        scrollable.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+        scrollable.grid_columnconfigure(0, weight=1)
+
+        # Placeholder
+        ctk.CTkLabel(
+            scrollable,
+            text="Kliknij 'Wygeneruj Plan' aby utworzyć plan posiłków na 7 dni",
+            font=("Arial", 14),
+            text_color="gray",
+        ).pack(pady=50)
+
+        self.meal_planner_scrollable = scrollable
+
+    def generate_meal_plan(self):
+        """Generuje plan posiłków"""
+        # Pokaż progress
+        for widget in self.meal_planner_scrollable.winfo_children():
+            widget.destroy()
+
+        progress_label = ctk.CTkLabel(
+            self.meal_planner_scrollable,
+            text="🦅 Bielik generuje plan posiłków...",
+            font=("Arial", 14),
+        )
+        progress_label.pack(pady=50)
+
+        # Generuj w osobnym wątku
+        import threading
+
+        thread = threading.Thread(target=self._generate_meal_plan_thread)
+        thread.daemon = True
+        thread.start()
+
+    def _generate_meal_plan_thread(self):
+        """Generuje plan posiłków w osobnym wątku"""
+        try:
+            with MealPlanner() as planner:
+                plan = planner.generate_weekly_plan()
+
+            # Aktualizuj GUI w głównym wątku
+            self.after(0, lambda: self._display_meal_plan(plan))
+
+        except Exception as e:
+            error_msg = f"Błąd podczas generowania planu: {str(e)}"
+            self.after(0, lambda: self._display_meal_plan_error(error_msg))
+
+    def _display_meal_plan(self, plan: Dict):
+        """Wyświetla wygenerowany plan posiłków"""
+        # Wyczyść
+        for widget in self.meal_planner_scrollable.winfo_children():
+            widget.destroy()
+
+        plan_data = plan.get("plan", [])
+
+        if not plan_data:
+            ctk.CTkLabel(
+                self.meal_planner_scrollable,
+                text="Nie udało się wygenerować planu",
+                font=("Arial", 14),
+                text_color="red",
+            ).pack(pady=20)
+            return
+
+        # Wyświetl plan dla każdego dnia
+        for i, day_plan in enumerate(plan_data):
+            day_frame = ctk.CTkFrame(self.meal_planner_scrollable)
+            day_frame.pack(fill="x", padx=10, pady=10)
+            day_frame.grid_columnconfigure(1, weight=1)
+
+            # Nagłówek dnia
+            day_name = day_plan.get("dzien_tygodnia", "")
+            day_date = day_plan.get("dzien", "")
+            header_text = f"{day_name} - {day_date}"
+
+            ctk.CTkLabel(
+                day_frame,
+                text=header_text,
+                font=("Arial", 16, "bold"),
+            ).grid(row=0, column=0, columnspan=3, padx=10, pady=10, sticky="w")
+
+            # Śniadanie
+            self._display_meal(
+                day_frame, 1, "🌅 Śniadanie", day_plan.get("sniadanie", {})
+            )
+            # Obiad
+            self._display_meal(day_frame, 2, "🍽️ Obiad", day_plan.get("obiad", {}))
+            # Kolacja
+            self._display_meal(
+                day_frame, 3, "🌙 Kolacja", day_plan.get("kolacja", {})
+            )
+
+    def _display_meal(self, parent, row: int, meal_name: str, meal_data: Dict):
+        """Wyświetla pojedynczy posiłek"""
+        meal_frame = ctk.CTkFrame(parent)
+        meal_frame.grid(row=row, column=0, columnspan=3, padx=10, pady=5, sticky="ew")
+        meal_frame.grid_columnconfigure(1, weight=1)
+
+        ctk.CTkLabel(
+            meal_frame, text=meal_name, font=("Arial", 14, "bold"), width=120
+        ).grid(row=0, column=0, padx=10, pady=5, sticky="w")
+
+        nazwa = meal_data.get("nazwa", "Brak")
+        opis = meal_data.get("opis", "")
+        czas = meal_data.get("czas", "")
+        skladniki = meal_data.get("skladniki", [])
+
+        meal_text = f"{nazwa}"
+        if czas:
+            meal_text += f" ⏱️ {czas}"
+        if opis:
+            meal_text += f"\n{opis}"
+        if skladniki:
+            meal_text += f"\nSkładniki: {', '.join(skladniki)}"
+
+        ctk.CTkLabel(
+            meal_frame, text=meal_text, font=("Arial", 12), anchor="w", justify="left"
+        ).grid(row=0, column=1, padx=10, pady=5, sticky="w")
+
+    def _display_meal_plan_error(self, error_msg: str):
+        """Wyświetla błąd podczas generowania planu"""
+        for widget in self.meal_planner_scrollable.winfo_children():
+            widget.destroy()
+
+        ctk.CTkLabel(
+            self.meal_planner_scrollable,
+            text=error_msg,
+            font=("Arial", 14),
+            text_color="red",
+        ).pack(pady=20)
 
     def refresh_history(self):
         """Odświeża listę historii plików w combobox."""
