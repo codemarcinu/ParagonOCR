@@ -34,6 +34,8 @@ class AppColors:
         SURFACE_DARK: Dark mode surface color
         BORDER_LIGHT: Light mode border color
         BORDER_DARK: Dark mode border color
+        CHAT_BOT: Light blue color for bot messages
+        CHAT_USER: Light green color for user messages
     """
     
     # Primary colors
@@ -60,6 +62,10 @@ class AppColors:
     # Border colors
     BORDER_LIGHT: Final[str] = "#e5e7eb"
     BORDER_DARK: Final[str] = "#404040"
+    
+    # Chat colors
+    CHAT_BOT: Final[str] = "#e0f2fe"  # Light blue for bot messages
+    CHAT_USER: Final[str] = "#f0fdf4"  # Light green for user messages
 
 
 class AppSpacing:
@@ -148,6 +154,7 @@ class Icons:
         SUCCESS: Success checkmark icon
         ERROR: Error cross icon
         WARNING: Warning icon
+        BEAR: Bielik (eagle) AI assistant icon
     """
     
     RECEIPT: Final[str] = "📄"
@@ -168,4 +175,5 @@ class Icons:
     SUCCESS: Final[str] = "✅"
     ERROR: Final[str] = "❌"
     WARNING: Final[str] = "⚠️"
+    BEAR: Final[str] = "🦅"  # Bielik (eagle) icon for AI assistant
 
