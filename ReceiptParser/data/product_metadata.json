@@ -1,0 +1,5599 @@
+{
+  "products": {
+    "Chleb pszeniczny": {
+      "id": "piekarnicze_chleb_pszeniczny",
+      "znormalizowana_nazwa": "Chleb pszeniczny",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Chleb",
+      "tags": [
+        "piekarnicze",
+        "chleb"
+      ],
+      "aliases": [
+        "Chleb",
+        "pszeniczny"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Chleb żytni": {
+      "id": "piekarnicze_chleb_żytni",
+      "znormalizowana_nazwa": "Chleb żytni",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Chleb",
+      "tags": [
+        "piekarnicze",
+        "chleb"
+      ],
+      "aliases": [
+        "Chleb",
+        "żytni"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        3.0,
+        4.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Chleb razowy": {
+      "id": "piekarnicze_chleb_razowy",
+      "znormalizowana_nazwa": "Chleb razowy",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Chleb",
+      "tags": [
+        "piekarnicze",
+        "chleb"
+      ],
+      "aliases": [
+        "Chleb",
+        "razowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        3.5,
+        5.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Chleb graham": {
+      "id": "piekarnicze_chleb_graham",
+      "znormalizowana_nazwa": "Chleb graham",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Chleb",
+      "tags": [
+        "piekarnicze",
+        "chleb"
+      ],
+      "aliases": [
+        "Chleb",
+        "graham"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        4.0,
+        6.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Chleb baltonowski": {
+      "id": "piekarnicze_chleb_baltonowski",
+      "znormalizowana_nazwa": "Chleb baltonowski",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Chleb",
+      "tags": [
+        "piekarnicze",
+        "chleb"
+      ],
+      "aliases": [
+        "Chleb",
+        "baltonowski"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        4.5,
+        6.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Chleb krojony": {
+      "id": "piekarnicze_chleb_krojony",
+      "znormalizowana_nazwa": "Chleb krojony",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Chleb",
+      "tags": [
+        "piekarnicze",
+        "chleb"
+      ],
+      "aliases": [
+        "Chleb",
+        "krojony"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        5.0,
+        7.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Bułki kajzerka": {
+      "id": "piekarnicze_bułki_kajzerka",
+      "znormalizowana_nazwa": "Bułki kajzerka",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Bułki",
+      "tags": [
+        "piekarnicze",
+        "bułki"
+      ],
+      "aliases": [
+        "Bułki",
+        "kajzerka"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        5.5,
+        8.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Bułki grahamka": {
+      "id": "piekarnicze_bułki_grahamka",
+      "znormalizowana_nazwa": "Bułki grahamka",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Bułki",
+      "tags": [
+        "piekarnicze",
+        "bułki"
+      ],
+      "aliases": [
+        "Bułki",
+        "grahamka"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        6.0,
+        9.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Bułki pszenna": {
+      "id": "piekarnicze_bułki_pszenna",
+      "znormalizowana_nazwa": "Bułki pszenna",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Bułki",
+      "tags": [
+        "piekarnicze",
+        "bułki"
+      ],
+      "aliases": [
+        "Bułki",
+        "pszenna"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        6.5,
+        9.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Bułki żytnia": {
+      "id": "piekarnicze_bułki_żytnia",
+      "znormalizowana_nazwa": "Bułki żytnia",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Bułki",
+      "tags": [
+        "piekarnicze",
+        "bułki"
+      ],
+      "aliases": [
+        "Bułki",
+        "żytnia"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        7.0,
+        10.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Bułki z sezamem": {
+      "id": "piekarnicze_bułki_z_sezamem",
+      "znormalizowana_nazwa": "Bułki z sezamem",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Bułki",
+      "tags": [
+        "piekarnicze",
+        "bułki"
+      ],
+      "aliases": [
+        "Bułki",
+        "z sezamem"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        7.5,
+        11.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Bułki z makiem": {
+      "id": "piekarnicze_bułki_z_makiem",
+      "znormalizowana_nazwa": "Bułki z makiem",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Bułki",
+      "tags": [
+        "piekarnicze",
+        "bułki"
+      ],
+      "aliases": [
+        "Bułki",
+        "z makiem"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        8.0,
+        12.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Bagietka francuska": {
+      "id": "piekarnicze_bagietka_francuska",
+      "znormalizowana_nazwa": "Bagietka francuska",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Bagietka",
+      "tags": [
+        "piekarnicze",
+        "bagietka"
+      ],
+      "aliases": [
+        "Bagietka",
+        "francuska"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        8.5,
+        12.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Bagietka czosnkowa": {
+      "id": "piekarnicze_bagietka_czosnkowa",
+      "znormalizowana_nazwa": "Bagietka czosnkowa",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Bagietka",
+      "tags": [
+        "piekarnicze",
+        "bagietka"
+      ],
+      "aliases": [
+        "Bagietka",
+        "czosnkowa"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        9.0,
+        13.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Bagietka z serem": {
+      "id": "piekarnicze_bagietka_z_serem",
+      "znormalizowana_nazwa": "Bagietka z serem",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Bagietka",
+      "tags": [
+        "piekarnicze",
+        "bagietka"
+      ],
+      "aliases": [
+        "Bagietka",
+        "z serem"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        9.5,
+        14.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Rogal maślany": {
+      "id": "piekarnicze_rogal_maślany",
+      "znormalizowana_nazwa": "Rogal maślany",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Rogal",
+      "tags": [
+        "piekarnicze",
+        "rogal"
+      ],
+      "aliases": [
+        "Rogal",
+        "maślany"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        10.0,
+        15.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Rogal drożdżowy": {
+      "id": "piekarnicze_rogal_drożdżowy",
+      "znormalizowana_nazwa": "Rogal drożdżowy",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Rogal",
+      "tags": [
+        "piekarnicze",
+        "rogal"
+      ],
+      "aliases": [
+        "Rogal",
+        "drożdżowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        10.5,
+        15.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Rogal z makiem": {
+      "id": "piekarnicze_rogal_z_makiem",
+      "znormalizowana_nazwa": "Rogal z makiem",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Rogal",
+      "tags": [
+        "piekarnicze",
+        "rogal"
+      ],
+      "aliases": [
+        "Rogal",
+        "z makiem"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        11.0,
+        16.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Pączek z dżemem": {
+      "id": "piekarnicze_pączek_z_dżemem",
+      "znormalizowana_nazwa": "Pączek z dżemem",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Pączek",
+      "tags": [
+        "piekarnicze",
+        "pączek"
+      ],
+      "aliases": [
+        "Pączek",
+        "z dżemem"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        11.5,
+        17.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Pączek z budyniem": {
+      "id": "piekarnicze_pączek_z_budyniem",
+      "znormalizowana_nazwa": "Pączek z budyniem",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Pączek",
+      "tags": [
+        "piekarnicze",
+        "pączek"
+      ],
+      "aliases": [
+        "Pączek",
+        "z budyniem"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        2.0,
+        3.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Pączek z różą": {
+      "id": "piekarnicze_pączek_z_różą",
+      "znormalizowana_nazwa": "Pączek z różą",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Pączek",
+      "tags": [
+        "piekarnicze",
+        "pączek"
+      ],
+      "aliases": [
+        "Pączek",
+        "z różą"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Mleko 3.2% UHT": {
+      "id": "nabiał_mleko_3.2_uht",
+      "znormalizowana_nazwa": "Mleko 3.2% UHT",
+      "kategoria": "Nabiał",
+      "subkategoria": "Mleko",
+      "tags": [
+        "nabiał",
+        "mleko"
+      ],
+      "aliases": [
+        "Mleko",
+        "3.2% UHT"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        3.0,
+        4.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Mleko 2% UHT": {
+      "id": "nabiał_mleko_2_uht",
+      "znormalizowana_nazwa": "Mleko 2% UHT",
+      "kategoria": "Nabiał",
+      "subkategoria": "Mleko",
+      "tags": [
+        "nabiał",
+        "mleko"
+      ],
+      "aliases": [
+        "Mleko",
+        "2% UHT"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        3.5,
+        5.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Mleko 1.5% UHT": {
+      "id": "nabiał_mleko_1.5_uht",
+      "znormalizowana_nazwa": "Mleko 1.5% UHT",
+      "kategoria": "Nabiał",
+      "subkategoria": "Mleko",
+      "tags": [
+        "nabiał",
+        "mleko"
+      ],
+      "aliases": [
+        "Mleko",
+        "1.5% UHT"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        4.0,
+        6.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Mleko 0.5% UHT": {
+      "id": "nabiał_mleko_0.5_uht",
+      "znormalizowana_nazwa": "Mleko 0.5% UHT",
+      "kategoria": "Nabiał",
+      "subkategoria": "Mleko",
+      "tags": [
+        "nabiał",
+        "mleko"
+      ],
+      "aliases": [
+        "Mleko",
+        "0.5% UHT"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        4.5,
+        6.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Mleko bez laktozy": {
+      "id": "nabiał_mleko_bez_laktozy",
+      "znormalizowana_nazwa": "Mleko bez laktozy",
+      "kategoria": "Nabiał",
+      "subkategoria": "Mleko",
+      "tags": [
+        "nabiał",
+        "mleko"
+      ],
+      "aliases": [
+        "Mleko",
+        "bez laktozy"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        5.0,
+        7.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Mleko sojowe": {
+      "id": "nabiał_mleko_sojowe",
+      "znormalizowana_nazwa": "Mleko sojowe",
+      "kategoria": "Nabiał",
+      "subkategoria": "Mleko",
+      "tags": [
+        "nabiał",
+        "mleko"
+      ],
+      "aliases": [
+        "Mleko",
+        "sojowe"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        5.5,
+        8.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Ser żółty": {
+      "id": "nabiał_ser_żółty",
+      "znormalizowana_nazwa": "Ser żółty",
+      "kategoria": "Nabiał",
+      "subkategoria": "Ser",
+      "tags": [
+        "nabiał",
+        "ser"
+      ],
+      "aliases": [
+        "Ser",
+        "żółty"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        6.0,
+        9.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Ser biały": {
+      "id": "nabiał_ser_biały",
+      "znormalizowana_nazwa": "Ser biały",
+      "kategoria": "Nabiał",
+      "subkategoria": "Ser",
+      "tags": [
+        "nabiał",
+        "ser"
+      ],
+      "aliases": [
+        "Ser",
+        "biały"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        6.5,
+        9.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Ser twaróg": {
+      "id": "nabiał_ser_twaróg",
+      "znormalizowana_nazwa": "Ser twaróg",
+      "kategoria": "Nabiał",
+      "subkategoria": "Ser",
+      "tags": [
+        "nabiał",
+        "ser"
+      ],
+      "aliases": [
+        "Ser",
+        "twaróg"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        7.0,
+        10.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Ser mozzarella": {
+      "id": "nabiał_ser_mozzarella",
+      "znormalizowana_nazwa": "Ser mozzarella",
+      "kategoria": "Nabiał",
+      "subkategoria": "Ser",
+      "tags": [
+        "nabiał",
+        "ser"
+      ],
+      "aliases": [
+        "Ser",
+        "mozzarella"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        7.5,
+        11.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Ser feta": {
+      "id": "nabiał_ser_feta",
+      "znormalizowana_nazwa": "Ser feta",
+      "kategoria": "Nabiał",
+      "subkategoria": "Ser",
+      "tags": [
+        "nabiał",
+        "ser"
+      ],
+      "aliases": [
+        "Ser",
+        "feta"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        8.0,
+        12.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Ser camembert": {
+      "id": "nabiał_ser_camembert",
+      "znormalizowana_nazwa": "Ser camembert",
+      "kategoria": "Nabiał",
+      "subkategoria": "Ser",
+      "tags": [
+        "nabiał",
+        "ser"
+      ],
+      "aliases": [
+        "Ser",
+        "camembert"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        8.5,
+        12.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Jogurt naturalny": {
+      "id": "nabiał_jogurt_naturalny",
+      "znormalizowana_nazwa": "Jogurt naturalny",
+      "kategoria": "Nabiał",
+      "subkategoria": "Jogurt",
+      "tags": [
+        "nabiał",
+        "jogurt"
+      ],
+      "aliases": [
+        "Jogurt",
+        "naturalny"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        9.0,
+        13.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Jogurt owocowy": {
+      "id": "nabiał_jogurt_owocowy",
+      "znormalizowana_nazwa": "Jogurt owocowy",
+      "kategoria": "Nabiał",
+      "subkategoria": "Jogurt",
+      "tags": [
+        "nabiał",
+        "jogurt"
+      ],
+      "aliases": [
+        "Jogurt",
+        "owocowy"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        9.5,
+        14.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Jogurt grecki": {
+      "id": "nabiał_jogurt_grecki",
+      "znormalizowana_nazwa": "Jogurt grecki",
+      "kategoria": "Nabiał",
+      "subkategoria": "Jogurt",
+      "tags": [
+        "nabiał",
+        "jogurt"
+      ],
+      "aliases": [
+        "Jogurt",
+        "grecki"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        10.0,
+        15.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Jogurt pitny": {
+      "id": "nabiał_jogurt_pitny",
+      "znormalizowana_nazwa": "Jogurt pitny",
+      "kategoria": "Nabiał",
+      "subkategoria": "Jogurt",
+      "tags": [
+        "nabiał",
+        "jogurt"
+      ],
+      "aliases": [
+        "Jogurt",
+        "pitny"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        10.5,
+        15.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Jogurt z probiotykami": {
+      "id": "nabiał_jogurt_z_probiotykami",
+      "znormalizowana_nazwa": "Jogurt z probiotykami",
+      "kategoria": "Nabiał",
+      "subkategoria": "Jogurt",
+      "tags": [
+        "nabiał",
+        "jogurt"
+      ],
+      "aliases": [
+        "Jogurt",
+        "z probiotykami"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        11.0,
+        16.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Śmietana 18%": {
+      "id": "nabiał_śmietana_18",
+      "znormalizowana_nazwa": "Śmietana 18%",
+      "kategoria": "Nabiał",
+      "subkategoria": "Śmietana",
+      "tags": [
+        "nabiał",
+        "śmietana"
+      ],
+      "aliases": [
+        "Śmietana",
+        "18%"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        11.5,
+        17.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Śmietana 22%": {
+      "id": "nabiał_śmietana_22",
+      "znormalizowana_nazwa": "Śmietana 22%",
+      "kategoria": "Nabiał",
+      "subkategoria": "Śmietana",
+      "tags": [
+        "nabiał",
+        "śmietana"
+      ],
+      "aliases": [
+        "Śmietana",
+        "22%"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        2.0,
+        3.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Śmietana 30%": {
+      "id": "nabiał_śmietana_30",
+      "znormalizowana_nazwa": "Śmietana 30%",
+      "kategoria": "Nabiał",
+      "subkategoria": "Śmietana",
+      "tags": [
+        "nabiał",
+        "śmietana"
+      ],
+      "aliases": [
+        "Śmietana",
+        "30%"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Śmietana kwaśna": {
+      "id": "nabiał_śmietana_kwaśna",
+      "znormalizowana_nazwa": "Śmietana kwaśna",
+      "kategoria": "Nabiał",
+      "subkategoria": "Śmietana",
+      "tags": [
+        "nabiał",
+        "śmietana"
+      ],
+      "aliases": [
+        "Śmietana",
+        "kwaśna"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        3.0,
+        4.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Masło ekstra": {
+      "id": "nabiał_masło_ekstra",
+      "znormalizowana_nazwa": "Masło ekstra",
+      "kategoria": "Nabiał",
+      "subkategoria": "Masło",
+      "tags": [
+        "nabiał",
+        "masło"
+      ],
+      "aliases": [
+        "Masło",
+        "ekstra"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        3.5,
+        5.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Masło świeże": {
+      "id": "nabiał_masło_świeże",
+      "znormalizowana_nazwa": "Masło świeże",
+      "kategoria": "Nabiał",
+      "subkategoria": "Masło",
+      "tags": [
+        "nabiał",
+        "masło"
+      ],
+      "aliases": [
+        "Masło",
+        "świeże"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        4.0,
+        6.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Masło słone": {
+      "id": "nabiał_masło_słone",
+      "znormalizowana_nazwa": "Masło słone",
+      "kategoria": "Nabiał",
+      "subkategoria": "Masło",
+      "tags": [
+        "nabiał",
+        "masło"
+      ],
+      "aliases": [
+        "Masło",
+        "słone"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        4.5,
+        6.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Masło bez soli": {
+      "id": "nabiał_masło_bez_soli",
+      "znormalizowana_nazwa": "Masło bez soli",
+      "kategoria": "Nabiał",
+      "subkategoria": "Masło",
+      "tags": [
+        "nabiał",
+        "masło"
+      ],
+      "aliases": [
+        "Masło",
+        "bez soli"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        5.0,
+        7.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Jajka kurze L": {
+      "id": "nabiał_jajka_kurze_l",
+      "znormalizowana_nazwa": "Jajka kurze L",
+      "kategoria": "Nabiał",
+      "subkategoria": "Jajka",
+      "tags": [
+        "nabiał",
+        "jajka"
+      ],
+      "aliases": [
+        "Jajka",
+        "kurze L"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        5.5,
+        8.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Jajka kurze M": {
+      "id": "nabiał_jajka_kurze_m",
+      "znormalizowana_nazwa": "Jajka kurze M",
+      "kategoria": "Nabiał",
+      "subkategoria": "Jajka",
+      "tags": [
+        "nabiał",
+        "jajka"
+      ],
+      "aliases": [
+        "Jajka",
+        "kurze M"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        6.0,
+        9.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Jajka kurze S": {
+      "id": "nabiał_jajka_kurze_s",
+      "znormalizowana_nazwa": "Jajka kurze S",
+      "kategoria": "Nabiał",
+      "subkategoria": "Jajka",
+      "tags": [
+        "nabiał",
+        "jajka"
+      ],
+      "aliases": [
+        "Jajka",
+        "kurze S"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        6.5,
+        9.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Jajka przepiórcze": {
+      "id": "nabiał_jajka_przepiórcze",
+      "znormalizowana_nazwa": "Jajka przepiórcze",
+      "kategoria": "Nabiał",
+      "subkategoria": "Jajka",
+      "tags": [
+        "nabiał",
+        "jajka"
+      ],
+      "aliases": [
+        "Jajka",
+        "przepiórcze"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        7.0,
+        10.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Jabłka szampion": {
+      "id": "owoce_jabłka_szampion",
+      "znormalizowana_nazwa": "Jabłka szampion",
+      "kategoria": "Owoce",
+      "subkategoria": "Jabłka",
+      "tags": [
+        "owoce",
+        "jabłka"
+      ],
+      "aliases": [
+        "Jabłka",
+        "szampion"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        7.5,
+        11.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Jabłka jonagold": {
+      "id": "owoce_jabłka_jonagold",
+      "znormalizowana_nazwa": "Jabłka jonagold",
+      "kategoria": "Owoce",
+      "subkategoria": "Jabłka",
+      "tags": [
+        "owoce",
+        "jabłka"
+      ],
+      "aliases": [
+        "Jabłka",
+        "jonagold"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        8.0,
+        12.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Jabłka gala": {
+      "id": "owoce_jabłka_gala",
+      "znormalizowana_nazwa": "Jabłka gala",
+      "kategoria": "Owoce",
+      "subkategoria": "Jabłka",
+      "tags": [
+        "owoce",
+        "jabłka"
+      ],
+      "aliases": [
+        "Jabłka",
+        "gala"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        8.5,
+        12.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Jabłka lobo": {
+      "id": "owoce_jabłka_lobo",
+      "znormalizowana_nazwa": "Jabłka lobo",
+      "kategoria": "Owoce",
+      "subkategoria": "Jabłka",
+      "tags": [
+        "owoce",
+        "jabłka"
+      ],
+      "aliases": [
+        "Jabłka",
+        "lobo"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        9.0,
+        13.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Jabłka idared": {
+      "id": "owoce_jabłka_idared",
+      "znormalizowana_nazwa": "Jabłka idared",
+      "kategoria": "Owoce",
+      "subkategoria": "Jabłka",
+      "tags": [
+        "owoce",
+        "jabłka"
+      ],
+      "aliases": [
+        "Jabłka",
+        "idared"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        9.5,
+        14.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Banany żółte": {
+      "id": "owoce_banany_żółte",
+      "znormalizowana_nazwa": "Banany żółte",
+      "kategoria": "Owoce",
+      "subkategoria": "Banany",
+      "tags": [
+        "owoce",
+        "banany"
+      ],
+      "aliases": [
+        "Banany",
+        "żółte"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        10.0,
+        15.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Banany zielone": {
+      "id": "owoce_banany_zielone",
+      "znormalizowana_nazwa": "Banany zielone",
+      "kategoria": "Owoce",
+      "subkategoria": "Banany",
+      "tags": [
+        "owoce",
+        "banany"
+      ],
+      "aliases": [
+        "Banany",
+        "zielone"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        10.5,
+        15.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Pomarańcze słodkie": {
+      "id": "owoce_pomarańcze_słodkie",
+      "znormalizowana_nazwa": "Pomarańcze słodkie",
+      "kategoria": "Owoce",
+      "subkategoria": "Pomarańcze",
+      "tags": [
+        "owoce",
+        "pomarańcze"
+      ],
+      "aliases": [
+        "Pomarańcze",
+        "słodkie"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        11.0,
+        16.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Pomarańcze kwaśne": {
+      "id": "owoce_pomarańcze_kwaśne",
+      "znormalizowana_nazwa": "Pomarańcze kwaśne",
+      "kategoria": "Owoce",
+      "subkategoria": "Pomarańcze",
+      "tags": [
+        "owoce",
+        "pomarańcze"
+      ],
+      "aliases": [
+        "Pomarańcze",
+        "kwaśne"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        11.5,
+        17.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Truskawki świeże": {
+      "id": "owoce_truskawki_świeże",
+      "znormalizowana_nazwa": "Truskawki świeże",
+      "kategoria": "Owoce",
+      "subkategoria": "Truskawki",
+      "tags": [
+        "owoce",
+        "truskawki"
+      ],
+      "aliases": [
+        "Truskawki",
+        "świeże"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        2.0,
+        3.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Truskawki mrożone": {
+      "id": "owoce_truskawki_mrożone",
+      "znormalizowana_nazwa": "Truskawki mrożone",
+      "kategoria": "Owoce",
+      "subkategoria": "Truskawki",
+      "tags": [
+        "owoce",
+        "truskawki"
+      ],
+      "aliases": [
+        "Truskawki",
+        "mrożone"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Winogrona zielone": {
+      "id": "owoce_winogrona_zielone",
+      "znormalizowana_nazwa": "Winogrona zielone",
+      "kategoria": "Owoce",
+      "subkategoria": "Winogrona",
+      "tags": [
+        "owoce",
+        "winogrona"
+      ],
+      "aliases": [
+        "Winogrona",
+        "zielone"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        3.0,
+        4.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Winogrona czerwone": {
+      "id": "owoce_winogrona_czerwone",
+      "znormalizowana_nazwa": "Winogrona czerwone",
+      "kategoria": "Owoce",
+      "subkategoria": "Winogrona",
+      "tags": [
+        "owoce",
+        "winogrona"
+      ],
+      "aliases": [
+        "Winogrona",
+        "czerwone"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        3.5,
+        5.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Winogrona czarne": {
+      "id": "owoce_winogrona_czarne",
+      "znormalizowana_nazwa": "Winogrona czarne",
+      "kategoria": "Owoce",
+      "subkategoria": "Winogrona",
+      "tags": [
+        "owoce",
+        "winogrona"
+      ],
+      "aliases": [
+        "Winogrona",
+        "czarne"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        4.0,
+        6.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Cytryny żółte": {
+      "id": "owoce_cytryny_żółte",
+      "znormalizowana_nazwa": "Cytryny żółte",
+      "kategoria": "Owoce",
+      "subkategoria": "Cytryny",
+      "tags": [
+        "owoce",
+        "cytryny"
+      ],
+      "aliases": [
+        "Cytryny",
+        "żółte"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        4.5,
+        6.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Cytryny limonki": {
+      "id": "owoce_cytryny_limonki",
+      "znormalizowana_nazwa": "Cytryny limonki",
+      "kategoria": "Owoce",
+      "subkategoria": "Cytryny",
+      "tags": [
+        "owoce",
+        "cytryny"
+      ],
+      "aliases": [
+        "Cytryny",
+        "limonki"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        5.0,
+        7.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Pomidory czerwone": {
+      "id": "warzywa_pomidory_czerwone",
+      "znormalizowana_nazwa": "Pomidory czerwone",
+      "kategoria": "Warzywa",
+      "subkategoria": "Pomidory",
+      "tags": [
+        "warzywa",
+        "pomidory"
+      ],
+      "aliases": [
+        "Pomidory",
+        "czerwone"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        5.5,
+        8.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Pomidory koktajlowe": {
+      "id": "warzywa_pomidory_koktajlowe",
+      "znormalizowana_nazwa": "Pomidory koktajlowe",
+      "kategoria": "Warzywa",
+      "subkategoria": "Pomidory",
+      "tags": [
+        "warzywa",
+        "pomidory"
+      ],
+      "aliases": [
+        "Pomidory",
+        "koktajlowe"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        6.0,
+        9.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Pomidory malinowe": {
+      "id": "warzywa_pomidory_malinowe",
+      "znormalizowana_nazwa": "Pomidory malinowe",
+      "kategoria": "Warzywa",
+      "subkategoria": "Pomidory",
+      "tags": [
+        "warzywa",
+        "pomidory"
+      ],
+      "aliases": [
+        "Pomidory",
+        "malinowe"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        6.5,
+        9.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Pomidory gałązkowe": {
+      "id": "warzywa_pomidory_gałązkowe",
+      "znormalizowana_nazwa": "Pomidory gałązkowe",
+      "kategoria": "Warzywa",
+      "subkategoria": "Pomidory",
+      "tags": [
+        "warzywa",
+        "pomidory"
+      ],
+      "aliases": [
+        "Pomidory",
+        "gałązkowe"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        7.0,
+        10.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Marchew młoda": {
+      "id": "warzywa_marchew_młoda",
+      "znormalizowana_nazwa": "Marchew młoda",
+      "kategoria": "Warzywa",
+      "subkategoria": "Marchew",
+      "tags": [
+        "warzywa",
+        "marchew"
+      ],
+      "aliases": [
+        "Marchew",
+        "młoda"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        7.5,
+        11.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Marchew zwykła": {
+      "id": "warzywa_marchew_zwykła",
+      "znormalizowana_nazwa": "Marchew zwykła",
+      "kategoria": "Warzywa",
+      "subkategoria": "Marchew",
+      "tags": [
+        "warzywa",
+        "marchew"
+      ],
+      "aliases": [
+        "Marchew",
+        "zwykła"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        8.0,
+        12.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Marchew baby": {
+      "id": "warzywa_marchew_baby",
+      "znormalizowana_nazwa": "Marchew baby",
+      "kategoria": "Warzywa",
+      "subkategoria": "Marchew",
+      "tags": [
+        "warzywa",
+        "marchew"
+      ],
+      "aliases": [
+        "Marchew",
+        "baby"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        8.5,
+        12.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Ogórek gruntowy": {
+      "id": "warzywa_ogórek_gruntowy",
+      "znormalizowana_nazwa": "Ogórek gruntowy",
+      "kategoria": "Warzywa",
+      "subkategoria": "Ogórek",
+      "tags": [
+        "warzywa",
+        "ogórek"
+      ],
+      "aliases": [
+        "Ogórek",
+        "gruntowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        9.0,
+        13.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Ogórek szklarniowy": {
+      "id": "warzywa_ogórek_szklarniowy",
+      "znormalizowana_nazwa": "Ogórek szklarniowy",
+      "kategoria": "Warzywa",
+      "subkategoria": "Ogórek",
+      "tags": [
+        "warzywa",
+        "ogórek"
+      ],
+      "aliases": [
+        "Ogórek",
+        "szklarniowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        9.5,
+        14.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Ogórek kiszony": {
+      "id": "warzywa_ogórek_kiszony",
+      "znormalizowana_nazwa": "Ogórek kiszony",
+      "kategoria": "Warzywa",
+      "subkategoria": "Ogórek",
+      "tags": [
+        "warzywa",
+        "ogórek"
+      ],
+      "aliases": [
+        "Ogórek",
+        "kiszony"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        10.0,
+        15.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Cebula żółta": {
+      "id": "warzywa_cebula_żółta",
+      "znormalizowana_nazwa": "Cebula żółta",
+      "kategoria": "Warzywa",
+      "subkategoria": "Cebula",
+      "tags": [
+        "warzywa",
+        "cebula"
+      ],
+      "aliases": [
+        "Cebula",
+        "żółta"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        10.5,
+        15.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Cebula czerwona": {
+      "id": "warzywa_cebula_czerwona",
+      "znormalizowana_nazwa": "Cebula czerwona",
+      "kategoria": "Warzywa",
+      "subkategoria": "Cebula",
+      "tags": [
+        "warzywa",
+        "cebula"
+      ],
+      "aliases": [
+        "Cebula",
+        "czerwona"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        11.0,
+        16.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Cebula biała": {
+      "id": "warzywa_cebula_biała",
+      "znormalizowana_nazwa": "Cebula biała",
+      "kategoria": "Warzywa",
+      "subkategoria": "Cebula",
+      "tags": [
+        "warzywa",
+        "cebula"
+      ],
+      "aliases": [
+        "Cebula",
+        "biała"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        11.5,
+        17.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Cebula dymka": {
+      "id": "warzywa_cebula_dymka",
+      "znormalizowana_nazwa": "Cebula dymka",
+      "kategoria": "Warzywa",
+      "subkategoria": "Cebula",
+      "tags": [
+        "warzywa",
+        "cebula"
+      ],
+      "aliases": [
+        "Cebula",
+        "dymka"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        2.0,
+        3.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Papryka czerwona": {
+      "id": "warzywa_papryka_czerwona",
+      "znormalizowana_nazwa": "Papryka czerwona",
+      "kategoria": "Warzywa",
+      "subkategoria": "Papryka",
+      "tags": [
+        "warzywa",
+        "papryka"
+      ],
+      "aliases": [
+        "Papryka",
+        "czerwona"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Papryka żółta": {
+      "id": "warzywa_papryka_żółta",
+      "znormalizowana_nazwa": "Papryka żółta",
+      "kategoria": "Warzywa",
+      "subkategoria": "Papryka",
+      "tags": [
+        "warzywa",
+        "papryka"
+      ],
+      "aliases": [
+        "Papryka",
+        "żółta"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        3.0,
+        4.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Papryka zielona": {
+      "id": "warzywa_papryka_zielona",
+      "znormalizowana_nazwa": "Papryka zielona",
+      "kategoria": "Warzywa",
+      "subkategoria": "Papryka",
+      "tags": [
+        "warzywa",
+        "papryka"
+      ],
+      "aliases": [
+        "Papryka",
+        "zielona"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        3.5,
+        5.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Papryka ostra": {
+      "id": "przyprawy_papryka_ostra",
+      "znormalizowana_nazwa": "Papryka ostra",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Papryka",
+      "tags": [
+        "przyprawy",
+        "papryka"
+      ],
+      "aliases": [
+        "Papryka",
+        "ostra"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        10.0,
+        15.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Ziemniaki młode": {
+      "id": "warzywa_ziemniaki_młode",
+      "znormalizowana_nazwa": "Ziemniaki młode",
+      "kategoria": "Warzywa",
+      "subkategoria": "Ziemniaki",
+      "tags": [
+        "warzywa",
+        "ziemniaki"
+      ],
+      "aliases": [
+        "Ziemniaki",
+        "młode"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        4.5,
+        6.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Ziemniaki stare": {
+      "id": "warzywa_ziemniaki_stare",
+      "znormalizowana_nazwa": "Ziemniaki stare",
+      "kategoria": "Warzywa",
+      "subkategoria": "Ziemniaki",
+      "tags": [
+        "warzywa",
+        "ziemniaki"
+      ],
+      "aliases": [
+        "Ziemniaki",
+        "stare"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        5.0,
+        7.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Ziemniaki słodkie": {
+      "id": "warzywa_ziemniaki_słodkie",
+      "znormalizowana_nazwa": "Ziemniaki słodkie",
+      "kategoria": "Warzywa",
+      "subkategoria": "Ziemniaki",
+      "tags": [
+        "warzywa",
+        "ziemniaki"
+      ],
+      "aliases": [
+        "Ziemniaki",
+        "słodkie"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        5.5,
+        8.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Kurczak filet": {
+      "id": "mięso_kurczak_filet",
+      "znormalizowana_nazwa": "Kurczak filet",
+      "kategoria": "Mięso",
+      "subkategoria": "Kurczak",
+      "tags": [
+        "mięso",
+        "kurczak"
+      ],
+      "aliases": [
+        "Kurczak",
+        "filet"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        6.0,
+        9.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Kurczak udko": {
+      "id": "mięso_kurczak_udko",
+      "znormalizowana_nazwa": "Kurczak udko",
+      "kategoria": "Mięso",
+      "subkategoria": "Kurczak",
+      "tags": [
+        "mięso",
+        "kurczak"
+      ],
+      "aliases": [
+        "Kurczak",
+        "udko"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        6.5,
+        9.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Kurczak skrzydło": {
+      "id": "mięso_kurczak_skrzydło",
+      "znormalizowana_nazwa": "Kurczak skrzydło",
+      "kategoria": "Mięso",
+      "subkategoria": "Kurczak",
+      "tags": [
+        "mięso",
+        "kurczak"
+      ],
+      "aliases": [
+        "Kurczak",
+        "skrzydło"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        7.0,
+        10.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Kurczak pierś": {
+      "id": "mięso_kurczak_pierś",
+      "znormalizowana_nazwa": "Kurczak pierś",
+      "kategoria": "Mięso",
+      "subkategoria": "Kurczak",
+      "tags": [
+        "mięso",
+        "kurczak"
+      ],
+      "aliases": [
+        "Kurczak",
+        "pierś"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        7.5,
+        11.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Kurczak cały": {
+      "id": "mięso_kurczak_cały",
+      "znormalizowana_nazwa": "Kurczak cały",
+      "kategoria": "Mięso",
+      "subkategoria": "Kurczak",
+      "tags": [
+        "mięso",
+        "kurczak"
+      ],
+      "aliases": [
+        "Kurczak",
+        "cały"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        8.0,
+        12.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Wieprzowina schab": {
+      "id": "mięso_wieprzowina_schab",
+      "znormalizowana_nazwa": "Wieprzowina schab",
+      "kategoria": "Mięso",
+      "subkategoria": "Wieprzowina",
+      "tags": [
+        "mięso",
+        "wieprzowina"
+      ],
+      "aliases": [
+        "Wieprzowina",
+        "schab"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        8.5,
+        12.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Wieprzowina karkówka": {
+      "id": "mięso_wieprzowina_karkówka",
+      "znormalizowana_nazwa": "Wieprzowina karkówka",
+      "kategoria": "Mięso",
+      "subkategoria": "Wieprzowina",
+      "tags": [
+        "mięso",
+        "wieprzowina"
+      ],
+      "aliases": [
+        "Wieprzowina",
+        "karkówka"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        9.0,
+        13.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Wieprzowina łopatka": {
+      "id": "mięso_wieprzowina_łopatka",
+      "znormalizowana_nazwa": "Wieprzowina łopatka",
+      "kategoria": "Mięso",
+      "subkategoria": "Wieprzowina",
+      "tags": [
+        "mięso",
+        "wieprzowina"
+      ],
+      "aliases": [
+        "Wieprzowina",
+        "łopatka"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        9.5,
+        14.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Wieprzowina szynka": {
+      "id": "mięso_wieprzowina_szynka",
+      "znormalizowana_nazwa": "Wieprzowina szynka",
+      "kategoria": "Mięso",
+      "subkategoria": "Wieprzowina",
+      "tags": [
+        "mięso",
+        "wieprzowina"
+      ],
+      "aliases": [
+        "Wieprzowina",
+        "szynka"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        10.0,
+        15.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Wołowina mięso mielone": {
+      "id": "mięso_wołowina_mięso_mielone",
+      "znormalizowana_nazwa": "Wołowina mięso mielone",
+      "kategoria": "Mięso",
+      "subkategoria": "Wołowina",
+      "tags": [
+        "mięso",
+        "wołowina"
+      ],
+      "aliases": [
+        "Wołowina",
+        "mięso mielone"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        10.5,
+        15.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Wołowina stek": {
+      "id": "mięso_wołowina_stek",
+      "znormalizowana_nazwa": "Wołowina stek",
+      "kategoria": "Mięso",
+      "subkategoria": "Wołowina",
+      "tags": [
+        "mięso",
+        "wołowina"
+      ],
+      "aliases": [
+        "Wołowina",
+        "stek"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        11.0,
+        16.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Wołowina gulasz": {
+      "id": "mięso_wołowina_gulasz",
+      "znormalizowana_nazwa": "Wołowina gulasz",
+      "kategoria": "Mięso",
+      "subkategoria": "Wołowina",
+      "tags": [
+        "mięso",
+        "wołowina"
+      ],
+      "aliases": [
+        "Wołowina",
+        "gulasz"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        11.5,
+        17.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Indyk filet": {
+      "id": "mięso_indyk_filet",
+      "znormalizowana_nazwa": "Indyk filet",
+      "kategoria": "Mięso",
+      "subkategoria": "Indyk",
+      "tags": [
+        "mięso",
+        "indyk"
+      ],
+      "aliases": [
+        "Indyk",
+        "filet"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        2.0,
+        3.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Indyk udko": {
+      "id": "mięso_indyk_udko",
+      "znormalizowana_nazwa": "Indyk udko",
+      "kategoria": "Mięso",
+      "subkategoria": "Indyk",
+      "tags": [
+        "mięso",
+        "indyk"
+      ],
+      "aliases": [
+        "Indyk",
+        "udko"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Indyk pierś": {
+      "id": "mięso_indyk_pierś",
+      "znormalizowana_nazwa": "Indyk pierś",
+      "kategoria": "Mięso",
+      "subkategoria": "Indyk",
+      "tags": [
+        "mięso",
+        "indyk"
+      ],
+      "aliases": [
+        "Indyk",
+        "pierś"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        3.0,
+        4.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Ryba łosoś": {
+      "id": "mięso_ryba_łosoś",
+      "znormalizowana_nazwa": "Ryba łosoś",
+      "kategoria": "Mięso",
+      "subkategoria": "Ryba",
+      "tags": [
+        "mięso",
+        "ryba"
+      ],
+      "aliases": [
+        "Ryba",
+        "łosoś"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        3.5,
+        5.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Ryba dorsz": {
+      "id": "mięso_ryba_dorsz",
+      "znormalizowana_nazwa": "Ryba dorsz",
+      "kategoria": "Mięso",
+      "subkategoria": "Ryba",
+      "tags": [
+        "mięso",
+        "ryba"
+      ],
+      "aliases": [
+        "Ryba",
+        "dorsz"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        4.0,
+        6.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Ryba mintaj": {
+      "id": "mięso_ryba_mintaj",
+      "znormalizowana_nazwa": "Ryba mintaj",
+      "kategoria": "Mięso",
+      "subkategoria": "Ryba",
+      "tags": [
+        "mięso",
+        "ryba"
+      ],
+      "aliases": [
+        "Ryba",
+        "mintaj"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        4.5,
+        6.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Ryba makrela": {
+      "id": "mięso_ryba_makrela",
+      "znormalizowana_nazwa": "Ryba makrela",
+      "kategoria": "Mięso",
+      "subkategoria": "Ryba",
+      "tags": [
+        "mięso",
+        "ryba"
+      ],
+      "aliases": [
+        "Ryba",
+        "makrela"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        5.0,
+        7.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Ryba tuńczyk": {
+      "id": "mięso_ryba_tuńczyk",
+      "znormalizowana_nazwa": "Ryba tuńczyk",
+      "kategoria": "Mięso",
+      "subkategoria": "Ryba",
+      "tags": [
+        "mięso",
+        "ryba"
+      ],
+      "aliases": [
+        "Ryba",
+        "tuńczyk"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "price_range_pln": [
+        5.5,
+        8.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Chipsy solone": {
+      "id": "snacki_chipsy_solone",
+      "znormalizowana_nazwa": "Chipsy solone",
+      "kategoria": "Snacki",
+      "subkategoria": "Chipsy",
+      "tags": [
+        "snacki",
+        "chipsy"
+      ],
+      "aliases": [
+        "Chipsy",
+        "solone"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        6.0,
+        9.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Chipsy paprykowe": {
+      "id": "snacki_chipsy_paprykowe",
+      "znormalizowana_nazwa": "Chipsy paprykowe",
+      "kategoria": "Snacki",
+      "subkategoria": "Chipsy",
+      "tags": [
+        "snacki",
+        "chipsy"
+      ],
+      "aliases": [
+        "Chipsy",
+        "paprykowe"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        6.5,
+        9.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Chipsy cebulowe": {
+      "id": "snacki_chipsy_cebulowe",
+      "znormalizowana_nazwa": "Chipsy cebulowe",
+      "kategoria": "Snacki",
+      "subkategoria": "Chipsy",
+      "tags": [
+        "snacki",
+        "chipsy"
+      ],
+      "aliases": [
+        "Chipsy",
+        "cebulowe"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        7.0,
+        10.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Chipsy serowe": {
+      "id": "snacki_chipsy_serowe",
+      "znormalizowana_nazwa": "Chipsy serowe",
+      "kategoria": "Snacki",
+      "subkategoria": "Chipsy",
+      "tags": [
+        "snacki",
+        "chipsy"
+      ],
+      "aliases": [
+        "Chipsy",
+        "serowe"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        7.5,
+        11.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Orzeszki ziemne": {
+      "id": "snacki_orzeszki_ziemne",
+      "znormalizowana_nazwa": "Orzeszki ziemne",
+      "kategoria": "Snacki",
+      "subkategoria": "Orzeszki",
+      "tags": [
+        "snacki",
+        "orzeszki"
+      ],
+      "aliases": [
+        "Orzeszki",
+        "ziemne"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        8.0,
+        12.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Orzeszki laskowe": {
+      "id": "snacki_orzeszki_laskowe",
+      "znormalizowana_nazwa": "Orzeszki laskowe",
+      "kategoria": "Snacki",
+      "subkategoria": "Orzeszki",
+      "tags": [
+        "snacki",
+        "orzeszki"
+      ],
+      "aliases": [
+        "Orzeszki",
+        "laskowe"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        8.5,
+        12.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Orzeszki włoskie": {
+      "id": "snacki_orzeszki_włoskie",
+      "znormalizowana_nazwa": "Orzeszki włoskie",
+      "kategoria": "Snacki",
+      "subkategoria": "Orzeszki",
+      "tags": [
+        "snacki",
+        "orzeszki"
+      ],
+      "aliases": [
+        "Orzeszki",
+        "włoskie"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        9.0,
+        13.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Orzeszki migdały": {
+      "id": "snacki_orzeszki_migdały",
+      "znormalizowana_nazwa": "Orzeszki migdały",
+      "kategoria": "Snacki",
+      "subkategoria": "Orzeszki",
+      "tags": [
+        "snacki",
+        "orzeszki"
+      ],
+      "aliases": [
+        "Orzeszki",
+        "migdały"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        9.5,
+        14.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Czekolada mleczna": {
+      "id": "snacki_czekolada_mleczna",
+      "znormalizowana_nazwa": "Czekolada mleczna",
+      "kategoria": "Snacki",
+      "subkategoria": "Czekolada",
+      "tags": [
+        "snacki",
+        "czekolada"
+      ],
+      "aliases": [
+        "Czekolada",
+        "mleczna"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        10.0,
+        15.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Czekolada gorzka": {
+      "id": "snacki_czekolada_gorzka",
+      "znormalizowana_nazwa": "Czekolada gorzka",
+      "kategoria": "Snacki",
+      "subkategoria": "Czekolada",
+      "tags": [
+        "snacki",
+        "czekolada"
+      ],
+      "aliases": [
+        "Czekolada",
+        "gorzka"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        10.5,
+        15.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Czekolada biała": {
+      "id": "snacki_czekolada_biała",
+      "znormalizowana_nazwa": "Czekolada biała",
+      "kategoria": "Snacki",
+      "subkategoria": "Czekolada",
+      "tags": [
+        "snacki",
+        "czekolada"
+      ],
+      "aliases": [
+        "Czekolada",
+        "biała"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        11.0,
+        16.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Czekolada z orzechami": {
+      "id": "snacki_czekolada_z_orzechami",
+      "znormalizowana_nazwa": "Czekolada z orzechami",
+      "kategoria": "Snacki",
+      "subkategoria": "Czekolada",
+      "tags": [
+        "snacki",
+        "czekolada"
+      ],
+      "aliases": [
+        "Czekolada",
+        "z orzechami"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        11.5,
+        17.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Ciastka herbatniki": {
+      "id": "snacki_ciastka_herbatniki",
+      "znormalizowana_nazwa": "Ciastka herbatniki",
+      "kategoria": "Snacki",
+      "subkategoria": "Ciastka",
+      "tags": [
+        "snacki",
+        "ciastka"
+      ],
+      "aliases": [
+        "Ciastka",
+        "herbatniki"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        2.0,
+        3.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Ciastka wafle": {
+      "id": "snacki_ciastka_wafle",
+      "znormalizowana_nazwa": "Ciastka wafle",
+      "kategoria": "Snacki",
+      "subkategoria": "Ciastka",
+      "tags": [
+        "snacki",
+        "ciastka"
+      ],
+      "aliases": [
+        "Ciastka",
+        "wafle"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Ciastka biszkopty": {
+      "id": "snacki_ciastka_biszkopty",
+      "znormalizowana_nazwa": "Ciastka biszkopty",
+      "kategoria": "Snacki",
+      "subkategoria": "Ciastka",
+      "tags": [
+        "snacki",
+        "ciastka"
+      ],
+      "aliases": [
+        "Ciastka",
+        "biszkopty"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        3.0,
+        4.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Woda mineralna": {
+      "id": "napoje_woda_mineralna",
+      "znormalizowana_nazwa": "Woda mineralna",
+      "kategoria": "Napoje",
+      "subkategoria": "Woda",
+      "tags": [
+        "napoje",
+        "woda"
+      ],
+      "aliases": [
+        "Woda",
+        "mineralna"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        3.5,
+        5.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Woda źródlana": {
+      "id": "napoje_woda_źródlana",
+      "znormalizowana_nazwa": "Woda źródlana",
+      "kategoria": "Napoje",
+      "subkategoria": "Woda",
+      "tags": [
+        "napoje",
+        "woda"
+      ],
+      "aliases": [
+        "Woda",
+        "źródlana"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        4.0,
+        6.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Woda gazowana": {
+      "id": "napoje_woda_gazowana",
+      "znormalizowana_nazwa": "Woda gazowana",
+      "kategoria": "Napoje",
+      "subkategoria": "Woda",
+      "tags": [
+        "napoje",
+        "woda"
+      ],
+      "aliases": [
+        "Woda",
+        "gazowana"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        4.5,
+        6.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Woda niegazowana": {
+      "id": "napoje_woda_niegazowana",
+      "znormalizowana_nazwa": "Woda niegazowana",
+      "kategoria": "Napoje",
+      "subkategoria": "Woda",
+      "tags": [
+        "napoje",
+        "woda"
+      ],
+      "aliases": [
+        "Woda",
+        "niegazowana"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        5.0,
+        7.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Sok pomarańczowy": {
+      "id": "napoje_sok_pomarańczowy",
+      "znormalizowana_nazwa": "Sok pomarańczowy",
+      "kategoria": "Napoje",
+      "subkategoria": "Sok",
+      "tags": [
+        "napoje",
+        "sok"
+      ],
+      "aliases": [
+        "Sok",
+        "pomarańczowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        5.5,
+        8.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Sok jabłkowy": {
+      "id": "napoje_sok_jabłkowy",
+      "znormalizowana_nazwa": "Sok jabłkowy",
+      "kategoria": "Napoje",
+      "subkategoria": "Sok",
+      "tags": [
+        "napoje",
+        "sok"
+      ],
+      "aliases": [
+        "Sok",
+        "jabłkowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        6.0,
+        9.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Sok multiwitamina": {
+      "id": "napoje_sok_multiwitamina",
+      "znormalizowana_nazwa": "Sok multiwitamina",
+      "kategoria": "Napoje",
+      "subkategoria": "Sok",
+      "tags": [
+        "napoje",
+        "sok"
+      ],
+      "aliases": [
+        "Sok",
+        "multiwitamina"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        6.5,
+        9.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Sok pomidorowy": {
+      "id": "napoje_sok_pomidorowy",
+      "znormalizowana_nazwa": "Sok pomidorowy",
+      "kategoria": "Napoje",
+      "subkategoria": "Sok",
+      "tags": [
+        "napoje",
+        "sok"
+      ],
+      "aliases": [
+        "Sok",
+        "pomidorowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        7.0,
+        10.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Cola zwykła": {
+      "id": "napoje_cola_zwykła",
+      "znormalizowana_nazwa": "Cola zwykła",
+      "kategoria": "Napoje",
+      "subkategoria": "Cola",
+      "tags": [
+        "napoje",
+        "cola"
+      ],
+      "aliases": [
+        "Cola",
+        "zwykła"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        7.5,
+        11.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Cola zero": {
+      "id": "napoje_cola_zero",
+      "znormalizowana_nazwa": "Cola zero",
+      "kategoria": "Napoje",
+      "subkategoria": "Cola",
+      "tags": [
+        "napoje",
+        "cola"
+      ],
+      "aliases": [
+        "Cola",
+        "zero"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        8.0,
+        12.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Cola light": {
+      "id": "napoje_cola_light",
+      "znormalizowana_nazwa": "Cola light",
+      "kategoria": "Napoje",
+      "subkategoria": "Cola",
+      "tags": [
+        "napoje",
+        "cola"
+      ],
+      "aliases": [
+        "Cola",
+        "light"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        8.5,
+        12.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Kawa ziarnista": {
+      "id": "napoje_kawa_ziarnista",
+      "znormalizowana_nazwa": "Kawa ziarnista",
+      "kategoria": "Napoje",
+      "subkategoria": "Kawa",
+      "tags": [
+        "napoje",
+        "kawa"
+      ],
+      "aliases": [
+        "Kawa",
+        "ziarnista"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        9.0,
+        13.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Kawa mielona": {
+      "id": "napoje_kawa_mielona",
+      "znormalizowana_nazwa": "Kawa mielona",
+      "kategoria": "Napoje",
+      "subkategoria": "Kawa",
+      "tags": [
+        "napoje",
+        "kawa"
+      ],
+      "aliases": [
+        "Kawa",
+        "mielona"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        9.5,
+        14.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Kawa rozpuszczalna": {
+      "id": "napoje_kawa_rozpuszczalna",
+      "znormalizowana_nazwa": "Kawa rozpuszczalna",
+      "kategoria": "Napoje",
+      "subkategoria": "Kawa",
+      "tags": [
+        "napoje",
+        "kawa"
+      ],
+      "aliases": [
+        "Kawa",
+        "rozpuszczalna"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        10.0,
+        15.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Kawa kapsułki": {
+      "id": "napoje_kawa_kapsułki",
+      "znormalizowana_nazwa": "Kawa kapsułki",
+      "kategoria": "Napoje",
+      "subkategoria": "Kawa",
+      "tags": [
+        "napoje",
+        "kawa"
+      ],
+      "aliases": [
+        "Kawa",
+        "kapsułki"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        10.5,
+        15.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Herbata czarna": {
+      "id": "napoje_herbata_czarna",
+      "znormalizowana_nazwa": "Herbata czarna",
+      "kategoria": "Napoje",
+      "subkategoria": "Herbata",
+      "tags": [
+        "napoje",
+        "herbata"
+      ],
+      "aliases": [
+        "Herbata",
+        "czarna"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        11.0,
+        16.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Herbata zielona": {
+      "id": "napoje_herbata_zielona",
+      "znormalizowana_nazwa": "Herbata zielona",
+      "kategoria": "Napoje",
+      "subkategoria": "Herbata",
+      "tags": [
+        "napoje",
+        "herbata"
+      ],
+      "aliases": [
+        "Herbata",
+        "zielona"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        11.5,
+        17.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Herbata owocowa": {
+      "id": "napoje_herbata_owocowa",
+      "znormalizowana_nazwa": "Herbata owocowa",
+      "kategoria": "Napoje",
+      "subkategoria": "Herbata",
+      "tags": [
+        "napoje",
+        "herbata"
+      ],
+      "aliases": [
+        "Herbata",
+        "owocowa"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        2.0,
+        3.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Herbata ziołowa": {
+      "id": "napoje_herbata_ziołowa",
+      "znormalizowana_nazwa": "Herbata ziołowa",
+      "kategoria": "Napoje",
+      "subkategoria": "Herbata",
+      "tags": [
+        "napoje",
+        "herbata"
+      ],
+      "aliases": [
+        "Herbata",
+        "ziołowa"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Warzywa mieszanka": {
+      "id": "mrożone_warzywa_mieszanka",
+      "znormalizowana_nazwa": "Warzywa mieszanka",
+      "kategoria": "Mrożone",
+      "subkategoria": "Warzywa",
+      "tags": [
+        "mrożone",
+        "warzywa"
+      ],
+      "aliases": [
+        "Warzywa",
+        "mieszanka"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        3.0,
+        4.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Warzywa brokuły": {
+      "id": "mrożone_warzywa_brokuły",
+      "znormalizowana_nazwa": "Warzywa brokuły",
+      "kategoria": "Mrożone",
+      "subkategoria": "Warzywa",
+      "tags": [
+        "mrożone",
+        "warzywa"
+      ],
+      "aliases": [
+        "Warzywa",
+        "brokuły"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        3.5,
+        5.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Warzywa fasolka": {
+      "id": "mrożone_warzywa_fasolka",
+      "znormalizowana_nazwa": "Warzywa fasolka",
+      "kategoria": "Mrożone",
+      "subkategoria": "Warzywa",
+      "tags": [
+        "mrożone",
+        "warzywa"
+      ],
+      "aliases": [
+        "Warzywa",
+        "fasolka"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        4.0,
+        6.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Warzywa szpinak": {
+      "id": "mrożone_warzywa_szpinak",
+      "znormalizowana_nazwa": "Warzywa szpinak",
+      "kategoria": "Mrożone",
+      "subkategoria": "Warzywa",
+      "tags": [
+        "mrożone",
+        "warzywa"
+      ],
+      "aliases": [
+        "Warzywa",
+        "szpinak"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        4.5,
+        6.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Owoce truskawki": {
+      "id": "mrożone_owoce_truskawki",
+      "znormalizowana_nazwa": "Owoce truskawki",
+      "kategoria": "Mrożone",
+      "subkategoria": "Owoce",
+      "tags": [
+        "mrożone",
+        "owoce"
+      ],
+      "aliases": [
+        "Owoce",
+        "truskawki"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        5.0,
+        7.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Owoce maliny": {
+      "id": "mrożone_owoce_maliny",
+      "znormalizowana_nazwa": "Owoce maliny",
+      "kategoria": "Mrożone",
+      "subkategoria": "Owoce",
+      "tags": [
+        "mrożone",
+        "owoce"
+      ],
+      "aliases": [
+        "Owoce",
+        "maliny"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        5.5,
+        8.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Owoce borówki": {
+      "id": "mrożone_owoce_borówki",
+      "znormalizowana_nazwa": "Owoce borówki",
+      "kategoria": "Mrożone",
+      "subkategoria": "Owoce",
+      "tags": [
+        "mrożone",
+        "owoce"
+      ],
+      "aliases": [
+        "Owoce",
+        "borówki"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        6.0,
+        9.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Owoce mieszanka": {
+      "id": "mrożone_owoce_mieszanka",
+      "znormalizowana_nazwa": "Owoce mieszanka",
+      "kategoria": "Mrożone",
+      "subkategoria": "Owoce",
+      "tags": [
+        "mrożone",
+        "owoce"
+      ],
+      "aliases": [
+        "Owoce",
+        "mieszanka"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        6.5,
+        9.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Pizza margherita": {
+      "id": "mrożone_pizza_margherita",
+      "znormalizowana_nazwa": "Pizza margherita",
+      "kategoria": "Mrożone",
+      "subkategoria": "Pizza",
+      "tags": [
+        "mrożone",
+        "pizza"
+      ],
+      "aliases": [
+        "Pizza",
+        "margherita"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        7.0,
+        10.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Pizza pepperoni": {
+      "id": "mrożone_pizza_pepperoni",
+      "znormalizowana_nazwa": "Pizza pepperoni",
+      "kategoria": "Mrożone",
+      "subkategoria": "Pizza",
+      "tags": [
+        "mrożone",
+        "pizza"
+      ],
+      "aliases": [
+        "Pizza",
+        "pepperoni"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        7.5,
+        11.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Pizza hawajska": {
+      "id": "mrożone_pizza_hawajska",
+      "znormalizowana_nazwa": "Pizza hawajska",
+      "kategoria": "Mrożone",
+      "subkategoria": "Pizza",
+      "tags": [
+        "mrożone",
+        "pizza"
+      ],
+      "aliases": [
+        "Pizza",
+        "hawajska"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        8.0,
+        12.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Frytki proste": {
+      "id": "mrożone_frytki_proste",
+      "znormalizowana_nazwa": "Frytki proste",
+      "kategoria": "Mrożone",
+      "subkategoria": "Frytki",
+      "tags": [
+        "mrożone",
+        "frytki"
+      ],
+      "aliases": [
+        "Frytki",
+        "proste"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        8.5,
+        12.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Frytki kręcone": {
+      "id": "mrożone_frytki_kręcone",
+      "znormalizowana_nazwa": "Frytki kręcone",
+      "kategoria": "Mrożone",
+      "subkategoria": "Frytki",
+      "tags": [
+        "mrożone",
+        "frytki"
+      ],
+      "aliases": [
+        "Frytki",
+        "kręcone"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        9.0,
+        13.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Frytki sweet potato": {
+      "id": "mrożone_frytki_sweet_potato",
+      "znormalizowana_nazwa": "Frytki sweet potato",
+      "kategoria": "Mrożone",
+      "subkategoria": "Frytki",
+      "tags": [
+        "mrożone",
+        "frytki"
+      ],
+      "aliases": [
+        "Frytki",
+        "sweet potato"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        9.5,
+        14.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Pomidory krojone": {
+      "id": "słoiki/puszki_pomidory_krojone",
+      "znormalizowana_nazwa": "Pomidory krojone",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Pomidory",
+      "tags": [
+        "słoiki/puszki",
+        "pomidory"
+      ],
+      "aliases": [
+        "Pomidory",
+        "krojone"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        10.0,
+        15.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Pomidory passata": {
+      "id": "słoiki/puszki_pomidory_passata",
+      "znormalizowana_nazwa": "Pomidory passata",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Pomidory",
+      "tags": [
+        "słoiki/puszki",
+        "pomidory"
+      ],
+      "aliases": [
+        "Pomidory",
+        "passata"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        10.5,
+        15.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Pomidory koncentrat": {
+      "id": "słoiki/puszki_pomidory_koncentrat",
+      "znormalizowana_nazwa": "Pomidory koncentrat",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Pomidory",
+      "tags": [
+        "słoiki/puszki",
+        "pomidory"
+      ],
+      "aliases": [
+        "Pomidory",
+        "koncentrat"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        11.0,
+        16.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Fasola czerwona": {
+      "id": "słoiki/puszki_fasola_czerwona",
+      "znormalizowana_nazwa": "Fasola czerwona",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Fasola",
+      "tags": [
+        "słoiki/puszki",
+        "fasola"
+      ],
+      "aliases": [
+        "Fasola",
+        "czerwona"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        11.5,
+        17.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Fasola biała": {
+      "id": "słoiki/puszki_fasola_biała",
+      "znormalizowana_nazwa": "Fasola biała",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Fasola",
+      "tags": [
+        "słoiki/puszki",
+        "fasola"
+      ],
+      "aliases": [
+        "Fasola",
+        "biała"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        2.0,
+        3.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Fasola czarna": {
+      "id": "słoiki/puszki_fasola_czarna",
+      "znormalizowana_nazwa": "Fasola czarna",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Fasola",
+      "tags": [
+        "słoiki/puszki",
+        "fasola"
+      ],
+      "aliases": [
+        "Fasola",
+        "czarna"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Kukurydza słodka": {
+      "id": "słoiki/puszki_kukurydza_słodka",
+      "znormalizowana_nazwa": "Kukurydza słodka",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Kukurydza",
+      "tags": [
+        "słoiki/puszki",
+        "kukurydza"
+      ],
+      "aliases": [
+        "Kukurydza",
+        "słodka"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        3.0,
+        4.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Kukurydza zwykła": {
+      "id": "słoiki/puszki_kukurydza_zwykła",
+      "znormalizowana_nazwa": "Kukurydza zwykła",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Kukurydza",
+      "tags": [
+        "słoiki/puszki",
+        "kukurydza"
+      ],
+      "aliases": [
+        "Kukurydza",
+        "zwykła"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        3.5,
+        5.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Ogórki kiszone": {
+      "id": "słoiki/puszki_ogórki_kiszone",
+      "znormalizowana_nazwa": "Ogórki kiszone",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Ogórki",
+      "tags": [
+        "słoiki/puszki",
+        "ogórki"
+      ],
+      "aliases": [
+        "Ogórki",
+        "kiszone"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        4.0,
+        6.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Ogórki konserwowe": {
+      "id": "słoiki/puszki_ogórki_konserwowe",
+      "znormalizowana_nazwa": "Ogórki konserwowe",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Ogórki",
+      "tags": [
+        "słoiki/puszki",
+        "ogórki"
+      ],
+      "aliases": [
+        "Ogórki",
+        "konserwowe"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        4.5,
+        6.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Dżem truskawkowy": {
+      "id": "słoiki/puszki_dżem_truskawkowy",
+      "znormalizowana_nazwa": "Dżem truskawkowy",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Dżem",
+      "tags": [
+        "słoiki/puszki",
+        "dżem"
+      ],
+      "aliases": [
+        "Dżem",
+        "truskawkowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        5.0,
+        7.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Dżem malinowy": {
+      "id": "słoiki/puszki_dżem_malinowy",
+      "znormalizowana_nazwa": "Dżem malinowy",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Dżem",
+      "tags": [
+        "słoiki/puszki",
+        "dżem"
+      ],
+      "aliases": [
+        "Dżem",
+        "malinowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        5.5,
+        8.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Dżem morelowy": {
+      "id": "słoiki/puszki_dżem_morelowy",
+      "znormalizowana_nazwa": "Dżem morelowy",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Dżem",
+      "tags": [
+        "słoiki/puszki",
+        "dżem"
+      ],
+      "aliases": [
+        "Dżem",
+        "morelowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        6.0,
+        9.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Sól zwykła": {
+      "id": "przyprawy_sól_zwykła",
+      "znormalizowana_nazwa": "Sól zwykła",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Sól",
+      "tags": [
+        "przyprawy",
+        "sól"
+      ],
+      "aliases": [
+        "Sól",
+        "zwykła"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        6.5,
+        9.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Sól morska": {
+      "id": "przyprawy_sól_morska",
+      "znormalizowana_nazwa": "Sól morska",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Sól",
+      "tags": [
+        "przyprawy",
+        "sól"
+      ],
+      "aliases": [
+        "Sól",
+        "morska"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        7.0,
+        10.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Sól himalajska": {
+      "id": "przyprawy_sól_himalajska",
+      "znormalizowana_nazwa": "Sól himalajska",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Sól",
+      "tags": [
+        "przyprawy",
+        "sól"
+      ],
+      "aliases": [
+        "Sól",
+        "himalajska"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        7.5,
+        11.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Pieprz czarny": {
+      "id": "przyprawy_pieprz_czarny",
+      "znormalizowana_nazwa": "Pieprz czarny",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Pieprz",
+      "tags": [
+        "przyprawy",
+        "pieprz"
+      ],
+      "aliases": [
+        "Pieprz",
+        "czarny"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        8.0,
+        12.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Pieprz biały": {
+      "id": "przyprawy_pieprz_biały",
+      "znormalizowana_nazwa": "Pieprz biały",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Pieprz",
+      "tags": [
+        "przyprawy",
+        "pieprz"
+      ],
+      "aliases": [
+        "Pieprz",
+        "biały"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        8.5,
+        12.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Pieprz kolorowy": {
+      "id": "przyprawy_pieprz_kolorowy",
+      "znormalizowana_nazwa": "Pieprz kolorowy",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Pieprz",
+      "tags": [
+        "przyprawy",
+        "pieprz"
+      ],
+      "aliases": [
+        "Pieprz",
+        "kolorowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        9.0,
+        13.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Papryka słodka": {
+      "id": "przyprawy_papryka_słodka",
+      "znormalizowana_nazwa": "Papryka słodka",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Papryka",
+      "tags": [
+        "przyprawy",
+        "papryka"
+      ],
+      "aliases": [
+        "Papryka",
+        "słodka"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        9.5,
+        14.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Papryka wędzona": {
+      "id": "przyprawy_papryka_wędzona",
+      "znormalizowana_nazwa": "Papryka wędzona",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Papryka",
+      "tags": [
+        "przyprawy",
+        "papryka"
+      ],
+      "aliases": [
+        "Papryka",
+        "wędzona"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        10.5,
+        15.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    "Zioła bazylia": {
+      "id": "przyprawy_zioła_bazylia",
+      "znormalizowana_nazwa": "Zioła bazylia",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Zioła",
+      "tags": [
+        "przyprawy",
+        "zioła"
+      ],
+      "aliases": [
+        "Zioła",
+        "bazylia"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        11.0,
+        16.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    "Zioła oregano": {
+      "id": "przyprawy_zioła_oregano",
+      "znormalizowana_nazwa": "Zioła oregano",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Zioła",
+      "tags": [
+        "przyprawy",
+        "zioła"
+      ],
+      "aliases": [
+        "Zioła",
+        "oregano"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        11.5,
+        17.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    "Zioła tymianek": {
+      "id": "przyprawy_zioła_tymianek",
+      "znormalizowana_nazwa": "Zioła tymianek",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Zioła",
+      "tags": [
+        "przyprawy",
+        "zioła"
+      ],
+      "aliases": [
+        "Zioła",
+        "tymianek"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        2.0,
+        3.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    "Zioła rozmaryn": {
+      "id": "przyprawy_zioła_rozmaryn",
+      "znormalizowana_nazwa": "Zioła rozmaryn",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Zioła",
+      "tags": [
+        "przyprawy",
+        "zioła"
+      ],
+      "aliases": [
+        "Zioła",
+        "rozmaryn"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    }
+  },
+  "index_by_category": {
+    "Piekarnicze": [
+      "Chleb pszeniczny",
+      "Chleb żytni",
+      "Chleb razowy",
+      "Chleb graham",
+      "Chleb baltonowski",
+      "Chleb krojony",
+      "Bułki kajzerka",
+      "Bułki grahamka",
+      "Bułki pszenna",
+      "Bułki żytnia",
+      "Bułki z sezamem",
+      "Bułki z makiem",
+      "Bagietka francuska",
+      "Bagietka czosnkowa",
+      "Bagietka z serem",
+      "Rogal maślany",
+      "Rogal drożdżowy",
+      "Rogal z makiem",
+      "Pączek z dżemem",
+      "Pączek z budyniem",
+      "Pączek z różą"
+    ],
+    "Nabiał": [
+      "Mleko 3.2% UHT",
+      "Mleko 2% UHT",
+      "Mleko 1.5% UHT",
+      "Mleko 0.5% UHT",
+      "Mleko bez laktozy",
+      "Mleko sojowe",
+      "Ser żółty",
+      "Ser biały",
+      "Ser twaróg",
+      "Ser mozzarella",
+      "Ser feta",
+      "Ser camembert",
+      "Jogurt naturalny",
+      "Jogurt owocowy",
+      "Jogurt grecki",
+      "Jogurt pitny",
+      "Jogurt z probiotykami",
+      "Śmietana 18%",
+      "Śmietana 22%",
+      "Śmietana 30%",
+      "Śmietana kwaśna",
+      "Masło ekstra",
+      "Masło świeże",
+      "Masło słone",
+      "Masło bez soli",
+      "Jajka kurze L",
+      "Jajka kurze M",
+      "Jajka kurze S",
+      "Jajka przepiórcze"
+    ],
+    "Owoce": [
+      "Jabłka szampion",
+      "Jabłka jonagold",
+      "Jabłka gala",
+      "Jabłka lobo",
+      "Jabłka idared",
+      "Banany żółte",
+      "Banany zielone",
+      "Pomarańcze słodkie",
+      "Pomarańcze kwaśne",
+      "Truskawki świeże",
+      "Truskawki mrożone",
+      "Winogrona zielone",
+      "Winogrona czerwone",
+      "Winogrona czarne",
+      "Cytryny żółte",
+      "Cytryny limonki"
+    ],
+    "Warzywa": [
+      "Pomidory czerwone",
+      "Pomidory koktajlowe",
+      "Pomidory malinowe",
+      "Pomidory gałązkowe",
+      "Marchew młoda",
+      "Marchew zwykła",
+      "Marchew baby",
+      "Ogórek gruntowy",
+      "Ogórek szklarniowy",
+      "Ogórek kiszony",
+      "Cebula żółta",
+      "Cebula czerwona",
+      "Cebula biała",
+      "Cebula dymka",
+      "Papryka czerwona",
+      "Papryka żółta",
+      "Papryka zielona",
+      "Ziemniaki młode",
+      "Ziemniaki stare",
+      "Ziemniaki słodkie"
+    ],
+    "Przyprawy": [
+      "Papryka ostra",
+      "Sól zwykła",
+      "Sól morska",
+      "Sól himalajska",
+      "Pieprz czarny",
+      "Pieprz biały",
+      "Pieprz kolorowy",
+      "Papryka słodka",
+      "Papryka wędzona",
+      "Zioła bazylia",
+      "Zioła oregano",
+      "Zioła tymianek",
+      "Zioła rozmaryn"
+    ],
+    "Mięso": [
+      "Kurczak filet",
+      "Kurczak udko",
+      "Kurczak skrzydło",
+      "Kurczak pierś",
+      "Kurczak cały",
+      "Wieprzowina schab",
+      "Wieprzowina karkówka",
+      "Wieprzowina łopatka",
+      "Wieprzowina szynka",
+      "Wołowina mięso mielone",
+      "Wołowina stek",
+      "Wołowina gulasz",
+      "Indyk filet",
+      "Indyk udko",
+      "Indyk pierś",
+      "Ryba łosoś",
+      "Ryba dorsz",
+      "Ryba mintaj",
+      "Ryba makrela",
+      "Ryba tuńczyk"
+    ],
+    "Snacki": [
+      "Chipsy solone",
+      "Chipsy paprykowe",
+      "Chipsy cebulowe",
+      "Chipsy serowe",
+      "Orzeszki ziemne",
+      "Orzeszki laskowe",
+      "Orzeszki włoskie",
+      "Orzeszki migdały",
+      "Czekolada mleczna",
+      "Czekolada gorzka",
+      "Czekolada biała",
+      "Czekolada z orzechami",
+      "Ciastka herbatniki",
+      "Ciastka wafle",
+      "Ciastka biszkopty"
+    ],
+    "Napoje": [
+      "Woda mineralna",
+      "Woda źródlana",
+      "Woda gazowana",
+      "Woda niegazowana",
+      "Sok pomarańczowy",
+      "Sok jabłkowy",
+      "Sok multiwitamina",
+      "Sok pomidorowy",
+      "Cola zwykła",
+      "Cola zero",
+      "Cola light",
+      "Kawa ziarnista",
+      "Kawa mielona",
+      "Kawa rozpuszczalna",
+      "Kawa kapsułki",
+      "Herbata czarna",
+      "Herbata zielona",
+      "Herbata owocowa",
+      "Herbata ziołowa"
+    ],
+    "Mrożone": [
+      "Warzywa mieszanka",
+      "Warzywa brokuły",
+      "Warzywa fasolka",
+      "Warzywa szpinak",
+      "Owoce truskawki",
+      "Owoce maliny",
+      "Owoce borówki",
+      "Owoce mieszanka",
+      "Pizza margherita",
+      "Pizza pepperoni",
+      "Pizza hawajska",
+      "Frytki proste",
+      "Frytki kręcone",
+      "Frytki sweet potato"
+    ],
+    "Słoiki/Puszki": [
+      "Pomidory krojone",
+      "Pomidory passata",
+      "Pomidory koncentrat",
+      "Fasola czerwona",
+      "Fasola biała",
+      "Fasola czarna",
+      "Kukurydza słodka",
+      "Kukurydza zwykła",
+      "Ogórki kiszone",
+      "Ogórki konserwowe",
+      "Dżem truskawkowy",
+      "Dżem malinowy",
+      "Dżem morelowy"
+    ]
+  },
+  "index_by_tag": {
+    "piekarnicze": [
+      "Chleb pszeniczny",
+      "Chleb żytni",
+      "Chleb razowy",
+      "Chleb graham",
+      "Chleb baltonowski",
+      "Chleb krojony",
+      "Bułki kajzerka",
+      "Bułki grahamka",
+      "Bułki pszenna",
+      "Bułki żytnia",
+      "Bułki z sezamem",
+      "Bułki z makiem",
+      "Bagietka francuska",
+      "Bagietka czosnkowa",
+      "Bagietka z serem",
+      "Rogal maślany",
+      "Rogal drożdżowy",
+      "Rogal z makiem",
+      "Pączek z dżemem",
+      "Pączek z budyniem",
+      "Pączek z różą"
+    ],
+    "chleb": [
+      "Chleb pszeniczny",
+      "Chleb żytni",
+      "Chleb razowy",
+      "Chleb graham",
+      "Chleb baltonowski",
+      "Chleb krojony"
+    ],
+    "bułki": [
+      "Bułki kajzerka",
+      "Bułki grahamka",
+      "Bułki pszenna",
+      "Bułki żytnia",
+      "Bułki z sezamem",
+      "Bułki z makiem"
+    ],
+    "bagietka": [
+      "Bagietka francuska",
+      "Bagietka czosnkowa",
+      "Bagietka z serem"
+    ],
+    "rogal": [
+      "Rogal maślany",
+      "Rogal drożdżowy",
+      "Rogal z makiem"
+    ],
+    "pączek": [
+      "Pączek z dżemem",
+      "Pączek z budyniem",
+      "Pączek z różą"
+    ],
+    "nabiał": [
+      "Mleko 3.2% UHT",
+      "Mleko 2% UHT",
+      "Mleko 1.5% UHT",
+      "Mleko 0.5% UHT",
+      "Mleko bez laktozy",
+      "Mleko sojowe",
+      "Ser żółty",
+      "Ser biały",
+      "Ser twaróg",
+      "Ser mozzarella",
+      "Ser feta",
+      "Ser camembert",
+      "Jogurt naturalny",
+      "Jogurt owocowy",
+      "Jogurt grecki",
+      "Jogurt pitny",
+      "Jogurt z probiotykami",
+      "Śmietana 18%",
+      "Śmietana 22%",
+      "Śmietana 30%",
+      "Śmietana kwaśna",
+      "Masło ekstra",
+      "Masło świeże",
+      "Masło słone",
+      "Masło bez soli",
+      "Jajka kurze L",
+      "Jajka kurze M",
+      "Jajka kurze S",
+      "Jajka przepiórcze"
+    ],
+    "mleko": [
+      "Mleko 3.2% UHT",
+      "Mleko 2% UHT",
+      "Mleko 1.5% UHT",
+      "Mleko 0.5% UHT",
+      "Mleko bez laktozy",
+      "Mleko sojowe"
+    ],
+    "ser": [
+      "Ser żółty",
+      "Ser biały",
+      "Ser twaróg",
+      "Ser mozzarella",
+      "Ser feta",
+      "Ser camembert"
+    ],
+    "jogurt": [
+      "Jogurt naturalny",
+      "Jogurt owocowy",
+      "Jogurt grecki",
+      "Jogurt pitny",
+      "Jogurt z probiotykami"
+    ],
+    "śmietana": [
+      "Śmietana 18%",
+      "Śmietana 22%",
+      "Śmietana 30%",
+      "Śmietana kwaśna"
+    ],
+    "masło": [
+      "Masło ekstra",
+      "Masło świeże",
+      "Masło słone",
+      "Masło bez soli"
+    ],
+    "jajka": [
+      "Jajka kurze L",
+      "Jajka kurze M",
+      "Jajka kurze S",
+      "Jajka przepiórcze"
+    ],
+    "owoce": [
+      "Jabłka szampion",
+      "Jabłka jonagold",
+      "Jabłka gala",
+      "Jabłka lobo",
+      "Jabłka idared",
+      "Banany żółte",
+      "Banany zielone",
+      "Pomarańcze słodkie",
+      "Pomarańcze kwaśne",
+      "Truskawki świeże",
+      "Truskawki mrożone",
+      "Winogrona zielone",
+      "Winogrona czerwone",
+      "Winogrona czarne",
+      "Cytryny żółte",
+      "Cytryny limonki",
+      "Owoce truskawki",
+      "Owoce maliny",
+      "Owoce borówki",
+      "Owoce mieszanka"
+    ],
+    "jabłka": [
+      "Jabłka szampion",
+      "Jabłka jonagold",
+      "Jabłka gala",
+      "Jabłka lobo",
+      "Jabłka idared"
+    ],
+    "banany": [
+      "Banany żółte",
+      "Banany zielone"
+    ],
+    "pomarańcze": [
+      "Pomarańcze słodkie",
+      "Pomarańcze kwaśne"
+    ],
+    "truskawki": [
+      "Truskawki świeże",
+      "Truskawki mrożone"
+    ],
+    "winogrona": [
+      "Winogrona zielone",
+      "Winogrona czerwone",
+      "Winogrona czarne"
+    ],
+    "cytryny": [
+      "Cytryny żółte",
+      "Cytryny limonki"
+    ],
+    "warzywa": [
+      "Pomidory czerwone",
+      "Pomidory koktajlowe",
+      "Pomidory malinowe",
+      "Pomidory gałązkowe",
+      "Marchew młoda",
+      "Marchew zwykła",
+      "Marchew baby",
+      "Ogórek gruntowy",
+      "Ogórek szklarniowy",
+      "Ogórek kiszony",
+      "Cebula żółta",
+      "Cebula czerwona",
+      "Cebula biała",
+      "Cebula dymka",
+      "Papryka czerwona",
+      "Papryka żółta",
+      "Papryka zielona",
+      "Ziemniaki młode",
+      "Ziemniaki stare",
+      "Ziemniaki słodkie",
+      "Warzywa mieszanka",
+      "Warzywa brokuły",
+      "Warzywa fasolka",
+      "Warzywa szpinak"
+    ],
+    "pomidory": [
+      "Pomidory czerwone",
+      "Pomidory koktajlowe",
+      "Pomidory malinowe",
+      "Pomidory gałązkowe",
+      "Pomidory krojone",
+      "Pomidory passata",
+      "Pomidory koncentrat"
+    ],
+    "marchew": [
+      "Marchew młoda",
+      "Marchew zwykła",
+      "Marchew baby"
+    ],
+    "ogórek": [
+      "Ogórek gruntowy",
+      "Ogórek szklarniowy",
+      "Ogórek kiszony"
+    ],
+    "cebula": [
+      "Cebula żółta",
+      "Cebula czerwona",
+      "Cebula biała",
+      "Cebula dymka"
+    ],
+    "papryka": [
+      "Papryka czerwona",
+      "Papryka żółta",
+      "Papryka zielona",
+      "Papryka ostra",
+      "Papryka słodka",
+      "Papryka wędzona"
+    ],
+    "przyprawy": [
+      "Papryka ostra",
+      "Sól zwykła",
+      "Sól morska",
+      "Sól himalajska",
+      "Pieprz czarny",
+      "Pieprz biały",
+      "Pieprz kolorowy",
+      "Papryka słodka",
+      "Papryka wędzona",
+      "Zioła bazylia",
+      "Zioła oregano",
+      "Zioła tymianek",
+      "Zioła rozmaryn"
+    ],
+    "ziemniaki": [
+      "Ziemniaki młode",
+      "Ziemniaki stare",
+      "Ziemniaki słodkie"
+    ],
+    "mięso": [
+      "Kurczak filet",
+      "Kurczak udko",
+      "Kurczak skrzydło",
+      "Kurczak pierś",
+      "Kurczak cały",
+      "Wieprzowina schab",
+      "Wieprzowina karkówka",
+      "Wieprzowina łopatka",
+      "Wieprzowina szynka",
+      "Wołowina mięso mielone",
+      "Wołowina stek",
+      "Wołowina gulasz",
+      "Indyk filet",
+      "Indyk udko",
+      "Indyk pierś",
+      "Ryba łosoś",
+      "Ryba dorsz",
+      "Ryba mintaj",
+      "Ryba makrela",
+      "Ryba tuńczyk"
+    ],
+    "kurczak": [
+      "Kurczak filet",
+      "Kurczak udko",
+      "Kurczak skrzydło",
+      "Kurczak pierś",
+      "Kurczak cały"
+    ],
+    "wieprzowina": [
+      "Wieprzowina schab",
+      "Wieprzowina karkówka",
+      "Wieprzowina łopatka",
+      "Wieprzowina szynka"
+    ],
+    "wołowina": [
+      "Wołowina mięso mielone",
+      "Wołowina stek",
+      "Wołowina gulasz"
+    ],
+    "indyk": [
+      "Indyk filet",
+      "Indyk udko",
+      "Indyk pierś"
+    ],
+    "ryba": [
+      "Ryba łosoś",
+      "Ryba dorsz",
+      "Ryba mintaj",
+      "Ryba makrela",
+      "Ryba tuńczyk"
+    ],
+    "snacki": [
+      "Chipsy solone",
+      "Chipsy paprykowe",
+      "Chipsy cebulowe",
+      "Chipsy serowe",
+      "Orzeszki ziemne",
+      "Orzeszki laskowe",
+      "Orzeszki włoskie",
+      "Orzeszki migdały",
+      "Czekolada mleczna",
+      "Czekolada gorzka",
+      "Czekolada biała",
+      "Czekolada z orzechami",
+      "Ciastka herbatniki",
+      "Ciastka wafle",
+      "Ciastka biszkopty"
+    ],
+    "chipsy": [
+      "Chipsy solone",
+      "Chipsy paprykowe",
+      "Chipsy cebulowe",
+      "Chipsy serowe"
+    ],
+    "orzeszki": [
+      "Orzeszki ziemne",
+      "Orzeszki laskowe",
+      "Orzeszki włoskie",
+      "Orzeszki migdały"
+    ],
+    "czekolada": [
+      "Czekolada mleczna",
+      "Czekolada gorzka",
+      "Czekolada biała",
+      "Czekolada z orzechami"
+    ],
+    "ciastka": [
+      "Ciastka herbatniki",
+      "Ciastka wafle",
+      "Ciastka biszkopty"
+    ],
+    "napoje": [
+      "Woda mineralna",
+      "Woda źródlana",
+      "Woda gazowana",
+      "Woda niegazowana",
+      "Sok pomarańczowy",
+      "Sok jabłkowy",
+      "Sok multiwitamina",
+      "Sok pomidorowy",
+      "Cola zwykła",
+      "Cola zero",
+      "Cola light",
+      "Kawa ziarnista",
+      "Kawa mielona",
+      "Kawa rozpuszczalna",
+      "Kawa kapsułki",
+      "Herbata czarna",
+      "Herbata zielona",
+      "Herbata owocowa",
+      "Herbata ziołowa"
+    ],
+    "woda": [
+      "Woda mineralna",
+      "Woda źródlana",
+      "Woda gazowana",
+      "Woda niegazowana"
+    ],
+    "sok": [
+      "Sok pomarańczowy",
+      "Sok jabłkowy",
+      "Sok multiwitamina",
+      "Sok pomidorowy"
+    ],
+    "cola": [
+      "Cola zwykła",
+      "Cola zero",
+      "Cola light"
+    ],
+    "kawa": [
+      "Kawa ziarnista",
+      "Kawa mielona",
+      "Kawa rozpuszczalna",
+      "Kawa kapsułki"
+    ],
+    "herbata": [
+      "Herbata czarna",
+      "Herbata zielona",
+      "Herbata owocowa",
+      "Herbata ziołowa"
+    ],
+    "mrożone": [
+      "Warzywa mieszanka",
+      "Warzywa brokuły",
+      "Warzywa fasolka",
+      "Warzywa szpinak",
+      "Owoce truskawki",
+      "Owoce maliny",
+      "Owoce borówki",
+      "Owoce mieszanka",
+      "Pizza margherita",
+      "Pizza pepperoni",
+      "Pizza hawajska",
+      "Frytki proste",
+      "Frytki kręcone",
+      "Frytki sweet potato"
+    ],
+    "pizza": [
+      "Pizza margherita",
+      "Pizza pepperoni",
+      "Pizza hawajska"
+    ],
+    "frytki": [
+      "Frytki proste",
+      "Frytki kręcone",
+      "Frytki sweet potato"
+    ],
+    "słoiki/puszki": [
+      "Pomidory krojone",
+      "Pomidory passata",
+      "Pomidory koncentrat",
+      "Fasola czerwona",
+      "Fasola biała",
+      "Fasola czarna",
+      "Kukurydza słodka",
+      "Kukurydza zwykła",
+      "Ogórki kiszone",
+      "Ogórki konserwowe",
+      "Dżem truskawkowy",
+      "Dżem malinowy",
+      "Dżem morelowy"
+    ],
+    "fasola": [
+      "Fasola czerwona",
+      "Fasola biała",
+      "Fasola czarna"
+    ],
+    "kukurydza": [
+      "Kukurydza słodka",
+      "Kukurydza zwykła"
+    ],
+    "ogórki": [
+      "Ogórki kiszone",
+      "Ogórki konserwowe"
+    ],
+    "dżem": [
+      "Dżem truskawkowy",
+      "Dżem malinowy",
+      "Dżem morelowy"
+    ],
+    "sól": [
+      "Sól zwykła",
+      "Sól morska",
+      "Sól himalajska"
+    ],
+    "pieprz": [
+      "Pieprz czarny",
+      "Pieprz biały",
+      "Pieprz kolorowy"
+    ],
+    "zioła": [
+      "Zioła bazylia",
+      "Zioła oregano",
+      "Zioła tymianek",
+      "Zioła rozmaryn"
+    ]
+  },
+  "metadata": {
+    "total_products": 180,
+    "categories": [
+      "Piekarnicze",
+      "Nabiał",
+      "Owoce",
+      "Warzywa",
+      "Przyprawy",
+      "Mięso",
+      "Snacki",
+      "Napoje",
+      "Mrożone",
+      "Słoiki/Puszki"
+    ],
+    "total_tags": 56,
+    "extracted_from": "expanded_products.json"
+  }
+}
