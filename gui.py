@@ -47,6 +47,9 @@ from src.gui_optimizations import (
     dialog_manager,
     memory_profiler,
 )
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class ToolTip:
@@ -1258,7 +1261,8 @@ class App(ctk.CTk):
             new_rgb = tuple(max(0, min(255, c + amount)) for c in rgb)
             # Konwertuj z powrotem na hex
             return "#%02x%02x%02x" % new_rgb
-        except:
+        except Exception as e:
+            logger.warning(f"Error adjusting color {color}: {e}")
             return color
 
     def __init__(self):
