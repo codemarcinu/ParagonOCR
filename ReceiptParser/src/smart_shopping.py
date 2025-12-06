@@ -393,13 +393,15 @@ class SmartShopping:
             for item in items
         ])
         
+        budget_str = f"{budget:.2f} PLN" if budget else "Nie określono"
+        
         prompt = f"""Przeanalizuj listę zakupów i zaproponuj optymalizacje:
 
 Lista zakupów:
 {items_str}
 
 Szacowany koszt: {total_cost:.2f} PLN
-Budżet: {budget:.2f} PLN" if budget else "Budżet: Nie określono"}
+Budżet: {budget_str}
 
 Zwróć listę praktycznych sugestii (maksymalnie 5) jak zoptymalizować zakupy:
 - Czy można coś zastąpić tańszym odpowiednikiem?
