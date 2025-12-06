@@ -3,15 +3,20 @@ import httpx
 
 import json
 import re
+import logging
 from pathlib import Path
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from typing import List, Tuple, Optional, Dict, Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from queue import Queue
+import threading
 from rapidfuzz import fuzz
 from .config import Config
 from .security import sanitize_path, sanitize_log_message
 from .retry_handler import retry_with_backoff
+
+logger = logging.getLogger(__name__)
 
 # Import sanitize_log_message dla użycia w globalnym except
 def _sanitize_error(e: Exception) -> str:
@@ -35,6 +40,22 @@ except Exception as e:
         f"BŁĄD: Nie można połączyć się z Ollama na {Config.OLLAMA_HOST}. Upewnij się, że usługa działa. Szczegóły: {sanitize_log_message(str(e))}"
     )
     client = None
+
+# --- Request Queuing ---
+# Queue for managing concurrent LLM requests (max 2 simultaneous)
+_request_queue: Queue = Queue()
+_active_requests: int = 0
+_max_concurrent_requests: int = 2
+_queue_lock = threading.Lock()
+
+# --- Conversation Context ---
+# Store last 10 messages per conversation
+_conversation_contexts: Dict[int, List[Dict]] = {}
+
+# --- Timeout Presets ---
+TIMEOUT_QUICK = 30  # 30 seconds for quick queries
+TIMEOUT_RECIPES = 120  # 120 seconds for recipe generation
+TIMEOUT_ANALYSIS = 60  # 60 seconds for analysis
 
 # --- Normalizacja Nazw Produktów ---
 
