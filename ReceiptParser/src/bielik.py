@@ -9,11 +9,14 @@ Funkcjonalności:
 """
 
 import ollama
+import logging
 from typing import List, Dict, Optional, Tuple
 from sqlalchemy.orm import Session, joinedload
 from rapidfuzz import fuzz
 from datetime import date, datetime
 from decimal import Decimal
+
+logger = logging.getLogger(__name__)
 
 from .database import (
     engine,
@@ -461,7 +464,8 @@ Odpowiedz na pytanie użytkownika, korzystając z dostępnych informacji o produ
             return response["message"]["content"].strip()
 
         except Exception as e:
-            return f"Przepraszam, wystąpił błąd podczas przetwarzania pytania: {str(e)}"
+            logger.error(f"Error processing question: {e}", exc_info=True)
+            return "Przepraszam, wystąpił błąd podczas przetwarzania pytania. Spróbuj ponownie."
 
     def close(self):
         """Zamyka sesję bazy danych."""
