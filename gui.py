@@ -36,6 +36,16 @@ from src.quick_add import QuickAddHelper
 from src.meal_planner import MealPlanner
 from history_manager import load_history, add_to_history
 from src.unified_design_system import AppColors, AppSpacing, AppFont, Icons
+from src.gui_optimizations import (
+    VirtualScrollableFrame,
+    MemoryProfiler,
+    DialogManager,
+    AnimationHelper,
+    cleanup_widget_tree,
+    force_garbage_collection,
+    dialog_manager,
+    memory_profiler,
+)
 
 
 class ToolTip:
@@ -1257,6 +1267,15 @@ class App(ctk.CTk):
         self.geometry("1200x700")
         self.minsize(1200, 700)  # Minimalny rozmiar okna
         ctk.set_appearance_mode("System")
+        
+        # Register dialogs for lazy loading
+        dialog_manager.register_dialog("cooking", CookingDialog)
+        dialog_manager.register_dialog("add_product", AddProductDialog)
+        dialog_manager.register_dialog("bielik_chat", BielikChatDialog)
+        dialog_manager.register_dialog("settings", SettingsDialog)
+        
+        # Start memory profiling (optional, can be disabled)
+        # memory_profiler.start()
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
@@ -1553,8 +1572,11 @@ class App(ctk.CTk):
 
     def show_cooking_dialog(self):
         """Otwiera okno gotowania"""
-        dialog = CookingDialog(self)
+        # Lazy load dialog
+        dialog = dialog_manager.get_dialog("cooking", self)
         dialog.wait_window()
+        dialog_manager.cleanup()
+        force_garbage_collection()
 
     def show_quick_add_dialog(self):
         """Otwiera okno Quick Add"""
@@ -1568,10 +1590,13 @@ class App(ctk.CTk):
 
     def show_add_product_dialog(self):
         """Otwiera okno dodawania produktu"""
-        dialog = AddProductDialog(self)
+        # Lazy load dialog
+        dialog = dialog_manager.get_dialog("add_product", self)
         dialog.wait_window()
-        if dialog.result:
+        if hasattr(dialog, 'result') and dialog.result:
             self.log("INFO: Produkt został dodany do magazynu")
+        dialog_manager.cleanup()
+        force_garbage_collection()
 
     def show_inventory(self):
         """Pokazuje stan magazynu z możliwością edycji"""
@@ -1587,7 +1612,18 @@ class App(ctk.CTk):
         action_frame = ctk.CTkFrame(inv_window)
         action_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.XS)
 
-        ctk.CTkButton(
+        # Get data first
+        stany = (
+            session.query(StanMagazynowy)
+            .join(Produkt)
+            .filter(StanMagazynowy.ilosc > 0)
+            .order_by(StanMagazynowy.data_waznosci)
+            .all()
+        )
+
+        inventory_items = []
+        
+        save_btn = ctk.CTkButton(
             action_frame,
             text=f"{Icons.SAVE} Zapisz zmiany",
             command=lambda: self.save_inventory_changes(
@@ -1596,7 +1632,8 @@ class App(ctk.CTk):
             fg_color=AppColors.SUCCESS,
             hover_color=App._adjust_color(AppColors.SUCCESS, -15),
             width=150,
-        ).pack(side="left", padx=AppSpacing.XS)
+        )
+        save_btn.pack(side="left", padx=AppSpacing.XS)
 
         ctk.CTkButton(
             action_frame,
@@ -1607,151 +1644,287 @@ class App(ctk.CTk):
             width=150,
         ).pack(side="left", padx=AppSpacing.XS)
 
-        scrollable = ctk.CTkScrollableFrame(inv_window)
-        scrollable.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.SM)
-
-        # Headers - dodano kolumnę "Zamrożone" i "Akcje"
-        headers = [
-            "Produkt",
-            "Ilość",
-            "Jednostka",
-            "Data ważności",
-            "Zamrożone",
-            "Status",
-            "Akcje",
-        ]
-        for col, text in enumerate(headers):
-            ctk.CTkLabel(scrollable, text=text, font=("Arial", 12, "bold")).grid(
-                row=0, column=col, padx=AppSpacing.XS, pady=AppSpacing.XS
-            )
-
-        stany = (
-            session.query(StanMagazynowy)
-            .join(Produkt)
-            .filter(StanMagazynowy.ilosc > 0)
-            .order_by(StanMagazynowy.data_waznosci)
-            .all()
-        )
-
-        inventory_items = []
-
-        for i, stan in enumerate(stany):
-            row = i + 1
+        # Use virtual scrolling for large datasets (>1000 rows)
+        use_virtual_scrolling = len(stany) > 1000
+        
+        if use_virtual_scrolling:
+            # Headers frame (fixed)
+            headers_frame = ctk.CTkFrame(inv_window)
+            headers_frame.pack(fill="x", padx=AppSpacing.SM, pady=(AppSpacing.SM, 0))
             
-            # Create row frame with alternating colors
-            row_frame = ctk.CTkFrame(
-                scrollable,
-                fg_color=AppColors.SURFACE_DARK if i % 2 == 0 else AppColors.BG_DARK
-            )
-            row_frame.grid(row=row, column=0, columnspan=len(headers), sticky="ew", padx=0, pady=1)
-            row_frame.grid_columnconfigure(0, weight=1)
+            headers = [
+                "Produkt",
+                "Ilość",
+                "Jednostka",
+                "Data ważności",
+                "Zamrożone",
+                "Status",
+                "Akcje",
+            ]
+            for col, text in enumerate(headers):
+                ctk.CTkLabel(headers_frame, text=text, font=("Arial", 12, "bold")).grid(
+                    row=0, column=col, padx=AppSpacing.XS, pady=AppSpacing.XS
+                )
+            
+            # Virtual scrollable frame
+            def render_row(index, stan_data, row_frame):
+                """Render a single row in virtual scrolling."""
+                stan = stan_data["stan"]
+                i = index
+                
+                row_frame.grid_columnconfigure(0, weight=1)
+                
+                # Produkt (tylko do odczytu)
+                ctk.CTkLabel(
+                    row_frame, text=stan.produkt.znormalizowana_nazwa, width=250
+                ).grid(row=0, column=0, padx=AppSpacing.XS, pady=2, sticky="w")
 
-            # Produkt (tylko do odczytu)
-            ctk.CTkLabel(
-                row_frame, text=stan.produkt.znormalizowana_nazwa, width=250
-            ).grid(row=0, column=0, padx=AppSpacing.XS, pady=2, sticky="w")
+                # Ilość (edytowalna)
+                ilosc_entry = ctk.CTkEntry(row_frame, width=100)
+                ilosc_entry.insert(0, str(stan.ilosc))
+                ilosc_entry.grid(row=0, column=1, padx=AppSpacing.XS, pady=2)
 
-            # Ilość (edytowalna)
-            ilosc_entry = ctk.CTkEntry(row_frame, width=100)
-            ilosc_entry.insert(0, str(stan.ilosc))
-            ilosc_entry.grid(row=0, column=1, padx=AppSpacing.XS, pady=2)
+                # Jednostka (edytowalna)
+                jednostka_entry = ctk.CTkEntry(row_frame, width=100)
+                jednostka_entry.insert(0, stan.jednostka_miary or "szt")
+                jednostka_entry.grid(row=0, column=2, padx=AppSpacing.XS, pady=2)
 
-            # Jednostka (edytowalna)
-            jednostka_entry = ctk.CTkEntry(row_frame, width=100)
-            jednostka_entry.insert(0, stan.jednostka_miary or "szt")
-            jednostka_entry.grid(row=0, column=2, padx=AppSpacing.XS, pady=2)
+                # Data ważności (edytowalna)
+                data_entry = ctk.CTkEntry(
+                    row_frame, width=120, placeholder_text="YYYY-MM-DD"
+                )
+                if stan.data_waznosci:
+                    data_entry.insert(0, stan.data_waznosci.strftime("%Y-%m-%d"))
+                data_entry.grid(row=0, column=3, padx=AppSpacing.XS, pady=2)
 
-            # Data ważności (edytowalna)
-            data_entry = ctk.CTkEntry(
-                row_frame, width=120, placeholder_text="YYYY-MM-DD"
-            )
-            if stan.data_waznosci:
-                data_entry.insert(0, stan.data_waznosci.strftime("%Y-%m-%d"))
-            data_entry.grid(row=0, column=3, padx=AppSpacing.XS, pady=2)
-
-            # Checkbox "Zamrożone"
-            zamrozone_checkbox = ctk.CTkCheckBox(row_frame, text="")
-            zamrozone_checkbox.grid(row=0, column=4, padx=AppSpacing.XS, pady=2)
-            # Ustaw stan checkboxa na podstawie wartości z bazy (domyślnie False jeśli None)
-            (
-                zamrozone_checkbox.select()
-                if getattr(stan, "zamrozone", False)
-                else zamrozone_checkbox.deselect()
-            )
-
-            # Status (tylko do odczytu)
-            if stan.data_waznosci:
-                if stan.data_waznosci < date.today():
-                    status = "⚠️ Przeterminowany"
-                    color = AppColors.EXPIRED
-                elif stan.data_waznosci <= date.today() + timedelta(days=3):
-                    status = "🔴 Wkrótce przeterminowany"
-                    color = AppColors.EXPIRING_SOON
+                # Checkbox "Zamrożone"
+                zamrozone_checkbox = ctk.CTkCheckBox(row_frame, text="")
+                zamrozone_checkbox.grid(row=0, column=4, padx=AppSpacing.XS, pady=2)
+                if getattr(stan, "zamrozone", False):
+                    zamrozone_checkbox.select()
                 else:
-                    status = "✅ OK"
-                    color = AppColors.OK
-            else:
-                status = "❓ Brak daty"
-                color = AppColors.UNKNOWN
+                    zamrozone_checkbox.deselect()
 
-            status_label = ctk.CTkLabel(
-                row_frame, text=status, width=150, text_color=color
-            )
-            status_label.grid(row=0, column=5, padx=AppSpacing.XS, pady=2)
+                # Status
+                if stan.data_waznosci:
+                    if stan.data_waznosci < date.today():
+                        status = "⚠️ Przeterminowany"
+                        color = AppColors.EXPIRED
+                    elif stan.data_waznosci <= date.today() + timedelta(days=3):
+                        status = "🔴 Wkrótce przeterminowany"
+                        color = AppColors.EXPIRING_SOON
+                    else:
+                        status = "✅ OK"
+                        color = AppColors.OK
+                else:
+                    status = "❓ Brak daty"
+                    color = AppColors.UNKNOWN
 
-            # Frame dla przycisków akcji
-            actions_frame = ctk.CTkFrame(row_frame)
-            actions_frame.grid(row=0, column=6, padx=AppSpacing.XS, pady=2)
+                status_label = ctk.CTkLabel(
+                    row_frame, text=status, width=150, text_color=color
+                )
+                status_label.grid(row=0, column=5, padx=AppSpacing.XS, pady=2)
 
-            # Przycisk zmarnowany
-            waste_btn = ctk.CTkButton(
-                actions_frame,
-                text="🗑️",
-                command=lambda s=stan: self.mark_as_waste(inv_window, session, s),
-                fg_color="#8b4513",
-                hover_color="#654321",
-                width=40,
-                height=25,
-            )
-            waste_btn.pack(side="left", padx=2)
+                # Frame dla przycisków akcji
+                actions_frame = ctk.CTkFrame(row_frame)
+                actions_frame.grid(row=0, column=6, padx=AppSpacing.XS, pady=2)
 
-            # Przycisk usuwania
-            delete_btn = ctk.CTkButton(
-                actions_frame,
-                text=f"{Icons.DELETE} Usuń",
-                command=lambda s=stan: self.delete_inventory_item(
-                    inv_window, session, s
-                ),
-                fg_color=AppColors.ERROR,
-                hover_color=App._adjust_color(AppColors.ERROR, -15),
-                width=80,
-                height=25,
-            )
-            delete_btn.pack(side="left", padx=2)
+                waste_btn = ctk.CTkButton(
+                    actions_frame,
+                    text="🗑️",
+                    command=lambda s=stan: self.mark_as_waste(inv_window, session, s),
+                    fg_color="#8b4513",
+                    hover_color="#654321",
+                    width=40,
+                    height=25,
+                )
+                waste_btn.pack(side="left", padx=2)
 
-            inventory_items.append(
-                {
+                delete_btn = ctk.CTkButton(
+                    actions_frame,
+                    text=f"{Icons.DELETE} Usuń",
+                    command=lambda s=stan: self.delete_inventory_item(
+                        inv_window, session, s
+                    ),
+                    fg_color=AppColors.ERROR,
+                    hover_color=App._adjust_color(AppColors.ERROR, -15),
+                    width=80,
+                    height=25,
+                )
+                delete_btn.pack(side="left", padx=2)
+                
+                # Store in inventory_items
+                inventory_items.append({
                     "stan": stan,
                     "ilosc_entry": ilosc_entry,
                     "jednostka_entry": jednostka_entry,
                     "data_entry": data_entry,
                     "zamrozone_checkbox": zamrozone_checkbox,
                     "status_label": status_label,
-                }
+                })
+            
+            # Prepare data for virtual scrolling
+            data_list = [{"stan": stan} for stan in stany]
+            
+            scrollable = VirtualScrollableFrame(
+                inv_window,
+                item_height=50,
+                page_size=100,
+                render_callback=render_row
             )
+            scrollable.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.SM)
+            scrollable.set_data(data_list, use_pagination_threshold=1000)
+            
+        else:
+            # Standard scrolling for smaller datasets
+            scrollable = ctk.CTkScrollableFrame(inv_window)
+            scrollable.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.SM)
+
+            # Headers
+            headers = [
+                "Produkt",
+                "Ilość",
+                "Jednostka",
+                "Data ważności",
+                "Zamrożone",
+                "Status",
+                "Akcje",
+            ]
+            for col, text in enumerate(headers):
+                ctk.CTkLabel(scrollable, text=text, font=("Arial", 12, "bold")).grid(
+                    row=0, column=col, padx=AppSpacing.XS, pady=AppSpacing.XS
+                )
+
+            for i, stan in enumerate(stany):
+                row = i + 1
+                
+                # Create row frame with alternating colors
+                row_frame = ctk.CTkFrame(
+                    scrollable,
+                    fg_color=AppColors.SURFACE_DARK if i % 2 == 0 else AppColors.BG_DARK
+                )
+                row_frame.grid(row=row, column=0, columnspan=len(headers), sticky="ew", padx=0, pady=1)
+                row_frame.grid_columnconfigure(0, weight=1)
+
+                # Produkt (tylko do odczytu)
+                ctk.CTkLabel(
+                    row_frame, text=stan.produkt.znormalizowana_nazwa, width=250
+                ).grid(row=0, column=0, padx=AppSpacing.XS, pady=2, sticky="w")
+
+                # Ilość (edytowalna)
+                ilosc_entry = ctk.CTkEntry(row_frame, width=100)
+                ilosc_entry.insert(0, str(stan.ilosc))
+                ilosc_entry.grid(row=0, column=1, padx=AppSpacing.XS, pady=2)
+
+                # Jednostka (edytowalna)
+                jednostka_entry = ctk.CTkEntry(row_frame, width=100)
+                jednostka_entry.insert(0, stan.jednostka_miary or "szt")
+                jednostka_entry.grid(row=0, column=2, padx=AppSpacing.XS, pady=2)
+
+                # Data ważności (edytowalna)
+                data_entry = ctk.CTkEntry(
+                    row_frame, width=120, placeholder_text="YYYY-MM-DD"
+                )
+                if stan.data_waznosci:
+                    data_entry.insert(0, stan.data_waznosci.strftime("%Y-%m-%d"))
+                data_entry.grid(row=0, column=3, padx=AppSpacing.XS, pady=2)
+
+                # Checkbox "Zamrożone"
+                zamrozone_checkbox = ctk.CTkCheckBox(row_frame, text="")
+                zamrozone_checkbox.grid(row=0, column=4, padx=AppSpacing.XS, pady=2)
+                if getattr(stan, "zamrozone", False):
+                    zamrozone_checkbox.select()
+                else:
+                    zamrozone_checkbox.deselect()
+
+                # Status (tylko do odczytu)
+                if stan.data_waznosci:
+                    if stan.data_waznosci < date.today():
+                        status = "⚠️ Przeterminowany"
+                        color = AppColors.EXPIRED
+                    elif stan.data_waznosci <= date.today() + timedelta(days=3):
+                        status = "🔴 Wkrótce przeterminowany"
+                        color = AppColors.EXPIRING_SOON
+                    else:
+                        status = "✅ OK"
+                        color = AppColors.OK
+                else:
+                    status = "❓ Brak daty"
+                    color = AppColors.UNKNOWN
+
+                status_label = ctk.CTkLabel(
+                    row_frame, text=status, width=150, text_color=color
+                )
+                status_label.grid(row=0, column=5, padx=AppSpacing.XS, pady=2)
+
+                # Frame dla przycisków akcji
+                actions_frame = ctk.CTkFrame(row_frame)
+                actions_frame.grid(row=0, column=6, padx=AppSpacing.XS, pady=2)
+
+                # Przycisk zmarnowany
+                waste_btn = ctk.CTkButton(
+                    actions_frame,
+                    text="🗑️",
+                    command=lambda s=stan: self.mark_as_waste(inv_window, session, s),
+                    fg_color="#8b4513",
+                    hover_color="#654321",
+                    width=40,
+                    height=25,
+                )
+                waste_btn.pack(side="left", padx=2)
+
+                # Przycisk usuwania
+                delete_btn = ctk.CTkButton(
+                    actions_frame,
+                    text=f"{Icons.DELETE} Usuń",
+                    command=lambda s=stan: self.delete_inventory_item(
+                        inv_window, session, s
+                    ),
+                    fg_color=AppColors.ERROR,
+                    hover_color=App._adjust_color(AppColors.ERROR, -15),
+                    width=80,
+                    height=25,
+                )
+                delete_btn.pack(side="left", padx=2)
+
+                inventory_items.append(
+                    {
+                        "stan": stan,
+                        "ilosc_entry": ilosc_entry,
+                        "jednostka_entry": jednostka_entry,
+                        "data_entry": data_entry,
+                        "zamrozone_checkbox": zamrozone_checkbox,
+                        "status_label": status_label,
+                    }
+                )
 
         if not stany:
-            ctk.CTkLabel(
-                scrollable, text="Brak produktów w magazynie", font=("Arial", 14)
-            ).grid(row=1, column=0, columnspan=7, pady=AppSpacing.LG)
+            empty_label = ctk.CTkLabel(
+                inv_window, text="Brak produktów w magazynie", font=("Arial", 14)
+            )
+            empty_label.pack(pady=AppSpacing.LG)
 
         # Przechowaj referencje w oknie
         inv_window.inventory_items = inventory_items
         inv_window.session = session
+        inv_window.scrollable = scrollable if not use_virtual_scrolling else None
 
-        inv_window.protocol(
-            "WM_DELETE_WINDOW", lambda: self.close_inventory_window(inv_window, session)
-        )
+        def on_close():
+            """Cleanup on window close."""
+            try:
+                cleanup_widget_tree(inv_window)
+                session.close()
+                dialog_manager.cleanup()
+                force_garbage_collection()
+            except Exception as e:
+                import logging
+                logging.warning(f"Error during inventory window cleanup: {e}")
+            inv_window.destroy()
+
+        inv_window.protocol("WM_DELETE_WINDOW", on_close)
+        
+        # Smooth animation
+        AnimationHelper.fade_in(inv_window)
 
     def save_inventory_changes(self, inv_window, session, inventory_items):
         """Zapisuje zmiany w magazynie"""
@@ -1893,13 +2066,19 @@ class App(ctk.CTk):
 
     def show_bielik_chat(self):
         """Otwiera okno czatu z Bielikiem"""
-        dialog = BielikChatDialog(self)
+        # Lazy load dialog
+        dialog = dialog_manager.get_dialog("bielik_chat", self)
         dialog.wait_window()
+        dialog_manager.cleanup()
+        force_garbage_collection()
 
     def show_settings(self):
         """Otwiera okno ustawień"""
-        dialog = SettingsDialog(self)
+        # Lazy load dialog
+        dialog = dialog_manager.get_dialog("settings", self)
         dialog.wait_window()
+        dialog_manager.cleanup()
+        force_garbage_collection()
 
     def show_add_receipt_dialog(self):
         """Otwiera widok do dodawania paragonu"""
@@ -2861,4 +3040,19 @@ class App(ctk.CTk):
 
 if __name__ == "__main__":
     app = App()
+    
+    # Cleanup on exit
+    def on_closing():
+        """Cleanup on application exit."""
+        try:
+            cleanup_widget_tree(app)
+            dialog_manager.cleanup()
+            force_garbage_collection()
+            memory_profiler.stop()
+        except Exception as e:
+            import logging
+            logging.warning(f"Error during application cleanup: {e}")
+        app.destroy()
+    
+    app.protocol("WM_DELETE_WINDOW", on_closing)
     app.mainloop()

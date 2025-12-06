@@ -1,0 +1,809 @@
+{
+"project": {
+"name": "ParagonOCR 2.0",
+"version": "2.0-local-only",
+"status": "ready-for-implementation",
+"scope": "44 hours | 1-2 developers | 2-3 weeks",
+"date": "2025-12-06",
+"constraints": [
+"100% local desktop only (CustomTkinter)",
+"No web server version",
+"Ollama integration required",
+"SQLite database (existing)",
+"Python 3.9+"
+]
+},
+"phases": [
+{
+"phase_number": 1,
+"name": "UI/UX Overhaul",
+"duration_hours": 8,
+"priority": "HIGH",
+"description": "Create unified design system and modernize GUI",
+"sections": [
+{
+"section_id": "1.1",
+"name": "Design System Creation",
+"file": "ReceiptParser/src/unified_design_system.py",
+"type": "new",
+"duration_hours": 2,
+"classes": [
+{
+"name": "AppColors",
+"properties": {
+"PRIMARY": "#1f538d",
+"SUCCESS": "#2d8659",
+"WARNING": "#d97706",
+"ERROR": "#dc2626",
+"INFO": "#2563eb",
+"EXPIRED": "#dc2626",
+"EXPIRING_SOON": "#d97706",
+"OK": "#2d8659",
+"UNKNOWN": "#6b7280",
+"BG_LIGHT": "#f3f4f6",
+"BG_DARK": "#1a1a1a",
+"SURFACE_LIGHT": "#ffffff",
+"SURFACE_DARK": "#2a2a2a",
+"BORDER_LIGHT": "#e5e7eb",
+"BORDER_DARK": "#404040"
+}
+},
+{
+"name": "AppSpacing",
+"properties": {
+"XS": 5,
+"SM": 10,
+"MD": 15,
+"LG": 20,
+"XL": 30,
+"XXL": 40
+}
+},
+{
+"name": "AppFont",
+"properties": {
+"SIZE_XS": 10,
+"SIZE_SM": 11,
+"SIZE_MD": 12,
+"SIZE_LG": 14,
+"SIZE_XL": 16,
+"SIZE_2XL": 18,
+"SIZE_3XL": 20,
+"WEIGHT_NORMAL": 400,
+"WEIGHT_MEDIUM": 500,
+"WEIGHT_BOLD": 600,
+"FAMILY": "Segoe UI"
+}
+},
+{
+"name": "Icons",
+"properties": {
+"RECEIPT": "📄",
+"COOKING": "🍳",
+"ADD": "➕",
+"CHAT": "💬",
+"INVENTORY": "📦",
+"SETTINGS": "⚙️",
+"REFRESH": "🔄",
+"DELETE": "🗑️",
+"SAVE": "💾",
+"SEARCH": "🔍",
+"SEND": "📤",
+"COPY": "📋",
+"EXPORT": "📊",
+"CLEAR": "🧹",
+"HISTORY": "📜",
+"SUCCESS": "✅",
+"ERROR": "❌",
+"WARNING": "⚠️"
+}
+}
+]
+},
+{
+"section_id": "1.2",
+"name": "GUI Refactoring",
+"file": "gui.py",
+"type": "update",
+"duration_hours": 4,
+"instructions": [
+"Add import: from ReceiptParser.src.unified_design_system import AppColors, AppSpacing, AppFont, Icons",
+"Replace ALL hardcoded colors with AppColors constants",
+"Replace ALL padx/pady values with AppSpacing constants",
+"Set minimum window size: self.minsize(1200, 700)",
+"Add status bar at bottom of window"
+]
+},
+{
+"section_id": "1.3",
+"name": "Notification System",
+"file": "ReceiptParser/src/notifications.py",
+"type": "new",
+"duration_hours": 1,
+"classes": [
+{
+"name": "NotificationToast",
+"methods": [
+{"name": "show_success", "params": ["message: str", "duration_ms: int = 3000"]},
+{"name": "show_error", "params": ["message: str", "duration_ms: int = 5000"]},
+{"name": "show_warning", "params": ["message: str", "duration_ms: int = 4000"]},
+{"name": "show_info", "params": ["message: str", "duration_ms: int = 3000"]}
+]
+},
+{
+"name": "NotificationDialog",
+"methods": [
+{"name": "confirm", "params": ["title: str", "message: str"], "returns": "bool"},
+{"name": "alert", "params": ["title: str", "message: str"]}
+]
+}
+]
+},
+{
+"section_id": "1.4",
+"name": "Enhanced Tab Layouts",
+"file": "gui.py",
+"type": "update",
+"duration_hours": 1,
+"improvements": [
+"Add card-based sections with borders",
+"Add emoji icons before section titles",
+"Use visual separators between groups",
+"Implement alternating row colors in tables"
+]
+}
+]
+},
+{
+  "phase_number": 2,
+  "name": "Local AI Chat with RAG",
+  "duration_hours": 10,
+  "priority": "CRITICAL",
+  "description": "Implement AI chat interface with RAG retrieval",
+  "sections": [
+    {
+      "section_id": "2.1",
+      "name": "Chat UI Tab",
+      "file": "ReceiptParser/src/ai_chat_tab.py",
+      "type": "new",
+      "duration_hours": 3,
+      "components": [
+        {
+          "component": "Message History Widget",
+          "features": [
+            "Auto-scroll to newest",
+            "Different colors for user (blue) / AI (green)",
+            "Timestamp for each message",
+            "Copy button on hover",
+            "Response time display"
+          ]
+        },
+        {
+          "component": "Input Area",
+          "features": [
+            "Multi-line text input",
+            "Ctrl+Enter to send",
+            "Send button with icon",
+            "Character counter"
+          ]
+        },
+        {
+          "component": "Chat Header",
+          "features": [
+            "Conversation title",
+            "Clear history button",
+            "Export button",
+            "Conversation list dropdown"
+          ]
+        }
+      ]
+    },
+    {
+      "section_id": "2.2",
+      "name": "RAG Search Engine",
+      "file": "ReceiptParser/src/rag_engine.py",
+      "type": "new",
+      "duration_hours": 3,
+      "class": "RAGSearchEngine",
+      "methods": [
+        {
+          "name": "search",
+          "signature": "search(self, query: str, limit: int = 15) -> List[Dict]",
+          "algorithm": [
+            "Factor 1: Fuzzy matching on names (weight: 0.4)",
+            "Factor 2: Semantic search on categories/tags (weight: 0.3)",
+            "Factor 3: Temporal ranking - expiry, frequency (weight: 0.3)",
+            "Return top N results ranked by combined score"
+          ]
+        },
+        {
+          "name": "_fuzzy_search",
+          "signature": "_fuzzy_search(self, query: str) -> List",
+          "library": "rapidfuzz.fuzz.partial_ratio()"
+        },
+        {
+          "name": "_semantic_search",
+          "signature": "_semantic_search(self, query: str) -> List",
+          "implementation": "Search database categories, tags, aliases"
+        },
+        {
+          "name": "_rank_results",
+          "signature": "_rank_results(self, results: List) -> List",
+          "scoring": {
+            "available": "1.0x",
+            "expiring_today": "1.5x",
+            "expiring_week": "1.2x",
+            "frequently_used": "1.1x"
+          }
+        },
+        {
+          "name": "format_context",
+          "signature": "format_context(self, products: List, query_type: str) -> str",
+          "types": ["product_info", "recipe_suggestion", "shopping_list", "expiry_usage"]
+        }
+      ]
+    },
+    {
+      "section_id": "2.3",
+      "name": "Enhanced LLM Integration",
+      "file": "ReceiptParser/src/llm.py",
+      "type": "update",
+      "duration_hours": 2,
+      "additions": [
+        {
+          "method": "stream_generate",
+          "signature": "stream_generate(self, prompt: str, stream_callback: Callable) -> str",
+          "implementation": "Use Ollama /api/generate with stream=true"
+        },
+        {
+          "feature": "Request queuing",
+          "implementation": "Max 2 simultaneous requests"
+        },
+        {
+          "feature": "Timeouts",
+          "values": {
+            "quick": "30s",
+            "recipes": "120s",
+            "analysis": "60s"
+          }
+        },
+        {
+          "feature": "Conversation context",
+          "implementation": "Keep last 10 messages"
+        },
+        {
+          "method": "estimate_tokens",
+          "formula": "len(text.split()) * 1.3"
+        }
+      ]
+    },
+    {
+      "section_id": "2.4",
+      "name": "Smart Prompt Templates",
+      "file": "ReceiptParser/src/prompt_templates.py",
+      "type": "new",
+      "duration_hours": 1,
+      "prompts": [
+        {
+          "key": "product_info",
+          "template": "Odpowiadaj na pytania o produkty.\n\nDostępne:\n{PRODUCTS_CONTEXT}\n\nPytanie: {QUERY}"
+        },
+        {
+          "key": "recipe_suggestion",
+          "template": "Zaproponuj potrawy z dostępnych produktów. Priorityzuj wygasające.\n\nDostępne:\n{AVAILABLE_PRODUCTS}\n\nWygasające:\n{EXPIRING_PRODUCTS}"
+        },
+        {
+          "key": "shopping_list",
+          "template": "Generuj listę zakupów.\n\nMają już:\n{CURRENT_INVENTORY}\n\nChce zrobić:\n{PLANNED_MEALS}\n\nBudżet: {BUDGET}"
+        },
+        {
+          "key": "expiry_usage",
+          "template": "Pomóż wykorzystać wygasające produkty.\n\nWygasające:\n{EXPIRING_PRODUCTS}"
+        },
+        {
+          "key": "nutrition_analysis",
+          "template": "Przeanalizuj wartość odżywczą.\n\nProdukty:\n{PRODUCTS}\n\nCele: {HEALTH_GOALS}"
+        },
+        {
+          "key": "storage_advice",
+          "template": "Podaj poradę na temat przechowywania i mrożenia.\n\nProdukty:\n{PRODUCTS}"
+        },
+        {
+          "key": "waste_reduction",
+          "template": "Przeanalizuj marnowanie żywności.\n\nWyrzucone:\n{WASTED_PRODUCTS}\n\nBieżące:\n{CURRENT_INVENTORY}"
+        },
+        {
+          "key": "meal_planning",
+          "template": "Zaplanuj menu na tydzień.\n\nDostępne:\n{AVAILABLE_PRODUCTS}\n\nPreferencje:\n{PREFERENCES}"
+        },
+        {
+          "key": "budget_optimization",
+          "template": "Zaproponuj najtańsze opcje.\n\nLista:\n{SHOPPING_LIST}\n\nBudżet: {BUDGET_PLN}\n\nSklepy: {STORES}"
+        },
+        {
+          "key": "dietary_preferences",
+          "template": "Zaproponuj potrawy dostosowane.\n\nPreferencje:\n{DIETARY_PREFERENCES}\n\nAlergie:\n{ALLERGENS}\n\nDostępne:\n{AVAILABLE_PRODUCTS}"
+        }
+      ]
+    },
+    {
+      "section_id": "2.5",
+      "name": "Chat Storage and History",
+      "file": "ReceiptParser/src/chat_storage.py",
+      "type": "new",
+      "duration_hours": 1,
+      "tables": [
+        {
+          "table": "conversations",
+          "columns": [
+            {"name": "conversation_id", "type": "INTEGER PRIMARY KEY"},
+            {"name": "created_at", "type": "DATETIME DEFAULT CURRENT_TIMESTAMP"},
+            {"name": "title", "type": "TEXT DEFAULT 'Nowa rozmowa'"},
+            {"name": "model_used", "type": "TEXT DEFAULT 'bielik'"},
+            {"name": "tags", "type": "TEXT"}
+          ]
+        },
+        {
+          "table": "chat_messages",
+          "columns": [
+            {"name": "message_id", "type": "INTEGER PRIMARY KEY"},
+            {"name": "conversation_id", "type": "INTEGER FK"},
+            {"name": "role", "type": "TEXT", "check": "role IN ('user', 'assistant')"},
+            {"name": "content", "type": "TEXT"},
+            {"name": "timestamp", "type": "DATETIME DEFAULT CURRENT_TIMESTAMP"},
+            {"name": "response_time_ms", "type": "INTEGER"},
+            {"name": "tokens_used", "type": "INTEGER"},
+            {"name": "rag_context_used", "type": "BOOLEAN DEFAULT 0"}
+          ]
+        }
+      ],
+      "class_methods": [
+        {"name": "create_conversation", "returns": "conversation_id"},
+        {"name": "save_message", "params": ["conversation_id", "role", "content"]},
+        {"name": "get_conversation_history", "returns": "List[Dict]"},
+        {"name": "list_conversations", "params": ["limit: int = 50"]},
+        {"name": "export_conversation", "params": ["conversation_id", "format: 'txt'|'json'"]},
+        {"name": "delete_conversation", "params": ["conversation_id"]}
+      ]
+    }
+  ]
+},
+
+{
+  "phase_number": 3,
+  "name": "Product Dictionary Enhancement",
+  "duration_hours": 12,
+  "priority": "CRITICAL",
+  "description": "Expand to 500+ products with comprehensive metadata",
+  "sections": [
+    {
+      "section_id": "3.1",
+      "name": "Expand Product Catalog",
+      "file": "ReceiptParser/data/expanded_products.json",
+      "type": "new",
+      "duration_hours": 5,
+      "target_count": 500,
+      "structure_example": {
+        "produkty": [
+          {
+            "id": "mleko_3.2_uht",
+            "znormalizowana_nazwa": "Mleko 3.2% UHT",
+            "kategoria": "Nabiał",
+            "subkategoria": "Mleko",
+            "typ": "Mleko UHT 3.2%",
+            "tags": ["dairy", "milk", "can-freeze", "common"],
+            "aliases": ["Mleko", "Mleczko", "UHT 3.2%", "Łaciate"],
+            "properties": {
+              "can_freeze": true,
+              "freeze_note": "Bez zmian smaku",
+              "shelf_life_unopened_days": 30,
+              "shelf_life_opened_days": 3,
+              "storage_temperature_c_min": 4,
+              "storage_temperature_c_max": 8,
+              "allergens": ["lactose"],
+              "vegan": false,
+              "vegetarian": true
+            },
+            "nutrition_per_100ml": {
+              "calories": 61,
+              "protein_g": 3.2,
+              "fat_g": 3.2,
+              "carbs_g": 4.8,
+              "calcium_mg": 120
+            },
+            "shops": {
+              "lidl": "Mleko Wiejskie",
+              "biedronka": "Mleko Mlekovita",
+              "kaufland": "Mleko Premium",
+              "auchan": "Mleko własne marki"
+            },
+            "price_range_pln": [1.50, 4.50],
+            "purchase_frequency": "weekly"
+          }
+        ]
+      },
+      "categories": [
+        {"emoji": "🍞", "name": "Piekarnicze", "target": 30},
+        {"emoji": "🧈", "name": "Nabiał", "target": 40},
+        {"emoji": "🍎", "name": "Owoce", "target": 35},
+        {"emoji": "🥕", "name": "Warzywa", "target": 40},
+        {"emoji": "🥩", "name": "Mięso", "target": 30},
+        {"emoji": "🌮", "name": "Snacki", "target": 30},
+        {"emoji": "☕", "name": "Napoje", "target": 35},
+        {"emoji": "🍌", "name": "Mrożone", "target": 20},
+        {"emoji": "🥫", "name": "Słoiki/Puszki", "target": 25},
+        {"emoji": "🧂", "name": "Przyprawy", "target": 20}
+      ]
+    },
+    {
+      "section_id": "3.2",
+      "name": "Multi-Stage Normalization Pipeline",
+      "file": "ReceiptParser/src/normalization_rules.py",
+      "type": "new",
+      "duration_hours": 4,
+      "class": "NormalizationPipeline",
+      "stages": [
+        {
+          "stage": 1,
+          "name": "Cleanup OCR",
+          "target": "100%",
+          "operations": [
+            "Remove tax codes (A, B, C suffix)",
+            "Remove quantities (1x, 2.5x)",
+            "Remove promo keywords (RABAT, PROMOCJA)",
+            "Normalize whitespace",
+            "Remove duplicate words",
+            "Convert to title case"
+          ]
+        },
+        {
+          "stage": 2,
+          "name": "Static Rules",
+          "target": "80%",
+          "method": "Apply regex patterns from static_rules.json"
+        },
+        {
+          "stage": 3,
+          "name": "Alias Lookup",
+          "target": "15%",
+          "library": "rapidfuzz.fuzz.partial_ratio()"
+        },
+        {
+          "stage": 4,
+          "name": "LLM-based",
+          "target": "4%",
+          "implementation": "Query Ollama with product normalization prompt"
+        },
+        {
+          "stage": 5,
+          "name": "User Confirmation",
+          "target": "1%",
+          "implementation": "Flag in GUI for manual confirmation"
+        }
+      ],
+      "methods": [
+        {
+          "name": "normalize",
+          "signature": "normalize(self, raw_name: str) -> Tuple[str, float]",
+          "returns": "(znormalizowana_nazwa, confidence_score 0-1)"
+        },
+        {
+          "name": "_cleanup_ocr",
+          "signature": "_cleanup_ocr(self, name: str) -> str"
+        },
+        {
+          "name": "_apply_static_rules",
+          "signature": "_apply_static_rules(self, name: str) -> Tuple[str, float]"
+        },
+        {
+          "name": "_check_aliases",
+          "signature": "_check_aliases(self, name: str) -> Tuple[str, float]"
+        },
+        {
+          "name": "_llm_normalize",
+          "signature": "_llm_normalize(self, name: str) -> Tuple[str, float]"
+        },
+        {
+          "name": "get_confidence_level",
+          "signature": "get_confidence_level(self, score: float) -> str",
+          "levels": {
+            "0.95+": "certain",
+            "0.80-0.95": "high",
+            "0.60-0.80": "medium",
+            "0.40-0.60": "low",
+            "<0.40": "needs_confirmation"
+          }
+        }
+      ]
+    },
+    {
+      "section_id": "3.3",
+      "name": "Static Rules Library",
+      "file": "ReceiptParser/data/static_rules.json",
+      "type": "new",
+      "duration_hours": 2,
+      "target_rules": 200,
+      "structure_example": {
+        "rules": [
+          {
+            "normalized_name": "Mleko 3.2% UHT",
+            "patterns": [
+              {"regex": "^mleko.*3\\.2.*", "confidence": 0.95},
+              {"regex": ".*uht.*mleko.*", "confidence": 0.90},
+              {"regex": ".*laciate.*", "confidence": 0.92}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "section_id": "3.4",
+      "name": "Shop-Specific Variants",
+      "file": "ReceiptParser/data/shop_variants.json",
+      "type": "new",
+      "duration_hours": 1,
+      "structure_example": {
+        "LIDL": {
+          "Mleko Wiejskie": "Mleko 3.2% UHT",
+          "Chleb Żytni Lidl": "Chleb żytni"
+        },
+        "BIEDRONKA": {
+          "Mleko Mlekovita": "Mleko 3.2% UHT",
+          "Chleb Tradycyjny": "Chleb pszeniczny"
+        },
+        "KAUFLAND": {
+          "Mleko Premium": "Mleko 3.2% UHT",
+          "Chleb Rzemieślniczy": "Chleb"
+        },
+        "AUCHAN": {
+          "Mleko własne marki": "Mleko 3.2% UHT",
+          "Chleb domowy": "Chleb"
+        }
+      }
+    },
+    {
+      "section_id": "3.5",
+      "name": "Product Metadata",
+      "file": "ReceiptParser/data/product_metadata.json",
+      "type": "new",
+      "duration_hours": 0,
+      "note": "Extracted from expanded_products.json for fast lookups"
+    }
+  ]
+},
+
+{
+  "phase_number": 4,
+  "name": "Advanced Features",
+  "duration_hours": 8,
+  "priority": "HIGH",
+  "sections": [
+    {
+      "section_id": "4.1",
+      "name": "Smart Recipe Engine",
+      "file": "ReceiptParser/src/recipe_engine.py",
+      "type": "new",
+      "duration_hours": 2,
+      "class": "RecipeEngine",
+      "methods": [
+        {
+          "name": "suggest_recipes",
+          "signature": "suggest_recipes(self, available_products: List[str], preferences: Dict = None) -> List[Dict]"
+        },
+        {
+          "name": "get_recipe_details",
+          "signature": "get_recipe_details(self, recipe_name: str) -> Dict"
+        },
+        {
+          "name": "calculate_recipe_cost",
+          "signature": "calculate_recipe_cost(self, recipe_name: str) -> float"
+        }
+      ]
+    },
+    {
+      "section_id": "4.2",
+      "name": "Food Waste Reduction AI",
+      "file": "ReceiptParser/src/waste_reduction_engine.py",
+      "type": "new",
+      "duration_hours": 2,
+      "class": "WasteReductionEngine",
+      "methods": [
+        {
+          "name": "get_expiry_alerts",
+          "returns": "Products expiring soon with recipes"
+        },
+        {
+          "name": "suggest_freezing",
+          "signature": "suggest_freezing(self, product_name: str) -> Dict"
+        },
+        {
+          "name": "get_waste_stats",
+          "signature": "get_waste_stats(self, days: int = 30) -> Dict"
+        }
+      ]
+    },
+    {
+      "section_id": "4.3",
+      "name": "Smart Shopping Lists",
+      "file": "ReceiptParser/src/smart_shopping.py",
+      "type": "new",
+      "duration_hours": 2,
+      "class": "SmartShopping",
+      "methods": [
+        {
+          "name": "generate_shopping_list",
+          "signature": "generate_shopping_list(self, planned_meals: List[str], budget_pln: float = None) -> Dict"
+        },
+        {
+          "name": "group_by_store_layout",
+          "signature": "group_by_store_layout(self, store_name: str, items: List[str]) -> List[List[str]]"
+        },
+        {
+          "name": "suggest_alternatives",
+          "signature": "suggest_alternatives(self, product_name: str, max_price_pln: float = None) -> List[Dict]"
+        }
+      ]
+    },
+    {
+      "section_id": "4.4",
+      "name": "Nutritional Analysis",
+      "file": "ReceiptParser/src/nutrition_analyzer.py",
+      "type": "new",
+      "duration_hours": 2,
+      "class": "NutritionAnalyzer",
+      "methods": [
+        {
+          "name": "analyze_meal",
+          "signature": "analyze_meal(self, products: List[str], quantities_g: List[float]) -> Dict"
+        },
+        {
+          "name": "daily_nutritional_tracking",
+          "signature": "daily_nutritional_tracking(self, date: str) -> Dict"
+        },
+        {
+          "name": "identify_gaps",
+          "signature": "identify_gaps(self, nutrition_profile: Dict) -> List[str]"
+        },
+        {
+          "name": "suggest_balanced_combinations",
+          "returns": "Balanced meal combinations from available products"
+        }
+      ]
+    }
+  ]
+},
+
+{
+  "phase_number": 5,
+  "name": "Performance & Polish",
+  "duration_hours": 6,
+  "priority": "MEDIUM",
+  "tasks": [
+    {
+      "task": "Database Optimization",
+      "hours": 2,
+      "items": [
+        "Add full-text search indices on product names",
+        "Add composite indices for common queries",
+        "Implement query result caching (LRU, max 200)",
+        "Profile and optimize slow queries"
+      ]
+    },
+    {
+      "task": "LLM Response Optimization",
+      "hours": 2,
+      "items": [
+        "Implement token streaming visualization",
+        "Cache responses for 100 most-asked questions",
+        "Optimize prompt sizes (reduce context window)",
+        "Batch multiple product lookups"
+      ]
+    },
+    {
+      "task": "GUI Performance",
+      "hours": 2,
+      "items": [
+        "Fix memory leaks (use tracemalloc profiling)",
+        "Optimize table rendering (virtual scrolling for >1000 rows)",
+        "Lazy load dialogs (create on-demand)",
+        "Smooth animations and transitions"
+      ]
+    }
+  ]
+}
+
+
+],
+"success_metrics": {
+"technical": [
+{"metric": "Product search latency", "target": "< 100 ms"},
+{"metric": "RAG ranking latency", "target": "< 200 ms"},
+{"metric": "LLM first token", "target": "< 500 ms"},
+{"metric": "GUI interaction latency", "target": "< 50 ms"},
+{"metric": "Product normalization accuracy", "target": "> 90%"},
+{"metric": "Code coverage", "target": "> 80%"}
+],
+"business": [
+{"metric": "Food waste reduction", "target": "> 20%"},
+{"metric": "Shopping time reduction", "target": "> 15%"},
+{"metric": "Receipt processing time", "target": "< 2 minutes"},
+{"metric": "User satisfaction", "target": "≥ 4 stars"}
+]
+},
+"implementation_order": {
+"week_1": [
+"Phase 1.1: Design System Creation",
+"Phase 1.2: GUI Refactoring",
+"Phase 1.3-1.4: Notifications and Enhanced Layouts"
+],
+"week_2": [
+"Phase 2.1: Chat UI Tab",
+"Phase 2.2: RAG Search Engine",
+"Phase 2.3-2.4: LLM Integration and Prompt Templates",
+"Phase 3.1-3.2: Product Dictionary Start"
+],
+"week_3": [
+"Phase 3.2-3.5: Complete Product Dictionary",
+"Phase 4: Advanced Features",
+"Phase 5: Performance Optimization"
+]
+},
+"cursor_prompts": {
+"phase_1": [
+"@implementation.json Generate file: ReceiptParser/src/unified_design_system.py",
+"@implementation.json Update gui.py with design system imports and use AppColors, AppSpacing, AppFont, Icons everywhere",
+"@implementation.json Generate file: ReceiptParser/src/notifications.py",
+"@implementation.json Update gui.py: add status bar and enhance tab layouts"
+],
+"phase_2": [
+"@implementation.json Generate file: ReceiptParser/src/ai_chat_tab.py",
+"@implementation.json Generate file: ReceiptParser/src/rag_engine.py",
+"@implementation.json Update ReceiptParser/src/llm.py: add streaming support, request queuing, timeouts",
+"@implementation.json Generate file: ReceiptParser/src/prompt_templates.py",
+"@implementation.json Generate file: ReceiptParser/src/chat_storage.py and add tables to database.py"
+],
+"phase_3": [
+"@implementation.json Generate file: ReceiptParser/data/expanded_products.json with 325+ products",
+"@implementation.json Generate file: ReceiptParser/src/normalization_rules.py with 5-stage pipeline",
+"@implementation.json Generate file: ReceiptParser/data/static_rules.json with 200-300 patterns",
+"@implementation.json Generate file: ReceiptParser/data/shop_variants.json",
+"@implementation.json Generate file: ReceiptParser/data/product_metadata.json"
+],
+"phase_4": [
+"@implementation.json Generate file: ReceiptParser/src/recipe_engine.py",
+"@implementation.json Generate file: ReceiptParser/src/waste_reduction_engine.py",
+"@implementation.json Generate file: ReceiptParser/src/smart_shopping.py",
+"@implementation.json Generate file: ReceiptParser/src/nutrition_analyzer.py"
+],
+"phase_5": [
+"@implementation.json Optimize database: add indices, implement caching",
+"@implementation.json Optimize LLM responses: add streaming, caching, batching",
+"@implementation.json Optimize GUI performance: fix memory leaks, virtual scrolling, lazy loading"
+]
+},
+"file_structure": {
+"new_files": [
+"ReceiptParser/src/unified_design_system.py",
+"ReceiptParser/src/notifications.py",
+"ReceiptParser/src/ai_chat_tab.py",
+"ReceiptParser/src/rag_engine.py",
+"ReceiptParser/src/prompt_templates.py",
+"ReceiptParser/src/chat_storage.py",
+"ReceiptParser/src/recipe_engine.py",
+"ReceiptParser/src/waste_reduction_engine.py",
+"ReceiptParser/src/smart_shopping.py",
+"ReceiptParser/src/nutrition_analyzer.py",
+"ReceiptParser/data/expanded_products.json",
+"ReceiptParser/data/product_categories.json",
+"ReceiptParser/data/shop_variants.json",
+"ReceiptParser/data/product_metadata.json",
+"ReceiptParser/data/static_rules.json"
+],
+"updated_files": [
+"gui.py",
+"ReceiptParser/src/llm.py",
+"ReceiptParser/src/normalization_rules.py",
+"ReceiptParser/src/database.py"
+]
+}
+}
