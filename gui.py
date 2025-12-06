@@ -5,7 +5,7 @@ import queue
 import os
 import sys
 from datetime import datetime, date, timedelta
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Dict
 from sqlalchemy.orm import sessionmaker, joinedload
 
@@ -1938,9 +1938,18 @@ class App(ctk.CTk):
                 stan = item["stan"]
 
                 # Aktualizuj ilość
+                ilosc_str = item["ilosc_entry"].get().strip()
+                if not ilosc_str:
+                    session.rollback()
+                    messagebox.showerror(
+                        "Błąd",
+                        f"Ilość nie może być pusta dla produktu {stan.produkt.znormalizowana_nazwa}",
+                    )
+                    return
                 try:
-                    nowa_ilosc = Decimal(item["ilosc_entry"].get().replace(",", "."))
+                    nowa_ilosc = Decimal(ilosc_str.replace(",", "."))
                     if nowa_ilosc < 0:
+                        session.rollback()
                         messagebox.showerror(
                             "Błąd",
                             f"Ilość nie może być ujemna dla produktu {stan.produkt.znormalizowana_nazwa}",
@@ -1951,10 +1960,11 @@ class App(ctk.CTk):
                         session.delete(stan)
                         continue
                     stan.ilosc = nowa_ilosc
-                except ValueError:
+                except (ValueError, InvalidOperation) as e:
+                    session.rollback()
                     messagebox.showerror(
                         "Błąd",
-                        f"Nieprawidłowa ilość dla produktu {stan.produkt.znormalizowana_nazwa}",
+                        f"Nieprawidłowa ilość '{ilosc_str}' dla produktu {stan.produkt.znormalizowana_nazwa}",
                     )
                     return
 
@@ -1969,6 +1979,7 @@ class App(ctk.CTk):
                             data_str, "%Y-%m-%d"
                         ).date()
                     except ValueError:
+                        session.rollback()
                         messagebox.showerror(
                             "Błąd",
                             f"Nieprawidłowy format daty dla produktu {stan.produkt.znormalizowana_nazwa}\nUżyj formatu YYYY-MM-DD",
