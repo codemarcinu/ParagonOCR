@@ -434,7 +434,12 @@ class AIChatTab(ctk.CTkFrame):
         
         Args:
             conversation_id: Conversation ID or None for new conversation
+            
+        Raises:
+            ValueError: If conversation_id is negative
         """
+        if conversation_id is not None and conversation_id < 0:
+            raise ValueError(f"Invalid conversation_id: {conversation_id}. Must be non-negative or None.")
         self.current_conversation_id = conversation_id
     
     @staticmethod
