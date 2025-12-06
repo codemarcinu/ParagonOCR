@@ -35,64 +35,7 @@ from src.food_waste_tracker import FoodWasteTracker, get_expiring_products_summa
 from src.quick_add import QuickAddHelper
 from src.meal_planner import MealPlanner
 from history_manager import load_history, add_to_history
-
-
-# --- KONSTANTY STYLISTYCZNE ---
-class AppColors:
-    """Spójna paleta kolorów dla aplikacji"""
-
-    PRIMARY = "#1f538d"  # Niebieski (główny)
-    SUCCESS = "#2d8659"  # Zielony (sukces)
-    WARNING = "#d97706"  # Pomarańczowy (ostrzeżenie)
-    ERROR = "#dc2626"  # Czerwony (błąd)
-    INFO = "#2563eb"  # Niebieski (informacja)
-
-    # Statusy produktów
-    EXPIRED = "#dc2626"  # Przeterminowany
-    EXPIRING_SOON = "#d97706"  # Wkrótce przeterminowany
-    OK = "#2d8659"  # OK
-    UNKNOWN = "#6b7280"  # Nieznany
-
-    # Tła dla wierszy tabel
-    ROW_EVEN = "#2b2b2b"  # Parzyste wiersze (dark mode)
-    ROW_ODD = "#1f1f1f"  # Nieparzyste wiersze (dark mode)
-    ROW_EVEN_LIGHT = "#f9fafb"  # Parzyste wiersze (light mode)
-    ROW_ODD_LIGHT = "#ffffff"  # Nieparzyste wiersze (light mode)
-
-    # Chat
-    CHAT_BOT = "#1f538d"  # Wiadomości od bota
-    CHAT_USER = "#2b2b2b"  # Wiadomości użytkownika
-
-
-class AppSpacing:
-    """Spójne odstępy dla aplikacji"""
-
-    XS = 5
-    SM = 10
-    MD = 15
-    LG = 20
-    XL = 30
-
-
-class Icons:
-    """Spójne ikony dla aplikacji"""
-
-    RECEIPT = "📄"
-    COOKING = "🍳"
-    ADD = "➕"
-    INVENTORY = "📦"
-    SETTINGS = "⚙️"
-    BEAR = "🦅"
-    REFRESH = "🔄"
-    SAVE = "💾"
-    DELETE = "🗑️"
-    ANALYTICS = "📊"
-    SHOP = "🏪"
-    CATEGORY = "📦"
-    PRODUCT = "🛒"
-    CALENDAR = "📅"
-    FILE = "📁"
-    MEAL_PLANNER = "🍽️"
+from src.unified_design_system import AppColors, AppSpacing, AppFont, Icons
 
 
 class ToolTip:
@@ -141,11 +84,11 @@ class ToolTip:
             tw,
             text=self.text,
             justify="left",
-            bg="#1a1a1a",
+            bg=AppColors.BG_DARK,
             fg="white",
             font=("Arial", 10),
-            padx=5,
-            pady=5,
+            padx=AppSpacing.XS,
+            pady=AppSpacing.XS,
         )
         label.pack()
 
@@ -164,17 +107,17 @@ class ProductMappingDialog(ctk.CTkToplevel):
         self.user_input = None
 
         self.label = ctk.CTkLabel(self, text=text, wraplength=480, font=("Arial", 14))
-        self.label.pack(pady=20, padx=20)
+        self.label.pack(pady=AppSpacing.LG, padx=AppSpacing.LG)
 
         self.entry = ctk.CTkEntry(self, width=400, font=("Arial", 14))
-        self.entry.pack(pady=10)
+        self.entry.pack(pady=AppSpacing.SM)
         self.entry.insert(0, initial_value)
         self.entry.focus_set()
 
         self.ok_button = ctk.CTkButton(
             self, text="Zatwierdź", command=self.on_ok, width=200
         )
-        self.ok_button.pack(pady=20)
+        self.ok_button.pack(pady=AppSpacing.LG)
 
         self.bind("<Return>", lambda event: self.on_ok())
         self.bind("<Escape>", lambda event: self.on_close())
@@ -205,20 +148,20 @@ class ReviewDialog(ctk.CTkToplevel):
 
         # --- Header ---
         self.header_frame = ctk.CTkFrame(self)
-        self.header_frame.pack(fill="x", padx=10, pady=10)
+        self.header_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
 
         ctk.CTkLabel(self.header_frame, text="Sklep:").grid(
-            row=0, column=0, padx=5, pady=5
+            row=0, column=0, padx=AppSpacing.XS, pady=AppSpacing.XS
         )
         self.store_entry = ctk.CTkEntry(self.header_frame, width=200)
-        self.store_entry.grid(row=0, column=1, padx=5, pady=5)
+        self.store_entry.grid(row=0, column=1, padx=AppSpacing.XS, pady=AppSpacing.XS)
         self.store_entry.insert(0, parsed_data["sklep_info"]["nazwa"])
 
         ctk.CTkLabel(self.header_frame, text="Data:").grid(
-            row=0, column=2, padx=5, pady=5
+            row=0, column=2, padx=AppSpacing.XS, pady=AppSpacing.XS
         )
         self.date_entry = ctk.CTkEntry(self.header_frame, width=150)
-        self.date_entry.grid(row=0, column=3, padx=5, pady=5)
+        self.date_entry.grid(row=0, column=3, padx=AppSpacing.XS, pady=AppSpacing.XS)
         # Format daty do stringa
         date_val = parsed_data["paragon_info"]["data_zakupu"]
         if isinstance(date_val, datetime):
@@ -226,15 +169,15 @@ class ReviewDialog(ctk.CTkToplevel):
         self.date_entry.insert(0, str(date_val))
 
         ctk.CTkLabel(self.header_frame, text="Suma:").grid(
-            row=0, column=4, padx=5, pady=5
+            row=0, column=4, padx=AppSpacing.XS, pady=AppSpacing.XS
         )
         self.total_entry = ctk.CTkEntry(self.header_frame, width=100)
-        self.total_entry.grid(row=0, column=5, padx=5, pady=5)
+        self.total_entry.grid(row=0, column=5, padx=AppSpacing.XS, pady=AppSpacing.XS)
         self.total_entry.insert(0, str(parsed_data["paragon_info"]["suma_calkowita"]))
 
         # --- Body (Items) ---
         self.scrollable_frame = ctk.CTkScrollableFrame(self)
-        self.scrollable_frame.pack(fill="both", expand=True, padx=10, pady=5)
+        self.scrollable_frame.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.XS)
 
         # Headers - dodano kolumnę "Znormalizowana nazwa" i "Data ważności"
         headers = [
@@ -250,7 +193,7 @@ class ReviewDialog(ctk.CTkToplevel):
         for col, text in enumerate(headers):
             ctk.CTkLabel(
                 self.scrollable_frame, text=text, font=("Arial", 12, "bold")
-            ).grid(row=0, column=col, padx=5, pady=5)
+            ).grid(row=0, column=col, padx=AppSpacing.XS, pady=AppSpacing.XS)
 
         # Pobierz sugestie znormalizowanych nazw z bazy danych (jeśli dostępna)
         SessionLocal = sessionmaker(bind=engine)
@@ -393,7 +336,7 @@ class ReviewDialog(ctk.CTkToplevel):
 
         # --- Footer ---
         self.footer_frame = ctk.CTkFrame(self)
-        self.footer_frame.pack(fill="x", padx=10, pady=10)
+        self.footer_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
 
         self.save_btn = ctk.CTkButton(
             self.footer_frame,
@@ -497,23 +440,23 @@ class CookingDialog(ctk.CTkToplevel):
 
         # Header
         header_frame = ctk.CTkFrame(self)
-        header_frame.pack(fill="x", padx=10, pady=10)
+        header_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
         ctk.CTkLabel(
             header_frame,
             text="Zaznacz produkty do zużycia:",
             font=("Arial", 16, "bold"),
-        ).pack(pady=10)
+        ).pack(pady=AppSpacing.SM)
 
         # Scrollable list of products
         self.scrollable_frame = ctk.CTkScrollableFrame(self)
-        self.scrollable_frame.pack(fill="both", expand=True, padx=10, pady=5)
+        self.scrollable_frame.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.XS)
 
         # Headers
         headers = ["Zaznacz", "Produkt", "Ilość", "Jednostka", "Data ważności"]
         for col, text in enumerate(headers):
             ctk.CTkLabel(
                 self.scrollable_frame, text=text, font=("Arial", 12, "bold")
-            ).grid(row=0, column=col, padx=5, pady=5)
+            ).grid(row=0, column=col, padx=AppSpacing.XS, pady=AppSpacing.XS)
 
         # Load products from database
         self.checkboxes = []
@@ -522,7 +465,7 @@ class CookingDialog(ctk.CTkToplevel):
 
         # Footer
         footer_frame = ctk.CTkFrame(self)
-        footer_frame.pack(fill="x", padx=10, pady=10)
+        footer_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
 
         ctk.CTkButton(
             footer_frame,
@@ -557,25 +500,25 @@ class CookingDialog(ctk.CTkToplevel):
                 self.scrollable_frame,
                 text="Brak produktów w magazynie",
                 font=("Arial", 14),
-            ).grid(row=1, column=0, columnspan=5, pady=20)
+            ).grid(row=1, column=0, columnspan=5, pady=AppSpacing.LG)
             return
 
         for i, stan in enumerate(stany):
             row = i + 1
             checkbox = ctk.CTkCheckBox(self.scrollable_frame, text="")
-            checkbox.grid(row=row, column=0, padx=5, pady=2)
+            checkbox.grid(row=row, column=0, padx=AppSpacing.XS, pady=2)
 
             ctk.CTkLabel(
                 self.scrollable_frame, text=stan.produkt.znormalizowana_nazwa, width=300
-            ).grid(row=row, column=1, padx=5, pady=2, sticky="w")
+            ).grid(row=row, column=1, padx=AppSpacing.XS, pady=2, sticky="w")
 
             ilosc_entry = ctk.CTkEntry(self.scrollable_frame, width=80)
             ilosc_entry.insert(0, str(stan.ilosc))
-            ilosc_entry.grid(row=row, column=2, padx=5, pady=2)
+            ilosc_entry.grid(row=row, column=2, padx=AppSpacing.XS, pady=2)
 
             ctk.CTkLabel(
                 self.scrollable_frame, text=stan.jednostka_miary or "szt", width=80
-            ).grid(row=row, column=3, padx=5, pady=2)
+            ).grid(row=row, column=3, padx=AppSpacing.XS, pady=2)
 
             data_waz = (
                 stan.data_waznosci.strftime("%Y-%m-%d")
@@ -589,7 +532,7 @@ class CookingDialog(ctk.CTkToplevel):
             )
             ctk.CTkLabel(
                 self.scrollable_frame, text=data_waz, width=120, text_color=color
-            ).grid(row=row, column=4, padx=5, pady=2)
+            ).grid(row=row, column=4, padx=AppSpacing.XS, pady=2)
 
             self.checkboxes.append(
                 {
@@ -660,23 +603,23 @@ class QuickAddDialog(ctk.CTkToplevel):
 
         # Header
         header_frame = ctk.CTkFrame(self)
-        header_frame.pack(fill="x", padx=10, pady=10)
+        header_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
         ctk.CTkLabel(
             header_frame,
             text="⚡ Quick Add - Dodaj produkt w 5 sekund",
             font=("Arial", 16, "bold"),
-        ).pack(pady=10)
+        ).pack(pady=AppSpacing.SM)
 
         # Form
         form_frame = ctk.CTkFrame(self)
-        form_frame.pack(fill="both", expand=True, padx=20, pady=10)
+        form_frame.pack(fill="both", expand=True, padx=AppSpacing.LG, pady=AppSpacing.SM)
 
         # Nazwa produktu z autocomplete
         ctk.CTkLabel(form_frame, text="Nazwa produktu:", font=("Arial", 14)).grid(
-            row=0, column=0, sticky="w", pady=10
+            row=0, column=0, sticky="w", pady=AppSpacing.SM
         )
         self.name_entry = ctk.CTkEntry(form_frame, width=300, font=("Arial", 14))
-        self.name_entry.grid(row=0, column=1, pady=10, padx=10, sticky="ew")
+        self.name_entry.grid(row=0, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM, sticky="ew")
         self.name_entry.focus_set()
         form_frame.grid_columnconfigure(1, weight=1)
 
@@ -686,32 +629,32 @@ class QuickAddDialog(ctk.CTkToplevel):
 
         # Ilość
         ctk.CTkLabel(form_frame, text="Ilość:", font=("Arial", 14)).grid(
-            row=1, column=0, sticky="w", pady=10
+            row=1, column=0, sticky="w", pady=AppSpacing.SM
         )
         self.quantity_entry = ctk.CTkEntry(form_frame, width=300)
         self.quantity_entry.insert(0, "1.0")
-        self.quantity_entry.grid(row=1, column=1, pady=10, padx=10, sticky="ew")
+        self.quantity_entry.grid(row=1, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM, sticky="ew")
 
         # Jednostka
         ctk.CTkLabel(form_frame, text="Jednostka:", font=("Arial", 14)).grid(
-            row=2, column=0, sticky="w", pady=10
+            row=2, column=0, sticky="w", pady=AppSpacing.SM
         )
         self.unit_entry = ctk.CTkEntry(form_frame, width=300)
         self.unit_entry.insert(0, "szt")
-        self.unit_entry.grid(row=2, column=1, pady=10, padx=10, sticky="ew")
+        self.unit_entry.grid(row=2, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM, sticky="ew")
 
         # Data ważności (opcjonalna)
         ctk.CTkLabel(
             form_frame, text="Data ważności (opcjonalna):", font=("Arial", 14)
-        ).grid(row=3, column=0, sticky="w", pady=10)
+        ).grid(row=3, column=0, sticky="w", pady=AppSpacing.SM)
         self.expiry_entry = ctk.CTkEntry(
             form_frame, width=300, placeholder_text="YYYY-MM-DD"
         )
-        self.expiry_entry.grid(row=3, column=1, pady=10, padx=10, sticky="ew")
+        self.expiry_entry.grid(row=3, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM, sticky="ew")
 
         # Buttons
         button_frame = ctk.CTkFrame(self)
-        button_frame.pack(fill="x", padx=20, pady=10)
+        button_frame.pack(fill="x", padx=AppSpacing.LG, pady=AppSpacing.SM)
 
         ctk.CTkButton(
             button_frame,
@@ -842,41 +785,41 @@ class AddProductDialog(ctk.CTkToplevel):
 
         # Form fields
         form_frame = ctk.CTkFrame(self)
-        form_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        form_frame.pack(fill="both", expand=True, padx=AppSpacing.LG, pady=AppSpacing.LG)
 
         ctk.CTkLabel(form_frame, text="Nazwa produktu:", font=("Arial", 14)).grid(
-            row=0, column=0, sticky="w", pady=10
+            row=0, column=0, sticky="w", pady=AppSpacing.SM
         )
         self.name_entry = ctk.CTkEntry(form_frame, width=300)
-        self.name_entry.grid(row=0, column=1, pady=10, padx=10)
+        self.name_entry.grid(row=0, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM)
 
         ctk.CTkLabel(form_frame, text="Ilość:", font=("Arial", 14)).grid(
-            row=1, column=0, sticky="w", pady=10
+            row=1, column=0, sticky="w", pady=AppSpacing.SM
         )
         self.quantity_entry = ctk.CTkEntry(form_frame, width=300)
         self.quantity_entry.insert(0, "1.0")
-        self.quantity_entry.grid(row=1, column=1, pady=10, padx=10)
+        self.quantity_entry.grid(row=1, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM)
 
         ctk.CTkLabel(form_frame, text="Jednostka:", font=("Arial", 14)).grid(
-            row=2, column=0, sticky="w", pady=10
+            row=2, column=0, sticky="w", pady=AppSpacing.SM
         )
         self.unit_entry = ctk.CTkEntry(form_frame, width=300)
         self.unit_entry.insert(0, "szt")
-        self.unit_entry.grid(row=2, column=1, pady=10, padx=10)
+        self.unit_entry.grid(row=2, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM)
 
         ctk.CTkLabel(
             form_frame, text="Data ważności (YYYY-MM-DD):", font=("Arial", 14)
-        ).grid(row=3, column=0, sticky="w", pady=10)
+        ).grid(row=3, column=0, sticky="w", pady=AppSpacing.SM)
         self.expiry_entry = ctk.CTkEntry(
             form_frame, width=300, placeholder_text="YYYY-MM-DD"
         )
         default_expiry = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
         self.expiry_entry.insert(0, default_expiry)
-        self.expiry_entry.grid(row=3, column=1, pady=10, padx=10)
+        self.expiry_entry.grid(row=3, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM)
 
         # Buttons
         button_frame = ctk.CTkFrame(self)
-        button_frame.pack(fill="x", padx=20, pady=10)
+        button_frame.pack(fill="x", padx=AppSpacing.LG, pady=AppSpacing.SM)
 
         ctk.CTkButton(
             button_frame,
@@ -964,37 +907,37 @@ class BielikChatDialog(ctk.CTkToplevel):
 
         # Header
         header_frame = ctk.CTkFrame(self)
-        header_frame.pack(fill="x", padx=10, pady=10)
+        header_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
         ctk.CTkLabel(
             header_frame,
             text="🦅 Bielik - Asystent Kulinarny",
             font=("Arial", 18, "bold"),
-        ).pack(pady=10)
+        ).pack(pady=AppSpacing.SM)
 
         # Chat area (scrollable)
         self.chat_frame = ctk.CTkScrollableFrame(self)
-        self.chat_frame.pack(fill="both", expand=True, padx=10, pady=5)
+        self.chat_frame.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.XS)
 
         # Input area
         input_frame = ctk.CTkFrame(self)
-        input_frame.pack(fill="x", padx=10, pady=10)
+        input_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
 
         self.input_entry = ctk.CTkEntry(
             input_frame,
             placeholder_text="Zadaj pytanie Bielikowi...",
             font=("Arial", 14),
         )
-        self.input_entry.pack(side="left", fill="x", expand=True, padx=5)
+        self.input_entry.pack(side="left", fill="x", expand=True, padx=AppSpacing.XS)
         self.input_entry.bind("<Return>", lambda e: self.send_message())
 
         self.send_button = ctk.CTkButton(
             input_frame, text="Wyślij", command=self.send_message, width=100
         )
-        self.send_button.pack(side="right", padx=5)
+        self.send_button.pack(side="right", padx=AppSpacing.XS)
 
         # Status label
         self.status_label = ctk.CTkLabel(self, text="Gotowy", font=("Arial", 10))
-        self.status_label.pack(pady=5)
+        self.status_label.pack(pady=AppSpacing.XS)
 
         # Inicjalizuj asystenta
         self.init_assistant()
@@ -1020,7 +963,7 @@ class BielikChatDialog(ctk.CTkToplevel):
         """Dodaje wiadomość do czatu"""
         # Ramka dla wiadomości
         msg_frame = ctk.CTkFrame(self.chat_frame)
-        msg_frame.pack(fill="x", padx=5, pady=5)
+        msg_frame.pack(fill="x", padx=AppSpacing.XS, pady=AppSpacing.XS)
 
         # Kolor w zależności od nadawcy
         if sender == "Bielik":
@@ -1039,7 +982,7 @@ class BielikChatDialog(ctk.CTkToplevel):
             justify="left",
             anchor="w",
         )
-        msg_label.pack(fill="x", padx=10, pady=5)
+        msg_label.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.XS)
 
         # Przewiń do dołu
         self.chat_frame.update()
@@ -1108,24 +1051,24 @@ class SettingsDialog(ctk.CTkToplevel):
 
         # Header
         header_frame = ctk.CTkFrame(self)
-        header_frame.pack(fill="x", padx=10, pady=10)
+        header_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
         ctk.CTkLabel(
             header_frame,
             text="⚙️ Ustawienia Promptów Systemowych Bielika",
             font=("Arial", 18, "bold"),
-        ).pack(pady=10)
+        ).pack(pady=AppSpacing.SM)
 
         # Scrollable frame dla promptów
         scrollable = ctk.CTkScrollableFrame(self)
-        scrollable.pack(fill="both", expand=True, padx=10, pady=5)
+        scrollable.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.XS)
 
         # --- Sekcja OCR ---
         ocr_frame = ctk.CTkFrame(scrollable)
-        ocr_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
+        ocr_frame.grid(row=0, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
         ocr_frame.grid_columnconfigure(1, weight=1)
 
         ctk.CTkLabel(ocr_frame, text="Silnik OCR:", font=("Arial", 12, "bold")).grid(
-            row=0, column=0, padx=10, pady=10, sticky="w"
+            row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w"
         )
         self.ocr_engine_var = ctk.StringVar(value=Config.OCR_ENGINE)
         self.ocr_engine_combo = ctk.CTkComboBox(
@@ -1134,7 +1077,7 @@ class SettingsDialog(ctk.CTkToplevel):
             variable=self.ocr_engine_var,
             width=200,
         )
-        self.ocr_engine_combo.grid(row=0, column=1, padx=10, pady=10, sticky="w")
+        self.ocr_engine_combo.grid(row=0, column=1, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w")
 
         self.use_gpu_var = ctk.BooleanVar(value=Config.USE_GPU_OCR)
         self.use_gpu_check = ctk.CTkCheckBox(
@@ -1143,13 +1086,13 @@ class SettingsDialog(ctk.CTkToplevel):
             variable=self.use_gpu_var,
         )
         self.use_gpu_check.grid(
-            row=1, column=0, columnspan=2, padx=10, pady=10, sticky="w"
+            row=1, column=0, columnspan=2, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w"
         )
 
         # --- Sekcja Promptów ---
         ctk.CTkLabel(
             scrollable, text="Prompty Systemowe", font=("Arial", 16, "bold")
-        ).grid(row=1, column=0, sticky="w", padx=10, pady=(20, 5))
+        ).grid(row=1, column=0, sticky="w", padx=AppSpacing.SM, pady=(20, 5))
 
         # Wczytaj prompty
         self.prompts = load_prompts()
@@ -1172,19 +1115,19 @@ class SettingsDialog(ctk.CTkToplevel):
                 text=prompt_descriptions.get(key, key),
                 font=("Arial", 14, "bold"),
             )
-            label.grid(row=row_idx, column=0, sticky="w", padx=10, pady=(10, 5))
+            label.grid(row=row_idx, column=0, sticky="w", padx=AppSpacing.SM, pady=(10, 5))
 
             # Textbox dla promptu
             textbox = ctk.CTkTextbox(scrollable, height=150, font=("Arial", 11))
             textbox.insert("1.0", value)
-            textbox.grid(row=row_idx + 1, column=0, sticky="ew", padx=10, pady=5)
+            textbox.grid(row=row_idx + 1, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.XS)
             scrollable.grid_columnconfigure(0, weight=1)
 
             self.text_boxes[key] = textbox
 
         # Footer z przyciskami
         footer_frame = ctk.CTkFrame(self)
-        footer_frame.pack(fill="x", padx=10, pady=10)
+        footer_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
 
         ctk.CTkButton(
             footer_frame,
@@ -1311,21 +1254,23 @@ class App(ctk.CTk):
         super().__init__()
 
         self.title("ReceiptParser - System Zarządzania Paragonami")
-        self.geometry("1000x700")
-        self.minsize(800, 600)  # Minimalny rozmiar okna
+        self.geometry("1200x700")
+        self.minsize(1200, 700)  # Minimalny rozmiar okna
         ctk.set_appearance_mode("System")
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=0)  # Status bar row
+        self.grid_rowconfigure(2, weight=0)  # Status bar row
 
         # --- MENU BAR ---
         self.menu_frame = ctk.CTkFrame(self)
-        self.menu_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=5)
+        self.menu_frame.grid(row=0, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.XS)
         self.menu_frame.grid_columnconfigure(0, weight=1)
 
         # Menu buttons
         menu_buttons_frame = ctk.CTkFrame(self.menu_frame)
-        menu_buttons_frame.pack(side="left", padx=5, pady=5)
+        menu_buttons_frame.pack(side="left", padx=AppSpacing.XS, pady=AppSpacing.XS)
 
         # Menu buttons z ujednoliconymi kolorami i tooltips
         btn_receipts = ctk.CTkButton(
@@ -1407,7 +1352,7 @@ class App(ctk.CTk):
 
         # --- MAIN CONTENT AREA ---
         self.content_frame = ctk.CTkFrame(self)
-        self.content_frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+        self.content_frame.grid(row=1, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="nsew")
         self.content_frame.grid_columnconfigure(0, weight=1)
         self.content_frame.grid_rowconfigure(0, weight=1)
 
@@ -1419,7 +1364,7 @@ class App(ctk.CTk):
 
         # Header z przyciskami
         header_frame = ctk.CTkFrame(self.receipts_frame)
-        header_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
+        header_frame.grid(row=0, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
         header_frame.grid_columnconfigure(1, weight=1)
 
         ctk.CTkLabel(
@@ -1457,11 +1402,11 @@ class App(ctk.CTk):
 
         # Frame dla alertów wygasających produktów
         self.expiry_alert_frame = ctk.CTkFrame(self.receipts_frame)
-        self.expiry_alert_frame.grid(row=1, column=0, sticky="ew", padx=10, pady=5)
+        self.expiry_alert_frame.grid(row=1, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.XS)
 
         # Scrollable area dla analityki
         self.analytics_scrollable = ctk.CTkScrollableFrame(self.receipts_frame)
-        self.analytics_scrollable.grid(row=2, column=0, sticky="nsew", padx=10, pady=10)
+        self.analytics_scrollable.grid(row=2, column=0, sticky="nsew", padx=AppSpacing.SM, pady=AppSpacing.SM)
         self.analytics_scrollable.grid_columnconfigure(0, weight=1)
 
         # Stary widok przetwarzania (ukryty, dostępny przez dialog)
@@ -1473,18 +1418,18 @@ class App(ctk.CTk):
         # Historia plików
         history_frame = ctk.CTkFrame(self.processing_frame)
         history_frame.grid(
-            row=0, column=0, columnspan=4, padx=10, pady=(10, 5), sticky="ew"
+            row=0, column=0, columnspan=4, padx=AppSpacing.SM, pady=(10, 5), sticky="ew"
         )
         history_frame.grid_columnconfigure(1, weight=1)
 
         ctk.CTkLabel(history_frame, text="Ostatnie pliki:", font=("Arial", 12)).grid(
-            row=0, column=0, padx=5, pady=5
+            row=0, column=0, padx=AppSpacing.XS, pady=AppSpacing.XS
         )
 
         self.history_combo = ctk.CTkComboBox(
             history_frame, values=[], command=self.on_history_selected, width=400
         )
-        self.history_combo.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+        self.history_combo.grid(row=0, column=1, padx=AppSpacing.XS, pady=AppSpacing.XS, sticky="ew")
         self.history_combo.set("Wybierz z historii...")
 
         # Wczytaj historię plików (po utworzeniu history_combo)
@@ -1493,17 +1438,17 @@ class App(ctk.CTk):
         self.file_button = ctk.CTkButton(
             history_frame, text="📁 Wybierz plik", command=self.select_file, width=150
         )
-        self.file_button.grid(row=0, column=2, padx=5, pady=5)
+        self.file_button.grid(row=0, column=2, padx=AppSpacing.XS, pady=AppSpacing.XS)
 
         self.file_label = ctk.CTkLabel(
             self.processing_frame, text="Nie wybrano pliku", anchor="w"
         )
         self.file_label.grid(
-            row=1, column=0, columnspan=4, padx=10, pady=5, sticky="ew"
+            row=1, column=0, columnspan=4, padx=AppSpacing.SM, pady=AppSpacing.XS, sticky="ew"
         )
 
         buttons_frame2 = ctk.CTkFrame(self.processing_frame)
-        buttons_frame2.grid(row=2, column=0, columnspan=4, padx=10, pady=5, sticky="ew")
+        buttons_frame2.grid(row=2, column=0, columnspan=4, padx=AppSpacing.SM, pady=AppSpacing.XS, sticky="ew")
 
         self.process_button = ctk.CTkButton(
             buttons_frame2,
@@ -1511,26 +1456,26 @@ class App(ctk.CTk):
             command=self.start_processing,
             state="disabled",
         )
-        self.process_button.pack(side="left", padx=5)
+        self.process_button.pack(side="left", padx=AppSpacing.XS)
 
         self.init_db_button = ctk.CTkButton(
             buttons_frame2,
             text="⚙️ Inicjalizuj bazę danych",
             command=self.initialize_database,
         )
-        self.init_db_button.pack(side="left", padx=5)
+        self.init_db_button.pack(side="left", padx=AppSpacing.XS)
 
         # Status label i progress bar
         self.status_label = ctk.CTkLabel(
             self.processing_frame, text="Gotowy", anchor="w", font=("Arial", 12)
         )
         self.status_label.grid(
-            row=3, column=0, columnspan=4, padx=10, pady=(10, 5), sticky="ew"
+            row=3, column=0, columnspan=4, padx=AppSpacing.SM, pady=(10, 5), sticky="ew"
         )
 
         self.progress_bar = ctk.CTkProgressBar(self.processing_frame)
         self.progress_bar.grid(
-            row=4, column=0, columnspan=4, padx=10, pady=5, sticky="ew"
+            row=4, column=0, columnspan=4, padx=AppSpacing.SM, pady=AppSpacing.XS, sticky="ew"
         )
         self.progress_bar.set(0)
 
@@ -1538,7 +1483,7 @@ class App(ctk.CTk):
             self.processing_frame, state="disabled", wrap="word"
         )
         self.log_textbox.grid(
-            row=5, column=0, columnspan=4, padx=10, pady=10, sticky="nsew"
+            row=5, column=0, columnspan=4, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="nsew"
         )
 
         # Ukryj processing_frame domyślnie
@@ -1554,6 +1499,19 @@ class App(ctk.CTk):
 
         self.after(100, self.process_log_queue)
 
+        # --- STATUS BAR ---
+        self.status_bar = ctk.CTkFrame(self)
+        self.status_bar.grid(row=2, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.XS)
+        self.status_bar.grid_columnconfigure(0, weight=1)
+        
+        self.status_label = ctk.CTkLabel(
+            self.status_bar,
+            text="Gotowy",
+            anchor="w",
+            font=(AppFont.FAMILY, AppFont.SIZE_SM)
+        )
+        self.status_label.grid(row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.XS, sticky="w")
+        
         # --- FAB BUTTON (Floating Action Button) ---
         self.fab_button = ctk.CTkButton(
             self,
@@ -1627,7 +1585,7 @@ class App(ctk.CTk):
 
         # Frame dla przycisków akcji
         action_frame = ctk.CTkFrame(inv_window)
-        action_frame.pack(fill="x", padx=10, pady=5)
+        action_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.XS)
 
         ctk.CTkButton(
             action_frame,
@@ -1650,7 +1608,7 @@ class App(ctk.CTk):
         ).pack(side="left", padx=AppSpacing.XS)
 
         scrollable = ctk.CTkScrollableFrame(inv_window)
-        scrollable.pack(fill="both", expand=True, padx=10, pady=10)
+        scrollable.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.SM)
 
         # Headers - dodano kolumnę "Zamrożone" i "Akcje"
         headers = [
@@ -1664,7 +1622,7 @@ class App(ctk.CTk):
         ]
         for col, text in enumerate(headers):
             ctk.CTkLabel(scrollable, text=text, font=("Arial", 12, "bold")).grid(
-                row=0, column=col, padx=5, pady=5
+                row=0, column=col, padx=AppSpacing.XS, pady=AppSpacing.XS
             )
 
         stany = (
@@ -1683,17 +1641,17 @@ class App(ctk.CTk):
             # Produkt (tylko do odczytu)
             ctk.CTkLabel(
                 scrollable, text=stan.produkt.znormalizowana_nazwa, width=250
-            ).grid(row=row, column=0, padx=5, pady=2, sticky="w")
+            ).grid(row=row, column=0, padx=AppSpacing.XS, pady=2, sticky="w")
 
             # Ilość (edytowalna)
             ilosc_entry = ctk.CTkEntry(scrollable, width=100)
             ilosc_entry.insert(0, str(stan.ilosc))
-            ilosc_entry.grid(row=row, column=1, padx=5, pady=2)
+            ilosc_entry.grid(row=row, column=1, padx=AppSpacing.XS, pady=2)
 
             # Jednostka (edytowalna)
             jednostka_entry = ctk.CTkEntry(scrollable, width=100)
             jednostka_entry.insert(0, stan.jednostka_miary or "szt")
-            jednostka_entry.grid(row=row, column=2, padx=5, pady=2)
+            jednostka_entry.grid(row=row, column=2, padx=AppSpacing.XS, pady=2)
 
             # Data ważności (edytowalna)
             data_entry = ctk.CTkEntry(
@@ -1701,11 +1659,11 @@ class App(ctk.CTk):
             )
             if stan.data_waznosci:
                 data_entry.insert(0, stan.data_waznosci.strftime("%Y-%m-%d"))
-            data_entry.grid(row=row, column=3, padx=5, pady=2)
+            data_entry.grid(row=row, column=3, padx=AppSpacing.XS, pady=2)
 
             # Checkbox "Zamrożone"
             zamrozone_checkbox = ctk.CTkCheckBox(scrollable, text="")
-            zamrozone_checkbox.grid(row=row, column=4, padx=5, pady=2)
+            zamrozone_checkbox.grid(row=row, column=4, padx=AppSpacing.XS, pady=2)
             # Ustaw stan checkboxa na podstawie wartości z bazy (domyślnie False jeśli None)
             (
                 zamrozone_checkbox.select()
@@ -1731,7 +1689,7 @@ class App(ctk.CTk):
             status_label = ctk.CTkLabel(
                 scrollable, text=status, width=150, text_color=color
             )
-            status_label.grid(row=row, column=5, padx=5, pady=2)
+            status_label.grid(row=row, column=5, padx=AppSpacing.XS, pady=2)
 
             # Frame dla przycisków akcji
             actions_frame = ctk.CTkFrame(scrollable)
@@ -1777,7 +1735,7 @@ class App(ctk.CTk):
         if not stany:
             ctk.CTkLabel(
                 scrollable, text="Brak produktów w magazynie", font=("Arial", 14)
-            ).grid(row=1, column=0, columnspan=7, pady=20)
+            ).grid(row=1, column=0, columnspan=7, pady=AppSpacing.LG)
 
         # Przechowaj referencje w oknie
         inv_window.inventory_items = inventory_items
@@ -1954,10 +1912,10 @@ class App(ctk.CTk):
 
                 # Kolory zgodnie z specyfikacją
                 colors = {
-                    "expired": "#ff4444",  # critical
-                    "critical": "#ff4444",  # critical
-                    "warning": "#ff8800",  # warning
-                    "normal": "#44ff44",  # success
+                    "expired": AppColors.EXPIRED,  # critical
+                    "critical": AppColors.EXPIRED,  # critical
+                    "warning": AppColors.EXPIRING_SOON,  # warning
+                    "normal": AppColors.OK,  # success
                 }
 
                 # Liczniki
@@ -1973,12 +1931,12 @@ class App(ctk.CTk):
                         font=("Arial", 14),
                         text_color=colors["normal"],
                     )
-                    status_label.pack(pady=10, padx=10)
+                    status_label.pack(pady=AppSpacing.SM, padx=AppSpacing.SM)
                     return
 
                 # Frame dla alertów
                 alerts_container = ctk.CTkFrame(self.expiry_alert_frame)
-                alerts_container.pack(fill="x", padx=10, pady=10)
+                alerts_container.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
 
                 # Nagłówek
                 header_label = ctk.CTkLabel(
@@ -1986,12 +1944,12 @@ class App(ctk.CTk):
                     text="🚨 Alerty Wygasających Produktów",
                     font=("Arial", 16, "bold"),
                 )
-                header_label.pack(pady=5)
+                header_label.pack(pady=AppSpacing.XS)
 
                 # Przeterminowane
                 if expired_count > 0:
                     expired_frame = ctk.CTkFrame(alerts_container)
-                    expired_frame.pack(fill="x", padx=10, pady=5)
+                    expired_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.XS)
                     expired_frame.configure(fg_color=colors["expired"])
 
                     expired_label = ctk.CTkLabel(
@@ -2000,7 +1958,7 @@ class App(ctk.CTk):
                         font=("Arial", 14, "bold"),
                         text_color="white",
                     )
-                    expired_label.pack(pady=5)
+                    expired_label.pack(pady=AppSpacing.XS)
 
                     # Lista produktów
                     for product in alerts["expired"][:5]:  # Maksymalnie 5
@@ -2014,12 +1972,12 @@ class App(ctk.CTk):
                             text_color="white",
                             anchor="w",
                         )
-                        product_label.pack(padx=10, pady=2, anchor="w")
+                        product_label.pack(padx=AppSpacing.SM, pady=2, anchor="w")
 
                 # Krytyczne (dziś)
                 if critical_count > 0:
                     critical_frame = ctk.CTkFrame(alerts_container)
-                    critical_frame.pack(fill="x", padx=10, pady=5)
+                    critical_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.XS)
                     critical_frame.configure(fg_color=colors["critical"])
 
                     critical_label = ctk.CTkLabel(
@@ -2028,7 +1986,7 @@ class App(ctk.CTk):
                         font=("Arial", 14, "bold"),
                         text_color="white",
                     )
-                    critical_label.pack(pady=5)
+                    critical_label.pack(pady=AppSpacing.XS)
 
                     for product in alerts["critical"][:5]:
                         product_text = f"  • {product['nazwa']} ({product['ilosc']} {product['jednostka']})"
@@ -2039,12 +1997,12 @@ class App(ctk.CTk):
                             text_color="white",
                             anchor="w",
                         )
-                        product_label.pack(padx=10, pady=2, anchor="w")
+                        product_label.pack(padx=AppSpacing.SM, pady=2, anchor="w")
 
                 # Ostrzeżenia (3 dni)
                 if warning_count > 0:
                     warning_frame = ctk.CTkFrame(alerts_container)
-                    warning_frame.pack(fill="x", padx=10, pady=5)
+                    warning_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.XS)
                     warning_frame.configure(fg_color=colors["warning"])
 
                     warning_label = ctk.CTkLabel(
@@ -2053,7 +2011,7 @@ class App(ctk.CTk):
                         font=("Arial", 14, "bold"),
                         text_color="white",
                     )
-                    warning_label.pack(pady=5)
+                    warning_label.pack(pady=AppSpacing.XS)
 
                     for product in alerts["warning"][:5]:
                         product_text = f"  • {product['nazwa']} ({product['ilosc']} {product['jednostka']})"
@@ -2066,12 +2024,12 @@ class App(ctk.CTk):
                             text_color="white",
                             anchor="w",
                         )
-                        product_label.pack(padx=10, pady=2, anchor="w")
+                        product_label.pack(padx=AppSpacing.SM, pady=2, anchor="w")
 
                 # Przycisk do otwarcia szczegółów
                 if expired_count + critical_count + warning_count > 0:
                     buttons_frame = ctk.CTkFrame(alerts_container)
-                    buttons_frame.pack(pady=10)
+                    buttons_frame.pack(pady=AppSpacing.SM)
 
                     btn_details = ctk.CTkButton(
                         buttons_frame,
@@ -2080,7 +2038,7 @@ class App(ctk.CTk):
                         fg_color=AppColors.INFO,
                         hover_color=self._adjust_color(AppColors.INFO, -15),
                     )
-                    btn_details.pack(side="left", padx=5)
+                    btn_details.pack(side="left", padx=AppSpacing.XS)
 
                     btn_bielik_suggest = ctk.CTkButton(
                         buttons_frame,
@@ -2089,7 +2047,7 @@ class App(ctk.CTk):
                         fg_color=AppColors.PRIMARY,
                         hover_color=self._adjust_color(AppColors.PRIMARY, -15),
                     )
-                    btn_bielik_suggest.pack(side="left", padx=5)
+                    btn_bielik_suggest.pack(side="left", padx=AppSpacing.XS)
 
         except Exception as e:
             error_label = ctk.CTkLabel(
@@ -2098,7 +2056,7 @@ class App(ctk.CTk):
                 font=("Arial", 12),
                 text_color="red",
             )
-            error_label.pack(pady=10, padx=10)
+            error_label.pack(pady=AppSpacing.SM, padx=AppSpacing.SM)
 
     def ask_bielik_about_expiring(self):
         """Zadaje Bielikowi pytanie o wygasające produkty"""
@@ -2116,10 +2074,10 @@ class App(ctk.CTk):
                     text="🦅 Bielik - Sugestie",
                     font=("Arial", 18, "bold"),
                 )
-                header.pack(pady=10)
+                header.pack(pady=AppSpacing.SM)
 
                 scrollable = ctk.CTkScrollableFrame(dialog)
-                scrollable.pack(fill="both", expand=True, padx=20, pady=10)
+                scrollable.pack(fill="both", expand=True, padx=AppSpacing.LG, pady=AppSpacing.SM)
 
                 suggestion_label = ctk.CTkLabel(
                     scrollable,
@@ -2129,14 +2087,14 @@ class App(ctk.CTk):
                     justify="left",
                     anchor="w",
                 )
-                suggestion_label.pack(pady=10, padx=10, anchor="w")
+                suggestion_label.pack(pady=AppSpacing.SM, padx=AppSpacing.SM, anchor="w")
 
                 ctk.CTkButton(
                     dialog,
                     text="Zamknij",
                     command=dialog.destroy,
                     width=150,
-                ).pack(pady=10)
+                ).pack(pady=AppSpacing.SM)
 
         except Exception as e:
             messagebox.showerror(
@@ -2152,7 +2110,7 @@ class App(ctk.CTk):
 
         # Scrollable frame
         scrollable = ctk.CTkScrollableFrame(details_window)
-        scrollable.pack(fill="both", expand=True, padx=10, pady=10)
+        scrollable.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.SM)
 
         try:
             with FoodWasteTracker() as tracker:
@@ -2164,7 +2122,7 @@ class App(ctk.CTk):
                     scrollable,
                     text="🚨 Wygasające Produkty",
                     font=("Arial", 18, "bold"),
-                ).pack(pady=10)
+                ).pack(pady=AppSpacing.SM)
 
                 # Przeterminowane
                 if alerts["expired"]:
@@ -2172,8 +2130,8 @@ class App(ctk.CTk):
                         scrollable,
                         text="❌ PRZETERMINOWANE",
                         font=("Arial", 16, "bold"),
-                        text_color="#ff4444",
-                    ).pack(pady=10, anchor="w")
+                        text_color=AppColors.EXPIRED,
+                    ).pack(pady=AppSpacing.SM, anchor="w")
 
                     for product in alerts["expired"]:
                         product_text = f"• {product['nazwa']} - {product['ilosc']} {product['jednostka']}"
@@ -2181,7 +2139,7 @@ class App(ctk.CTk):
                             product_text += f" (wygasł {abs(product['days_until_expiry'])} dni temu)"
                         ctk.CTkLabel(
                             scrollable, text=product_text, font=("Arial", 12)
-                        ).pack(padx=20, pady=2, anchor="w")
+                        ).pack(padx=AppSpacing.LG, pady=2, anchor="w")
 
                 # Krytyczne
                 if alerts["critical"]:
@@ -2189,14 +2147,14 @@ class App(ctk.CTk):
                         scrollable,
                         text="🔴 KRYTYCZNE (dziś wygasa)",
                         font=("Arial", 16, "bold"),
-                        text_color="#ff4444",
-                    ).pack(pady=10, anchor="w")
+                        text_color=AppColors.EXPIRED,
+                    ).pack(pady=AppSpacing.SM, anchor="w")
 
                     for product in alerts["critical"]:
                         product_text = f"• {product['nazwa']} - {product['ilosc']} {product['jednostka']}"
                         ctk.CTkLabel(
                             scrollable, text=product_text, font=("Arial", 12)
-                        ).pack(padx=20, pady=2, anchor="w")
+                        ).pack(padx=AppSpacing.LG, pady=2, anchor="w")
 
                 # Ostrzeżenia
                 if alerts["warning"]:
@@ -2204,8 +2162,8 @@ class App(ctk.CTk):
                         scrollable,
                         text="⚠️ OSTRZEŻENIE (≤3 dni)",
                         font=("Arial", 16, "bold"),
-                        text_color="#ff8800",
-                    ).pack(pady=10, anchor="w")
+                        text_color=AppColors.EXPIRING_SOON,
+                    ).pack(pady=AppSpacing.SM, anchor="w")
 
                     for product in alerts["warning"]:
                         product_text = f"• {product['nazwa']} - {product['ilosc']} {product['jednostka']}"
@@ -2213,15 +2171,15 @@ class App(ctk.CTk):
                             product_text += f" ({product['days_until_expiry']} dni do wygaśnięcia)"
                         ctk.CTkLabel(
                             scrollable, text=product_text, font=("Arial", 12)
-                        ).pack(padx=20, pady=2, anchor="w")
+                        ).pack(padx=AppSpacing.LG, pady=2, anchor="w")
 
                 if not alerts["expired"] and not alerts["critical"] and not alerts["warning"]:
                     ctk.CTkLabel(
                         scrollable,
                         text="✅ Brak wygasających produktów",
                         font=("Arial", 14),
-                        text_color="#44ff44",
-                    ).pack(pady=20)
+                        text_color=AppColors.OK,
+                    ).pack(pady=AppSpacing.LG)
 
         except Exception as e:
             ctk.CTkLabel(
@@ -2229,7 +2187,7 @@ class App(ctk.CTk):
                 text=f"Błąd: {str(e)}",
                 font=("Arial", 12),
                 text_color="red",
-            ).pack(pady=20)
+            ).pack(pady=AppSpacing.LG)
 
     def refresh_analytics(self):
         """Odświeża widok analityki zakupów"""
@@ -2247,7 +2205,7 @@ class App(ctk.CTk):
 
                 # Sekcja ogólnych statystyk
                 stats_frame = ctk.CTkFrame(self.analytics_scrollable)
-                stats_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
+                stats_frame.grid(row=0, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
                 stats_frame.grid_columnconfigure(0, weight=1)
 
                 ctk.CTkLabel(
@@ -2275,7 +2233,7 @@ class App(ctk.CTk):
                     font=("Arial", 12),
                     justify="left",
                     anchor="w",
-                ).grid(row=1, column=0, padx=20, pady=10, sticky="w")
+                ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.SM, sticky="w")
 
                 if stats["total_receipts"] == 0:
                     ctk.CTkLabel(
@@ -2283,12 +2241,12 @@ class App(ctk.CTk):
                         text="Brak danych do wyświetlenia. Dodaj paragony, aby zobaczyć analitykę.",
                         font=("Arial", 14),
                         text_color="gray",
-                    ).grid(row=1, column=0, padx=20, pady=20)
+                    ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.LG)
                     return
 
                 # Wydatki według sklepów
                 stores_frame = ctk.CTkFrame(self.analytics_scrollable)
-                stores_frame.grid(row=1, column=0, sticky="ew", padx=10, pady=10)
+                stores_frame.grid(row=1, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
                 stores_frame.grid_columnconfigure(0, weight=1)
 
                 ctk.CTkLabel(
@@ -2313,11 +2271,11 @@ class App(ctk.CTk):
                     font=("Arial", 12),
                     justify="left",
                     anchor="w",
-                ).grid(row=1, column=0, padx=20, pady=10, sticky="w")
+                ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.SM, sticky="w")
 
                 # Wydatki według kategorii
                 categories_frame = ctk.CTkFrame(self.analytics_scrollable)
-                categories_frame.grid(row=2, column=0, sticky="ew", padx=10, pady=10)
+                categories_frame.grid(row=2, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
                 categories_frame.grid_columnconfigure(0, weight=1)
 
                 ctk.CTkLabel(
@@ -2342,11 +2300,11 @@ class App(ctk.CTk):
                     font=("Arial", 12),
                     justify="left",
                     anchor="w",
-                ).grid(row=1, column=0, padx=20, pady=10, sticky="w")
+                ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.SM, sticky="w")
 
                 # Najczęściej kupowane produkty
                 products_frame = ctk.CTkFrame(self.analytics_scrollable)
-                products_frame.grid(row=3, column=0, sticky="ew", padx=10, pady=10)
+                products_frame.grid(row=3, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
                 products_frame.grid_columnconfigure(0, weight=1)
 
                 ctk.CTkLabel(
@@ -2371,11 +2329,11 @@ class App(ctk.CTk):
                     font=("Arial", 12),
                     justify="left",
                     anchor="w",
-                ).grid(row=1, column=0, padx=20, pady=10, sticky="w")
+                ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.SM, sticky="w")
 
                 # Statystyki miesięczne
                 monthly_frame = ctk.CTkFrame(self.analytics_scrollable)
-                monthly_frame.grid(row=4, column=0, sticky="ew", padx=10, pady=10)
+                monthly_frame.grid(row=4, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
                 monthly_frame.grid_columnconfigure(0, weight=1)
 
                 ctk.CTkLabel(
@@ -2403,18 +2361,18 @@ class App(ctk.CTk):
                     font=("Arial", 12),
                     justify="left",
                     anchor="w",
-                ).grid(row=1, column=0, padx=20, pady=10, sticky="w")
+                ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.SM, sticky="w")
 
                 # Ostatnie paragony
                 recent_frame = ctk.CTkFrame(self.analytics_scrollable)
-                recent_frame.grid(row=5, column=0, sticky="ew", padx=10, pady=10)
+                recent_frame.grid(row=5, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
                 recent_frame.grid_columnconfigure(0, weight=1)
 
                 ctk.CTkLabel(
                     recent_frame,
                     text="📄 Ostatnie Paragony",
                     font=("Arial", 16, "bold"),
-                ).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+                ).grid(row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w")
 
                 recent = analytics.get_recent_receipts(limit=10)
                 if recent:
@@ -2433,7 +2391,7 @@ class App(ctk.CTk):
                     font=("Arial", 12),
                     justify="left",
                     anchor="w",
-                ).grid(row=1, column=0, padx=20, pady=10, sticky="w")
+                ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.SM, sticky="w")
 
         except Exception as e:
             ctk.CTkLabel(
@@ -2441,7 +2399,7 @@ class App(ctk.CTk):
                 text=f"Błąd podczas ładowania analityki: {str(e)}",
                 font=("Arial", 12),
                 text_color="red",
-            ).grid(row=0, column=0, padx=20, pady=20)
+            ).grid(row=0, column=0, padx=AppSpacing.LG, pady=AppSpacing.LG)
 
     def refresh_meal_planner(self):
         """Odświeża widok planera posiłków"""
@@ -2451,7 +2409,7 @@ class App(ctk.CTk):
 
         # Header
         header_frame = ctk.CTkFrame(self.meal_planner_frame)
-        header_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=10)
+        header_frame.grid(row=0, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
         header_frame.grid_columnconfigure(1, weight=1)
 
         ctk.CTkLabel(
@@ -2478,7 +2436,7 @@ class App(ctk.CTk):
 
         # Scrollable area
         scrollable = ctk.CTkScrollableFrame(self.meal_planner_frame)
-        scrollable.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+        scrollable.grid(row=1, column=0, sticky="nsew", padx=AppSpacing.SM, pady=AppSpacing.SM)
         scrollable.grid_columnconfigure(0, weight=1)
 
         # Placeholder
@@ -2487,7 +2445,7 @@ class App(ctk.CTk):
             text="Kliknij 'Wygeneruj Plan' aby utworzyć plan posiłków na 7 dni",
             font=("Arial", 14),
             text_color="gray",
-        ).pack(pady=50)
+        ).pack(pady=AppSpacing.XS0)
 
         self.meal_planner_scrollable = scrollable
 
@@ -2502,7 +2460,7 @@ class App(ctk.CTk):
             text="🦅 Bielik generuje plan posiłków...",
             font=("Arial", 14),
         )
-        progress_label.pack(pady=50)
+        progress_label.pack(pady=AppSpacing.XS0)
 
         # Generuj w osobnym wątku
         import threading
@@ -2538,13 +2496,13 @@ class App(ctk.CTk):
                 text="Nie udało się wygenerować planu",
                 font=("Arial", 14),
                 text_color="red",
-            ).pack(pady=20)
+            ).pack(pady=AppSpacing.LG)
             return
 
         # Wyświetl plan dla każdego dnia
         for i, day_plan in enumerate(plan_data):
             day_frame = ctk.CTkFrame(self.meal_planner_scrollable)
-            day_frame.pack(fill="x", padx=10, pady=10)
+            day_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
             day_frame.grid_columnconfigure(1, weight=1)
 
             # Nagłówek dnia
@@ -2556,7 +2514,7 @@ class App(ctk.CTk):
                 day_frame,
                 text=header_text,
                 font=("Arial", 16, "bold"),
-            ).grid(row=0, column=0, columnspan=3, padx=10, pady=10, sticky="w")
+            ).grid(row=0, column=0, columnspan=3, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w")
 
             # Śniadanie
             self._display_meal(
@@ -2572,12 +2530,12 @@ class App(ctk.CTk):
     def _display_meal(self, parent, row: int, meal_name: str, meal_data: Dict):
         """Wyświetla pojedynczy posiłek"""
         meal_frame = ctk.CTkFrame(parent)
-        meal_frame.grid(row=row, column=0, columnspan=3, padx=10, pady=5, sticky="ew")
+        meal_frame.grid(row=row, column=0, columnspan=3, padx=AppSpacing.SM, pady=AppSpacing.XS, sticky="ew")
         meal_frame.grid_columnconfigure(1, weight=1)
 
         ctk.CTkLabel(
             meal_frame, text=meal_name, font=("Arial", 14, "bold"), width=120
-        ).grid(row=0, column=0, padx=10, pady=5, sticky="w")
+        ).grid(row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.XS, sticky="w")
 
         nazwa = meal_data.get("nazwa", "Brak")
         opis = meal_data.get("opis", "")
@@ -2594,7 +2552,7 @@ class App(ctk.CTk):
 
         ctk.CTkLabel(
             meal_frame, text=meal_text, font=("Arial", 12), anchor="w", justify="left"
-        ).grid(row=0, column=1, padx=10, pady=5, sticky="w")
+        ).grid(row=0, column=1, padx=AppSpacing.SM, pady=AppSpacing.XS, sticky="w")
 
     def _display_meal_plan_error(self, error_msg: str):
         """Wyświetla błąd podczas generowania planu"""
@@ -2606,7 +2564,7 @@ class App(ctk.CTk):
             text=error_msg,
             font=("Arial", 14),
             text_color="red",
-        ).pack(pady=20)
+        ).pack(pady=AppSpacing.LG)
 
     def refresh_history(self):
         """Odświeża listę historii plików w combobox."""
