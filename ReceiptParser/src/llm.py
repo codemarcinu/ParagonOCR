@@ -294,10 +294,11 @@ def normalize_batch(
     # Buduj sekcję z przykładami uczenia
     learning_section = ""
     if learning_examples and len(learning_examples) > 0:
-        learning_section = "\n    PRZYKŁADY Z POPRZEDNICH WYBORÓW UŻYTKOWNIKA (użyj podobnego stylu normalizacji):\n"
-        for raw, normalized in learning_examples:
-            learning_section += f'    - "{raw}" -> "{normalized}"\n'
-        learning_section += "\n"
+        examples_lines = [
+            f'    - "{raw}" -> "{normalized}"'
+            for raw, normalized in learning_examples
+        ]
+        learning_section = "\n    PRZYKŁADY Z POPRZEDNICH WYBORÓW UŻYTKOWNIKA (użyj podobnego stylu normalizacji):\n" + "\n".join(examples_lines) + "\n"
     
     # Formatuj listę produktów do normalizacji
     products_list = "\n".join([f'    - "{name}"' for name in raw_names])
