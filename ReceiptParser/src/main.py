@@ -324,10 +324,56 @@ def save_to_database(
         status="Przetwarzam pozycje...",
     )
     total_items = len(parsed_data["pozycje"])
+    
+    # KROK 1: Zbierz wszystkie nieznane produkty (dla batch processing)
+    unknown_products = []
+    product_to_item_map = {}  # Mapowanie raw_name -> item_data
+    
     for idx, item_data in enumerate(parsed_data["pozycje"]):
-        # Aktualizuj postęp dla każdej pozycji (85-95%)
+        raw_name = item_data["nazwa_raw"]
+        
+        # Sprawdź czy produkt jest już w bazie (alias)
+        alias = (
+            session.query(AliasProduktu)
+            .options(joinedload(AliasProduktu.produkt))
+            .filter_by(nazwa_z_paragonu=raw_name)
+            .first()
+        )
+        
+        # Jeśli nie ma aliasu i nie ma w regułach statycznych, dodaj do batcha
+        if not alias:
+            from .normalization_rules import find_static_match
+            if not find_static_match(raw_name):
+                unknown_products.append(raw_name)
+                product_to_item_map[raw_name] = item_data
+    
+    # KROK 2: Batch processing dla nieznanych produktów
+    batch_cache = {}
+    if unknown_products:
+        _call_log_callback(
+            log_callback,
+            f"INFO: Znaleziono {len(unknown_products)} nieznanych produktów. Używam batch processing...",
+            progress=86,
+            status="Normalizacja produktów (batch)...",
+        )
+        from .llm import normalize_products_batch
+        batch_cache = normalize_products_batch(
+            unknown_products,
+            session,
+            log_callback=log_callback
+        )
+        _call_log_callback(
+            log_callback,
+            f"INFO: Batch processing zakończony. Znormalizowano {len([v for v in batch_cache.values() if v])} produktów.",
+            progress=87,
+            status="Przetwarzam pozycje...",
+        )
+    
+    # KROK 3: Przetwarzaj pozycje (używając cache z batch processing)
+    for idx, item_data in enumerate(parsed_data["pozycje"]):
+        # Aktualizuj postęp dla każdej pozycji (87-95%)
         if total_items > 0:
-            progress = 85 + int((idx / total_items) * 10)
+            progress = 87 + int((idx / total_items) * 8)
             _call_log_callback(
                 log_callback,
                 f"INFO: Przetwarzam pozycję {idx + 1}/{total_items}...",
@@ -337,9 +383,19 @@ def save_to_database(
         # Logika rabatów została przeniesiona do strategies.py (LidlStrategy)
         # Tutaj zakładamy, że dane są już wyczyszczone przez strategy.post_process
 
-        product_id = resolve_product(
-            session, item_data["nazwa_raw"], log_callback, prompt_callback
-        )
+        # Użyj batch cache jeśli dostępny, w przeciwnym razie użyj standardowego resolve_product
+        raw_name = item_data["nazwa_raw"]
+        if raw_name in batch_cache and batch_cache[raw_name]:
+            # Produkt został znormalizowany przez batch processing
+            # Użyj resolve_product_with_suggestion do zapisu do bazy
+            product_id = resolve_product_with_suggestion(
+                session, raw_name, batch_cache[raw_name], log_callback, prompt_callback
+            )
+        else:
+            # Standardowe przetwarzanie (dla produktów z aliasem lub regułami statycznymi)
+            product_id = resolve_product(
+                session, item_data["nazwa_raw"], log_callback, prompt_callback
+            )
 
         # Jeśli resolve_product zwrócił None (np. dla śmieci OCR, PTU, POMIŃ), pomijamy dodawanie
         if product_id is None:
@@ -416,6 +472,107 @@ def save_to_database(
         progress=95,
         status="Kończenie zapisu...",
     )
+
+
+def resolve_product_with_suggestion(
+    session: Session, 
+    raw_name: str, 
+    suggested_name: str,
+    log_callback: Callable, 
+    prompt_callback: Callable
+) -> int | None:
+    """
+    Rozwiązuje produkt używając wcześniej uzyskanej sugestii (np. z batch processing).
+    Pomija wywołania LLM, ponieważ sugestia jest już dostępna.
+    
+    Args:
+        session: Sesja SQLAlchemy
+        raw_name: Surowa nazwa produktu
+        suggested_name: Wcześniej uzyskana znormalizowana nazwa
+        log_callback: Callback do logowania
+        prompt_callback: Callback do promptowania użytkownika
+    
+    Returns:
+        ID produktu lub None jeśli pozycja ma być pominięta
+    """
+    # Obsługa przypadku "POMIŃ"
+    if suggested_name == "POMIŃ":
+        _call_log_callback(
+            log_callback, "   -> System zasugerował pominięcie tej pozycji."
+        )
+        return None
+    
+    # Weryfikacja Użytkownika (Prompt)
+    prompt_text = f"Nieznany produkt (Sugerowany przez Batch LLM: {suggested_name or 'Brak'}). Do jakiego produktu go przypisać?"
+    normalized_name = prompt_callback(prompt_text, suggested_name or "", raw_name)
+    
+    # Jeśli użytkownik nie podał nazwy lub podał "POMIŃ", pomijamy pozycję
+    if not normalized_name or normalized_name.strip().upper() == "POMIŃ":
+        _call_log_callback(
+            log_callback, "   -> Pominięto przypisanie produktu dla tej pozycji."
+        )
+        return None
+    
+    # Zapis do bazy (identyczna logika jak w resolve_product)
+    product = (
+        session.query(Produkt).filter_by(znormalizowana_nazwa=normalized_name).first()
+    )
+    
+    # Pobierz metadane z bazy wiedzy
+    metadata = get_product_metadata(normalized_name)
+    kategoria_nazwa = metadata["kategoria"]
+    can_freeze = metadata["can_freeze"]
+    
+    # Info dla usera
+    freeze_info = "❄️ MOŻNA MROZIĆ" if can_freeze else "🚫 NIE MROZIĆ"
+    if can_freeze is None:
+        freeze_info = ""  # Brak danych
+    
+    _call_log_callback(
+        log_callback, f"   -> Kategoria: {kategoria_nazwa} | {freeze_info}"
+    )
+    
+    # Pobierz lub utwórz kategorię w bazie
+    kategoria = (
+        session.query(KategoriaProduktu)
+        .filter_by(nazwa_kategorii=kategoria_nazwa)
+        .first()
+    )
+    if not kategoria:
+        _call_log_callback(
+            log_callback, f"   -> Tworzę nową kategorię: '{kategoria_nazwa}'"
+        )
+        kategoria = KategoriaProduktu(nazwa_kategorii=kategoria_nazwa)
+        session.add(kategoria)
+        session.flush()
+    
+    if not product:
+        _call_log_callback(
+            log_callback, f"   -> Tworzę nowy produkt w bazie: '{normalized_name}'"
+        )
+        product = Produkt(
+            znormalizowana_nazwa=normalized_name, kategoria_id=kategoria.kategoria_id
+        )
+        session.add(product)
+        session.flush()
+    else:
+        _call_log_callback(
+            log_callback, f"   -> Znaleziono istniejący produkt: '{normalized_name}'"
+        )
+        # Opcjonalnie: Aktualizuj kategorię jeśli brakuje (dla starszych wpisów)
+        if product.kategoria_id is None:
+            product.kategoria_id = kategoria.kategoria_id
+            _call_log_callback(
+                log_callback,
+                f"   -> Zaktualizowano kategorię produktu na: '{kategoria_nazwa}'",
+            )
+    
+    _call_log_callback(
+        log_callback, f"   -> Tworzę nowy alias: '{raw_name}' -> '{normalized_name}'"
+    )
+    new_alias = AliasProduktu(nazwa_z_paragonu=raw_name, produkt_id=product.produkt_id)
+    session.add(new_alias)
+    return product.produkt_id
 
 
 def resolve_product(

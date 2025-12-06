@@ -42,6 +42,24 @@ class Config:
     # Czy używać GPU dla EasyOCR (jeśli dostępne)
     USE_GPU_OCR = os.getenv("USE_GPU_OCR", "true").lower() == "true"
 
+    # --- Konfiguracja Retry Logic ---
+    # Maksymalna liczba prób retry dla wywołań API
+    RETRY_MAX_ATTEMPTS = int(os.getenv("RETRY_MAX_ATTEMPTS", "3"))
+    # Początkowe opóźnienie przed retry (w sekundach)
+    RETRY_INITIAL_DELAY = float(os.getenv("RETRY_INITIAL_DELAY", "1.0"))
+    # Maksymalne opóźnienie przed retry (w sekundach)
+    RETRY_MAX_DELAY = float(os.getenv("RETRY_MAX_DELAY", "30.0"))
+    # Mnożnik exponential backoff
+    RETRY_BACKOFF_FACTOR = float(os.getenv("RETRY_BACKOFF_FACTOR", "2.0"))
+    # Czy używać jitter (losowe opóźnienie ±20% dla uniknięcia thundering herd)
+    RETRY_JITTER = os.getenv("RETRY_JITTER", "true").lower() == "true"
+
+    # --- Konfiguracja Batch Processing LLM ---
+    # Rozmiar batcha dla normalizacji produktów (5-10 to sweet spot)
+    BATCH_SIZE = int(os.getenv("BATCH_SIZE", "5"))
+    # Maksymalna liczba równoległych batchy (ThreadPoolExecutor workers)
+    BATCH_MAX_WORKERS = int(os.getenv("BATCH_MAX_WORKERS", "3"))
+
     @staticmethod
     def print_config():
         print("--- Konfiguracja ---")

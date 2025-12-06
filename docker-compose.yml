@@ -23,12 +23,11 @@ services:
       # Wymuszamy tryb Cloud (Mistral OCR + OpenAI API)
       - USE_CLOUD_AI=true
       - USE_CLOUD_OCR=true
-      # Klucze API - użyj zmiennych środowiskowych z .env lub docker secrets
+      # Klucze API można podać tu lub w ustawieniach aplikacji
+      # Klucze API - użyj zmiennych środowiskowych z .env
       # NIE umieszczaj kluczy API bezpośrednio w tym pliku!
-      # Przykład użycia zmiennych środowiskowych:
-      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # Przykład: - OPENAI_API_KEY=${OPENAI_API_KEY}
       # - MISTRAL_API_KEY=${MISTRAL_API_KEY}
-      # Lub użyj docker secrets dla produkcji
     # Limity pamięci - kompatybilne z Docker Compose V1 i V2
     mem_limit: 4G  # Limit pamięci RAM (zwiększ jeśli masz zapas RAM)
     mem_reservation: 1G  # Gwarantowana rezerwacja pamięci

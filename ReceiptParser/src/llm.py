@@ -6,10 +6,12 @@ import re
 from pathlib import Path
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Dict, Callable
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from rapidfuzz import fuzz
 from .config import Config
 from .security import sanitize_path, sanitize_log_message
+from .retry_handler import retry_with_backoff
 
 # Import sanitize_log_message dla użycia w globalnym except
 def _sanitize_error(e: Exception) -> str:
@@ -121,6 +123,8 @@ def get_llm_suggestion(
     """
     Używa modelu językowego do normalizacji "brudnej" nazwy produktu.
     Może używać przykładów uczenia z poprzednich wyborów użytkownika.
+    
+    Funkcja jest automatycznie retry'owana przez dekorator retry_with_backoff.
 
     Args:
         raw_name: Surowa nazwa produktu z paragonu.
@@ -168,14 +172,24 @@ def get_llm_suggestion(
     Znormalizowana nazwa:
     """
 
-    try:
-        response = client.chat(
+    @retry_with_backoff(
+        max_retries=Config.RETRY_MAX_ATTEMPTS,
+        initial_delay=Config.RETRY_INITIAL_DELAY,
+        backoff_factor=Config.RETRY_BACKOFF_FACTOR,
+        max_delay=Config.RETRY_MAX_DELAY,
+        jitter=Config.RETRY_JITTER,
+    )
+    def _call_llm():
+        return client.chat(
             model=model_name,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
         )
+    
+    try:
+        response = _call_llm()
         suggestion = response["message"]["content"].strip()
         # Czyścimy sugestię z prefiksów i artefaktów
         cleaned = clean_llm_suggestion(suggestion)
@@ -185,6 +199,208 @@ def get_llm_suggestion(
             f"BŁĄD: Wystąpił problem podczas komunikacji z modelem '{model_name}': {sanitize_log_message(str(e))}"
         )
         return None
+
+
+# --- Batch Processing dla Normalizacji Produktów ---
+
+
+def normalize_batch(
+    raw_names: List[str],
+    model_name: str = Config.TEXT_MODEL,
+    learning_examples: Optional[List[Tuple[str, str]]] = None
+) -> Dict[str, Optional[str]]:
+    """
+    Normalizuje batch produktów jednocześnie zamiast sekwencyjnie.
+    
+    Args:
+        raw_names: Lista surowych nazw produktów do normalizacji
+        model_name: Nazwa modelu Ollama do użycia
+        learning_examples: Opcjonalna lista przykładów uczenia
+    
+    Returns:
+        Słownik mapujący raw_name -> normalized_name (lub None w przypadku błędu)
+    """
+    if not raw_names:
+        return {}
+    
+    if not client:
+        print("BŁĄD: Klient Ollama nie jest skonfigurowany.")
+        return {name: None for name in raw_names}
+    
+    system_prompt = """
+    Jesteś wirtualnym magazynierem. Twoim zadaniem jest zamiana nazw z paragonu na KRÓTKIE, GENERYCZNE nazwy produktów do domowej spiżarni.
+    
+    ZASADY KRYTYCZNE:
+    1. USUWASZ marki (np. "Krakus", "Mlekovita", "Winiary" -> USUŃ).
+    2. USUWASZ gramaturę i opakowania (np. "1L", "500g", "butelka", "szt" -> USUŃ).
+    3. USUWASZ przymiotniki marketingowe (np. "tradycyjne", "babuni", "pyszne", "luksusowe" -> USUŃ).
+    4. Zmieniasz na Mianownik Liczby Pojedynczej (np. "Bułki" -> "Bułka", "Jaja" -> "Jajka").
+    5. Jeśli produkt to plastikowa torba/reklamówka, zwróć dokładnie słowo: "POMIŃ".
+    
+    Zwróć odpowiedź w formacie JSON, gdzie klucz to surowa nazwa, a wartość to znormalizowana nazwa.
+    Przykład:
+    {
+      "Mleko UHT 3,2% Łaciate 1L": "Mleko",
+      "Jaja z wolnego wybiegu L 10szt": "Jajka",
+      "Reklamówka mała płatna": "POMIŃ"
+    }
+    """
+    
+    # Buduj sekcję z przykładami uczenia
+    learning_section = ""
+    if learning_examples and len(learning_examples) > 0:
+        learning_section = "\n    PRZYKŁADY Z POPRZEDNICH WYBORÓW UŻYTKOWNIKA (użyj podobnego stylu normalizacji):\n"
+        for raw, normalized in learning_examples:
+            learning_section += f'    - "{raw}" -> "{normalized}"\n'
+        learning_section += "\n"
+    
+    # Formatuj listę produktów do normalizacji
+    products_list = "\n".join([f'    - "{name}"' for name in raw_names])
+    
+    user_prompt = f"""
+    PRZYKŁADY OGÓLNE:
+    - "Mleko UHT 3,2% Łaciate 1L" -> "Mleko"
+    - "Jaja z wolnego wybiegu L 10szt" -> "Jajka"
+    - "Chleb Baltonowski krojony 500g" -> "Chleb"
+    - "Kajzerka pszenna duża" -> "Bułka"
+    - "Szynka Konserwowa Krakus" -> "Szynka"
+    - "Pomidor gałązka luz" -> "Pomidory"
+    - "Coca Cola 0.5L" -> "Napój gazowany"
+    - "Reklamówka mała płatna" -> "POMIŃ"
+{learning_section}
+    Znormalizuj następujące produkty (zwróć JSON z mapowaniem):
+{products_list}
+    
+    Zwróć TYLKO JSON, bez dodatkowego tekstu.
+    """
+    
+    @retry_with_backoff(
+        max_retries=Config.RETRY_MAX_ATTEMPTS,
+        initial_delay=Config.RETRY_INITIAL_DELAY,
+        backoff_factor=Config.RETRY_BACKOFF_FACTOR,
+        max_delay=Config.RETRY_MAX_DELAY,
+        jitter=Config.RETRY_JITTER,
+    )
+    def _call_batch_llm():
+        return client.chat(
+            model=model_name,
+            format="json",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+        )
+    
+    try:
+        response = _call_batch_llm()
+        response_text = response["message"]["content"].strip()
+        
+        # Parsuj JSON odpowiedź
+        try:
+            # Usuń markdown code blocks jeśli są
+            if response_text.startswith("```"):
+                response_text = re.sub(r"```json\n?", "", response_text)
+                response_text = re.sub(r"```\n?$", "", response_text)
+            
+            batch_results = json.loads(response_text)
+            
+            # Waliduj i czyść wyniki
+            result_dict = {}
+            for raw_name in raw_names:
+                normalized = batch_results.get(raw_name)
+                if normalized:
+                    normalized = clean_llm_suggestion(normalized)
+                result_dict[raw_name] = normalized if normalized else None
+            
+            return result_dict
+        except json.JSONDecodeError as e:
+            print(
+                f"BŁĄD: Nie udało się sparsować JSON-a z batch LLM. Szczegóły: {sanitize_log_message(str(e))}"
+            )
+            print(f"Otrzymany tekst (obcięty): {sanitize_log_message(response_text, max_length=500)}")
+            # Fallback: zwróć None dla wszystkich produktów
+            return {name: None for name in raw_names}
+    except Exception as e:
+        print(
+            f"BŁĄD: Wystąpił problem podczas batch normalizacji: {sanitize_log_message(str(e))}"
+        )
+        return {name: None for name in raw_names}
+
+
+def normalize_products_batch(
+    raw_names: List[str],
+    session,
+    model_name: str = Config.TEXT_MODEL,
+    batch_size: int = None,
+    max_workers: int = None,
+    log_callback: Optional[Callable] = None
+) -> Dict[str, Optional[str]]:
+    """
+    Normalizuje wiele produktów używając batch processing z równoległym przetwarzaniem.
+    
+    Args:
+        raw_names: Lista surowych nazw produktów do normalizacji
+        session: Sesja SQLAlchemy do pobrania przykładów uczenia
+        model_name: Nazwa modelu Ollama do użycia
+        batch_size: Rozmiar batcha (domyślnie z Config.BATCH_SIZE)
+        max_workers: Liczba równoległych workerów (domyślnie z Config.BATCH_MAX_WORKERS)
+        log_callback: Opcjonalna funkcja callback do logowania
+    
+    Returns:
+        Słownik mapujący raw_name -> normalized_name
+    """
+    if not raw_names:
+        return {}
+    
+    batch_size = batch_size or Config.BATCH_SIZE
+    max_workers = max_workers or Config.BATCH_MAX_WORKERS
+    
+    # Podziel produkty na batche
+    batches = [raw_names[i:i + batch_size] for i in range(0, len(raw_names), batch_size)]
+    
+    if log_callback:
+        try:
+            log_callback(f"INFO: Przetwarzam {len(raw_names)} produktów w {len(batches)} batchach (rozmiar batcha: {batch_size})")
+        except Exception:
+            pass
+    
+    # Pobierz przykłady uczenia (używamy pierwszego produktu jako referencji)
+    learning_examples = []
+    if raw_names:
+        try:
+            learning_examples = get_learning_examples(
+                raw_names[0], session, max_examples=5, min_similarity=30
+            )
+        except Exception:
+            pass  # Ignoruj błędy przy pobieraniu przykładów
+    
+    # Przetwarzaj batche równolegle
+    all_results = {}
+    
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        # Submituj wszystkie batche
+        future_to_batch = {
+            executor.submit(normalize_batch, batch, model_name, learning_examples): batch
+            for batch in batches
+        }
+        
+        # Zbierz wyniki gdy są gotowe
+        for future in as_completed(future_to_batch):
+            batch = future_to_batch[future]
+            try:
+                batch_results = future.result()
+                all_results.update(batch_results)
+            except Exception as e:
+                if log_callback:
+                    try:
+                        log_callback(f"OSTRZEŻENIE: Błąd podczas przetwarzania batcha: {sanitize_log_message(str(e))}")
+                    except Exception:
+                        pass
+                # W przypadku błędu, zwróć None dla wszystkich produktów w batchu
+                for name in batch:
+                    all_results[name] = None
+    
+    return all_results
 
 
 # --- Parsowanie Całego Paragonu z Obrazu ---
@@ -273,6 +489,37 @@ def _convert_types(data: dict) -> dict:
         raise ValueError("Nie udało się przekonwertować danych z LLM.") from e
 
 
+@retry_with_backoff(
+    max_retries=Config.RETRY_MAX_ATTEMPTS,
+    initial_delay=Config.RETRY_INITIAL_DELAY,
+    backoff_factor=Config.RETRY_BACKOFF_FACTOR,
+    max_delay=Config.RETRY_MAX_DELAY,
+    jitter=Config.RETRY_JITTER,
+)
+def _call_vision_llm(model_name: str, system_prompt: str, image_path: str, ocr_text: Optional[str] = None):
+    """Pomocnicza funkcja do wywołania vision LLM z retry."""
+    return client.chat(
+        model=model_name,
+        format="json",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {
+                "role": "user",
+                "content": (
+                    f"Przeanalizuj ten paragon.\n\nWspomóż się tekstem odczytanym przez OCR (może zawierać błędy, ale układ jest zachowany):\n---\n{ocr_text}\n---"
+                    if ocr_text
+                    else "Przeanalizuj ten paragon."
+                ),
+                "images": [image_path],
+            },
+        ],
+        options={
+            "temperature": 0,
+            "num_predict": 4000,
+        },
+    )
+
+
 def parse_receipt_with_llm(
     image_path: str,
     model_name: str = Config.VISION_MODEL,
@@ -345,26 +592,7 @@ def parse_receipt_with_llm(
             print(f"OSTRZEŻENIE: Tekst OCR jest za długi ({len(ocr_text)} znaków), obcinam do {MAX_OCR_TEXT_LENGTH} znaków.")
             ocr_text = ocr_text[:MAX_OCR_TEXT_LENGTH] + "\n\n[... tekst OCR obcięty ...]"
 
-        response = client.chat(
-            model=model_name,
-            format="json",  # WYMUSZENIE FORMATU JSON
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {
-                    "role": "user",
-                    "content": (
-                        f"Przeanalizuj ten paragon.\n\nWspomóż się tekstem odczytanym przez OCR (może zawierać błędy, ale układ jest zachowany):\n---\n{ocr_text}\n---"
-                        if ocr_text
-                        else "Przeanalizuj ten paragon."
-                    ),
-                    "images": [image_path],  # Ollama python client obsługuje ścieżki
-                },
-            ],
-            options={
-                "temperature": 0,
-                "num_predict": 4000,  # Limit tokenów zwiększony dla długich paragonów
-            },  # Zmniejszamy losowość dla większej deterministyczności
-        )
+        response = _call_vision_llm(model_name, system_prompt, image_path, ocr_text)
 
         raw_response_text = response["message"]["content"]
         print(
@@ -392,6 +620,32 @@ def parse_receipt_with_llm(
             f"BŁĄD: Wystąpił problem podczas komunikacji z modelem '{model_name}': {e}"
         )
         return None
+
+
+@retry_with_backoff(
+    max_retries=Config.RETRY_MAX_ATTEMPTS,
+    initial_delay=Config.RETRY_INITIAL_DELAY,
+    backoff_factor=Config.RETRY_BACKOFF_FACTOR,
+    max_delay=Config.RETRY_MAX_DELAY,
+    jitter=Config.RETRY_JITTER,
+)
+def _call_text_llm(model_name: str, system_prompt: str, text_content: str):
+    """Pomocnicza funkcja do wywołania text LLM z retry."""
+    return client.chat(
+        model=model_name,
+        format="json",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {
+                "role": "user",
+                "content": f"Przeanalizuj ten tekst paragonu:\n\n{text_content}",
+            },
+        ],
+        options={
+            "temperature": 0,
+            "num_predict": 4000,
+        },
+    )
 
 
 def parse_receipt_from_text(
@@ -496,21 +750,7 @@ def parse_receipt_from_text(
             print(f"OSTRZEŻENIE: Tekst paragonu jest za długi ({len(text_content)} znaków), obcinam do {MAX_TEXT_LENGTH} znaków.")
             text_content = text_content[:MAX_TEXT_LENGTH] + "\n\n[... tekst obcięty ...]"
         
-        response = client.chat(
-            model=model_name,
-            format="json",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {
-                    "role": "user",
-                    "content": f"Przeanalizuj ten tekst paragonu:\n\n{text_content}",
-                },
-            ],
-            options={
-                "temperature": 0,
-                "num_predict": 4000,
-            },
-        )
+        response = _call_text_llm(model_name, system_prompt, text_content)
 
         raw_response_text = response["message"]["content"]
         print(
