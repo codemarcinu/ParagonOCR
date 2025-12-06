@@ -194,6 +194,20 @@ def get_llm_suggestion(
     Znormalizowana nazwa:
     """
 
+    # Check cache first
+    llm_cache = get_llm_cache()
+    cached_response = llm_cache.get(
+        prompt=user_prompt,
+        model=model_name,
+        temperature=None
+    )
+    
+    if cached_response:
+        suggestion = cached_response.get("message", {}).get("content", "").strip()
+        if suggestion:
+            cleaned = clean_llm_suggestion(suggestion)
+            return cleaned if cleaned else None
+    
     @retry_with_backoff(
         max_retries=Config.RETRY_MAX_ATTEMPTS,
         initial_delay=Config.RETRY_INITIAL_DELAY,
@@ -212,6 +226,15 @@ def get_llm_suggestion(
     
     try:
         response = _call_llm()
+        
+        # Cache the response
+        llm_cache.set(
+            prompt=user_prompt,
+            model=model_name,
+            response=response,
+            temperature=None
+        )
+        
         suggestion = response["message"]["content"].strip()
         # Czyścimy sugestię z prefiksów i artefaktów
         cleaned = clean_llm_suggestion(suggestion)
