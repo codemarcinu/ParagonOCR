@@ -6,6 +6,7 @@ import os
 import sys
 from datetime import datetime, date, timedelta
 from decimal import Decimal
+from typing import Dict
 from sqlalchemy.orm import sessionmaker, joinedload
 
 # Lokalne importy - gui.py jest w folderze głównym projektu, src jest w ReceiptParser/src
