@@ -155,6 +155,13 @@ class Icons:
         ERROR: Error cross icon
         WARNING: Warning icon
         BEAR: Bielik (eagle) AI assistant icon
+        MEAL_PLANNER: Meal planner icon
+        ANALYTICS: Analytics/statistics icon
+        FILE: File/document icon
+        SHOP: Shop/store icon
+        CATEGORY: Category icon
+        PRODUCT: Product/shopping icon
+        CALENDAR: Calendar icon
     """
     
     RECEIPT: Final[str] = "📄"
@@ -176,4 +183,11 @@ class Icons:
     ERROR: Final[str] = "❌"
     WARNING: Final[str] = "⚠️"
     BEAR: Final[str] = "🦅"  # Bielik (eagle) icon for AI assistant
+    MEAL_PLANNER: Final[str] = "🍽️"  # Meal planner icon
+    ANALYTICS: Final[str] = "📈"  # Analytics/statistics icon
+    FILE: Final[str] = "📁"  # File/document icon
+    SHOP: Final[str] = "🏪"  # Shop/store icon
+    CATEGORY: Final[str] = "📂"  # Category icon
+    PRODUCT: Final[str] = "🛒"  # Product/shopping icon
+    CALENDAR: Final[str] = "📅"  # Calendar icon
 
