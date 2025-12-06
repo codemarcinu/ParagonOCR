@@ -2985,10 +2985,13 @@ class App(ctk.CTk):
             self.after(100, self.process_log_queue)
 
     def show_prompt_dialog(self, prompt_text, default_value, raw_name):
+        # Sanitize user input to prevent XSS/injection
+        from src.security import sanitize_log_message
+        sanitized_raw_name = sanitize_log_message(raw_name)
         dialog = ProductMappingDialog(
             self,
             title="Nieznany produkt",
-            text=f"Produkt z paragonu: '{raw_name}'\n\n{prompt_text}",
+            text=f"Produkt z paragonu: '{sanitized_raw_name}'\n\n{prompt_text}",
             initial_value=default_value,
         )
         user_input = dialog.get_input()
