@@ -2,7 +2,7 @@
 
 **Data rozpoczęcia:** 2025-12-06  
 **Status:** W trakcie implementacji  
-**Zakończone fazy:** Phase 1 (100%), Phase 2 (100%), Phase 3.1 (100%)
+**Zakończone fazy:** Phase 1 (100%), Phase 2 (100%), Phase 3 (100%)
 
 ---
 
@@ -85,7 +85,7 @@
      - delete_conversation()
    - Commit: `b6ac4cb`
 
-### Phase 3: Product Dictionary Enhancement (20% - 1/5 plików)
+### Phase 3: Product Dictionary Enhancement (100% - 5/5 plików)
 
 10. **Phase 3.1** ✅ - `ReceiptParser/data/expanded_products.json`
     - 181 produktów (struktura gotowa do rozszerzenia do 500+)
@@ -94,28 +94,43 @@
     - Pełna struktura z metadata (nutrition, properties, shops, aliases)
     - Commit: `b174368`
 
+11. **Phase 3.2** ✅ - `ReceiptParser/src/normalization_rules.py`
+    - Klasa NormalizationPipeline z 5-stage pipeline:
+      1. Cleanup OCR (100%)
+      2. Static Rules (80%)
+      3. Alias Lookup (15%) - rapidfuzz
+      4. LLM-based (4%)
+      5. User Confirmation (1%)
+    - Metody: normalize(), _cleanup_ocr(), _apply_static_rules(), 
+      _check_aliases(), _llm_normalize(), get_confidence_level()
+    - Ładuje static_rules.json i expanded_products.json
+    - Zwraca (normalized_name, confidence_score)
+    - Commit: `9756c93`
+
+12. **Phase 3.3** ✅ - `ReceiptParser/data/static_rules.json`
+    - 181 reguł z 908 wzorcami regex
+    - Wzorce wygenerowane z expanded_products.json
+    - Poziomy confidence: 0.98 (exact), 0.95 (words), 0.85 (main), 0.80 (aliases), 0.75 (shop)
+    - Commit: `7535765`
+
+13. **Phase 3.4** ✅ - `ReceiptParser/data/shop_variants.json`
+    - 720 mapowań (180 per shop)
+    - Shop-specific mappings dla: LIDL, BIEDRONKA, KAUFLAND, AUCHAN
+    - Mapuje nazwy specyficzne dla sklepów na znormalizowane nazwy
+    - Commit: `4787c26`
+
+14. **Phase 3.5** ✅ - `ReceiptParser/data/product_metadata.json`
+    - Wyekstrahowane metadata z expanded_products.json
+    - 180 produktów z indeksami:
+      - Index by normalized_name (fast lookup)
+      - Index by category (10 kategorii)
+      - Index by tag (56 tagów)
+    - Metadata: properties, price_range, purchase_frequency
+    - Commit: `abbda46`
+
 ---
 
 ## 🔄 W TRAKCIE / DO ZROBIENIA
-
-### Phase 3: Product Dictionary Enhancement (80% pozostało)
-
-- **Phase 3.2** ⏳ - `ReceiptParser/src/normalization_rules.py`
-  - 5-stage normalization pipeline:
-    1. Cleanup OCR (100%)
-    2. Static Rules (80%)
-    3. Alias Lookup (15%)
-    4. LLM-based (4%)
-    5. User Confirmation (1%)
-
-- **Phase 3.3** ⏳ - `ReceiptParser/data/static_rules.json`
-  - 200+ regex patterns dla normalizacji
-
-- **Phase 3.4** ⏳ - `ReceiptParser/data/shop_variants.json`
-  - Shop-specific mappings (Lidl, Biedronka, Kaufland, Auchan)
-
-- **Phase 3.5** ⏳ - `ReceiptParser/data/product_metadata.json`
-  - Extracted metadata z expanded_products.json
 
 ### Phase 4: Advanced Features (0% - 4 pliki)
 
@@ -134,10 +149,10 @@
 
 ## 📊 STATYSTYKI
 
-- **Zakończone pliki:** 10/21 (48%)
-- **Zakończone fazy:** 2.5/5 (50%)
-- **Commity:** 10
-- **Linie kodu dodane:** ~8000+
+- **Zakończone pliki:** 14/21 (67%)
+- **Zakończone fazy:** 3/5 (60%)
+- **Commity:** 14
+- **Linie kodu dodane:** ~15000+
 
 ---
 
@@ -158,10 +173,13 @@
 
 ## 🚀 NASTĘPNE KROKI
 
-1. Phase 3.2: Multi-Stage Normalization Pipeline
-2. Phase 3.3: Static Rules Library (200+ patterns)
-3. Phase 3.4: Shop-Specific Variants
-4. Phase 3.5: Product Metadata Extraction
-5. Phase 4: Advanced Features (4 pliki)
-6. Phase 5: Performance Optimization (3 zadania)
+1. Phase 4: Advanced Features (4 pliki)
+   - Phase 4.1: Smart Recipe Engine
+   - Phase 4.2: Food Waste Reduction AI
+   - Phase 4.3: Smart Shopping Lists
+   - Phase 4.4: Nutritional Analysis
+2. Phase 5: Performance Optimization (3 zadania)
+   - Database optimization (indices, caching)
+   - LLM response optimization
+   - GUI performance optimization
 
