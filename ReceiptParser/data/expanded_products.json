@@ -1,0 +1,7648 @@
+{
+  "produkty": [
+    {
+      "id": "piekarnicze_chleb_pszeniczny",
+      "znormalizowana_nazwa": "Chleb pszeniczny",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Chleb",
+      "typ": "Chleb pszeniczny",
+      "tags": [
+        "piekarnicze",
+        "chleb"
+      ],
+      "aliases": [
+        "Chleb",
+        "pszeniczny"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 101,
+        "protein_g": 6.0,
+        "fat_g": 3.0,
+        "carbs_g": 11.0
+      },
+      "shops": {
+        "lidl": "Chleb pszeniczny Lidl",
+        "biedronka": "Chleb pszeniczny Biedronka",
+        "kaufland": "Chleb pszeniczny Kaufland",
+        "auchan": "Chleb pszeniczny Auchan"
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "piekarnicze_chleb_żytni",
+      "znormalizowana_nazwa": "Chleb żytni",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Chleb",
+      "typ": "Chleb żytni",
+      "tags": [
+        "piekarnicze",
+        "chleb"
+      ],
+      "aliases": [
+        "Chleb",
+        "żytni"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 102,
+        "protein_g": 7.0,
+        "fat_g": 4.0,
+        "carbs_g": 12.0
+      },
+      "shops": {
+        "lidl": "Chleb żytni Lidl",
+        "biedronka": "Chleb żytni Biedronka",
+        "kaufland": "Chleb żytni Kaufland",
+        "auchan": "Chleb żytni Auchan"
+      },
+      "price_range_pln": [
+        3.0,
+        4.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "piekarnicze_chleb_razowy",
+      "znormalizowana_nazwa": "Chleb razowy",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Chleb",
+      "typ": "Chleb razowy",
+      "tags": [
+        "piekarnicze",
+        "chleb"
+      ],
+      "aliases": [
+        "Chleb",
+        "razowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 103,
+        "protein_g": 8.0,
+        "fat_g": 5.0,
+        "carbs_g": 13.0
+      },
+      "shops": {
+        "lidl": "Chleb razowy Lidl",
+        "biedronka": "Chleb razowy Biedronka",
+        "kaufland": "Chleb razowy Kaufland",
+        "auchan": "Chleb razowy Auchan"
+      },
+      "price_range_pln": [
+        3.5,
+        5.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "piekarnicze_chleb_graham",
+      "znormalizowana_nazwa": "Chleb graham",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Chleb",
+      "typ": "Chleb graham",
+      "tags": [
+        "piekarnicze",
+        "chleb"
+      ],
+      "aliases": [
+        "Chleb",
+        "graham"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 104,
+        "protein_g": 9.0,
+        "fat_g": 6.0,
+        "carbs_g": 14.0
+      },
+      "shops": {
+        "lidl": "Chleb graham Lidl",
+        "biedronka": "Chleb graham Biedronka",
+        "kaufland": "Chleb graham Kaufland",
+        "auchan": "Chleb graham Auchan"
+      },
+      "price_range_pln": [
+        4.0,
+        6.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "piekarnicze_chleb_baltonowski",
+      "znormalizowana_nazwa": "Chleb baltonowski",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Chleb",
+      "typ": "Chleb baltonowski",
+      "tags": [
+        "piekarnicze",
+        "chleb"
+      ],
+      "aliases": [
+        "Chleb",
+        "baltonowski"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 105,
+        "protein_g": 10.0,
+        "fat_g": 7.0,
+        "carbs_g": 15.0
+      },
+      "shops": {
+        "lidl": "Chleb baltonowski Lidl",
+        "biedronka": "Chleb baltonowski Biedronka",
+        "kaufland": "Chleb baltonowski Kaufland",
+        "auchan": "Chleb baltonowski Auchan"
+      },
+      "price_range_pln": [
+        4.5,
+        6.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "piekarnicze_chleb_krojony",
+      "znormalizowana_nazwa": "Chleb krojony",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Chleb",
+      "typ": "Chleb krojony",
+      "tags": [
+        "piekarnicze",
+        "chleb"
+      ],
+      "aliases": [
+        "Chleb",
+        "krojony"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 106,
+        "protein_g": 11.0,
+        "fat_g": 8.0,
+        "carbs_g": 16.0
+      },
+      "shops": {
+        "lidl": "Chleb krojony Lidl",
+        "biedronka": "Chleb krojony Biedronka",
+        "kaufland": "Chleb krojony Kaufland",
+        "auchan": "Chleb krojony Auchan"
+      },
+      "price_range_pln": [
+        5.0,
+        7.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "piekarnicze_bułki_kajzerka",
+      "znormalizowana_nazwa": "Bułki kajzerka",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Bułki",
+      "typ": "Bułki kajzerka",
+      "tags": [
+        "piekarnicze",
+        "bułki"
+      ],
+      "aliases": [
+        "Bułki",
+        "kajzerka"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 107,
+        "protein_g": 12.0,
+        "fat_g": 9.0,
+        "carbs_g": 17.0
+      },
+      "shops": {
+        "lidl": "Bułki kajzerka Lidl",
+        "biedronka": "Bułki kajzerka Biedronka",
+        "kaufland": "Bułki kajzerka Kaufland",
+        "auchan": "Bułki kajzerka Auchan"
+      },
+      "price_range_pln": [
+        5.5,
+        8.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "piekarnicze_bułki_grahamka",
+      "znormalizowana_nazwa": "Bułki grahamka",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Bułki",
+      "typ": "Bułki grahamka",
+      "tags": [
+        "piekarnicze",
+        "bułki"
+      ],
+      "aliases": [
+        "Bułki",
+        "grahamka"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 108,
+        "protein_g": 13.0,
+        "fat_g": 10.0,
+        "carbs_g": 18.0
+      },
+      "shops": {
+        "lidl": "Bułki grahamka Lidl",
+        "biedronka": "Bułki grahamka Biedronka",
+        "kaufland": "Bułki grahamka Kaufland",
+        "auchan": "Bułki grahamka Auchan"
+      },
+      "price_range_pln": [
+        6.0,
+        9.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "piekarnicze_bułki_pszenna",
+      "znormalizowana_nazwa": "Bułki pszenna",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Bułki",
+      "typ": "Bułki pszenna",
+      "tags": [
+        "piekarnicze",
+        "bułki"
+      ],
+      "aliases": [
+        "Bułki",
+        "pszenna"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 109,
+        "protein_g": 14.0,
+        "fat_g": 11.0,
+        "carbs_g": 19.0
+      },
+      "shops": {
+        "lidl": "Bułki pszenna Lidl",
+        "biedronka": "Bułki pszenna Biedronka",
+        "kaufland": "Bułki pszenna Kaufland",
+        "auchan": "Bułki pszenna Auchan"
+      },
+      "price_range_pln": [
+        6.5,
+        9.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "piekarnicze_bułki_żytnia",
+      "znormalizowana_nazwa": "Bułki żytnia",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Bułki",
+      "typ": "Bułki żytnia",
+      "tags": [
+        "piekarnicze",
+        "bułki"
+      ],
+      "aliases": [
+        "Bułki",
+        "żytnia"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 110,
+        "protein_g": 15.0,
+        "fat_g": 2.0,
+        "carbs_g": 20.0
+      },
+      "shops": {
+        "lidl": "Bułki żytnia Lidl",
+        "biedronka": "Bułki żytnia Biedronka",
+        "kaufland": "Bułki żytnia Kaufland",
+        "auchan": "Bułki żytnia Auchan"
+      },
+      "price_range_pln": [
+        7.0,
+        10.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "piekarnicze_bułki_z_sezamem",
+      "znormalizowana_nazwa": "Bułki z sezamem",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Bułki",
+      "typ": "Bułki z sezamem",
+      "tags": [
+        "piekarnicze",
+        "bułki"
+      ],
+      "aliases": [
+        "Bułki",
+        "z sezamem"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 111,
+        "protein_g": 16.0,
+        "fat_g": 3.0,
+        "carbs_g": 21.0
+      },
+      "shops": {
+        "lidl": "Bułki z sezamem Lidl",
+        "biedronka": "Bułki z sezamem Biedronka",
+        "kaufland": "Bułki z sezamem Kaufland",
+        "auchan": "Bułki z sezamem Auchan"
+      },
+      "price_range_pln": [
+        7.5,
+        11.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "piekarnicze_bułki_z_makiem",
+      "znormalizowana_nazwa": "Bułki z makiem",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Bułki",
+      "typ": "Bułki z makiem",
+      "tags": [
+        "piekarnicze",
+        "bułki"
+      ],
+      "aliases": [
+        "Bułki",
+        "z makiem"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 112,
+        "protein_g": 17.0,
+        "fat_g": 4.0,
+        "carbs_g": 22.0
+      },
+      "shops": {
+        "lidl": "Bułki z makiem Lidl",
+        "biedronka": "Bułki z makiem Biedronka",
+        "kaufland": "Bułki z makiem Kaufland",
+        "auchan": "Bułki z makiem Auchan"
+      },
+      "price_range_pln": [
+        8.0,
+        12.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "piekarnicze_bagietka_francuska",
+      "znormalizowana_nazwa": "Bagietka francuska",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Bagietka",
+      "typ": "Bagietka francuska",
+      "tags": [
+        "piekarnicze",
+        "bagietka"
+      ],
+      "aliases": [
+        "Bagietka",
+        "francuska"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 113,
+        "protein_g": 18.0,
+        "fat_g": 5.0,
+        "carbs_g": 23.0
+      },
+      "shops": {
+        "lidl": "Bagietka francuska Lidl",
+        "biedronka": "Bagietka francuska Biedronka",
+        "kaufland": "Bagietka francuska Kaufland",
+        "auchan": "Bagietka francuska Auchan"
+      },
+      "price_range_pln": [
+        8.5,
+        12.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "piekarnicze_bagietka_czosnkowa",
+      "znormalizowana_nazwa": "Bagietka czosnkowa",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Bagietka",
+      "typ": "Bagietka czosnkowa",
+      "tags": [
+        "piekarnicze",
+        "bagietka"
+      ],
+      "aliases": [
+        "Bagietka",
+        "czosnkowa"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 114,
+        "protein_g": 19.0,
+        "fat_g": 6.0,
+        "carbs_g": 24.0
+      },
+      "shops": {
+        "lidl": "Bagietka czosnkowa Lidl",
+        "biedronka": "Bagietka czosnkowa Biedronka",
+        "kaufland": "Bagietka czosnkowa Kaufland",
+        "auchan": "Bagietka czosnkowa Auchan"
+      },
+      "price_range_pln": [
+        9.0,
+        13.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "piekarnicze_bagietka_z_serem",
+      "znormalizowana_nazwa": "Bagietka z serem",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Bagietka",
+      "typ": "Bagietka z serem",
+      "tags": [
+        "piekarnicze",
+        "bagietka"
+      ],
+      "aliases": [
+        "Bagietka",
+        "z serem"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 115,
+        "protein_g": 5.0,
+        "fat_g": 7.0,
+        "carbs_g": 25.0
+      },
+      "shops": {
+        "lidl": "Bagietka z serem Lidl",
+        "biedronka": "Bagietka z serem Biedronka",
+        "kaufland": "Bagietka z serem Kaufland",
+        "auchan": "Bagietka z serem Auchan"
+      },
+      "price_range_pln": [
+        9.5,
+        14.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "piekarnicze_rogal_maślany",
+      "znormalizowana_nazwa": "Rogal maślany",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Rogal",
+      "typ": "Rogal maślany",
+      "tags": [
+        "piekarnicze",
+        "rogal"
+      ],
+      "aliases": [
+        "Rogal",
+        "maślany"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 116,
+        "protein_g": 6.0,
+        "fat_g": 8.0,
+        "carbs_g": 26.0
+      },
+      "shops": {
+        "lidl": "Rogal maślany Lidl",
+        "biedronka": "Rogal maślany Biedronka",
+        "kaufland": "Rogal maślany Kaufland",
+        "auchan": "Rogal maślany Auchan"
+      },
+      "price_range_pln": [
+        10.0,
+        15.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "piekarnicze_rogal_drożdżowy",
+      "znormalizowana_nazwa": "Rogal drożdżowy",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Rogal",
+      "typ": "Rogal drożdżowy",
+      "tags": [
+        "piekarnicze",
+        "rogal"
+      ],
+      "aliases": [
+        "Rogal",
+        "drożdżowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 117,
+        "protein_g": 7.0,
+        "fat_g": 9.0,
+        "carbs_g": 27.0
+      },
+      "shops": {
+        "lidl": "Rogal drożdżowy Lidl",
+        "biedronka": "Rogal drożdżowy Biedronka",
+        "kaufland": "Rogal drożdżowy Kaufland",
+        "auchan": "Rogal drożdżowy Auchan"
+      },
+      "price_range_pln": [
+        10.5,
+        15.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "piekarnicze_rogal_z_makiem",
+      "znormalizowana_nazwa": "Rogal z makiem",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Rogal",
+      "typ": "Rogal z makiem",
+      "tags": [
+        "piekarnicze",
+        "rogal"
+      ],
+      "aliases": [
+        "Rogal",
+        "z makiem"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 118,
+        "protein_g": 8.0,
+        "fat_g": 10.0,
+        "carbs_g": 28.0
+      },
+      "shops": {
+        "lidl": "Rogal z makiem Lidl",
+        "biedronka": "Rogal z makiem Biedronka",
+        "kaufland": "Rogal z makiem Kaufland",
+        "auchan": "Rogal z makiem Auchan"
+      },
+      "price_range_pln": [
+        11.0,
+        16.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "piekarnicze_pączek_z_dżemem",
+      "znormalizowana_nazwa": "Pączek z dżemem",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Pączek",
+      "typ": "Pączek z dżemem",
+      "tags": [
+        "piekarnicze",
+        "pączek"
+      ],
+      "aliases": [
+        "Pączek",
+        "z dżemem"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 119,
+        "protein_g": 9.0,
+        "fat_g": 11.0,
+        "carbs_g": 29.0
+      },
+      "shops": {
+        "lidl": "Pączek z dżemem Lidl",
+        "biedronka": "Pączek z dżemem Biedronka",
+        "kaufland": "Pączek z dżemem Kaufland",
+        "auchan": "Pączek z dżemem Auchan"
+      },
+      "price_range_pln": [
+        11.5,
+        17.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "piekarnicze_pączek_z_budyniem",
+      "znormalizowana_nazwa": "Pączek z budyniem",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Pączek",
+      "typ": "Pączek z budyniem",
+      "tags": [
+        "piekarnicze",
+        "pączek"
+      ],
+      "aliases": [
+        "Pączek",
+        "z budyniem"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 120,
+        "protein_g": 10.0,
+        "fat_g": 2.0,
+        "carbs_g": 30.0
+      },
+      "shops": {
+        "lidl": "Pączek z budyniem Lidl",
+        "biedronka": "Pączek z budyniem Biedronka",
+        "kaufland": "Pączek z budyniem Kaufland",
+        "auchan": "Pączek z budyniem Auchan"
+      },
+      "price_range_pln": [
+        2.0,
+        3.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "piekarnicze_pączek_z_różą",
+      "znormalizowana_nazwa": "Pączek z różą",
+      "kategoria": "Piekarnicze",
+      "subkategoria": "Pączek",
+      "typ": "Pączek z różą",
+      "tags": [
+        "piekarnicze",
+        "pączek"
+      ],
+      "aliases": [
+        "Pączek",
+        "z różą"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [
+          "gluten"
+        ],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 121,
+        "protein_g": 11.0,
+        "fat_g": 3.0,
+        "carbs_g": 31.0
+      },
+      "shops": {
+        "lidl": "Pączek z różą Lidl",
+        "biedronka": "Pączek z różą Biedronka",
+        "kaufland": "Pączek z różą Kaufland",
+        "auchan": "Pączek z różą Auchan"
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "nabiał_mleko_3.2_uht",
+      "znormalizowana_nazwa": "Mleko 3.2% UHT",
+      "kategoria": "Nabiał",
+      "subkategoria": "Mleko",
+      "typ": "Mleko 3.2% UHT",
+      "tags": [
+        "nabiał",
+        "mleko"
+      ],
+      "aliases": [
+        "Mleko",
+        "3.2% UHT"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 122,
+        "protein_g": 12.0,
+        "fat_g": 4.0,
+        "carbs_g": 32.0
+      },
+      "shops": {
+        "lidl": "Mleko 3.2% UHT Lidl",
+        "biedronka": "Mleko 3.2% UHT Biedronka",
+        "kaufland": "Mleko 3.2% UHT Kaufland",
+        "auchan": "Mleko 3.2% UHT Auchan"
+      },
+      "price_range_pln": [
+        3.0,
+        4.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "nabiał_mleko_2_uht",
+      "znormalizowana_nazwa": "Mleko 2% UHT",
+      "kategoria": "Nabiał",
+      "subkategoria": "Mleko",
+      "typ": "Mleko 2% UHT",
+      "tags": [
+        "nabiał",
+        "mleko"
+      ],
+      "aliases": [
+        "Mleko",
+        "2% UHT"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 123,
+        "protein_g": 13.0,
+        "fat_g": 5.0,
+        "carbs_g": 33.0
+      },
+      "shops": {
+        "lidl": "Mleko 2% UHT Lidl",
+        "biedronka": "Mleko 2% UHT Biedronka",
+        "kaufland": "Mleko 2% UHT Kaufland",
+        "auchan": "Mleko 2% UHT Auchan"
+      },
+      "price_range_pln": [
+        3.5,
+        5.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "nabiał_mleko_1.5_uht",
+      "znormalizowana_nazwa": "Mleko 1.5% UHT",
+      "kategoria": "Nabiał",
+      "subkategoria": "Mleko",
+      "typ": "Mleko 1.5% UHT",
+      "tags": [
+        "nabiał",
+        "mleko"
+      ],
+      "aliases": [
+        "Mleko",
+        "1.5% UHT"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 124,
+        "protein_g": 14.0,
+        "fat_g": 6.0,
+        "carbs_g": 34.0
+      },
+      "shops": {
+        "lidl": "Mleko 1.5% UHT Lidl",
+        "biedronka": "Mleko 1.5% UHT Biedronka",
+        "kaufland": "Mleko 1.5% UHT Kaufland",
+        "auchan": "Mleko 1.5% UHT Auchan"
+      },
+      "price_range_pln": [
+        4.0,
+        6.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "nabiał_mleko_0.5_uht",
+      "znormalizowana_nazwa": "Mleko 0.5% UHT",
+      "kategoria": "Nabiał",
+      "subkategoria": "Mleko",
+      "typ": "Mleko 0.5% UHT",
+      "tags": [
+        "nabiał",
+        "mleko"
+      ],
+      "aliases": [
+        "Mleko",
+        "0.5% UHT"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 125,
+        "protein_g": 15.0,
+        "fat_g": 7.0,
+        "carbs_g": 35.0
+      },
+      "shops": {
+        "lidl": "Mleko 0.5% UHT Lidl",
+        "biedronka": "Mleko 0.5% UHT Biedronka",
+        "kaufland": "Mleko 0.5% UHT Kaufland",
+        "auchan": "Mleko 0.5% UHT Auchan"
+      },
+      "price_range_pln": [
+        4.5,
+        6.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "nabiał_mleko_bez_laktozy",
+      "znormalizowana_nazwa": "Mleko bez laktozy",
+      "kategoria": "Nabiał",
+      "subkategoria": "Mleko",
+      "typ": "Mleko bez laktozy",
+      "tags": [
+        "nabiał",
+        "mleko"
+      ],
+      "aliases": [
+        "Mleko",
+        "bez laktozy"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 126,
+        "protein_g": 16.0,
+        "fat_g": 8.0,
+        "carbs_g": 36.0
+      },
+      "shops": {
+        "lidl": "Mleko bez laktozy Lidl",
+        "biedronka": "Mleko bez laktozy Biedronka",
+        "kaufland": "Mleko bez laktozy Kaufland",
+        "auchan": "Mleko bez laktozy Auchan"
+      },
+      "price_range_pln": [
+        5.0,
+        7.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "nabiał_mleko_sojowe",
+      "znormalizowana_nazwa": "Mleko sojowe",
+      "kategoria": "Nabiał",
+      "subkategoria": "Mleko",
+      "typ": "Mleko sojowe",
+      "tags": [
+        "nabiał",
+        "mleko"
+      ],
+      "aliases": [
+        "Mleko",
+        "sojowe"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 127,
+        "protein_g": 17.0,
+        "fat_g": 9.0,
+        "carbs_g": 37.0
+      },
+      "shops": {
+        "lidl": "Mleko sojowe Lidl",
+        "biedronka": "Mleko sojowe Biedronka",
+        "kaufland": "Mleko sojowe Kaufland",
+        "auchan": "Mleko sojowe Auchan"
+      },
+      "price_range_pln": [
+        5.5,
+        8.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "nabiał_ser_żółty",
+      "znormalizowana_nazwa": "Ser żółty",
+      "kategoria": "Nabiał",
+      "subkategoria": "Ser",
+      "typ": "Ser żółty",
+      "tags": [
+        "nabiał",
+        "ser"
+      ],
+      "aliases": [
+        "Ser",
+        "żółty"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 128,
+        "protein_g": 18.0,
+        "fat_g": 10.0,
+        "carbs_g": 38.0
+      },
+      "shops": {
+        "lidl": "Ser żółty Lidl",
+        "biedronka": "Ser żółty Biedronka",
+        "kaufland": "Ser żółty Kaufland",
+        "auchan": "Ser żółty Auchan"
+      },
+      "price_range_pln": [
+        6.0,
+        9.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "nabiał_ser_biały",
+      "znormalizowana_nazwa": "Ser biały",
+      "kategoria": "Nabiał",
+      "subkategoria": "Ser",
+      "typ": "Ser biały",
+      "tags": [
+        "nabiał",
+        "ser"
+      ],
+      "aliases": [
+        "Ser",
+        "biały"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 129,
+        "protein_g": 19.0,
+        "fat_g": 11.0,
+        "carbs_g": 39.0
+      },
+      "shops": {
+        "lidl": "Ser biały Lidl",
+        "biedronka": "Ser biały Biedronka",
+        "kaufland": "Ser biały Kaufland",
+        "auchan": "Ser biały Auchan"
+      },
+      "price_range_pln": [
+        6.5,
+        9.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "nabiał_ser_twaróg",
+      "znormalizowana_nazwa": "Ser twaróg",
+      "kategoria": "Nabiał",
+      "subkategoria": "Ser",
+      "typ": "Ser twaróg",
+      "tags": [
+        "nabiał",
+        "ser"
+      ],
+      "aliases": [
+        "Ser",
+        "twaróg"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 130,
+        "protein_g": 5.0,
+        "fat_g": 2.0,
+        "carbs_g": 10.0
+      },
+      "shops": {
+        "lidl": "Ser twaróg Lidl",
+        "biedronka": "Ser twaróg Biedronka",
+        "kaufland": "Ser twaróg Kaufland",
+        "auchan": "Ser twaróg Auchan"
+      },
+      "price_range_pln": [
+        7.0,
+        10.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "nabiał_ser_mozzarella",
+      "znormalizowana_nazwa": "Ser mozzarella",
+      "kategoria": "Nabiał",
+      "subkategoria": "Ser",
+      "typ": "Ser mozzarella",
+      "tags": [
+        "nabiał",
+        "ser"
+      ],
+      "aliases": [
+        "Ser",
+        "mozzarella"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 131,
+        "protein_g": 6.0,
+        "fat_g": 3.0,
+        "carbs_g": 11.0
+      },
+      "shops": {
+        "lidl": "Ser mozzarella Lidl",
+        "biedronka": "Ser mozzarella Biedronka",
+        "kaufland": "Ser mozzarella Kaufland",
+        "auchan": "Ser mozzarella Auchan"
+      },
+      "price_range_pln": [
+        7.5,
+        11.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "nabiał_ser_feta",
+      "znormalizowana_nazwa": "Ser feta",
+      "kategoria": "Nabiał",
+      "subkategoria": "Ser",
+      "typ": "Ser feta",
+      "tags": [
+        "nabiał",
+        "ser"
+      ],
+      "aliases": [
+        "Ser",
+        "feta"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 132,
+        "protein_g": 7.0,
+        "fat_g": 4.0,
+        "carbs_g": 12.0
+      },
+      "shops": {
+        "lidl": "Ser feta Lidl",
+        "biedronka": "Ser feta Biedronka",
+        "kaufland": "Ser feta Kaufland",
+        "auchan": "Ser feta Auchan"
+      },
+      "price_range_pln": [
+        8.0,
+        12.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "nabiał_ser_camembert",
+      "znormalizowana_nazwa": "Ser camembert",
+      "kategoria": "Nabiał",
+      "subkategoria": "Ser",
+      "typ": "Ser camembert",
+      "tags": [
+        "nabiał",
+        "ser"
+      ],
+      "aliases": [
+        "Ser",
+        "camembert"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 133,
+        "protein_g": 8.0,
+        "fat_g": 5.0,
+        "carbs_g": 13.0
+      },
+      "shops": {
+        "lidl": "Ser camembert Lidl",
+        "biedronka": "Ser camembert Biedronka",
+        "kaufland": "Ser camembert Kaufland",
+        "auchan": "Ser camembert Auchan"
+      },
+      "price_range_pln": [
+        8.5,
+        12.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "nabiał_jogurt_naturalny",
+      "znormalizowana_nazwa": "Jogurt naturalny",
+      "kategoria": "Nabiał",
+      "subkategoria": "Jogurt",
+      "typ": "Jogurt naturalny",
+      "tags": [
+        "nabiał",
+        "jogurt"
+      ],
+      "aliases": [
+        "Jogurt",
+        "naturalny"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 134,
+        "protein_g": 9.0,
+        "fat_g": 6.0,
+        "carbs_g": 14.0
+      },
+      "shops": {
+        "lidl": "Jogurt naturalny Lidl",
+        "biedronka": "Jogurt naturalny Biedronka",
+        "kaufland": "Jogurt naturalny Kaufland",
+        "auchan": "Jogurt naturalny Auchan"
+      },
+      "price_range_pln": [
+        9.0,
+        13.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "nabiał_jogurt_owocowy",
+      "znormalizowana_nazwa": "Jogurt owocowy",
+      "kategoria": "Nabiał",
+      "subkategoria": "Jogurt",
+      "typ": "Jogurt owocowy",
+      "tags": [
+        "nabiał",
+        "jogurt"
+      ],
+      "aliases": [
+        "Jogurt",
+        "owocowy"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 135,
+        "protein_g": 10.0,
+        "fat_g": 7.0,
+        "carbs_g": 15.0
+      },
+      "shops": {
+        "lidl": "Jogurt owocowy Lidl",
+        "biedronka": "Jogurt owocowy Biedronka",
+        "kaufland": "Jogurt owocowy Kaufland",
+        "auchan": "Jogurt owocowy Auchan"
+      },
+      "price_range_pln": [
+        9.5,
+        14.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "nabiał_jogurt_grecki",
+      "znormalizowana_nazwa": "Jogurt grecki",
+      "kategoria": "Nabiał",
+      "subkategoria": "Jogurt",
+      "typ": "Jogurt grecki",
+      "tags": [
+        "nabiał",
+        "jogurt"
+      ],
+      "aliases": [
+        "Jogurt",
+        "grecki"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 136,
+        "protein_g": 11.0,
+        "fat_g": 8.0,
+        "carbs_g": 16.0
+      },
+      "shops": {
+        "lidl": "Jogurt grecki Lidl",
+        "biedronka": "Jogurt grecki Biedronka",
+        "kaufland": "Jogurt grecki Kaufland",
+        "auchan": "Jogurt grecki Auchan"
+      },
+      "price_range_pln": [
+        10.0,
+        15.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "nabiał_jogurt_pitny",
+      "znormalizowana_nazwa": "Jogurt pitny",
+      "kategoria": "Nabiał",
+      "subkategoria": "Jogurt",
+      "typ": "Jogurt pitny",
+      "tags": [
+        "nabiał",
+        "jogurt"
+      ],
+      "aliases": [
+        "Jogurt",
+        "pitny"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 137,
+        "protein_g": 12.0,
+        "fat_g": 9.0,
+        "carbs_g": 17.0
+      },
+      "shops": {
+        "lidl": "Jogurt pitny Lidl",
+        "biedronka": "Jogurt pitny Biedronka",
+        "kaufland": "Jogurt pitny Kaufland",
+        "auchan": "Jogurt pitny Auchan"
+      },
+      "price_range_pln": [
+        10.5,
+        15.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "nabiał_jogurt_z_probiotykami",
+      "znormalizowana_nazwa": "Jogurt z probiotykami",
+      "kategoria": "Nabiał",
+      "subkategoria": "Jogurt",
+      "typ": "Jogurt z probiotykami",
+      "tags": [
+        "nabiał",
+        "jogurt"
+      ],
+      "aliases": [
+        "Jogurt",
+        "z probiotykami"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 138,
+        "protein_g": 13.0,
+        "fat_g": 10.0,
+        "carbs_g": 18.0
+      },
+      "shops": {
+        "lidl": "Jogurt z probiotykami Lidl",
+        "biedronka": "Jogurt z probiotykami Biedronka",
+        "kaufland": "Jogurt z probiotykami Kaufland",
+        "auchan": "Jogurt z probiotykami Auchan"
+      },
+      "price_range_pln": [
+        11.0,
+        16.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "nabiał_śmietana_18",
+      "znormalizowana_nazwa": "Śmietana 18%",
+      "kategoria": "Nabiał",
+      "subkategoria": "Śmietana",
+      "typ": "Śmietana 18%",
+      "tags": [
+        "nabiał",
+        "śmietana"
+      ],
+      "aliases": [
+        "Śmietana",
+        "18%"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 139,
+        "protein_g": 14.0,
+        "fat_g": 11.0,
+        "carbs_g": 19.0
+      },
+      "shops": {
+        "lidl": "Śmietana 18% Lidl",
+        "biedronka": "Śmietana 18% Biedronka",
+        "kaufland": "Śmietana 18% Kaufland",
+        "auchan": "Śmietana 18% Auchan"
+      },
+      "price_range_pln": [
+        11.5,
+        17.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "nabiał_śmietana_22",
+      "znormalizowana_nazwa": "Śmietana 22%",
+      "kategoria": "Nabiał",
+      "subkategoria": "Śmietana",
+      "typ": "Śmietana 22%",
+      "tags": [
+        "nabiał",
+        "śmietana"
+      ],
+      "aliases": [
+        "Śmietana",
+        "22%"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 140,
+        "protein_g": 15.0,
+        "fat_g": 2.0,
+        "carbs_g": 20.0
+      },
+      "shops": {
+        "lidl": "Śmietana 22% Lidl",
+        "biedronka": "Śmietana 22% Biedronka",
+        "kaufland": "Śmietana 22% Kaufland",
+        "auchan": "Śmietana 22% Auchan"
+      },
+      "price_range_pln": [
+        2.0,
+        3.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "nabiał_śmietana_30",
+      "znormalizowana_nazwa": "Śmietana 30%",
+      "kategoria": "Nabiał",
+      "subkategoria": "Śmietana",
+      "typ": "Śmietana 30%",
+      "tags": [
+        "nabiał",
+        "śmietana"
+      ],
+      "aliases": [
+        "Śmietana",
+        "30%"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 141,
+        "protein_g": 16.0,
+        "fat_g": 3.0,
+        "carbs_g": 21.0
+      },
+      "shops": {
+        "lidl": "Śmietana 30% Lidl",
+        "biedronka": "Śmietana 30% Biedronka",
+        "kaufland": "Śmietana 30% Kaufland",
+        "auchan": "Śmietana 30% Auchan"
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "nabiał_śmietana_kwaśna",
+      "znormalizowana_nazwa": "Śmietana kwaśna",
+      "kategoria": "Nabiał",
+      "subkategoria": "Śmietana",
+      "typ": "Śmietana kwaśna",
+      "tags": [
+        "nabiał",
+        "śmietana"
+      ],
+      "aliases": [
+        "Śmietana",
+        "kwaśna"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 142,
+        "protein_g": 17.0,
+        "fat_g": 4.0,
+        "carbs_g": 22.0
+      },
+      "shops": {
+        "lidl": "Śmietana kwaśna Lidl",
+        "biedronka": "Śmietana kwaśna Biedronka",
+        "kaufland": "Śmietana kwaśna Kaufland",
+        "auchan": "Śmietana kwaśna Auchan"
+      },
+      "price_range_pln": [
+        3.0,
+        4.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "nabiał_masło_ekstra",
+      "znormalizowana_nazwa": "Masło ekstra",
+      "kategoria": "Nabiał",
+      "subkategoria": "Masło",
+      "typ": "Masło ekstra",
+      "tags": [
+        "nabiał",
+        "masło"
+      ],
+      "aliases": [
+        "Masło",
+        "ekstra"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 143,
+        "protein_g": 18.0,
+        "fat_g": 5.0,
+        "carbs_g": 23.0
+      },
+      "shops": {
+        "lidl": "Masło ekstra Lidl",
+        "biedronka": "Masło ekstra Biedronka",
+        "kaufland": "Masło ekstra Kaufland",
+        "auchan": "Masło ekstra Auchan"
+      },
+      "price_range_pln": [
+        3.5,
+        5.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "nabiał_masło_świeże",
+      "znormalizowana_nazwa": "Masło świeże",
+      "kategoria": "Nabiał",
+      "subkategoria": "Masło",
+      "typ": "Masło świeże",
+      "tags": [
+        "nabiał",
+        "masło"
+      ],
+      "aliases": [
+        "Masło",
+        "świeże"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 144,
+        "protein_g": 19.0,
+        "fat_g": 6.0,
+        "carbs_g": 24.0
+      },
+      "shops": {
+        "lidl": "Masło świeże Lidl",
+        "biedronka": "Masło świeże Biedronka",
+        "kaufland": "Masło świeże Kaufland",
+        "auchan": "Masło świeże Auchan"
+      },
+      "price_range_pln": [
+        4.0,
+        6.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "nabiał_masło_słone",
+      "znormalizowana_nazwa": "Masło słone",
+      "kategoria": "Nabiał",
+      "subkategoria": "Masło",
+      "typ": "Masło słone",
+      "tags": [
+        "nabiał",
+        "masło"
+      ],
+      "aliases": [
+        "Masło",
+        "słone"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 145,
+        "protein_g": 5.0,
+        "fat_g": 7.0,
+        "carbs_g": 25.0
+      },
+      "shops": {
+        "lidl": "Masło słone Lidl",
+        "biedronka": "Masło słone Biedronka",
+        "kaufland": "Masło słone Kaufland",
+        "auchan": "Masło słone Auchan"
+      },
+      "price_range_pln": [
+        4.5,
+        6.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "nabiał_masło_bez_soli",
+      "znormalizowana_nazwa": "Masło bez soli",
+      "kategoria": "Nabiał",
+      "subkategoria": "Masło",
+      "typ": "Masło bez soli",
+      "tags": [
+        "nabiał",
+        "masło"
+      ],
+      "aliases": [
+        "Masło",
+        "bez soli"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 146,
+        "protein_g": 6.0,
+        "fat_g": 8.0,
+        "carbs_g": 26.0
+      },
+      "shops": {
+        "lidl": "Masło bez soli Lidl",
+        "biedronka": "Masło bez soli Biedronka",
+        "kaufland": "Masło bez soli Kaufland",
+        "auchan": "Masło bez soli Auchan"
+      },
+      "price_range_pln": [
+        5.0,
+        7.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "nabiał_jajka_kurze_l",
+      "znormalizowana_nazwa": "Jajka kurze L",
+      "kategoria": "Nabiał",
+      "subkategoria": "Jajka",
+      "typ": "Jajka kurze L",
+      "tags": [
+        "nabiał",
+        "jajka"
+      ],
+      "aliases": [
+        "Jajka",
+        "kurze L"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 147,
+        "protein_g": 7.0,
+        "fat_g": 9.0,
+        "carbs_g": 27.0
+      },
+      "shops": {
+        "lidl": "Jajka kurze L Lidl",
+        "biedronka": "Jajka kurze L Biedronka",
+        "kaufland": "Jajka kurze L Kaufland",
+        "auchan": "Jajka kurze L Auchan"
+      },
+      "price_range_pln": [
+        5.5,
+        8.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "nabiał_jajka_kurze_m",
+      "znormalizowana_nazwa": "Jajka kurze M",
+      "kategoria": "Nabiał",
+      "subkategoria": "Jajka",
+      "typ": "Jajka kurze M",
+      "tags": [
+        "nabiał",
+        "jajka"
+      ],
+      "aliases": [
+        "Jajka",
+        "kurze M"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 148,
+        "protein_g": 8.0,
+        "fat_g": 10.0,
+        "carbs_g": 28.0
+      },
+      "shops": {
+        "lidl": "Jajka kurze M Lidl",
+        "biedronka": "Jajka kurze M Biedronka",
+        "kaufland": "Jajka kurze M Kaufland",
+        "auchan": "Jajka kurze M Auchan"
+      },
+      "price_range_pln": [
+        6.0,
+        9.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "nabiał_jajka_kurze_s",
+      "znormalizowana_nazwa": "Jajka kurze S",
+      "kategoria": "Nabiał",
+      "subkategoria": "Jajka",
+      "typ": "Jajka kurze S",
+      "tags": [
+        "nabiał",
+        "jajka"
+      ],
+      "aliases": [
+        "Jajka",
+        "kurze S"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 149,
+        "protein_g": 9.0,
+        "fat_g": 11.0,
+        "carbs_g": 29.0
+      },
+      "shops": {
+        "lidl": "Jajka kurze S Lidl",
+        "biedronka": "Jajka kurze S Biedronka",
+        "kaufland": "Jajka kurze S Kaufland",
+        "auchan": "Jajka kurze S Auchan"
+      },
+      "price_range_pln": [
+        6.5,
+        9.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "nabiał_jajka_przepiórcze",
+      "znormalizowana_nazwa": "Jajka przepiórcze",
+      "kategoria": "Nabiał",
+      "subkategoria": "Jajka",
+      "typ": "Jajka przepiórcze",
+      "tags": [
+        "nabiał",
+        "jajka"
+      ],
+      "aliases": [
+        "Jajka",
+        "przepiórcze"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 3,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 150,
+        "protein_g": 10.0,
+        "fat_g": 2.0,
+        "carbs_g": 30.0
+      },
+      "shops": {
+        "lidl": "Jajka przepiórcze Lidl",
+        "biedronka": "Jajka przepiórcze Biedronka",
+        "kaufland": "Jajka przepiórcze Kaufland",
+        "auchan": "Jajka przepiórcze Auchan"
+      },
+      "price_range_pln": [
+        7.0,
+        10.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "owoce_jabłka_szampion",
+      "znormalizowana_nazwa": "Jabłka szampion",
+      "kategoria": "Owoce",
+      "subkategoria": "Jabłka",
+      "typ": "Jabłka szampion",
+      "tags": [
+        "owoce",
+        "jabłka"
+      ],
+      "aliases": [
+        "Jabłka",
+        "szampion"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 151,
+        "protein_g": 11.0,
+        "fat_g": 3.0,
+        "carbs_g": 31.0
+      },
+      "shops": {
+        "lidl": "Jabłka szampion Lidl",
+        "biedronka": "Jabłka szampion Biedronka",
+        "kaufland": "Jabłka szampion Kaufland",
+        "auchan": "Jabłka szampion Auchan"
+      },
+      "price_range_pln": [
+        7.5,
+        11.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "owoce_jabłka_jonagold",
+      "znormalizowana_nazwa": "Jabłka jonagold",
+      "kategoria": "Owoce",
+      "subkategoria": "Jabłka",
+      "typ": "Jabłka jonagold",
+      "tags": [
+        "owoce",
+        "jabłka"
+      ],
+      "aliases": [
+        "Jabłka",
+        "jonagold"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 152,
+        "protein_g": 12.0,
+        "fat_g": 4.0,
+        "carbs_g": 32.0
+      },
+      "shops": {
+        "lidl": "Jabłka jonagold Lidl",
+        "biedronka": "Jabłka jonagold Biedronka",
+        "kaufland": "Jabłka jonagold Kaufland",
+        "auchan": "Jabłka jonagold Auchan"
+      },
+      "price_range_pln": [
+        8.0,
+        12.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "owoce_jabłka_gala",
+      "znormalizowana_nazwa": "Jabłka gala",
+      "kategoria": "Owoce",
+      "subkategoria": "Jabłka",
+      "typ": "Jabłka gala",
+      "tags": [
+        "owoce",
+        "jabłka"
+      ],
+      "aliases": [
+        "Jabłka",
+        "gala"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 153,
+        "protein_g": 13.0,
+        "fat_g": 5.0,
+        "carbs_g": 33.0
+      },
+      "shops": {
+        "lidl": "Jabłka gala Lidl",
+        "biedronka": "Jabłka gala Biedronka",
+        "kaufland": "Jabłka gala Kaufland",
+        "auchan": "Jabłka gala Auchan"
+      },
+      "price_range_pln": [
+        8.5,
+        12.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "owoce_jabłka_lobo",
+      "znormalizowana_nazwa": "Jabłka lobo",
+      "kategoria": "Owoce",
+      "subkategoria": "Jabłka",
+      "typ": "Jabłka lobo",
+      "tags": [
+        "owoce",
+        "jabłka"
+      ],
+      "aliases": [
+        "Jabłka",
+        "lobo"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 154,
+        "protein_g": 14.0,
+        "fat_g": 6.0,
+        "carbs_g": 34.0
+      },
+      "shops": {
+        "lidl": "Jabłka lobo Lidl",
+        "biedronka": "Jabłka lobo Biedronka",
+        "kaufland": "Jabłka lobo Kaufland",
+        "auchan": "Jabłka lobo Auchan"
+      },
+      "price_range_pln": [
+        9.0,
+        13.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "owoce_jabłka_idared",
+      "znormalizowana_nazwa": "Jabłka idared",
+      "kategoria": "Owoce",
+      "subkategoria": "Jabłka",
+      "typ": "Jabłka idared",
+      "tags": [
+        "owoce",
+        "jabłka"
+      ],
+      "aliases": [
+        "Jabłka",
+        "idared"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 155,
+        "protein_g": 15.0,
+        "fat_g": 7.0,
+        "carbs_g": 35.0
+      },
+      "shops": {
+        "lidl": "Jabłka idared Lidl",
+        "biedronka": "Jabłka idared Biedronka",
+        "kaufland": "Jabłka idared Kaufland",
+        "auchan": "Jabłka idared Auchan"
+      },
+      "price_range_pln": [
+        9.5,
+        14.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "owoce_banany_żółte",
+      "znormalizowana_nazwa": "Banany żółte",
+      "kategoria": "Owoce",
+      "subkategoria": "Banany",
+      "typ": "Banany żółte",
+      "tags": [
+        "owoce",
+        "banany"
+      ],
+      "aliases": [
+        "Banany",
+        "żółte"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 156,
+        "protein_g": 16.0,
+        "fat_g": 8.0,
+        "carbs_g": 36.0
+      },
+      "shops": {
+        "lidl": "Banany żółte Lidl",
+        "biedronka": "Banany żółte Biedronka",
+        "kaufland": "Banany żółte Kaufland",
+        "auchan": "Banany żółte Auchan"
+      },
+      "price_range_pln": [
+        10.0,
+        15.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "owoce_banany_zielone",
+      "znormalizowana_nazwa": "Banany zielone",
+      "kategoria": "Owoce",
+      "subkategoria": "Banany",
+      "typ": "Banany zielone",
+      "tags": [
+        "owoce",
+        "banany"
+      ],
+      "aliases": [
+        "Banany",
+        "zielone"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 157,
+        "protein_g": 17.0,
+        "fat_g": 9.0,
+        "carbs_g": 37.0
+      },
+      "shops": {
+        "lidl": "Banany zielone Lidl",
+        "biedronka": "Banany zielone Biedronka",
+        "kaufland": "Banany zielone Kaufland",
+        "auchan": "Banany zielone Auchan"
+      },
+      "price_range_pln": [
+        10.5,
+        15.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "owoce_pomarańcze_słodkie",
+      "znormalizowana_nazwa": "Pomarańcze słodkie",
+      "kategoria": "Owoce",
+      "subkategoria": "Pomarańcze",
+      "typ": "Pomarańcze słodkie",
+      "tags": [
+        "owoce",
+        "pomarańcze"
+      ],
+      "aliases": [
+        "Pomarańcze",
+        "słodkie"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 158,
+        "protein_g": 18.0,
+        "fat_g": 10.0,
+        "carbs_g": 38.0
+      },
+      "shops": {
+        "lidl": "Pomarańcze słodkie Lidl",
+        "biedronka": "Pomarańcze słodkie Biedronka",
+        "kaufland": "Pomarańcze słodkie Kaufland",
+        "auchan": "Pomarańcze słodkie Auchan"
+      },
+      "price_range_pln": [
+        11.0,
+        16.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "owoce_pomarańcze_kwaśne",
+      "znormalizowana_nazwa": "Pomarańcze kwaśne",
+      "kategoria": "Owoce",
+      "subkategoria": "Pomarańcze",
+      "typ": "Pomarańcze kwaśne",
+      "tags": [
+        "owoce",
+        "pomarańcze"
+      ],
+      "aliases": [
+        "Pomarańcze",
+        "kwaśne"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 159,
+        "protein_g": 19.0,
+        "fat_g": 11.0,
+        "carbs_g": 39.0
+      },
+      "shops": {
+        "lidl": "Pomarańcze kwaśne Lidl",
+        "biedronka": "Pomarańcze kwaśne Biedronka",
+        "kaufland": "Pomarańcze kwaśne Kaufland",
+        "auchan": "Pomarańcze kwaśne Auchan"
+      },
+      "price_range_pln": [
+        11.5,
+        17.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "owoce_truskawki_świeże",
+      "znormalizowana_nazwa": "Truskawki świeże",
+      "kategoria": "Owoce",
+      "subkategoria": "Truskawki",
+      "typ": "Truskawki świeże",
+      "tags": [
+        "owoce",
+        "truskawki"
+      ],
+      "aliases": [
+        "Truskawki",
+        "świeże"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 160,
+        "protein_g": 5.0,
+        "fat_g": 2.0,
+        "carbs_g": 10.0
+      },
+      "shops": {
+        "lidl": "Truskawki świeże Lidl",
+        "biedronka": "Truskawki świeże Biedronka",
+        "kaufland": "Truskawki świeże Kaufland",
+        "auchan": "Truskawki świeże Auchan"
+      },
+      "price_range_pln": [
+        2.0,
+        3.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "owoce_truskawki_mrożone",
+      "znormalizowana_nazwa": "Truskawki mrożone",
+      "kategoria": "Owoce",
+      "subkategoria": "Truskawki",
+      "typ": "Truskawki mrożone",
+      "tags": [
+        "owoce",
+        "truskawki"
+      ],
+      "aliases": [
+        "Truskawki",
+        "mrożone"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 161,
+        "protein_g": 6.0,
+        "fat_g": 3.0,
+        "carbs_g": 11.0
+      },
+      "shops": {
+        "lidl": "Truskawki mrożone Lidl",
+        "biedronka": "Truskawki mrożone Biedronka",
+        "kaufland": "Truskawki mrożone Kaufland",
+        "auchan": "Truskawki mrożone Auchan"
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "owoce_winogrona_zielone",
+      "znormalizowana_nazwa": "Winogrona zielone",
+      "kategoria": "Owoce",
+      "subkategoria": "Winogrona",
+      "typ": "Winogrona zielone",
+      "tags": [
+        "owoce",
+        "winogrona"
+      ],
+      "aliases": [
+        "Winogrona",
+        "zielone"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 162,
+        "protein_g": 7.0,
+        "fat_g": 4.0,
+        "carbs_g": 12.0
+      },
+      "shops": {
+        "lidl": "Winogrona zielone Lidl",
+        "biedronka": "Winogrona zielone Biedronka",
+        "kaufland": "Winogrona zielone Kaufland",
+        "auchan": "Winogrona zielone Auchan"
+      },
+      "price_range_pln": [
+        3.0,
+        4.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "owoce_winogrona_czerwone",
+      "znormalizowana_nazwa": "Winogrona czerwone",
+      "kategoria": "Owoce",
+      "subkategoria": "Winogrona",
+      "typ": "Winogrona czerwone",
+      "tags": [
+        "owoce",
+        "winogrona"
+      ],
+      "aliases": [
+        "Winogrona",
+        "czerwone"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 163,
+        "protein_g": 8.0,
+        "fat_g": 5.0,
+        "carbs_g": 13.0
+      },
+      "shops": {
+        "lidl": "Winogrona czerwone Lidl",
+        "biedronka": "Winogrona czerwone Biedronka",
+        "kaufland": "Winogrona czerwone Kaufland",
+        "auchan": "Winogrona czerwone Auchan"
+      },
+      "price_range_pln": [
+        3.5,
+        5.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "owoce_winogrona_czarne",
+      "znormalizowana_nazwa": "Winogrona czarne",
+      "kategoria": "Owoce",
+      "subkategoria": "Winogrona",
+      "typ": "Winogrona czarne",
+      "tags": [
+        "owoce",
+        "winogrona"
+      ],
+      "aliases": [
+        "Winogrona",
+        "czarne"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 164,
+        "protein_g": 9.0,
+        "fat_g": 6.0,
+        "carbs_g": 14.0
+      },
+      "shops": {
+        "lidl": "Winogrona czarne Lidl",
+        "biedronka": "Winogrona czarne Biedronka",
+        "kaufland": "Winogrona czarne Kaufland",
+        "auchan": "Winogrona czarne Auchan"
+      },
+      "price_range_pln": [
+        4.0,
+        6.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "owoce_cytryny_żółte",
+      "znormalizowana_nazwa": "Cytryny żółte",
+      "kategoria": "Owoce",
+      "subkategoria": "Cytryny",
+      "typ": "Cytryny żółte",
+      "tags": [
+        "owoce",
+        "cytryny"
+      ],
+      "aliases": [
+        "Cytryny",
+        "żółte"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 165,
+        "protein_g": 10.0,
+        "fat_g": 7.0,
+        "carbs_g": 15.0
+      },
+      "shops": {
+        "lidl": "Cytryny żółte Lidl",
+        "biedronka": "Cytryny żółte Biedronka",
+        "kaufland": "Cytryny żółte Kaufland",
+        "auchan": "Cytryny żółte Auchan"
+      },
+      "price_range_pln": [
+        4.5,
+        6.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "owoce_cytryny_limonki",
+      "znormalizowana_nazwa": "Cytryny limonki",
+      "kategoria": "Owoce",
+      "subkategoria": "Cytryny",
+      "typ": "Cytryny limonki",
+      "tags": [
+        "owoce",
+        "cytryny"
+      ],
+      "aliases": [
+        "Cytryny",
+        "limonki"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 166,
+        "protein_g": 11.0,
+        "fat_g": 8.0,
+        "carbs_g": 16.0
+      },
+      "shops": {
+        "lidl": "Cytryny limonki Lidl",
+        "biedronka": "Cytryny limonki Biedronka",
+        "kaufland": "Cytryny limonki Kaufland",
+        "auchan": "Cytryny limonki Auchan"
+      },
+      "price_range_pln": [
+        5.0,
+        7.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "warzywa_pomidory_czerwone",
+      "znormalizowana_nazwa": "Pomidory czerwone",
+      "kategoria": "Warzywa",
+      "subkategoria": "Pomidory",
+      "typ": "Pomidory czerwone",
+      "tags": [
+        "warzywa",
+        "pomidory"
+      ],
+      "aliases": [
+        "Pomidory",
+        "czerwone"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 167,
+        "protein_g": 12.0,
+        "fat_g": 9.0,
+        "carbs_g": 17.0
+      },
+      "shops": {
+        "lidl": "Pomidory czerwone Lidl",
+        "biedronka": "Pomidory czerwone Biedronka",
+        "kaufland": "Pomidory czerwone Kaufland",
+        "auchan": "Pomidory czerwone Auchan"
+      },
+      "price_range_pln": [
+        5.5,
+        8.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "warzywa_pomidory_koktajlowe",
+      "znormalizowana_nazwa": "Pomidory koktajlowe",
+      "kategoria": "Warzywa",
+      "subkategoria": "Pomidory",
+      "typ": "Pomidory koktajlowe",
+      "tags": [
+        "warzywa",
+        "pomidory"
+      ],
+      "aliases": [
+        "Pomidory",
+        "koktajlowe"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 168,
+        "protein_g": 13.0,
+        "fat_g": 10.0,
+        "carbs_g": 18.0
+      },
+      "shops": {
+        "lidl": "Pomidory koktajlowe Lidl",
+        "biedronka": "Pomidory koktajlowe Biedronka",
+        "kaufland": "Pomidory koktajlowe Kaufland",
+        "auchan": "Pomidory koktajlowe Auchan"
+      },
+      "price_range_pln": [
+        6.0,
+        9.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "warzywa_pomidory_malinowe",
+      "znormalizowana_nazwa": "Pomidory malinowe",
+      "kategoria": "Warzywa",
+      "subkategoria": "Pomidory",
+      "typ": "Pomidory malinowe",
+      "tags": [
+        "warzywa",
+        "pomidory"
+      ],
+      "aliases": [
+        "Pomidory",
+        "malinowe"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 169,
+        "protein_g": 14.0,
+        "fat_g": 11.0,
+        "carbs_g": 19.0
+      },
+      "shops": {
+        "lidl": "Pomidory malinowe Lidl",
+        "biedronka": "Pomidory malinowe Biedronka",
+        "kaufland": "Pomidory malinowe Kaufland",
+        "auchan": "Pomidory malinowe Auchan"
+      },
+      "price_range_pln": [
+        6.5,
+        9.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "warzywa_pomidory_gałązkowe",
+      "znormalizowana_nazwa": "Pomidory gałązkowe",
+      "kategoria": "Warzywa",
+      "subkategoria": "Pomidory",
+      "typ": "Pomidory gałązkowe",
+      "tags": [
+        "warzywa",
+        "pomidory"
+      ],
+      "aliases": [
+        "Pomidory",
+        "gałązkowe"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 170,
+        "protein_g": 15.0,
+        "fat_g": 2.0,
+        "carbs_g": 20.0
+      },
+      "shops": {
+        "lidl": "Pomidory gałązkowe Lidl",
+        "biedronka": "Pomidory gałązkowe Biedronka",
+        "kaufland": "Pomidory gałązkowe Kaufland",
+        "auchan": "Pomidory gałązkowe Auchan"
+      },
+      "price_range_pln": [
+        7.0,
+        10.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "warzywa_marchew_młoda",
+      "znormalizowana_nazwa": "Marchew młoda",
+      "kategoria": "Warzywa",
+      "subkategoria": "Marchew",
+      "typ": "Marchew młoda",
+      "tags": [
+        "warzywa",
+        "marchew"
+      ],
+      "aliases": [
+        "Marchew",
+        "młoda"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 171,
+        "protein_g": 16.0,
+        "fat_g": 3.0,
+        "carbs_g": 21.0
+      },
+      "shops": {
+        "lidl": "Marchew młoda Lidl",
+        "biedronka": "Marchew młoda Biedronka",
+        "kaufland": "Marchew młoda Kaufland",
+        "auchan": "Marchew młoda Auchan"
+      },
+      "price_range_pln": [
+        7.5,
+        11.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "warzywa_marchew_zwykła",
+      "znormalizowana_nazwa": "Marchew zwykła",
+      "kategoria": "Warzywa",
+      "subkategoria": "Marchew",
+      "typ": "Marchew zwykła",
+      "tags": [
+        "warzywa",
+        "marchew"
+      ],
+      "aliases": [
+        "Marchew",
+        "zwykła"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 172,
+        "protein_g": 17.0,
+        "fat_g": 4.0,
+        "carbs_g": 22.0
+      },
+      "shops": {
+        "lidl": "Marchew zwykła Lidl",
+        "biedronka": "Marchew zwykła Biedronka",
+        "kaufland": "Marchew zwykła Kaufland",
+        "auchan": "Marchew zwykła Auchan"
+      },
+      "price_range_pln": [
+        8.0,
+        12.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "warzywa_marchew_baby",
+      "znormalizowana_nazwa": "Marchew baby",
+      "kategoria": "Warzywa",
+      "subkategoria": "Marchew",
+      "typ": "Marchew baby",
+      "tags": [
+        "warzywa",
+        "marchew"
+      ],
+      "aliases": [
+        "Marchew",
+        "baby"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 173,
+        "protein_g": 18.0,
+        "fat_g": 5.0,
+        "carbs_g": 23.0
+      },
+      "shops": {
+        "lidl": "Marchew baby Lidl",
+        "biedronka": "Marchew baby Biedronka",
+        "kaufland": "Marchew baby Kaufland",
+        "auchan": "Marchew baby Auchan"
+      },
+      "price_range_pln": [
+        8.5,
+        12.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "warzywa_ogórek_gruntowy",
+      "znormalizowana_nazwa": "Ogórek gruntowy",
+      "kategoria": "Warzywa",
+      "subkategoria": "Ogórek",
+      "typ": "Ogórek gruntowy",
+      "tags": [
+        "warzywa",
+        "ogórek"
+      ],
+      "aliases": [
+        "Ogórek",
+        "gruntowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 174,
+        "protein_g": 19.0,
+        "fat_g": 6.0,
+        "carbs_g": 24.0
+      },
+      "shops": {
+        "lidl": "Ogórek gruntowy Lidl",
+        "biedronka": "Ogórek gruntowy Biedronka",
+        "kaufland": "Ogórek gruntowy Kaufland",
+        "auchan": "Ogórek gruntowy Auchan"
+      },
+      "price_range_pln": [
+        9.0,
+        13.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "warzywa_ogórek_szklarniowy",
+      "znormalizowana_nazwa": "Ogórek szklarniowy",
+      "kategoria": "Warzywa",
+      "subkategoria": "Ogórek",
+      "typ": "Ogórek szklarniowy",
+      "tags": [
+        "warzywa",
+        "ogórek"
+      ],
+      "aliases": [
+        "Ogórek",
+        "szklarniowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 175,
+        "protein_g": 5.0,
+        "fat_g": 7.0,
+        "carbs_g": 25.0
+      },
+      "shops": {
+        "lidl": "Ogórek szklarniowy Lidl",
+        "biedronka": "Ogórek szklarniowy Biedronka",
+        "kaufland": "Ogórek szklarniowy Kaufland",
+        "auchan": "Ogórek szklarniowy Auchan"
+      },
+      "price_range_pln": [
+        9.5,
+        14.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "warzywa_ogórek_kiszony",
+      "znormalizowana_nazwa": "Ogórek kiszony",
+      "kategoria": "Warzywa",
+      "subkategoria": "Ogórek",
+      "typ": "Ogórek kiszony",
+      "tags": [
+        "warzywa",
+        "ogórek"
+      ],
+      "aliases": [
+        "Ogórek",
+        "kiszony"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 176,
+        "protein_g": 6.0,
+        "fat_g": 8.0,
+        "carbs_g": 26.0
+      },
+      "shops": {
+        "lidl": "Ogórek kiszony Lidl",
+        "biedronka": "Ogórek kiszony Biedronka",
+        "kaufland": "Ogórek kiszony Kaufland",
+        "auchan": "Ogórek kiszony Auchan"
+      },
+      "price_range_pln": [
+        10.0,
+        15.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "warzywa_cebula_żółta",
+      "znormalizowana_nazwa": "Cebula żółta",
+      "kategoria": "Warzywa",
+      "subkategoria": "Cebula",
+      "typ": "Cebula żółta",
+      "tags": [
+        "warzywa",
+        "cebula"
+      ],
+      "aliases": [
+        "Cebula",
+        "żółta"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 177,
+        "protein_g": 7.0,
+        "fat_g": 9.0,
+        "carbs_g": 27.0
+      },
+      "shops": {
+        "lidl": "Cebula żółta Lidl",
+        "biedronka": "Cebula żółta Biedronka",
+        "kaufland": "Cebula żółta Kaufland",
+        "auchan": "Cebula żółta Auchan"
+      },
+      "price_range_pln": [
+        10.5,
+        15.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "warzywa_cebula_czerwona",
+      "znormalizowana_nazwa": "Cebula czerwona",
+      "kategoria": "Warzywa",
+      "subkategoria": "Cebula",
+      "typ": "Cebula czerwona",
+      "tags": [
+        "warzywa",
+        "cebula"
+      ],
+      "aliases": [
+        "Cebula",
+        "czerwona"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 178,
+        "protein_g": 8.0,
+        "fat_g": 10.0,
+        "carbs_g": 28.0
+      },
+      "shops": {
+        "lidl": "Cebula czerwona Lidl",
+        "biedronka": "Cebula czerwona Biedronka",
+        "kaufland": "Cebula czerwona Kaufland",
+        "auchan": "Cebula czerwona Auchan"
+      },
+      "price_range_pln": [
+        11.0,
+        16.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "warzywa_cebula_biała",
+      "znormalizowana_nazwa": "Cebula biała",
+      "kategoria": "Warzywa",
+      "subkategoria": "Cebula",
+      "typ": "Cebula biała",
+      "tags": [
+        "warzywa",
+        "cebula"
+      ],
+      "aliases": [
+        "Cebula",
+        "biała"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 179,
+        "protein_g": 9.0,
+        "fat_g": 11.0,
+        "carbs_g": 29.0
+      },
+      "shops": {
+        "lidl": "Cebula biała Lidl",
+        "biedronka": "Cebula biała Biedronka",
+        "kaufland": "Cebula biała Kaufland",
+        "auchan": "Cebula biała Auchan"
+      },
+      "price_range_pln": [
+        11.5,
+        17.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "warzywa_cebula_dymka",
+      "znormalizowana_nazwa": "Cebula dymka",
+      "kategoria": "Warzywa",
+      "subkategoria": "Cebula",
+      "typ": "Cebula dymka",
+      "tags": [
+        "warzywa",
+        "cebula"
+      ],
+      "aliases": [
+        "Cebula",
+        "dymka"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 180,
+        "protein_g": 10.0,
+        "fat_g": 2.0,
+        "carbs_g": 30.0
+      },
+      "shops": {
+        "lidl": "Cebula dymka Lidl",
+        "biedronka": "Cebula dymka Biedronka",
+        "kaufland": "Cebula dymka Kaufland",
+        "auchan": "Cebula dymka Auchan"
+      },
+      "price_range_pln": [
+        2.0,
+        3.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "warzywa_papryka_czerwona",
+      "znormalizowana_nazwa": "Papryka czerwona",
+      "kategoria": "Warzywa",
+      "subkategoria": "Papryka",
+      "typ": "Papryka czerwona",
+      "tags": [
+        "warzywa",
+        "papryka"
+      ],
+      "aliases": [
+        "Papryka",
+        "czerwona"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 181,
+        "protein_g": 11.0,
+        "fat_g": 3.0,
+        "carbs_g": 31.0
+      },
+      "shops": {
+        "lidl": "Papryka czerwona Lidl",
+        "biedronka": "Papryka czerwona Biedronka",
+        "kaufland": "Papryka czerwona Kaufland",
+        "auchan": "Papryka czerwona Auchan"
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "warzywa_papryka_żółta",
+      "znormalizowana_nazwa": "Papryka żółta",
+      "kategoria": "Warzywa",
+      "subkategoria": "Papryka",
+      "typ": "Papryka żółta",
+      "tags": [
+        "warzywa",
+        "papryka"
+      ],
+      "aliases": [
+        "Papryka",
+        "żółta"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 182,
+        "protein_g": 12.0,
+        "fat_g": 4.0,
+        "carbs_g": 32.0
+      },
+      "shops": {
+        "lidl": "Papryka żółta Lidl",
+        "biedronka": "Papryka żółta Biedronka",
+        "kaufland": "Papryka żółta Kaufland",
+        "auchan": "Papryka żółta Auchan"
+      },
+      "price_range_pln": [
+        3.0,
+        4.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "warzywa_papryka_zielona",
+      "znormalizowana_nazwa": "Papryka zielona",
+      "kategoria": "Warzywa",
+      "subkategoria": "Papryka",
+      "typ": "Papryka zielona",
+      "tags": [
+        "warzywa",
+        "papryka"
+      ],
+      "aliases": [
+        "Papryka",
+        "zielona"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 183,
+        "protein_g": 13.0,
+        "fat_g": 5.0,
+        "carbs_g": 33.0
+      },
+      "shops": {
+        "lidl": "Papryka zielona Lidl",
+        "biedronka": "Papryka zielona Biedronka",
+        "kaufland": "Papryka zielona Kaufland",
+        "auchan": "Papryka zielona Auchan"
+      },
+      "price_range_pln": [
+        3.5,
+        5.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "warzywa_papryka_ostra",
+      "znormalizowana_nazwa": "Papryka ostra",
+      "kategoria": "Warzywa",
+      "subkategoria": "Papryka",
+      "typ": "Papryka ostra",
+      "tags": [
+        "warzywa",
+        "papryka"
+      ],
+      "aliases": [
+        "Papryka",
+        "ostra"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 184,
+        "protein_g": 14.0,
+        "fat_g": 6.0,
+        "carbs_g": 34.0
+      },
+      "shops": {
+        "lidl": "Papryka ostra Lidl",
+        "biedronka": "Papryka ostra Biedronka",
+        "kaufland": "Papryka ostra Kaufland",
+        "auchan": "Papryka ostra Auchan"
+      },
+      "price_range_pln": [
+        4.0,
+        6.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "warzywa_ziemniaki_młode",
+      "znormalizowana_nazwa": "Ziemniaki młode",
+      "kategoria": "Warzywa",
+      "subkategoria": "Ziemniaki",
+      "typ": "Ziemniaki młode",
+      "tags": [
+        "warzywa",
+        "ziemniaki"
+      ],
+      "aliases": [
+        "Ziemniaki",
+        "młode"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 185,
+        "protein_g": 15.0,
+        "fat_g": 7.0,
+        "carbs_g": 35.0
+      },
+      "shops": {
+        "lidl": "Ziemniaki młode Lidl",
+        "biedronka": "Ziemniaki młode Biedronka",
+        "kaufland": "Ziemniaki młode Kaufland",
+        "auchan": "Ziemniaki młode Auchan"
+      },
+      "price_range_pln": [
+        4.5,
+        6.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "warzywa_ziemniaki_stare",
+      "znormalizowana_nazwa": "Ziemniaki stare",
+      "kategoria": "Warzywa",
+      "subkategoria": "Ziemniaki",
+      "typ": "Ziemniaki stare",
+      "tags": [
+        "warzywa",
+        "ziemniaki"
+      ],
+      "aliases": [
+        "Ziemniaki",
+        "stare"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 186,
+        "protein_g": 16.0,
+        "fat_g": 8.0,
+        "carbs_g": 36.0
+      },
+      "shops": {
+        "lidl": "Ziemniaki stare Lidl",
+        "biedronka": "Ziemniaki stare Biedronka",
+        "kaufland": "Ziemniaki stare Kaufland",
+        "auchan": "Ziemniaki stare Auchan"
+      },
+      "price_range_pln": [
+        5.0,
+        7.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "warzywa_ziemniaki_słodkie",
+      "znormalizowana_nazwa": "Ziemniaki słodkie",
+      "kategoria": "Warzywa",
+      "subkategoria": "Ziemniaki",
+      "typ": "Ziemniaki słodkie",
+      "tags": [
+        "warzywa",
+        "ziemniaki"
+      ],
+      "aliases": [
+        "Ziemniaki",
+        "słodkie"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 7,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": true,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 187,
+        "protein_g": 17.0,
+        "fat_g": 9.0,
+        "carbs_g": 37.0
+      },
+      "shops": {
+        "lidl": "Ziemniaki słodkie Lidl",
+        "biedronka": "Ziemniaki słodkie Biedronka",
+        "kaufland": "Ziemniaki słodkie Kaufland",
+        "auchan": "Ziemniaki słodkie Auchan"
+      },
+      "price_range_pln": [
+        5.5,
+        8.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "mięso_kurczak_filet",
+      "znormalizowana_nazwa": "Kurczak filet",
+      "kategoria": "Mięso",
+      "subkategoria": "Kurczak",
+      "typ": "Kurczak filet",
+      "tags": [
+        "mięso",
+        "kurczak"
+      ],
+      "aliases": [
+        "Kurczak",
+        "filet"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 188,
+        "protein_g": 18.0,
+        "fat_g": 10.0,
+        "carbs_g": 38.0
+      },
+      "shops": {
+        "lidl": "Kurczak filet Lidl",
+        "biedronka": "Kurczak filet Biedronka",
+        "kaufland": "Kurczak filet Kaufland",
+        "auchan": "Kurczak filet Auchan"
+      },
+      "price_range_pln": [
+        6.0,
+        9.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "mięso_kurczak_udko",
+      "znormalizowana_nazwa": "Kurczak udko",
+      "kategoria": "Mięso",
+      "subkategoria": "Kurczak",
+      "typ": "Kurczak udko",
+      "tags": [
+        "mięso",
+        "kurczak"
+      ],
+      "aliases": [
+        "Kurczak",
+        "udko"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 189,
+        "protein_g": 19.0,
+        "fat_g": 11.0,
+        "carbs_g": 39.0
+      },
+      "shops": {
+        "lidl": "Kurczak udko Lidl",
+        "biedronka": "Kurczak udko Biedronka",
+        "kaufland": "Kurczak udko Kaufland",
+        "auchan": "Kurczak udko Auchan"
+      },
+      "price_range_pln": [
+        6.5,
+        9.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "mięso_kurczak_skrzydło",
+      "znormalizowana_nazwa": "Kurczak skrzydło",
+      "kategoria": "Mięso",
+      "subkategoria": "Kurczak",
+      "typ": "Kurczak skrzydło",
+      "tags": [
+        "mięso",
+        "kurczak"
+      ],
+      "aliases": [
+        "Kurczak",
+        "skrzydło"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 190,
+        "protein_g": 5.0,
+        "fat_g": 2.0,
+        "carbs_g": 10.0
+      },
+      "shops": {
+        "lidl": "Kurczak skrzydło Lidl",
+        "biedronka": "Kurczak skrzydło Biedronka",
+        "kaufland": "Kurczak skrzydło Kaufland",
+        "auchan": "Kurczak skrzydło Auchan"
+      },
+      "price_range_pln": [
+        7.0,
+        10.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "mięso_kurczak_pierś",
+      "znormalizowana_nazwa": "Kurczak pierś",
+      "kategoria": "Mięso",
+      "subkategoria": "Kurczak",
+      "typ": "Kurczak pierś",
+      "tags": [
+        "mięso",
+        "kurczak"
+      ],
+      "aliases": [
+        "Kurczak",
+        "pierś"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 191,
+        "protein_g": 6.0,
+        "fat_g": 3.0,
+        "carbs_g": 11.0
+      },
+      "shops": {
+        "lidl": "Kurczak pierś Lidl",
+        "biedronka": "Kurczak pierś Biedronka",
+        "kaufland": "Kurczak pierś Kaufland",
+        "auchan": "Kurczak pierś Auchan"
+      },
+      "price_range_pln": [
+        7.5,
+        11.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "mięso_kurczak_cały",
+      "znormalizowana_nazwa": "Kurczak cały",
+      "kategoria": "Mięso",
+      "subkategoria": "Kurczak",
+      "typ": "Kurczak cały",
+      "tags": [
+        "mięso",
+        "kurczak"
+      ],
+      "aliases": [
+        "Kurczak",
+        "cały"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 192,
+        "protein_g": 7.0,
+        "fat_g": 4.0,
+        "carbs_g": 12.0
+      },
+      "shops": {
+        "lidl": "Kurczak cały Lidl",
+        "biedronka": "Kurczak cały Biedronka",
+        "kaufland": "Kurczak cały Kaufland",
+        "auchan": "Kurczak cały Auchan"
+      },
+      "price_range_pln": [
+        8.0,
+        12.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "mięso_wieprzowina_schab",
+      "znormalizowana_nazwa": "Wieprzowina schab",
+      "kategoria": "Mięso",
+      "subkategoria": "Wieprzowina",
+      "typ": "Wieprzowina schab",
+      "tags": [
+        "mięso",
+        "wieprzowina"
+      ],
+      "aliases": [
+        "Wieprzowina",
+        "schab"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 193,
+        "protein_g": 8.0,
+        "fat_g": 5.0,
+        "carbs_g": 13.0
+      },
+      "shops": {
+        "lidl": "Wieprzowina schab Lidl",
+        "biedronka": "Wieprzowina schab Biedronka",
+        "kaufland": "Wieprzowina schab Kaufland",
+        "auchan": "Wieprzowina schab Auchan"
+      },
+      "price_range_pln": [
+        8.5,
+        12.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "mięso_wieprzowina_karkówka",
+      "znormalizowana_nazwa": "Wieprzowina karkówka",
+      "kategoria": "Mięso",
+      "subkategoria": "Wieprzowina",
+      "typ": "Wieprzowina karkówka",
+      "tags": [
+        "mięso",
+        "wieprzowina"
+      ],
+      "aliases": [
+        "Wieprzowina",
+        "karkówka"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 194,
+        "protein_g": 9.0,
+        "fat_g": 6.0,
+        "carbs_g": 14.0
+      },
+      "shops": {
+        "lidl": "Wieprzowina karkówka Lidl",
+        "biedronka": "Wieprzowina karkówka Biedronka",
+        "kaufland": "Wieprzowina karkówka Kaufland",
+        "auchan": "Wieprzowina karkówka Auchan"
+      },
+      "price_range_pln": [
+        9.0,
+        13.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "mięso_wieprzowina_łopatka",
+      "znormalizowana_nazwa": "Wieprzowina łopatka",
+      "kategoria": "Mięso",
+      "subkategoria": "Wieprzowina",
+      "typ": "Wieprzowina łopatka",
+      "tags": [
+        "mięso",
+        "wieprzowina"
+      ],
+      "aliases": [
+        "Wieprzowina",
+        "łopatka"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 195,
+        "protein_g": 10.0,
+        "fat_g": 7.0,
+        "carbs_g": 15.0
+      },
+      "shops": {
+        "lidl": "Wieprzowina łopatka Lidl",
+        "biedronka": "Wieprzowina łopatka Biedronka",
+        "kaufland": "Wieprzowina łopatka Kaufland",
+        "auchan": "Wieprzowina łopatka Auchan"
+      },
+      "price_range_pln": [
+        9.5,
+        14.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "mięso_wieprzowina_szynka",
+      "znormalizowana_nazwa": "Wieprzowina szynka",
+      "kategoria": "Mięso",
+      "subkategoria": "Wieprzowina",
+      "typ": "Wieprzowina szynka",
+      "tags": [
+        "mięso",
+        "wieprzowina"
+      ],
+      "aliases": [
+        "Wieprzowina",
+        "szynka"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 196,
+        "protein_g": 11.0,
+        "fat_g": 8.0,
+        "carbs_g": 16.0
+      },
+      "shops": {
+        "lidl": "Wieprzowina szynka Lidl",
+        "biedronka": "Wieprzowina szynka Biedronka",
+        "kaufland": "Wieprzowina szynka Kaufland",
+        "auchan": "Wieprzowina szynka Auchan"
+      },
+      "price_range_pln": [
+        10.0,
+        15.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "mięso_wołowina_mięso_mielone",
+      "znormalizowana_nazwa": "Wołowina mięso mielone",
+      "kategoria": "Mięso",
+      "subkategoria": "Wołowina",
+      "typ": "Wołowina mięso mielone",
+      "tags": [
+        "mięso",
+        "wołowina"
+      ],
+      "aliases": [
+        "Wołowina",
+        "mięso mielone"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 197,
+        "protein_g": 12.0,
+        "fat_g": 9.0,
+        "carbs_g": 17.0
+      },
+      "shops": {
+        "lidl": "Wołowina mięso mielone Lidl",
+        "biedronka": "Wołowina mięso mielone Biedronka",
+        "kaufland": "Wołowina mięso mielone Kaufland",
+        "auchan": "Wołowina mięso mielone Auchan"
+      },
+      "price_range_pln": [
+        10.5,
+        15.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "mięso_wołowina_stek",
+      "znormalizowana_nazwa": "Wołowina stek",
+      "kategoria": "Mięso",
+      "subkategoria": "Wołowina",
+      "typ": "Wołowina stek",
+      "tags": [
+        "mięso",
+        "wołowina"
+      ],
+      "aliases": [
+        "Wołowina",
+        "stek"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 198,
+        "protein_g": 13.0,
+        "fat_g": 10.0,
+        "carbs_g": 18.0
+      },
+      "shops": {
+        "lidl": "Wołowina stek Lidl",
+        "biedronka": "Wołowina stek Biedronka",
+        "kaufland": "Wołowina stek Kaufland",
+        "auchan": "Wołowina stek Auchan"
+      },
+      "price_range_pln": [
+        11.0,
+        16.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "mięso_wołowina_gulasz",
+      "znormalizowana_nazwa": "Wołowina gulasz",
+      "kategoria": "Mięso",
+      "subkategoria": "Wołowina",
+      "typ": "Wołowina gulasz",
+      "tags": [
+        "mięso",
+        "wołowina"
+      ],
+      "aliases": [
+        "Wołowina",
+        "gulasz"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 199,
+        "protein_g": 14.0,
+        "fat_g": 11.0,
+        "carbs_g": 19.0
+      },
+      "shops": {
+        "lidl": "Wołowina gulasz Lidl",
+        "biedronka": "Wołowina gulasz Biedronka",
+        "kaufland": "Wołowina gulasz Kaufland",
+        "auchan": "Wołowina gulasz Auchan"
+      },
+      "price_range_pln": [
+        11.5,
+        17.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "mięso_indyk_filet",
+      "znormalizowana_nazwa": "Indyk filet",
+      "kategoria": "Mięso",
+      "subkategoria": "Indyk",
+      "typ": "Indyk filet",
+      "tags": [
+        "mięso",
+        "indyk"
+      ],
+      "aliases": [
+        "Indyk",
+        "filet"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 200,
+        "protein_g": 15.0,
+        "fat_g": 2.0,
+        "carbs_g": 20.0
+      },
+      "shops": {
+        "lidl": "Indyk filet Lidl",
+        "biedronka": "Indyk filet Biedronka",
+        "kaufland": "Indyk filet Kaufland",
+        "auchan": "Indyk filet Auchan"
+      },
+      "price_range_pln": [
+        2.0,
+        3.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "mięso_indyk_udko",
+      "znormalizowana_nazwa": "Indyk udko",
+      "kategoria": "Mięso",
+      "subkategoria": "Indyk",
+      "typ": "Indyk udko",
+      "tags": [
+        "mięso",
+        "indyk"
+      ],
+      "aliases": [
+        "Indyk",
+        "udko"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 201,
+        "protein_g": 16.0,
+        "fat_g": 3.0,
+        "carbs_g": 21.0
+      },
+      "shops": {
+        "lidl": "Indyk udko Lidl",
+        "biedronka": "Indyk udko Biedronka",
+        "kaufland": "Indyk udko Kaufland",
+        "auchan": "Indyk udko Auchan"
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "mięso_indyk_pierś",
+      "znormalizowana_nazwa": "Indyk pierś",
+      "kategoria": "Mięso",
+      "subkategoria": "Indyk",
+      "typ": "Indyk pierś",
+      "tags": [
+        "mięso",
+        "indyk"
+      ],
+      "aliases": [
+        "Indyk",
+        "pierś"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 202,
+        "protein_g": 17.0,
+        "fat_g": 4.0,
+        "carbs_g": 22.0
+      },
+      "shops": {
+        "lidl": "Indyk pierś Lidl",
+        "biedronka": "Indyk pierś Biedronka",
+        "kaufland": "Indyk pierś Kaufland",
+        "auchan": "Indyk pierś Auchan"
+      },
+      "price_range_pln": [
+        3.0,
+        4.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "mięso_ryba_łosoś",
+      "znormalizowana_nazwa": "Ryba łosoś",
+      "kategoria": "Mięso",
+      "subkategoria": "Ryba",
+      "typ": "Ryba łosoś",
+      "tags": [
+        "mięso",
+        "ryba"
+      ],
+      "aliases": [
+        "Ryba",
+        "łosoś"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 203,
+        "protein_g": 18.0,
+        "fat_g": 5.0,
+        "carbs_g": 23.0
+      },
+      "shops": {
+        "lidl": "Ryba łosoś Lidl",
+        "biedronka": "Ryba łosoś Biedronka",
+        "kaufland": "Ryba łosoś Kaufland",
+        "auchan": "Ryba łosoś Auchan"
+      },
+      "price_range_pln": [
+        3.5,
+        5.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "mięso_ryba_dorsz",
+      "znormalizowana_nazwa": "Ryba dorsz",
+      "kategoria": "Mięso",
+      "subkategoria": "Ryba",
+      "typ": "Ryba dorsz",
+      "tags": [
+        "mięso",
+        "ryba"
+      ],
+      "aliases": [
+        "Ryba",
+        "dorsz"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 204,
+        "protein_g": 19.0,
+        "fat_g": 6.0,
+        "carbs_g": 24.0
+      },
+      "shops": {
+        "lidl": "Ryba dorsz Lidl",
+        "biedronka": "Ryba dorsz Biedronka",
+        "kaufland": "Ryba dorsz Kaufland",
+        "auchan": "Ryba dorsz Auchan"
+      },
+      "price_range_pln": [
+        4.0,
+        6.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "mięso_ryba_mintaj",
+      "znormalizowana_nazwa": "Ryba mintaj",
+      "kategoria": "Mięso",
+      "subkategoria": "Ryba",
+      "typ": "Ryba mintaj",
+      "tags": [
+        "mięso",
+        "ryba"
+      ],
+      "aliases": [
+        "Ryba",
+        "mintaj"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 205,
+        "protein_g": 5.0,
+        "fat_g": 7.0,
+        "carbs_g": 25.0
+      },
+      "shops": {
+        "lidl": "Ryba mintaj Lidl",
+        "biedronka": "Ryba mintaj Biedronka",
+        "kaufland": "Ryba mintaj Kaufland",
+        "auchan": "Ryba mintaj Auchan"
+      },
+      "price_range_pln": [
+        4.5,
+        6.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "mięso_ryba_makrela",
+      "znormalizowana_nazwa": "Ryba makrela",
+      "kategoria": "Mięso",
+      "subkategoria": "Ryba",
+      "typ": "Ryba makrela",
+      "tags": [
+        "mięso",
+        "ryba"
+      ],
+      "aliases": [
+        "Ryba",
+        "makrela"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 206,
+        "protein_g": 6.0,
+        "fat_g": 8.0,
+        "carbs_g": 26.0
+      },
+      "shops": {
+        "lidl": "Ryba makrela Lidl",
+        "biedronka": "Ryba makrela Biedronka",
+        "kaufland": "Ryba makrela Kaufland",
+        "auchan": "Ryba makrela Auchan"
+      },
+      "price_range_pln": [
+        5.0,
+        7.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "mięso_ryba_tuńczyk",
+      "znormalizowana_nazwa": "Ryba tuńczyk",
+      "kategoria": "Mięso",
+      "subkategoria": "Ryba",
+      "typ": "Ryba tuńczyk",
+      "tags": [
+        "mięso",
+        "ryba"
+      ],
+      "aliases": [
+        "Ryba",
+        "tuńczyk"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": false
+      },
+      "nutrition_per_100g": {
+        "calories": 207,
+        "protein_g": 7.0,
+        "fat_g": 9.0,
+        "carbs_g": 27.0
+      },
+      "shops": {
+        "lidl": "Ryba tuńczyk Lidl",
+        "biedronka": "Ryba tuńczyk Biedronka",
+        "kaufland": "Ryba tuńczyk Kaufland",
+        "auchan": "Ryba tuńczyk Auchan"
+      },
+      "price_range_pln": [
+        5.5,
+        8.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "snacki_chipsy_solone",
+      "znormalizowana_nazwa": "Chipsy solone",
+      "kategoria": "Snacki",
+      "subkategoria": "Chipsy",
+      "typ": "Chipsy solone",
+      "tags": [
+        "snacki",
+        "chipsy"
+      ],
+      "aliases": [
+        "Chipsy",
+        "solone"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 208,
+        "protein_g": 8.0,
+        "fat_g": 10.0,
+        "carbs_g": 28.0
+      },
+      "shops": {
+        "lidl": "Chipsy solone Lidl",
+        "biedronka": "Chipsy solone Biedronka",
+        "kaufland": "Chipsy solone Kaufland",
+        "auchan": "Chipsy solone Auchan"
+      },
+      "price_range_pln": [
+        6.0,
+        9.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "snacki_chipsy_paprykowe",
+      "znormalizowana_nazwa": "Chipsy paprykowe",
+      "kategoria": "Snacki",
+      "subkategoria": "Chipsy",
+      "typ": "Chipsy paprykowe",
+      "tags": [
+        "snacki",
+        "chipsy"
+      ],
+      "aliases": [
+        "Chipsy",
+        "paprykowe"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 209,
+        "protein_g": 9.0,
+        "fat_g": 11.0,
+        "carbs_g": 29.0
+      },
+      "shops": {
+        "lidl": "Chipsy paprykowe Lidl",
+        "biedronka": "Chipsy paprykowe Biedronka",
+        "kaufland": "Chipsy paprykowe Kaufland",
+        "auchan": "Chipsy paprykowe Auchan"
+      },
+      "price_range_pln": [
+        6.5,
+        9.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "snacki_chipsy_cebulowe",
+      "znormalizowana_nazwa": "Chipsy cebulowe",
+      "kategoria": "Snacki",
+      "subkategoria": "Chipsy",
+      "typ": "Chipsy cebulowe",
+      "tags": [
+        "snacki",
+        "chipsy"
+      ],
+      "aliases": [
+        "Chipsy",
+        "cebulowe"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 210,
+        "protein_g": 10.0,
+        "fat_g": 2.0,
+        "carbs_g": 30.0
+      },
+      "shops": {
+        "lidl": "Chipsy cebulowe Lidl",
+        "biedronka": "Chipsy cebulowe Biedronka",
+        "kaufland": "Chipsy cebulowe Kaufland",
+        "auchan": "Chipsy cebulowe Auchan"
+      },
+      "price_range_pln": [
+        7.0,
+        10.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "snacki_chipsy_serowe",
+      "znormalizowana_nazwa": "Chipsy serowe",
+      "kategoria": "Snacki",
+      "subkategoria": "Chipsy",
+      "typ": "Chipsy serowe",
+      "tags": [
+        "snacki",
+        "chipsy"
+      ],
+      "aliases": [
+        "Chipsy",
+        "serowe"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 211,
+        "protein_g": 11.0,
+        "fat_g": 3.0,
+        "carbs_g": 31.0
+      },
+      "shops": {
+        "lidl": "Chipsy serowe Lidl",
+        "biedronka": "Chipsy serowe Biedronka",
+        "kaufland": "Chipsy serowe Kaufland",
+        "auchan": "Chipsy serowe Auchan"
+      },
+      "price_range_pln": [
+        7.5,
+        11.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "snacki_orzeszki_ziemne",
+      "znormalizowana_nazwa": "Orzeszki ziemne",
+      "kategoria": "Snacki",
+      "subkategoria": "Orzeszki",
+      "typ": "Orzeszki ziemne",
+      "tags": [
+        "snacki",
+        "orzeszki"
+      ],
+      "aliases": [
+        "Orzeszki",
+        "ziemne"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 212,
+        "protein_g": 12.0,
+        "fat_g": 4.0,
+        "carbs_g": 32.0
+      },
+      "shops": {
+        "lidl": "Orzeszki ziemne Lidl",
+        "biedronka": "Orzeszki ziemne Biedronka",
+        "kaufland": "Orzeszki ziemne Kaufland",
+        "auchan": "Orzeszki ziemne Auchan"
+      },
+      "price_range_pln": [
+        8.0,
+        12.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "snacki_orzeszki_laskowe",
+      "znormalizowana_nazwa": "Orzeszki laskowe",
+      "kategoria": "Snacki",
+      "subkategoria": "Orzeszki",
+      "typ": "Orzeszki laskowe",
+      "tags": [
+        "snacki",
+        "orzeszki"
+      ],
+      "aliases": [
+        "Orzeszki",
+        "laskowe"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 213,
+        "protein_g": 13.0,
+        "fat_g": 5.0,
+        "carbs_g": 33.0
+      },
+      "shops": {
+        "lidl": "Orzeszki laskowe Lidl",
+        "biedronka": "Orzeszki laskowe Biedronka",
+        "kaufland": "Orzeszki laskowe Kaufland",
+        "auchan": "Orzeszki laskowe Auchan"
+      },
+      "price_range_pln": [
+        8.5,
+        12.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "snacki_orzeszki_włoskie",
+      "znormalizowana_nazwa": "Orzeszki włoskie",
+      "kategoria": "Snacki",
+      "subkategoria": "Orzeszki",
+      "typ": "Orzeszki włoskie",
+      "tags": [
+        "snacki",
+        "orzeszki"
+      ],
+      "aliases": [
+        "Orzeszki",
+        "włoskie"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 214,
+        "protein_g": 14.0,
+        "fat_g": 6.0,
+        "carbs_g": 34.0
+      },
+      "shops": {
+        "lidl": "Orzeszki włoskie Lidl",
+        "biedronka": "Orzeszki włoskie Biedronka",
+        "kaufland": "Orzeszki włoskie Kaufland",
+        "auchan": "Orzeszki włoskie Auchan"
+      },
+      "price_range_pln": [
+        9.0,
+        13.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "snacki_orzeszki_migdały",
+      "znormalizowana_nazwa": "Orzeszki migdały",
+      "kategoria": "Snacki",
+      "subkategoria": "Orzeszki",
+      "typ": "Orzeszki migdały",
+      "tags": [
+        "snacki",
+        "orzeszki"
+      ],
+      "aliases": [
+        "Orzeszki",
+        "migdały"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 215,
+        "protein_g": 15.0,
+        "fat_g": 7.0,
+        "carbs_g": 35.0
+      },
+      "shops": {
+        "lidl": "Orzeszki migdały Lidl",
+        "biedronka": "Orzeszki migdały Biedronka",
+        "kaufland": "Orzeszki migdały Kaufland",
+        "auchan": "Orzeszki migdały Auchan"
+      },
+      "price_range_pln": [
+        9.5,
+        14.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "snacki_czekolada_mleczna",
+      "znormalizowana_nazwa": "Czekolada mleczna",
+      "kategoria": "Snacki",
+      "subkategoria": "Czekolada",
+      "typ": "Czekolada mleczna",
+      "tags": [
+        "snacki",
+        "czekolada"
+      ],
+      "aliases": [
+        "Czekolada",
+        "mleczna"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100ml": {
+        "calories": 216,
+        "protein_g": 16.0,
+        "fat_g": 8.0,
+        "carbs_g": 36.0
+      },
+      "shops": {
+        "lidl": "Czekolada mleczna Lidl",
+        "biedronka": "Czekolada mleczna Biedronka",
+        "kaufland": "Czekolada mleczna Kaufland",
+        "auchan": "Czekolada mleczna Auchan"
+      },
+      "price_range_pln": [
+        10.0,
+        15.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "snacki_czekolada_gorzka",
+      "znormalizowana_nazwa": "Czekolada gorzka",
+      "kategoria": "Snacki",
+      "subkategoria": "Czekolada",
+      "typ": "Czekolada gorzka",
+      "tags": [
+        "snacki",
+        "czekolada"
+      ],
+      "aliases": [
+        "Czekolada",
+        "gorzka"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 217,
+        "protein_g": 17.0,
+        "fat_g": 9.0,
+        "carbs_g": 37.0
+      },
+      "shops": {
+        "lidl": "Czekolada gorzka Lidl",
+        "biedronka": "Czekolada gorzka Biedronka",
+        "kaufland": "Czekolada gorzka Kaufland",
+        "auchan": "Czekolada gorzka Auchan"
+      },
+      "price_range_pln": [
+        10.5,
+        15.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "snacki_czekolada_biała",
+      "znormalizowana_nazwa": "Czekolada biała",
+      "kategoria": "Snacki",
+      "subkategoria": "Czekolada",
+      "typ": "Czekolada biała",
+      "tags": [
+        "snacki",
+        "czekolada"
+      ],
+      "aliases": [
+        "Czekolada",
+        "biała"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 218,
+        "protein_g": 18.0,
+        "fat_g": 10.0,
+        "carbs_g": 38.0
+      },
+      "shops": {
+        "lidl": "Czekolada biała Lidl",
+        "biedronka": "Czekolada biała Biedronka",
+        "kaufland": "Czekolada biała Kaufland",
+        "auchan": "Czekolada biała Auchan"
+      },
+      "price_range_pln": [
+        11.0,
+        16.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "snacki_czekolada_z_orzechami",
+      "znormalizowana_nazwa": "Czekolada z orzechami",
+      "kategoria": "Snacki",
+      "subkategoria": "Czekolada",
+      "typ": "Czekolada z orzechami",
+      "tags": [
+        "snacki",
+        "czekolada"
+      ],
+      "aliases": [
+        "Czekolada",
+        "z orzechami"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 219,
+        "protein_g": 19.0,
+        "fat_g": 11.0,
+        "carbs_g": 39.0
+      },
+      "shops": {
+        "lidl": "Czekolada z orzechami Lidl",
+        "biedronka": "Czekolada z orzechami Biedronka",
+        "kaufland": "Czekolada z orzechami Kaufland",
+        "auchan": "Czekolada z orzechami Auchan"
+      },
+      "price_range_pln": [
+        11.5,
+        17.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "snacki_ciastka_herbatniki",
+      "znormalizowana_nazwa": "Ciastka herbatniki",
+      "kategoria": "Snacki",
+      "subkategoria": "Ciastka",
+      "typ": "Ciastka herbatniki",
+      "tags": [
+        "snacki",
+        "ciastka"
+      ],
+      "aliases": [
+        "Ciastka",
+        "herbatniki"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 220,
+        "protein_g": 5.0,
+        "fat_g": 2.0,
+        "carbs_g": 10.0
+      },
+      "shops": {
+        "lidl": "Ciastka herbatniki Lidl",
+        "biedronka": "Ciastka herbatniki Biedronka",
+        "kaufland": "Ciastka herbatniki Kaufland",
+        "auchan": "Ciastka herbatniki Auchan"
+      },
+      "price_range_pln": [
+        2.0,
+        3.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "snacki_ciastka_wafle",
+      "znormalizowana_nazwa": "Ciastka wafle",
+      "kategoria": "Snacki",
+      "subkategoria": "Ciastka",
+      "typ": "Ciastka wafle",
+      "tags": [
+        "snacki",
+        "ciastka"
+      ],
+      "aliases": [
+        "Ciastka",
+        "wafle"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 221,
+        "protein_g": 6.0,
+        "fat_g": 3.0,
+        "carbs_g": 11.0
+      },
+      "shops": {
+        "lidl": "Ciastka wafle Lidl",
+        "biedronka": "Ciastka wafle Biedronka",
+        "kaufland": "Ciastka wafle Kaufland",
+        "auchan": "Ciastka wafle Auchan"
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "snacki_ciastka_biszkopty",
+      "znormalizowana_nazwa": "Ciastka biszkopty",
+      "kategoria": "Snacki",
+      "subkategoria": "Ciastka",
+      "typ": "Ciastka biszkopty",
+      "tags": [
+        "snacki",
+        "ciastka"
+      ],
+      "aliases": [
+        "Ciastka",
+        "biszkopty"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 222,
+        "protein_g": 7.0,
+        "fat_g": 4.0,
+        "carbs_g": 12.0
+      },
+      "shops": {
+        "lidl": "Ciastka biszkopty Lidl",
+        "biedronka": "Ciastka biszkopty Biedronka",
+        "kaufland": "Ciastka biszkopty Kaufland",
+        "auchan": "Ciastka biszkopty Auchan"
+      },
+      "price_range_pln": [
+        3.0,
+        4.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "napoje_woda_mineralna",
+      "znormalizowana_nazwa": "Woda mineralna",
+      "kategoria": "Napoje",
+      "subkategoria": "Woda",
+      "typ": "Woda mineralna",
+      "tags": [
+        "napoje",
+        "woda"
+      ],
+      "aliases": [
+        "Woda",
+        "mineralna"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 223,
+        "protein_g": 8.0,
+        "fat_g": 5.0,
+        "carbs_g": 13.0
+      },
+      "shops": {
+        "lidl": "Woda mineralna Lidl",
+        "biedronka": "Woda mineralna Biedronka",
+        "kaufland": "Woda mineralna Kaufland",
+        "auchan": "Woda mineralna Auchan"
+      },
+      "price_range_pln": [
+        3.5,
+        5.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "napoje_woda_źródlana",
+      "znormalizowana_nazwa": "Woda źródlana",
+      "kategoria": "Napoje",
+      "subkategoria": "Woda",
+      "typ": "Woda źródlana",
+      "tags": [
+        "napoje",
+        "woda"
+      ],
+      "aliases": [
+        "Woda",
+        "źródlana"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 224,
+        "protein_g": 9.0,
+        "fat_g": 6.0,
+        "carbs_g": 14.0
+      },
+      "shops": {
+        "lidl": "Woda źródlana Lidl",
+        "biedronka": "Woda źródlana Biedronka",
+        "kaufland": "Woda źródlana Kaufland",
+        "auchan": "Woda źródlana Auchan"
+      },
+      "price_range_pln": [
+        4.0,
+        6.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "napoje_woda_gazowana",
+      "znormalizowana_nazwa": "Woda gazowana",
+      "kategoria": "Napoje",
+      "subkategoria": "Woda",
+      "typ": "Woda gazowana",
+      "tags": [
+        "napoje",
+        "woda"
+      ],
+      "aliases": [
+        "Woda",
+        "gazowana"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 225,
+        "protein_g": 10.0,
+        "fat_g": 7.0,
+        "carbs_g": 15.0
+      },
+      "shops": {
+        "lidl": "Woda gazowana Lidl",
+        "biedronka": "Woda gazowana Biedronka",
+        "kaufland": "Woda gazowana Kaufland",
+        "auchan": "Woda gazowana Auchan"
+      },
+      "price_range_pln": [
+        4.5,
+        6.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "napoje_woda_niegazowana",
+      "znormalizowana_nazwa": "Woda niegazowana",
+      "kategoria": "Napoje",
+      "subkategoria": "Woda",
+      "typ": "Woda niegazowana",
+      "tags": [
+        "napoje",
+        "woda"
+      ],
+      "aliases": [
+        "Woda",
+        "niegazowana"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 226,
+        "protein_g": 11.0,
+        "fat_g": 8.0,
+        "carbs_g": 16.0
+      },
+      "shops": {
+        "lidl": "Woda niegazowana Lidl",
+        "biedronka": "Woda niegazowana Biedronka",
+        "kaufland": "Woda niegazowana Kaufland",
+        "auchan": "Woda niegazowana Auchan"
+      },
+      "price_range_pln": [
+        5.0,
+        7.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "napoje_sok_pomarańczowy",
+      "znormalizowana_nazwa": "Sok pomarańczowy",
+      "kategoria": "Napoje",
+      "subkategoria": "Sok",
+      "typ": "Sok pomarańczowy",
+      "tags": [
+        "napoje",
+        "sok"
+      ],
+      "aliases": [
+        "Sok",
+        "pomarańczowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 227,
+        "protein_g": 12.0,
+        "fat_g": 9.0,
+        "carbs_g": 17.0
+      },
+      "shops": {
+        "lidl": "Sok pomarańczowy Lidl",
+        "biedronka": "Sok pomarańczowy Biedronka",
+        "kaufland": "Sok pomarańczowy Kaufland",
+        "auchan": "Sok pomarańczowy Auchan"
+      },
+      "price_range_pln": [
+        5.5,
+        8.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "napoje_sok_jabłkowy",
+      "znormalizowana_nazwa": "Sok jabłkowy",
+      "kategoria": "Napoje",
+      "subkategoria": "Sok",
+      "typ": "Sok jabłkowy",
+      "tags": [
+        "napoje",
+        "sok"
+      ],
+      "aliases": [
+        "Sok",
+        "jabłkowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 228,
+        "protein_g": 13.0,
+        "fat_g": 10.0,
+        "carbs_g": 18.0
+      },
+      "shops": {
+        "lidl": "Sok jabłkowy Lidl",
+        "biedronka": "Sok jabłkowy Biedronka",
+        "kaufland": "Sok jabłkowy Kaufland",
+        "auchan": "Sok jabłkowy Auchan"
+      },
+      "price_range_pln": [
+        6.0,
+        9.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "napoje_sok_multiwitamina",
+      "znormalizowana_nazwa": "Sok multiwitamina",
+      "kategoria": "Napoje",
+      "subkategoria": "Sok",
+      "typ": "Sok multiwitamina",
+      "tags": [
+        "napoje",
+        "sok"
+      ],
+      "aliases": [
+        "Sok",
+        "multiwitamina"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 229,
+        "protein_g": 14.0,
+        "fat_g": 11.0,
+        "carbs_g": 19.0
+      },
+      "shops": {
+        "lidl": "Sok multiwitamina Lidl",
+        "biedronka": "Sok multiwitamina Biedronka",
+        "kaufland": "Sok multiwitamina Kaufland",
+        "auchan": "Sok multiwitamina Auchan"
+      },
+      "price_range_pln": [
+        6.5,
+        9.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "napoje_sok_pomidorowy",
+      "znormalizowana_nazwa": "Sok pomidorowy",
+      "kategoria": "Napoje",
+      "subkategoria": "Sok",
+      "typ": "Sok pomidorowy",
+      "tags": [
+        "napoje",
+        "sok"
+      ],
+      "aliases": [
+        "Sok",
+        "pomidorowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 230,
+        "protein_g": 15.0,
+        "fat_g": 2.0,
+        "carbs_g": 20.0
+      },
+      "shops": {
+        "lidl": "Sok pomidorowy Lidl",
+        "biedronka": "Sok pomidorowy Biedronka",
+        "kaufland": "Sok pomidorowy Kaufland",
+        "auchan": "Sok pomidorowy Auchan"
+      },
+      "price_range_pln": [
+        7.0,
+        10.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "napoje_cola_zwykła",
+      "znormalizowana_nazwa": "Cola zwykła",
+      "kategoria": "Napoje",
+      "subkategoria": "Cola",
+      "typ": "Cola zwykła",
+      "tags": [
+        "napoje",
+        "cola"
+      ],
+      "aliases": [
+        "Cola",
+        "zwykła"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 231,
+        "protein_g": 16.0,
+        "fat_g": 3.0,
+        "carbs_g": 21.0
+      },
+      "shops": {
+        "lidl": "Cola zwykła Lidl",
+        "biedronka": "Cola zwykła Biedronka",
+        "kaufland": "Cola zwykła Kaufland",
+        "auchan": "Cola zwykła Auchan"
+      },
+      "price_range_pln": [
+        7.5,
+        11.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "napoje_cola_zero",
+      "znormalizowana_nazwa": "Cola zero",
+      "kategoria": "Napoje",
+      "subkategoria": "Cola",
+      "typ": "Cola zero",
+      "tags": [
+        "napoje",
+        "cola"
+      ],
+      "aliases": [
+        "Cola",
+        "zero"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 232,
+        "protein_g": 17.0,
+        "fat_g": 4.0,
+        "carbs_g": 22.0
+      },
+      "shops": {
+        "lidl": "Cola zero Lidl",
+        "biedronka": "Cola zero Biedronka",
+        "kaufland": "Cola zero Kaufland",
+        "auchan": "Cola zero Auchan"
+      },
+      "price_range_pln": [
+        8.0,
+        12.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "napoje_cola_light",
+      "znormalizowana_nazwa": "Cola light",
+      "kategoria": "Napoje",
+      "subkategoria": "Cola",
+      "typ": "Cola light",
+      "tags": [
+        "napoje",
+        "cola"
+      ],
+      "aliases": [
+        "Cola",
+        "light"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 233,
+        "protein_g": 18.0,
+        "fat_g": 5.0,
+        "carbs_g": 23.0
+      },
+      "shops": {
+        "lidl": "Cola light Lidl",
+        "biedronka": "Cola light Biedronka",
+        "kaufland": "Cola light Kaufland",
+        "auchan": "Cola light Auchan"
+      },
+      "price_range_pln": [
+        8.5,
+        12.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "napoje_kawa_ziarnista",
+      "znormalizowana_nazwa": "Kawa ziarnista",
+      "kategoria": "Napoje",
+      "subkategoria": "Kawa",
+      "typ": "Kawa ziarnista",
+      "tags": [
+        "napoje",
+        "kawa"
+      ],
+      "aliases": [
+        "Kawa",
+        "ziarnista"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 234,
+        "protein_g": 19.0,
+        "fat_g": 6.0,
+        "carbs_g": 24.0
+      },
+      "shops": {
+        "lidl": "Kawa ziarnista Lidl",
+        "biedronka": "Kawa ziarnista Biedronka",
+        "kaufland": "Kawa ziarnista Kaufland",
+        "auchan": "Kawa ziarnista Auchan"
+      },
+      "price_range_pln": [
+        9.0,
+        13.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "napoje_kawa_mielona",
+      "znormalizowana_nazwa": "Kawa mielona",
+      "kategoria": "Napoje",
+      "subkategoria": "Kawa",
+      "typ": "Kawa mielona",
+      "tags": [
+        "napoje",
+        "kawa"
+      ],
+      "aliases": [
+        "Kawa",
+        "mielona"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 235,
+        "protein_g": 5.0,
+        "fat_g": 7.0,
+        "carbs_g": 25.0
+      },
+      "shops": {
+        "lidl": "Kawa mielona Lidl",
+        "biedronka": "Kawa mielona Biedronka",
+        "kaufland": "Kawa mielona Kaufland",
+        "auchan": "Kawa mielona Auchan"
+      },
+      "price_range_pln": [
+        9.5,
+        14.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "napoje_kawa_rozpuszczalna",
+      "znormalizowana_nazwa": "Kawa rozpuszczalna",
+      "kategoria": "Napoje",
+      "subkategoria": "Kawa",
+      "typ": "Kawa rozpuszczalna",
+      "tags": [
+        "napoje",
+        "kawa"
+      ],
+      "aliases": [
+        "Kawa",
+        "rozpuszczalna"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 236,
+        "protein_g": 6.0,
+        "fat_g": 8.0,
+        "carbs_g": 26.0
+      },
+      "shops": {
+        "lidl": "Kawa rozpuszczalna Lidl",
+        "biedronka": "Kawa rozpuszczalna Biedronka",
+        "kaufland": "Kawa rozpuszczalna Kaufland",
+        "auchan": "Kawa rozpuszczalna Auchan"
+      },
+      "price_range_pln": [
+        10.0,
+        15.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "napoje_kawa_kapsułki",
+      "znormalizowana_nazwa": "Kawa kapsułki",
+      "kategoria": "Napoje",
+      "subkategoria": "Kawa",
+      "typ": "Kawa kapsułki",
+      "tags": [
+        "napoje",
+        "kawa"
+      ],
+      "aliases": [
+        "Kawa",
+        "kapsułki"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 237,
+        "protein_g": 7.0,
+        "fat_g": 9.0,
+        "carbs_g": 27.0
+      },
+      "shops": {
+        "lidl": "Kawa kapsułki Lidl",
+        "biedronka": "Kawa kapsułki Biedronka",
+        "kaufland": "Kawa kapsułki Kaufland",
+        "auchan": "Kawa kapsułki Auchan"
+      },
+      "price_range_pln": [
+        10.5,
+        15.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "napoje_herbata_czarna",
+      "znormalizowana_nazwa": "Herbata czarna",
+      "kategoria": "Napoje",
+      "subkategoria": "Herbata",
+      "typ": "Herbata czarna",
+      "tags": [
+        "napoje",
+        "herbata"
+      ],
+      "aliases": [
+        "Herbata",
+        "czarna"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 238,
+        "protein_g": 8.0,
+        "fat_g": 10.0,
+        "carbs_g": 28.0
+      },
+      "shops": {
+        "lidl": "Herbata czarna Lidl",
+        "biedronka": "Herbata czarna Biedronka",
+        "kaufland": "Herbata czarna Kaufland",
+        "auchan": "Herbata czarna Auchan"
+      },
+      "price_range_pln": [
+        11.0,
+        16.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "napoje_herbata_zielona",
+      "znormalizowana_nazwa": "Herbata zielona",
+      "kategoria": "Napoje",
+      "subkategoria": "Herbata",
+      "typ": "Herbata zielona",
+      "tags": [
+        "napoje",
+        "herbata"
+      ],
+      "aliases": [
+        "Herbata",
+        "zielona"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 239,
+        "protein_g": 9.0,
+        "fat_g": 11.0,
+        "carbs_g": 29.0
+      },
+      "shops": {
+        "lidl": "Herbata zielona Lidl",
+        "biedronka": "Herbata zielona Biedronka",
+        "kaufland": "Herbata zielona Kaufland",
+        "auchan": "Herbata zielona Auchan"
+      },
+      "price_range_pln": [
+        11.5,
+        17.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "napoje_herbata_owocowa",
+      "znormalizowana_nazwa": "Herbata owocowa",
+      "kategoria": "Napoje",
+      "subkategoria": "Herbata",
+      "typ": "Herbata owocowa",
+      "tags": [
+        "napoje",
+        "herbata"
+      ],
+      "aliases": [
+        "Herbata",
+        "owocowa"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 240,
+        "protein_g": 10.0,
+        "fat_g": 2.0,
+        "carbs_g": 30.0
+      },
+      "shops": {
+        "lidl": "Herbata owocowa Lidl",
+        "biedronka": "Herbata owocowa Biedronka",
+        "kaufland": "Herbata owocowa Kaufland",
+        "auchan": "Herbata owocowa Auchan"
+      },
+      "price_range_pln": [
+        2.0,
+        3.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "napoje_herbata_ziołowa",
+      "znormalizowana_nazwa": "Herbata ziołowa",
+      "kategoria": "Napoje",
+      "subkategoria": "Herbata",
+      "typ": "Herbata ziołowa",
+      "tags": [
+        "napoje",
+        "herbata"
+      ],
+      "aliases": [
+        "Herbata",
+        "ziołowa"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 241,
+        "protein_g": 11.0,
+        "fat_g": 3.0,
+        "carbs_g": 31.0
+      },
+      "shops": {
+        "lidl": "Herbata ziołowa Lidl",
+        "biedronka": "Herbata ziołowa Biedronka",
+        "kaufland": "Herbata ziołowa Kaufland",
+        "auchan": "Herbata ziołowa Auchan"
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "mrożone_warzywa_mieszanka",
+      "znormalizowana_nazwa": "Warzywa mieszanka",
+      "kategoria": "Mrożone",
+      "subkategoria": "Warzywa",
+      "typ": "Warzywa mieszanka",
+      "tags": [
+        "mrożone",
+        "warzywa"
+      ],
+      "aliases": [
+        "Warzywa",
+        "mieszanka"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": -18,
+        "storage_temperature_c_max": -18,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 242,
+        "protein_g": 12.0,
+        "fat_g": 4.0,
+        "carbs_g": 32.0
+      },
+      "shops": {
+        "lidl": "Warzywa mieszanka Lidl",
+        "biedronka": "Warzywa mieszanka Biedronka",
+        "kaufland": "Warzywa mieszanka Kaufland",
+        "auchan": "Warzywa mieszanka Auchan"
+      },
+      "price_range_pln": [
+        3.0,
+        4.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "mrożone_warzywa_brokuły",
+      "znormalizowana_nazwa": "Warzywa brokuły",
+      "kategoria": "Mrożone",
+      "subkategoria": "Warzywa",
+      "typ": "Warzywa brokuły",
+      "tags": [
+        "mrożone",
+        "warzywa"
+      ],
+      "aliases": [
+        "Warzywa",
+        "brokuły"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": -18,
+        "storage_temperature_c_max": -18,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 243,
+        "protein_g": 13.0,
+        "fat_g": 5.0,
+        "carbs_g": 33.0
+      },
+      "shops": {
+        "lidl": "Warzywa brokuły Lidl",
+        "biedronka": "Warzywa brokuły Biedronka",
+        "kaufland": "Warzywa brokuły Kaufland",
+        "auchan": "Warzywa brokuły Auchan"
+      },
+      "price_range_pln": [
+        3.5,
+        5.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "mrożone_warzywa_fasolka",
+      "znormalizowana_nazwa": "Warzywa fasolka",
+      "kategoria": "Mrożone",
+      "subkategoria": "Warzywa",
+      "typ": "Warzywa fasolka",
+      "tags": [
+        "mrożone",
+        "warzywa"
+      ],
+      "aliases": [
+        "Warzywa",
+        "fasolka"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": -18,
+        "storage_temperature_c_max": -18,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 244,
+        "protein_g": 14.0,
+        "fat_g": 6.0,
+        "carbs_g": 34.0
+      },
+      "shops": {
+        "lidl": "Warzywa fasolka Lidl",
+        "biedronka": "Warzywa fasolka Biedronka",
+        "kaufland": "Warzywa fasolka Kaufland",
+        "auchan": "Warzywa fasolka Auchan"
+      },
+      "price_range_pln": [
+        4.0,
+        6.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "mrożone_warzywa_szpinak",
+      "znormalizowana_nazwa": "Warzywa szpinak",
+      "kategoria": "Mrożone",
+      "subkategoria": "Warzywa",
+      "typ": "Warzywa szpinak",
+      "tags": [
+        "mrożone",
+        "warzywa"
+      ],
+      "aliases": [
+        "Warzywa",
+        "szpinak"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": -18,
+        "storage_temperature_c_max": -18,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 245,
+        "protein_g": 15.0,
+        "fat_g": 7.0,
+        "carbs_g": 35.0
+      },
+      "shops": {
+        "lidl": "Warzywa szpinak Lidl",
+        "biedronka": "Warzywa szpinak Biedronka",
+        "kaufland": "Warzywa szpinak Kaufland",
+        "auchan": "Warzywa szpinak Auchan"
+      },
+      "price_range_pln": [
+        4.5,
+        6.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "mrożone_owoce_truskawki",
+      "znormalizowana_nazwa": "Owoce truskawki",
+      "kategoria": "Mrożone",
+      "subkategoria": "Owoce",
+      "typ": "Owoce truskawki",
+      "tags": [
+        "mrożone",
+        "owoce"
+      ],
+      "aliases": [
+        "Owoce",
+        "truskawki"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": -18,
+        "storage_temperature_c_max": -18,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 246,
+        "protein_g": 16.0,
+        "fat_g": 8.0,
+        "carbs_g": 36.0
+      },
+      "shops": {
+        "lidl": "Owoce truskawki Lidl",
+        "biedronka": "Owoce truskawki Biedronka",
+        "kaufland": "Owoce truskawki Kaufland",
+        "auchan": "Owoce truskawki Auchan"
+      },
+      "price_range_pln": [
+        5.0,
+        7.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "mrożone_owoce_maliny",
+      "znormalizowana_nazwa": "Owoce maliny",
+      "kategoria": "Mrożone",
+      "subkategoria": "Owoce",
+      "typ": "Owoce maliny",
+      "tags": [
+        "mrożone",
+        "owoce"
+      ],
+      "aliases": [
+        "Owoce",
+        "maliny"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": -18,
+        "storage_temperature_c_max": -18,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 247,
+        "protein_g": 17.0,
+        "fat_g": 9.0,
+        "carbs_g": 37.0
+      },
+      "shops": {
+        "lidl": "Owoce maliny Lidl",
+        "biedronka": "Owoce maliny Biedronka",
+        "kaufland": "Owoce maliny Kaufland",
+        "auchan": "Owoce maliny Auchan"
+      },
+      "price_range_pln": [
+        5.5,
+        8.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "mrożone_owoce_borówki",
+      "znormalizowana_nazwa": "Owoce borówki",
+      "kategoria": "Mrożone",
+      "subkategoria": "Owoce",
+      "typ": "Owoce borówki",
+      "tags": [
+        "mrożone",
+        "owoce"
+      ],
+      "aliases": [
+        "Owoce",
+        "borówki"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": -18,
+        "storage_temperature_c_max": -18,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 248,
+        "protein_g": 18.0,
+        "fat_g": 10.0,
+        "carbs_g": 38.0
+      },
+      "shops": {
+        "lidl": "Owoce borówki Lidl",
+        "biedronka": "Owoce borówki Biedronka",
+        "kaufland": "Owoce borówki Kaufland",
+        "auchan": "Owoce borówki Auchan"
+      },
+      "price_range_pln": [
+        6.0,
+        9.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "mrożone_owoce_mieszanka",
+      "znormalizowana_nazwa": "Owoce mieszanka",
+      "kategoria": "Mrożone",
+      "subkategoria": "Owoce",
+      "typ": "Owoce mieszanka",
+      "tags": [
+        "mrożone",
+        "owoce"
+      ],
+      "aliases": [
+        "Owoce",
+        "mieszanka"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": -18,
+        "storage_temperature_c_max": -18,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 249,
+        "protein_g": 19.0,
+        "fat_g": 11.0,
+        "carbs_g": 39.0
+      },
+      "shops": {
+        "lidl": "Owoce mieszanka Lidl",
+        "biedronka": "Owoce mieszanka Biedronka",
+        "kaufland": "Owoce mieszanka Kaufland",
+        "auchan": "Owoce mieszanka Auchan"
+      },
+      "price_range_pln": [
+        6.5,
+        9.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "mrożone_pizza_margherita",
+      "znormalizowana_nazwa": "Pizza margherita",
+      "kategoria": "Mrożone",
+      "subkategoria": "Pizza",
+      "typ": "Pizza margherita",
+      "tags": [
+        "mrożone",
+        "pizza"
+      ],
+      "aliases": [
+        "Pizza",
+        "margherita"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": -18,
+        "storage_temperature_c_max": -18,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 250,
+        "protein_g": 5.0,
+        "fat_g": 2.0,
+        "carbs_g": 10.0
+      },
+      "shops": {
+        "lidl": "Pizza margherita Lidl",
+        "biedronka": "Pizza margherita Biedronka",
+        "kaufland": "Pizza margherita Kaufland",
+        "auchan": "Pizza margherita Auchan"
+      },
+      "price_range_pln": [
+        7.0,
+        10.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "mrożone_pizza_pepperoni",
+      "znormalizowana_nazwa": "Pizza pepperoni",
+      "kategoria": "Mrożone",
+      "subkategoria": "Pizza",
+      "typ": "Pizza pepperoni",
+      "tags": [
+        "mrożone",
+        "pizza"
+      ],
+      "aliases": [
+        "Pizza",
+        "pepperoni"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": -18,
+        "storage_temperature_c_max": -18,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 251,
+        "protein_g": 6.0,
+        "fat_g": 3.0,
+        "carbs_g": 11.0
+      },
+      "shops": {
+        "lidl": "Pizza pepperoni Lidl",
+        "biedronka": "Pizza pepperoni Biedronka",
+        "kaufland": "Pizza pepperoni Kaufland",
+        "auchan": "Pizza pepperoni Auchan"
+      },
+      "price_range_pln": [
+        7.5,
+        11.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "mrożone_pizza_hawajska",
+      "znormalizowana_nazwa": "Pizza hawajska",
+      "kategoria": "Mrożone",
+      "subkategoria": "Pizza",
+      "typ": "Pizza hawajska",
+      "tags": [
+        "mrożone",
+        "pizza"
+      ],
+      "aliases": [
+        "Pizza",
+        "hawajska"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": -18,
+        "storage_temperature_c_max": -18,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 252,
+        "protein_g": 7.0,
+        "fat_g": 4.0,
+        "carbs_g": 12.0
+      },
+      "shops": {
+        "lidl": "Pizza hawajska Lidl",
+        "biedronka": "Pizza hawajska Biedronka",
+        "kaufland": "Pizza hawajska Kaufland",
+        "auchan": "Pizza hawajska Auchan"
+      },
+      "price_range_pln": [
+        8.0,
+        12.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "mrożone_frytki_proste",
+      "znormalizowana_nazwa": "Frytki proste",
+      "kategoria": "Mrożone",
+      "subkategoria": "Frytki",
+      "typ": "Frytki proste",
+      "tags": [
+        "mrożone",
+        "frytki"
+      ],
+      "aliases": [
+        "Frytki",
+        "proste"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": -18,
+        "storage_temperature_c_max": -18,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 253,
+        "protein_g": 8.0,
+        "fat_g": 5.0,
+        "carbs_g": 13.0
+      },
+      "shops": {
+        "lidl": "Frytki proste Lidl",
+        "biedronka": "Frytki proste Biedronka",
+        "kaufland": "Frytki proste Kaufland",
+        "auchan": "Frytki proste Auchan"
+      },
+      "price_range_pln": [
+        8.5,
+        12.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "mrożone_frytki_kręcone",
+      "znormalizowana_nazwa": "Frytki kręcone",
+      "kategoria": "Mrożone",
+      "subkategoria": "Frytki",
+      "typ": "Frytki kręcone",
+      "tags": [
+        "mrożone",
+        "frytki"
+      ],
+      "aliases": [
+        "Frytki",
+        "kręcone"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": -18,
+        "storage_temperature_c_max": -18,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 254,
+        "protein_g": 9.0,
+        "fat_g": 6.0,
+        "carbs_g": 14.0
+      },
+      "shops": {
+        "lidl": "Frytki kręcone Lidl",
+        "biedronka": "Frytki kręcone Biedronka",
+        "kaufland": "Frytki kręcone Kaufland",
+        "auchan": "Frytki kręcone Auchan"
+      },
+      "price_range_pln": [
+        9.0,
+        13.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "mrożone_frytki_sweet_potato",
+      "znormalizowana_nazwa": "Frytki sweet potato",
+      "kategoria": "Mrożone",
+      "subkategoria": "Frytki",
+      "typ": "Frytki sweet potato",
+      "tags": [
+        "mrożone",
+        "frytki"
+      ],
+      "aliases": [
+        "Frytki",
+        "sweet potato"
+      ],
+      "properties": {
+        "can_freeze": true,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": -18,
+        "storage_temperature_c_max": -18,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 255,
+        "protein_g": 10.0,
+        "fat_g": 7.0,
+        "carbs_g": 15.0
+      },
+      "shops": {
+        "lidl": "Frytki sweet potato Lidl",
+        "biedronka": "Frytki sweet potato Biedronka",
+        "kaufland": "Frytki sweet potato Kaufland",
+        "auchan": "Frytki sweet potato Auchan"
+      },
+      "price_range_pln": [
+        9.5,
+        14.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "słoiki/puszki_pomidory_krojone",
+      "znormalizowana_nazwa": "Pomidory krojone",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Pomidory",
+      "typ": "Pomidory krojone",
+      "tags": [
+        "słoiki/puszki",
+        "pomidory"
+      ],
+      "aliases": [
+        "Pomidory",
+        "krojone"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 256,
+        "protein_g": 11.0,
+        "fat_g": 8.0,
+        "carbs_g": 16.0
+      },
+      "shops": {
+        "lidl": "Pomidory krojone Lidl",
+        "biedronka": "Pomidory krojone Biedronka",
+        "kaufland": "Pomidory krojone Kaufland",
+        "auchan": "Pomidory krojone Auchan"
+      },
+      "price_range_pln": [
+        10.0,
+        15.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "słoiki/puszki_pomidory_passata",
+      "znormalizowana_nazwa": "Pomidory passata",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Pomidory",
+      "typ": "Pomidory passata",
+      "tags": [
+        "słoiki/puszki",
+        "pomidory"
+      ],
+      "aliases": [
+        "Pomidory",
+        "passata"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 257,
+        "protein_g": 12.0,
+        "fat_g": 9.0,
+        "carbs_g": 17.0
+      },
+      "shops": {
+        "lidl": "Pomidory passata Lidl",
+        "biedronka": "Pomidory passata Biedronka",
+        "kaufland": "Pomidory passata Kaufland",
+        "auchan": "Pomidory passata Auchan"
+      },
+      "price_range_pln": [
+        10.5,
+        15.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "słoiki/puszki_pomidory_koncentrat",
+      "znormalizowana_nazwa": "Pomidory koncentrat",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Pomidory",
+      "typ": "Pomidory koncentrat",
+      "tags": [
+        "słoiki/puszki",
+        "pomidory"
+      ],
+      "aliases": [
+        "Pomidory",
+        "koncentrat"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 258,
+        "protein_g": 13.0,
+        "fat_g": 10.0,
+        "carbs_g": 18.0
+      },
+      "shops": {
+        "lidl": "Pomidory koncentrat Lidl",
+        "biedronka": "Pomidory koncentrat Biedronka",
+        "kaufland": "Pomidory koncentrat Kaufland",
+        "auchan": "Pomidory koncentrat Auchan"
+      },
+      "price_range_pln": [
+        11.0,
+        16.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "słoiki/puszki_fasola_czerwona",
+      "znormalizowana_nazwa": "Fasola czerwona",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Fasola",
+      "typ": "Fasola czerwona",
+      "tags": [
+        "słoiki/puszki",
+        "fasola"
+      ],
+      "aliases": [
+        "Fasola",
+        "czerwona"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 259,
+        "protein_g": 14.0,
+        "fat_g": 11.0,
+        "carbs_g": 19.0
+      },
+      "shops": {
+        "lidl": "Fasola czerwona Lidl",
+        "biedronka": "Fasola czerwona Biedronka",
+        "kaufland": "Fasola czerwona Kaufland",
+        "auchan": "Fasola czerwona Auchan"
+      },
+      "price_range_pln": [
+        11.5,
+        17.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "słoiki/puszki_fasola_biała",
+      "znormalizowana_nazwa": "Fasola biała",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Fasola",
+      "typ": "Fasola biała",
+      "tags": [
+        "słoiki/puszki",
+        "fasola"
+      ],
+      "aliases": [
+        "Fasola",
+        "biała"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 260,
+        "protein_g": 15.0,
+        "fat_g": 2.0,
+        "carbs_g": 20.0
+      },
+      "shops": {
+        "lidl": "Fasola biała Lidl",
+        "biedronka": "Fasola biała Biedronka",
+        "kaufland": "Fasola biała Kaufland",
+        "auchan": "Fasola biała Auchan"
+      },
+      "price_range_pln": [
+        2.0,
+        3.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "słoiki/puszki_fasola_czarna",
+      "znormalizowana_nazwa": "Fasola czarna",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Fasola",
+      "typ": "Fasola czarna",
+      "tags": [
+        "słoiki/puszki",
+        "fasola"
+      ],
+      "aliases": [
+        "Fasola",
+        "czarna"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 261,
+        "protein_g": 16.0,
+        "fat_g": 3.0,
+        "carbs_g": 21.0
+      },
+      "shops": {
+        "lidl": "Fasola czarna Lidl",
+        "biedronka": "Fasola czarna Biedronka",
+        "kaufland": "Fasola czarna Kaufland",
+        "auchan": "Fasola czarna Auchan"
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "słoiki/puszki_kukurydza_słodka",
+      "znormalizowana_nazwa": "Kukurydza słodka",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Kukurydza",
+      "typ": "Kukurydza słodka",
+      "tags": [
+        "słoiki/puszki",
+        "kukurydza"
+      ],
+      "aliases": [
+        "Kukurydza",
+        "słodka"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 262,
+        "protein_g": 17.0,
+        "fat_g": 4.0,
+        "carbs_g": 22.0
+      },
+      "shops": {
+        "lidl": "Kukurydza słodka Lidl",
+        "biedronka": "Kukurydza słodka Biedronka",
+        "kaufland": "Kukurydza słodka Kaufland",
+        "auchan": "Kukurydza słodka Auchan"
+      },
+      "price_range_pln": [
+        3.0,
+        4.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "słoiki/puszki_kukurydza_zwykła",
+      "znormalizowana_nazwa": "Kukurydza zwykła",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Kukurydza",
+      "typ": "Kukurydza zwykła",
+      "tags": [
+        "słoiki/puszki",
+        "kukurydza"
+      ],
+      "aliases": [
+        "Kukurydza",
+        "zwykła"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 263,
+        "protein_g": 18.0,
+        "fat_g": 5.0,
+        "carbs_g": 23.0
+      },
+      "shops": {
+        "lidl": "Kukurydza zwykła Lidl",
+        "biedronka": "Kukurydza zwykła Biedronka",
+        "kaufland": "Kukurydza zwykła Kaufland",
+        "auchan": "Kukurydza zwykła Auchan"
+      },
+      "price_range_pln": [
+        3.5,
+        5.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "słoiki/puszki_ogórki_kiszone",
+      "znormalizowana_nazwa": "Ogórki kiszone",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Ogórki",
+      "typ": "Ogórki kiszone",
+      "tags": [
+        "słoiki/puszki",
+        "ogórki"
+      ],
+      "aliases": [
+        "Ogórki",
+        "kiszone"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 264,
+        "protein_g": 19.0,
+        "fat_g": 6.0,
+        "carbs_g": 24.0
+      },
+      "shops": {
+        "lidl": "Ogórki kiszone Lidl",
+        "biedronka": "Ogórki kiszone Biedronka",
+        "kaufland": "Ogórki kiszone Kaufland",
+        "auchan": "Ogórki kiszone Auchan"
+      },
+      "price_range_pln": [
+        4.0,
+        6.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "słoiki/puszki_ogórki_konserwowe",
+      "znormalizowana_nazwa": "Ogórki konserwowe",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Ogórki",
+      "typ": "Ogórki konserwowe",
+      "tags": [
+        "słoiki/puszki",
+        "ogórki"
+      ],
+      "aliases": [
+        "Ogórki",
+        "konserwowe"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 265,
+        "protein_g": 5.0,
+        "fat_g": 7.0,
+        "carbs_g": 25.0
+      },
+      "shops": {
+        "lidl": "Ogórki konserwowe Lidl",
+        "biedronka": "Ogórki konserwowe Biedronka",
+        "kaufland": "Ogórki konserwowe Kaufland",
+        "auchan": "Ogórki konserwowe Auchan"
+      },
+      "price_range_pln": [
+        4.5,
+        6.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "słoiki/puszki_dżem_truskawkowy",
+      "znormalizowana_nazwa": "Dżem truskawkowy",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Dżem",
+      "typ": "Dżem truskawkowy",
+      "tags": [
+        "słoiki/puszki",
+        "dżem"
+      ],
+      "aliases": [
+        "Dżem",
+        "truskawkowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 266,
+        "protein_g": 6.0,
+        "fat_g": 8.0,
+        "carbs_g": 26.0
+      },
+      "shops": {
+        "lidl": "Dżem truskawkowy Lidl",
+        "biedronka": "Dżem truskawkowy Biedronka",
+        "kaufland": "Dżem truskawkowy Kaufland",
+        "auchan": "Dżem truskawkowy Auchan"
+      },
+      "price_range_pln": [
+        5.0,
+        7.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "słoiki/puszki_dżem_malinowy",
+      "znormalizowana_nazwa": "Dżem malinowy",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Dżem",
+      "typ": "Dżem malinowy",
+      "tags": [
+        "słoiki/puszki",
+        "dżem"
+      ],
+      "aliases": [
+        "Dżem",
+        "malinowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 267,
+        "protein_g": 7.0,
+        "fat_g": 9.0,
+        "carbs_g": 27.0
+      },
+      "shops": {
+        "lidl": "Dżem malinowy Lidl",
+        "biedronka": "Dżem malinowy Biedronka",
+        "kaufland": "Dżem malinowy Kaufland",
+        "auchan": "Dżem malinowy Auchan"
+      },
+      "price_range_pln": [
+        5.5,
+        8.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "słoiki/puszki_dżem_morelowy",
+      "znormalizowana_nazwa": "Dżem morelowy",
+      "kategoria": "Słoiki/Puszki",
+      "subkategoria": "Dżem",
+      "typ": "Dżem morelowy",
+      "tags": [
+        "słoiki/puszki",
+        "dżem"
+      ],
+      "aliases": [
+        "Dżem",
+        "morelowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 268,
+        "protein_g": 8.0,
+        "fat_g": 10.0,
+        "carbs_g": 28.0
+      },
+      "shops": {
+        "lidl": "Dżem morelowy Lidl",
+        "biedronka": "Dżem morelowy Biedronka",
+        "kaufland": "Dżem morelowy Kaufland",
+        "auchan": "Dżem morelowy Auchan"
+      },
+      "price_range_pln": [
+        6.0,
+        9.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "przyprawy_sól_zwykła",
+      "znormalizowana_nazwa": "Sól zwykła",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Sól",
+      "typ": "Sól zwykła",
+      "tags": [
+        "przyprawy",
+        "sól"
+      ],
+      "aliases": [
+        "Sól",
+        "zwykła"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 269,
+        "protein_g": 9.0,
+        "fat_g": 11.0,
+        "carbs_g": 29.0
+      },
+      "shops": {
+        "lidl": "Sól zwykła Lidl",
+        "biedronka": "Sól zwykła Biedronka",
+        "kaufland": "Sól zwykła Kaufland",
+        "auchan": "Sól zwykła Auchan"
+      },
+      "price_range_pln": [
+        6.5,
+        9.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "przyprawy_sól_morska",
+      "znormalizowana_nazwa": "Sól morska",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Sól",
+      "typ": "Sól morska",
+      "tags": [
+        "przyprawy",
+        "sól"
+      ],
+      "aliases": [
+        "Sól",
+        "morska"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 270,
+        "protein_g": 10.0,
+        "fat_g": 2.0,
+        "carbs_g": 30.0
+      },
+      "shops": {
+        "lidl": "Sól morska Lidl",
+        "biedronka": "Sól morska Biedronka",
+        "kaufland": "Sól morska Kaufland",
+        "auchan": "Sól morska Auchan"
+      },
+      "price_range_pln": [
+        7.0,
+        10.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "przyprawy_sól_himalajska",
+      "znormalizowana_nazwa": "Sól himalajska",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Sól",
+      "typ": "Sól himalajska",
+      "tags": [
+        "przyprawy",
+        "sól"
+      ],
+      "aliases": [
+        "Sól",
+        "himalajska"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 271,
+        "protein_g": 11.0,
+        "fat_g": 3.0,
+        "carbs_g": 31.0
+      },
+      "shops": {
+        "lidl": "Sól himalajska Lidl",
+        "biedronka": "Sól himalajska Biedronka",
+        "kaufland": "Sól himalajska Kaufland",
+        "auchan": "Sól himalajska Auchan"
+      },
+      "price_range_pln": [
+        7.5,
+        11.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "przyprawy_pieprz_czarny",
+      "znormalizowana_nazwa": "Pieprz czarny",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Pieprz",
+      "typ": "Pieprz czarny",
+      "tags": [
+        "przyprawy",
+        "pieprz"
+      ],
+      "aliases": [
+        "Pieprz",
+        "czarny"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 272,
+        "protein_g": 12.0,
+        "fat_g": 4.0,
+        "carbs_g": 32.0
+      },
+      "shops": {
+        "lidl": "Pieprz czarny Lidl",
+        "biedronka": "Pieprz czarny Biedronka",
+        "kaufland": "Pieprz czarny Kaufland",
+        "auchan": "Pieprz czarny Auchan"
+      },
+      "price_range_pln": [
+        8.0,
+        12.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "przyprawy_pieprz_biały",
+      "znormalizowana_nazwa": "Pieprz biały",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Pieprz",
+      "typ": "Pieprz biały",
+      "tags": [
+        "przyprawy",
+        "pieprz"
+      ],
+      "aliases": [
+        "Pieprz",
+        "biały"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 273,
+        "protein_g": 13.0,
+        "fat_g": 5.0,
+        "carbs_g": 33.0
+      },
+      "shops": {
+        "lidl": "Pieprz biały Lidl",
+        "biedronka": "Pieprz biały Biedronka",
+        "kaufland": "Pieprz biały Kaufland",
+        "auchan": "Pieprz biały Auchan"
+      },
+      "price_range_pln": [
+        8.5,
+        12.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "przyprawy_pieprz_kolorowy",
+      "znormalizowana_nazwa": "Pieprz kolorowy",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Pieprz",
+      "typ": "Pieprz kolorowy",
+      "tags": [
+        "przyprawy",
+        "pieprz"
+      ],
+      "aliases": [
+        "Pieprz",
+        "kolorowy"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 274,
+        "protein_g": 14.0,
+        "fat_g": 6.0,
+        "carbs_g": 34.0
+      },
+      "shops": {
+        "lidl": "Pieprz kolorowy Lidl",
+        "biedronka": "Pieprz kolorowy Biedronka",
+        "kaufland": "Pieprz kolorowy Kaufland",
+        "auchan": "Pieprz kolorowy Auchan"
+      },
+      "price_range_pln": [
+        9.0,
+        13.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "przyprawy_papryka_słodka",
+      "znormalizowana_nazwa": "Papryka słodka",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Papryka",
+      "typ": "Papryka słodka",
+      "tags": [
+        "przyprawy",
+        "papryka"
+      ],
+      "aliases": [
+        "Papryka",
+        "słodka"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 275,
+        "protein_g": 15.0,
+        "fat_g": 7.0,
+        "carbs_g": 35.0
+      },
+      "shops": {
+        "lidl": "Papryka słodka Lidl",
+        "biedronka": "Papryka słodka Biedronka",
+        "kaufland": "Papryka słodka Kaufland",
+        "auchan": "Papryka słodka Auchan"
+      },
+      "price_range_pln": [
+        9.5,
+        14.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "przyprawy_papryka_ostra",
+      "znormalizowana_nazwa": "Papryka ostra",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Papryka",
+      "typ": "Papryka ostra",
+      "tags": [
+        "przyprawy",
+        "papryka"
+      ],
+      "aliases": [
+        "Papryka",
+        "ostra"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 276,
+        "protein_g": 16.0,
+        "fat_g": 8.0,
+        "carbs_g": 36.0
+      },
+      "shops": {
+        "lidl": "Papryka ostra Lidl",
+        "biedronka": "Papryka ostra Biedronka",
+        "kaufland": "Papryka ostra Kaufland",
+        "auchan": "Papryka ostra Auchan"
+      },
+      "price_range_pln": [
+        10.0,
+        15.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "przyprawy_papryka_wędzona",
+      "znormalizowana_nazwa": "Papryka wędzona",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Papryka",
+      "typ": "Papryka wędzona",
+      "tags": [
+        "przyprawy",
+        "papryka"
+      ],
+      "aliases": [
+        "Papryka",
+        "wędzona"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 277,
+        "protein_g": 17.0,
+        "fat_g": 9.0,
+        "carbs_g": 37.0
+      },
+      "shops": {
+        "lidl": "Papryka wędzona Lidl",
+        "biedronka": "Papryka wędzona Biedronka",
+        "kaufland": "Papryka wędzona Kaufland",
+        "auchan": "Papryka wędzona Auchan"
+      },
+      "price_range_pln": [
+        10.5,
+        15.75
+      ],
+      "purchase_frequency": "weekly"
+    },
+    {
+      "id": "przyprawy_zioła_bazylia",
+      "znormalizowana_nazwa": "Zioła bazylia",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Zioła",
+      "typ": "Zioła bazylia",
+      "tags": [
+        "przyprawy",
+        "zioła"
+      ],
+      "aliases": [
+        "Zioła",
+        "bazylia"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 278,
+        "protein_g": 18.0,
+        "fat_g": 10.0,
+        "carbs_g": 38.0
+      },
+      "shops": {
+        "lidl": "Zioła bazylia Lidl",
+        "biedronka": "Zioła bazylia Biedronka",
+        "kaufland": "Zioła bazylia Kaufland",
+        "auchan": "Zioła bazylia Auchan"
+      },
+      "price_range_pln": [
+        11.0,
+        16.5
+      ],
+      "purchase_frequency": "biweekly"
+    },
+    {
+      "id": "przyprawy_zioła_oregano",
+      "znormalizowana_nazwa": "Zioła oregano",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Zioła",
+      "typ": "Zioła oregano",
+      "tags": [
+        "przyprawy",
+        "zioła"
+      ],
+      "aliases": [
+        "Zioła",
+        "oregano"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 279,
+        "protein_g": 19.0,
+        "fat_g": 11.0,
+        "carbs_g": 39.0
+      },
+      "shops": {
+        "lidl": "Zioła oregano Lidl",
+        "biedronka": "Zioła oregano Biedronka",
+        "kaufland": "Zioła oregano Kaufland",
+        "auchan": "Zioła oregano Auchan"
+      },
+      "price_range_pln": [
+        11.5,
+        17.25
+      ],
+      "purchase_frequency": "monthly"
+    },
+    {
+      "id": "przyprawy_zioła_tymianek",
+      "znormalizowana_nazwa": "Zioła tymianek",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Zioła",
+      "typ": "Zioła tymianek",
+      "tags": [
+        "przyprawy",
+        "zioła"
+      ],
+      "aliases": [
+        "Zioła",
+        "tymianek"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 280,
+        "protein_g": 5.0,
+        "fat_g": 2.0,
+        "carbs_g": 10.0
+      },
+      "shops": {
+        "lidl": "Zioła tymianek Lidl",
+        "biedronka": "Zioła tymianek Biedronka",
+        "kaufland": "Zioła tymianek Kaufland",
+        "auchan": "Zioła tymianek Auchan"
+      },
+      "price_range_pln": [
+        2.0,
+        3.0
+      ],
+      "purchase_frequency": "daily"
+    },
+    {
+      "id": "przyprawy_zioła_rozmaryn",
+      "znormalizowana_nazwa": "Zioła rozmaryn",
+      "kategoria": "Przyprawy",
+      "subkategoria": "Zioła",
+      "typ": "Zioła rozmaryn",
+      "tags": [
+        "przyprawy",
+        "zioła"
+      ],
+      "aliases": [
+        "Zioła",
+        "rozmaryn"
+      ],
+      "properties": {
+        "can_freeze": false,
+        "shelf_life_unopened_days": 30,
+        "shelf_life_opened_days": 7,
+        "storage_temperature_c_min": 4,
+        "storage_temperature_c_max": 8,
+        "allergens": [],
+        "vegan": false,
+        "vegetarian": true
+      },
+      "nutrition_per_100g": {
+        "calories": 281,
+        "protein_g": 6.0,
+        "fat_g": 3.0,
+        "carbs_g": 11.0
+      },
+      "shops": {
+        "lidl": "Zioła rozmaryn Lidl",
+        "biedronka": "Zioła rozmaryn Biedronka",
+        "kaufland": "Zioła rozmaryn Kaufland",
+        "auchan": "Zioła rozmaryn Auchan"
+      },
+      "price_range_pln": [
+        2.5,
+        3.75
+      ],
+      "purchase_frequency": "weekly"
+    }
+  ]
+}
