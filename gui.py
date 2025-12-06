@@ -1296,6 +1296,9 @@ class App(ctk.CTk):
         self.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(2, weight=0)  # Status bar row
         self.grid_rowconfigure(2, weight=0)  # Status bar row
+        
+        # Automatycznie uruchom migracje bazy danych przy starcie (jeśli baza istnieje)
+        self.after(100, self._run_migrations_on_startup)
 
         # --- MENU BAR ---
         self.menu_frame = ctk.CTkFrame(self)
