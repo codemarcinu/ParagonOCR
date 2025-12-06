@@ -1279,6 +1279,10 @@ class App(ctk.CTk):
         self.minsize(1200, 700)  # Minimalny rozmiar okna
         ctk.set_appearance_mode("System")
         
+        # Thread safety for processing
+        self.processing_lock = threading.Lock()
+        self.is_processing = False
+        
         # Register dialogs for lazy loading
         dialog_manager.register_dialog("cooking", CookingDialog)
         dialog_manager.register_dialog("add_product", AddProductDialog)
@@ -3017,40 +3021,67 @@ class App(ctk.CTk):
         if not self.selected_file_path:
             return
 
-        # Dodaj do historii przed przetwarzaniem
-        add_to_history(self.selected_file_path)
-        self.refresh_history()
+        # Acquire lock to prevent concurrent processing
+        if not self.processing_lock.acquire(blocking=False):
+            messagebox.showwarning("Uwaga", "Przetwarzanie już trwa. Proszę poczekać na zakończenie.")
+            return
+        
+        try:
+            self.is_processing = True
+            
+            # Dodaj do historii przed przetwarzaniem
+            add_to_history(self.selected_file_path)
+            self.refresh_history()
 
-        self.set_ui_state("disabled")
-        self.process_button.configure(text="⏳ Przetwarzanie...")
-        self.log_textbox.configure(state="normal")
-        self.log_textbox.delete("1.0", "end")
-        self.log_textbox.configure(state="disabled")
+            self.set_ui_state("disabled")
+            self.process_button.configure(text="⏳ Przetwarzanie...")
+            self.log_textbox.configure(state="normal")
+            self.log_textbox.delete("1.0", "end")
+            self.log_textbox.configure(state="disabled")
 
-        # Uruchom pasek postępu w trybie indeterminate
-        self.update_status("Rozpoczynam przetwarzanie...", progress=-1)
+            # Uruchom pasek postępu w trybie indeterminate
+            self.update_status("Rozpoczynam przetwarzanie...", progress=-1)
 
-        llm_model = Config.VISION_MODEL
+            llm_model = Config.VISION_MODEL
 
-        thread = threading.Thread(
-            target=run_processing_pipeline,
-            args=(
-                self.selected_file_path,
+            thread = threading.Thread(
+                target=self._run_processing_with_cleanup,
+                args=(
+                    self.selected_file_path,
+                    llm_model,
+                ),
+            )
+            thread.daemon = True
+            thread.start()
+
+            self.monitor_thread(thread)
+        except Exception as e:
+            self.is_processing = False
+            self.processing_lock.release()
+            logger.error(f"Error starting processing: {e}")
+            messagebox.showerror("Błąd", f"Nie udało się rozpocząć przetwarzania: {e}")
+    
+    def _run_processing_with_cleanup(self, file_path, llm_model):
+        """Wrapper for processing pipeline that ensures lock is released."""
+        try:
+            run_processing_pipeline(
+                file_path,
                 llm_model,
                 self.log,
                 self.prompt_user,
                 self.review_user,
-            ),
-        )
-        thread.daemon = True
-        thread.start()
-
-        self.monitor_thread(thread)
+            )
+        finally:
+            self.is_processing = False
+            self.processing_lock.release()
+            # Update UI on main thread
+            self.after(0, lambda: self.set_ui_state("normal"))
 
     def monitor_thread(self, thread):
         if thread.is_alive():
             self.after(100, lambda: self.monitor_thread(thread))
         else:
+            # Lock is released in _run_processing_with_cleanup, but ensure UI is updated
             self.set_ui_state("normal")
             self.process_button.configure(text="🔄 Przetwórz")
             # Zatrzymaj pasek postępu i ustaw na 100%
