@@ -105,6 +105,31 @@ class StanMagazynowy(Base):
     produkt = relationship("Produkt", back_populates="stan_magazynowy")
     pozycja_paragonu = relationship("PozycjaParagonu")
 
+class Conversation(Base):
+    """Tabela do przechowywania konwersacji AI chat"""
+    __tablename__ = 'conversations'
+    conversation_id = Column(Integer, primary_key=True)
+    created_at = Column(DateTime, default=datetime.now)
+    title = Column(String, default='Nowa rozmowa')
+    model_used = Column(String, default='bielik')
+    tags = Column(String)
+    
+    messages = relationship("ChatMessage", back_populates="conversation", cascade="all, delete-orphan")
+
+class ChatMessage(Base):
+    """Tabela do przechowywania wiadomości w konwersacjach AI chat"""
+    __tablename__ = 'chat_messages'
+    message_id = Column(Integer, primary_key=True)
+    conversation_id = Column(Integer, ForeignKey('conversations.conversation_id'), nullable=False)
+    role = Column(String, nullable=False)  # 'user' or 'assistant'
+    content = Column(String, nullable=False)
+    timestamp = Column(DateTime, default=datetime.now)
+    response_time_ms = Column(Integer)
+    tokens_used = Column(Integer)
+    rag_context_used = Column(Boolean, default=False)
+    
+    conversation = relationship("Conversation", back_populates="messages")
+
 # --- Funkcja Inicjalizująca ---
 
 def init_db():
