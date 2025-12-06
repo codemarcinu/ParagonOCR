@@ -46,11 +46,19 @@ class ChatStorage:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit."""
         if self._own_session:
-            if exc_type:
-                self.session.rollback()
-            else:
-                self.session.commit()
-            self.session.close()
+            try:
+                if exc_type:
+                    self.session.rollback()
+                else:
+                    self.session.commit()
+            except Exception as e:
+                logger.error(f"Error in session cleanup: {e}")
+                try:
+                    self.session.rollback()
+                except Exception as rollback_error:
+                    logger.error(f"Error during rollback: {rollback_error}")
+            finally:
+                self.session.close()
     
     def create_conversation(
         self,
