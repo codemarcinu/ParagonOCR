@@ -25,10 +25,13 @@ class MistralOCRClient:
     )
     def _upload_file(self, image_path: str):
         """Pomocnicza metoda do uploadu pliku z retry."""
+        # Użyj context managera aby zapewnić zamknięcie pliku
+        with open(image_path, "rb") as f:
+            file_content = f.read()
         return self.client.files.upload(
             file={
                 "file_name": os.path.basename(image_path),
-                "content": open(image_path, "rb"),
+                "content": file_content,
             },
             purpose="ocr",
         )
