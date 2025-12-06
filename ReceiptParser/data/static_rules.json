@@ -1,0 +1,4546 @@
+{
+  "rules": [
+    {
+      "normalized_name": "Bagietka czosnkowa",
+      "patterns": [
+        {
+          "regex": "^bagietka\\ czosnkowa$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "bagietka.*czosnkowa",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*bagietka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*bagietka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*czosnkowa.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Bagietka francuska",
+      "patterns": [
+        {
+          "regex": "^bagietka\\ francuska$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "bagietka.*francuska",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*bagietka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*bagietka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*francuska.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Bagietka z serem",
+      "patterns": [
+        {
+          "regex": "^bagietka\\ z\\ serem$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "bagietka.*z.*serem",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*bagietka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*bagietka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*z\\ serem.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Banany zielone",
+      "patterns": [
+        {
+          "regex": "^banany\\ zielone$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "banany.*zielone",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*banany.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*banany.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*zielone.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Banany żółte",
+      "patterns": [
+        {
+          "regex": "^banany\\ żółte$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "banany.*żółte",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*banany.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*banany.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*żółte.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Bułki grahamka",
+      "patterns": [
+        {
+          "regex": "^bułki\\ grahamka$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "bułki.*grahamka",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*bułki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*bułki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*grahamka.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Bułki kajzerka",
+      "patterns": [
+        {
+          "regex": "^bułki\\ kajzerka$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "bułki.*kajzerka",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*bułki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*bułki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*kajzerka.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Bułki pszenna",
+      "patterns": [
+        {
+          "regex": "^bułki\\ pszenna$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "bułki.*pszenna",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*bułki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*bułki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*pszenna.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Bułki z makiem",
+      "patterns": [
+        {
+          "regex": "^bułki\\ z\\ makiem$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "bułki.*z.*makiem",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*bułki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*bułki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*z\\ makiem.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Bułki z sezamem",
+      "patterns": [
+        {
+          "regex": "^bułki\\ z\\ sezamem$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "bułki.*z.*sezamem",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*bułki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*bułki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*z\\ sezamem.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Bułki żytnia",
+      "patterns": [
+        {
+          "regex": "^bułki\\ żytnia$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "bułki.*żytnia",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*bułki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*bułki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*żytnia.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Cebula biała",
+      "patterns": [
+        {
+          "regex": "^cebula\\ biała$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "cebula.*biała",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*cebula.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*cebula.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*biała.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Cebula czerwona",
+      "patterns": [
+        {
+          "regex": "^cebula\\ czerwona$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "cebula.*czerwona",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*cebula.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*cebula.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*czerwona.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Cebula dymka",
+      "patterns": [
+        {
+          "regex": "^cebula\\ dymka$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "cebula.*dymka",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*cebula.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*cebula.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*dymka.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Cebula żółta",
+      "patterns": [
+        {
+          "regex": "^cebula\\ żółta$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "cebula.*żółta",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*cebula.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*cebula.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*żółta.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Chipsy cebulowe",
+      "patterns": [
+        {
+          "regex": "^chipsy\\ cebulowe$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "chipsy.*cebulowe",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*chipsy.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*chipsy.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*cebulowe.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Chipsy paprykowe",
+      "patterns": [
+        {
+          "regex": "^chipsy\\ paprykowe$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "chipsy.*paprykowe",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*chipsy.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*chipsy.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*paprykowe.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Chipsy serowe",
+      "patterns": [
+        {
+          "regex": "^chipsy\\ serowe$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "chipsy.*serowe",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*chipsy.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*chipsy.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*serowe.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Chipsy solone",
+      "patterns": [
+        {
+          "regex": "^chipsy\\ solone$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "chipsy.*solone",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*chipsy.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*chipsy.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*solone.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Chleb baltonowski",
+      "patterns": [
+        {
+          "regex": "^chleb\\ baltonowski$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "chleb.*baltonowski",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*chleb.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*chleb.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*baltonowski.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Chleb graham",
+      "patterns": [
+        {
+          "regex": "^chleb\\ graham$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "chleb.*graham",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*chleb.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*chleb.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*graham.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Chleb krojony",
+      "patterns": [
+        {
+          "regex": "^chleb\\ krojony$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "chleb.*krojony",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*chleb.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*chleb.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*krojony.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Chleb pszeniczny",
+      "patterns": [
+        {
+          "regex": "^chleb\\ pszeniczny$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "chleb.*pszeniczny",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*chleb.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*chleb.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*pszeniczny.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Chleb razowy",
+      "patterns": [
+        {
+          "regex": "^chleb\\ razowy$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "chleb.*razowy",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*chleb.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*chleb.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*razowy.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Chleb żytni",
+      "patterns": [
+        {
+          "regex": "^chleb\\ żytni$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "chleb.*żytni",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*chleb.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*chleb.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*żytni.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ciastka biszkopty",
+      "patterns": [
+        {
+          "regex": "^ciastka\\ biszkopty$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ciastka.*biszkopty",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ciastka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ciastka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*biszkopty.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ciastka herbatniki",
+      "patterns": [
+        {
+          "regex": "^ciastka\\ herbatniki$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ciastka.*herbatniki",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ciastka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ciastka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*herbatniki.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ciastka wafle",
+      "patterns": [
+        {
+          "regex": "^ciastka\\ wafle$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ciastka.*wafle",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ciastka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ciastka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*wafle.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Cola light",
+      "patterns": [
+        {
+          "regex": "^cola\\ light$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "cola.*light",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*cola.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*cola.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*light.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Cola zero",
+      "patterns": [
+        {
+          "regex": "^cola\\ zero$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "cola.*zero",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*cola.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*cola.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*zero.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Cola zwykła",
+      "patterns": [
+        {
+          "regex": "^cola\\ zwykła$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "cola.*zwykła",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*cola.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*cola.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*zwykła.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Cytryny limonki",
+      "patterns": [
+        {
+          "regex": "^cytryny\\ limonki$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "cytryny.*limonki",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*cytryny.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*cytryny.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*limonki.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Cytryny żółte",
+      "patterns": [
+        {
+          "regex": "^cytryny\\ żółte$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "cytryny.*żółte",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*cytryny.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*cytryny.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*żółte.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Czekolada biała",
+      "patterns": [
+        {
+          "regex": "^czekolada\\ biała$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "czekolada.*biała",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*czekolada.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*czekolada.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*biała.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Czekolada gorzka",
+      "patterns": [
+        {
+          "regex": "^czekolada\\ gorzka$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "czekolada.*gorzka",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*czekolada.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*czekolada.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*gorzka.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Czekolada mleczna",
+      "patterns": [
+        {
+          "regex": "^czekolada\\ mleczna$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "czekolada.*mleczna",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*czekolada.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*czekolada.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*mleczna.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Czekolada z orzechami",
+      "patterns": [
+        {
+          "regex": "^czekolada\\ z\\ orzechami$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "czekolada.*z.*orzechami",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*czekolada.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*czekolada.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*z\\ orzechami.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Dżem malinowy",
+      "patterns": [
+        {
+          "regex": "^dżem\\ malinowy$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "dżem.*malinowy",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*dżem.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*dżem.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*malinowy.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Dżem morelowy",
+      "patterns": [
+        {
+          "regex": "^dżem\\ morelowy$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "dżem.*morelowy",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*dżem.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*dżem.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*morelowy.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Dżem truskawkowy",
+      "patterns": [
+        {
+          "regex": "^dżem\\ truskawkowy$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "dżem.*truskawkowy",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*dżem.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*dżem.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*truskawkowy.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Fasola biała",
+      "patterns": [
+        {
+          "regex": "^fasola\\ biała$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "fasola.*biała",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*fasola.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*fasola.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*biała.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Fasola czarna",
+      "patterns": [
+        {
+          "regex": "^fasola\\ czarna$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "fasola.*czarna",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*fasola.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*fasola.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*czarna.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Fasola czerwona",
+      "patterns": [
+        {
+          "regex": "^fasola\\ czerwona$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "fasola.*czerwona",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*fasola.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*fasola.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*czerwona.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Frytki kręcone",
+      "patterns": [
+        {
+          "regex": "^frytki\\ kręcone$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "frytki.*kręcone",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*frytki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*frytki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*kręcone.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Frytki proste",
+      "patterns": [
+        {
+          "regex": "^frytki\\ proste$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "frytki.*proste",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*frytki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*frytki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*proste.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Frytki sweet potato",
+      "patterns": [
+        {
+          "regex": "^frytki\\ sweet\\ potato$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "frytki.*sweet.*potato",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*frytki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*frytki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*sweet\\ potato.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Herbata czarna",
+      "patterns": [
+        {
+          "regex": "^herbata\\ czarna$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "herbata.*czarna",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*herbata.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*herbata.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*czarna.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Herbata owocowa",
+      "patterns": [
+        {
+          "regex": "^herbata\\ owocowa$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "herbata.*owocowa",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*herbata.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*herbata.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*owocowa.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Herbata zielona",
+      "patterns": [
+        {
+          "regex": "^herbata\\ zielona$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "herbata.*zielona",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*herbata.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*herbata.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*zielona.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Herbata ziołowa",
+      "patterns": [
+        {
+          "regex": "^herbata\\ ziołowa$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "herbata.*ziołowa",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*herbata.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*herbata.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*ziołowa.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Indyk filet",
+      "patterns": [
+        {
+          "regex": "^indyk\\ filet$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "indyk.*filet",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*indyk.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*indyk.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*filet.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Indyk pierś",
+      "patterns": [
+        {
+          "regex": "^indyk\\ pierś$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "indyk.*pierś",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*indyk.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*indyk.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*pierś.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Indyk udko",
+      "patterns": [
+        {
+          "regex": "^indyk\\ udko$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "indyk.*udko",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*indyk.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*indyk.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*udko.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Jabłka gala",
+      "patterns": [
+        {
+          "regex": "^jabłka\\ gala$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "jabłka.*gala",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*jabłka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*jabłka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*gala.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Jabłka idared",
+      "patterns": [
+        {
+          "regex": "^jabłka\\ idared$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "jabłka.*idared",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*jabłka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*jabłka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*idared.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Jabłka jonagold",
+      "patterns": [
+        {
+          "regex": "^jabłka\\ jonagold$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "jabłka.*jonagold",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*jabłka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*jabłka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*jonagold.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Jabłka lobo",
+      "patterns": [
+        {
+          "regex": "^jabłka\\ lobo$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "jabłka.*lobo",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*jabłka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*jabłka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*lobo.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Jabłka szampion",
+      "patterns": [
+        {
+          "regex": "^jabłka\\ szampion$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "jabłka.*szampion",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*jabłka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*jabłka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*szampion.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Jajka kurze L",
+      "patterns": [
+        {
+          "regex": "^jajka\\ kurze\\ l$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "jajka.*kurze.*l",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*jajka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*jajka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*kurze\\ l.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Jajka kurze M",
+      "patterns": [
+        {
+          "regex": "^jajka\\ kurze\\ m$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "jajka.*kurze.*m",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*jajka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*jajka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*kurze\\ m.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Jajka kurze S",
+      "patterns": [
+        {
+          "regex": "^jajka\\ kurze\\ s$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "jajka.*kurze.*s",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*jajka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*jajka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*kurze\\ s.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Jajka przepiórcze",
+      "patterns": [
+        {
+          "regex": "^jajka\\ przepiórcze$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "jajka.*przepiórcze",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*jajka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*jajka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*przepiórcze.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Jogurt grecki",
+      "patterns": [
+        {
+          "regex": "^jogurt\\ grecki$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "jogurt.*grecki",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*jogurt.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*jogurt.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*grecki.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Jogurt naturalny",
+      "patterns": [
+        {
+          "regex": "^jogurt\\ naturalny$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "jogurt.*naturalny",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*jogurt.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*jogurt.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*naturalny.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Jogurt owocowy",
+      "patterns": [
+        {
+          "regex": "^jogurt\\ owocowy$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "jogurt.*owocowy",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*jogurt.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*jogurt.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*owocowy.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Jogurt pitny",
+      "patterns": [
+        {
+          "regex": "^jogurt\\ pitny$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "jogurt.*pitny",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*jogurt.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*jogurt.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*pitny.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Jogurt z probiotykami",
+      "patterns": [
+        {
+          "regex": "^jogurt\\ z\\ probiotykami$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "jogurt.*z.*probiotykami",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*jogurt.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*jogurt.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*z\\ probiotykami.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Kawa kapsułki",
+      "patterns": [
+        {
+          "regex": "^kawa\\ kapsułki$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "kawa.*kapsułki",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*kawa.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*kawa.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*kapsułki.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Kawa mielona",
+      "patterns": [
+        {
+          "regex": "^kawa\\ mielona$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "kawa.*mielona",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*kawa.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*kawa.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*mielona.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Kawa rozpuszczalna",
+      "patterns": [
+        {
+          "regex": "^kawa\\ rozpuszczalna$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "kawa.*rozpuszczalna",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*kawa.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*kawa.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*rozpuszczalna.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Kawa ziarnista",
+      "patterns": [
+        {
+          "regex": "^kawa\\ ziarnista$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "kawa.*ziarnista",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*kawa.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*kawa.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*ziarnista.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Kukurydza słodka",
+      "patterns": [
+        {
+          "regex": "^kukurydza\\ słodka$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "kukurydza.*słodka",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*kukurydza.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*kukurydza.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*słodka.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Kukurydza zwykła",
+      "patterns": [
+        {
+          "regex": "^kukurydza\\ zwykła$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "kukurydza.*zwykła",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*kukurydza.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*kukurydza.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*zwykła.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Kurczak cały",
+      "patterns": [
+        {
+          "regex": "^kurczak\\ cały$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "kurczak.*cały",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*kurczak.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*kurczak.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*cały.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Kurczak filet",
+      "patterns": [
+        {
+          "regex": "^kurczak\\ filet$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "kurczak.*filet",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*kurczak.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*kurczak.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*filet.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Kurczak pierś",
+      "patterns": [
+        {
+          "regex": "^kurczak\\ pierś$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "kurczak.*pierś",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*kurczak.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*kurczak.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*pierś.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Kurczak skrzydło",
+      "patterns": [
+        {
+          "regex": "^kurczak\\ skrzydło$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "kurczak.*skrzydło",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*kurczak.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*kurczak.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*skrzydło.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Kurczak udko",
+      "patterns": [
+        {
+          "regex": "^kurczak\\ udko$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "kurczak.*udko",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*kurczak.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*kurczak.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*udko.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Marchew baby",
+      "patterns": [
+        {
+          "regex": "^marchew\\ baby$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "marchew.*baby",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*marchew.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*marchew.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*baby.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Marchew młoda",
+      "patterns": [
+        {
+          "regex": "^marchew\\ młoda$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "marchew.*młoda",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*marchew.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*marchew.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*młoda.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Marchew zwykła",
+      "patterns": [
+        {
+          "regex": "^marchew\\ zwykła$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "marchew.*zwykła",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*marchew.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*marchew.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*zwykła.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Masło bez soli",
+      "patterns": [
+        {
+          "regex": "^masło\\ bez\\ soli$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "masło.*bez.*soli",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*masło.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*masło.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*bez\\ soli.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Masło ekstra",
+      "patterns": [
+        {
+          "regex": "^masło\\ ekstra$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "masło.*ekstra",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*masło.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*masło.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*ekstra.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Masło słone",
+      "patterns": [
+        {
+          "regex": "^masło\\ słone$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "masło.*słone",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*masło.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*masło.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*słone.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Masło świeże",
+      "patterns": [
+        {
+          "regex": "^masło\\ świeże$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "masło.*świeże",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*masło.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*masło.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*świeże.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Mleko 0.5% UHT",
+      "patterns": [
+        {
+          "regex": "^mleko\\ 0\\.5%\\ uht$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "mleko.*0\\.5%.*uht",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*mleko.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*mleko.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*0\\.5%\\ uht.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Mleko 1.5% UHT",
+      "patterns": [
+        {
+          "regex": "^mleko\\ 1\\.5%\\ uht$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "mleko.*1\\.5%.*uht",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*mleko.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*mleko.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*1\\.5%\\ uht.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Mleko 2% UHT",
+      "patterns": [
+        {
+          "regex": "^mleko\\ 2%\\ uht$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "mleko.*2%.*uht",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*mleko.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*mleko.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*2%\\ uht.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Mleko 3.2% UHT",
+      "patterns": [
+        {
+          "regex": "^mleko\\ 3\\.2%\\ uht$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "mleko.*3\\.2%.*uht",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*mleko.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*mleko.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*3\\.2%\\ uht.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Mleko bez laktozy",
+      "patterns": [
+        {
+          "regex": "^mleko\\ bez\\ laktozy$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "mleko.*bez.*laktozy",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*mleko.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*mleko.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*bez\\ laktozy.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Mleko sojowe",
+      "patterns": [
+        {
+          "regex": "^mleko\\ sojowe$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "mleko.*sojowe",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*mleko.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*mleko.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*sojowe.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ogórek gruntowy",
+      "patterns": [
+        {
+          "regex": "^ogórek\\ gruntowy$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ogórek.*gruntowy",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ogórek.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ogórek.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*gruntowy.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ogórek kiszony",
+      "patterns": [
+        {
+          "regex": "^ogórek\\ kiszony$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ogórek.*kiszony",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ogórek.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ogórek.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*kiszony.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ogórek szklarniowy",
+      "patterns": [
+        {
+          "regex": "^ogórek\\ szklarniowy$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ogórek.*szklarniowy",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ogórek.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ogórek.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*szklarniowy.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ogórki kiszone",
+      "patterns": [
+        {
+          "regex": "^ogórki\\ kiszone$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ogórki.*kiszone",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ogórki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ogórki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*kiszone.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ogórki konserwowe",
+      "patterns": [
+        {
+          "regex": "^ogórki\\ konserwowe$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ogórki.*konserwowe",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ogórki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ogórki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*konserwowe.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Orzeszki laskowe",
+      "patterns": [
+        {
+          "regex": "^orzeszki\\ laskowe$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "orzeszki.*laskowe",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*orzeszki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*orzeszki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*laskowe.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Orzeszki migdały",
+      "patterns": [
+        {
+          "regex": "^orzeszki\\ migdały$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "orzeszki.*migdały",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*orzeszki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*orzeszki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*migdały.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Orzeszki włoskie",
+      "patterns": [
+        {
+          "regex": "^orzeszki\\ włoskie$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "orzeszki.*włoskie",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*orzeszki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*orzeszki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*włoskie.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Orzeszki ziemne",
+      "patterns": [
+        {
+          "regex": "^orzeszki\\ ziemne$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "orzeszki.*ziemne",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*orzeszki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*orzeszki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*ziemne.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Owoce borówki",
+      "patterns": [
+        {
+          "regex": "^owoce\\ borówki$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "owoce.*borówki",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*owoce.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*owoce.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*borówki.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Owoce maliny",
+      "patterns": [
+        {
+          "regex": "^owoce\\ maliny$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "owoce.*maliny",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*owoce.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*owoce.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*maliny.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Owoce mieszanka",
+      "patterns": [
+        {
+          "regex": "^owoce\\ mieszanka$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "owoce.*mieszanka",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*owoce.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*owoce.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*mieszanka.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Owoce truskawki",
+      "patterns": [
+        {
+          "regex": "^owoce\\ truskawki$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "owoce.*truskawki",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*owoce.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*owoce.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*truskawki.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Papryka czerwona",
+      "patterns": [
+        {
+          "regex": "^papryka\\ czerwona$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "papryka.*czerwona",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*papryka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*papryka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*czerwona.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Papryka ostra",
+      "patterns": [
+        {
+          "regex": "^papryka\\ ostra$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "papryka.*ostra",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*papryka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*papryka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*ostra.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Papryka słodka",
+      "patterns": [
+        {
+          "regex": "^papryka\\ słodka$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "papryka.*słodka",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*papryka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*papryka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*słodka.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Papryka wędzona",
+      "patterns": [
+        {
+          "regex": "^papryka\\ wędzona$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "papryka.*wędzona",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*papryka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*papryka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*wędzona.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Papryka zielona",
+      "patterns": [
+        {
+          "regex": "^papryka\\ zielona$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "papryka.*zielona",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*papryka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*papryka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*zielona.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Papryka żółta",
+      "patterns": [
+        {
+          "regex": "^papryka\\ żółta$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "papryka.*żółta",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*papryka.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*papryka.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*żółta.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Pieprz biały",
+      "patterns": [
+        {
+          "regex": "^pieprz\\ biały$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "pieprz.*biały",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*pieprz.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*pieprz.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*biały.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Pieprz czarny",
+      "patterns": [
+        {
+          "regex": "^pieprz\\ czarny$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "pieprz.*czarny",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*pieprz.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*pieprz.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*czarny.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Pieprz kolorowy",
+      "patterns": [
+        {
+          "regex": "^pieprz\\ kolorowy$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "pieprz.*kolorowy",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*pieprz.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*pieprz.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*kolorowy.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Pizza hawajska",
+      "patterns": [
+        {
+          "regex": "^pizza\\ hawajska$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "pizza.*hawajska",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*pizza.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*pizza.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*hawajska.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Pizza margherita",
+      "patterns": [
+        {
+          "regex": "^pizza\\ margherita$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "pizza.*margherita",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*pizza.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*pizza.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*margherita.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Pizza pepperoni",
+      "patterns": [
+        {
+          "regex": "^pizza\\ pepperoni$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "pizza.*pepperoni",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*pizza.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*pizza.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*pepperoni.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Pomarańcze kwaśne",
+      "patterns": [
+        {
+          "regex": "^pomarańcze\\ kwaśne$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "pomarańcze.*kwaśne",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*pomarańcze.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*pomarańcze.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*kwaśne.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Pomarańcze słodkie",
+      "patterns": [
+        {
+          "regex": "^pomarańcze\\ słodkie$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "pomarańcze.*słodkie",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*pomarańcze.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*pomarańcze.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*słodkie.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Pomidory czerwone",
+      "patterns": [
+        {
+          "regex": "^pomidory\\ czerwone$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "pomidory.*czerwone",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*pomidory.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*pomidory.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*czerwone.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Pomidory gałązkowe",
+      "patterns": [
+        {
+          "regex": "^pomidory\\ gałązkowe$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "pomidory.*gałązkowe",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*pomidory.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*pomidory.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*gałązkowe.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Pomidory koktajlowe",
+      "patterns": [
+        {
+          "regex": "^pomidory\\ koktajlowe$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "pomidory.*koktajlowe",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*pomidory.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*pomidory.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*koktajlowe.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Pomidory koncentrat",
+      "patterns": [
+        {
+          "regex": "^pomidory\\ koncentrat$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "pomidory.*koncentrat",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*pomidory.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*pomidory.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*koncentrat.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Pomidory krojone",
+      "patterns": [
+        {
+          "regex": "^pomidory\\ krojone$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "pomidory.*krojone",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*pomidory.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*pomidory.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*krojone.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Pomidory malinowe",
+      "patterns": [
+        {
+          "regex": "^pomidory\\ malinowe$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "pomidory.*malinowe",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*pomidory.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*pomidory.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*malinowe.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Pomidory passata",
+      "patterns": [
+        {
+          "regex": "^pomidory\\ passata$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "pomidory.*passata",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*pomidory.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*pomidory.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*passata.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Pączek z budyniem",
+      "patterns": [
+        {
+          "regex": "^pączek\\ z\\ budyniem$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "pączek.*z.*budyniem",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*pączek.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*pączek.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*z\\ budyniem.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Pączek z dżemem",
+      "patterns": [
+        {
+          "regex": "^pączek\\ z\\ dżemem$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "pączek.*z.*dżemem",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*pączek.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*pączek.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*z\\ dżemem.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Pączek z różą",
+      "patterns": [
+        {
+          "regex": "^pączek\\ z\\ różą$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "pączek.*z.*różą",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*pączek.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*pączek.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*z\\ różą.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Rogal drożdżowy",
+      "patterns": [
+        {
+          "regex": "^rogal\\ drożdżowy$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "rogal.*drożdżowy",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*rogal.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*rogal.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*drożdżowy.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Rogal maślany",
+      "patterns": [
+        {
+          "regex": "^rogal\\ maślany$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "rogal.*maślany",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*rogal.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*rogal.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*maślany.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Rogal z makiem",
+      "patterns": [
+        {
+          "regex": "^rogal\\ z\\ makiem$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "rogal.*z.*makiem",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*rogal.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*rogal.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*z\\ makiem.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ryba dorsz",
+      "patterns": [
+        {
+          "regex": "^ryba\\ dorsz$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ryba.*dorsz",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ryba.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ryba.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*dorsz.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ryba makrela",
+      "patterns": [
+        {
+          "regex": "^ryba\\ makrela$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ryba.*makrela",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ryba.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ryba.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*makrela.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ryba mintaj",
+      "patterns": [
+        {
+          "regex": "^ryba\\ mintaj$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ryba.*mintaj",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ryba.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ryba.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*mintaj.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ryba tuńczyk",
+      "patterns": [
+        {
+          "regex": "^ryba\\ tuńczyk$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ryba.*tuńczyk",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ryba.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ryba.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*tuńczyk.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ryba łosoś",
+      "patterns": [
+        {
+          "regex": "^ryba\\ łosoś$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ryba.*łosoś",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ryba.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ryba.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*łosoś.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ser biały",
+      "patterns": [
+        {
+          "regex": "^ser\\ biały$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ser.*biały",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ser.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ser.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*biały.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ser camembert",
+      "patterns": [
+        {
+          "regex": "^ser\\ camembert$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ser.*camembert",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ser.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ser.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*camembert.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ser feta",
+      "patterns": [
+        {
+          "regex": "^ser\\ feta$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ser.*feta",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ser.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ser.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*feta.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ser mozzarella",
+      "patterns": [
+        {
+          "regex": "^ser\\ mozzarella$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ser.*mozzarella",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ser.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ser.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*mozzarella.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ser twaróg",
+      "patterns": [
+        {
+          "regex": "^ser\\ twaróg$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ser.*twaróg",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ser.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ser.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*twaróg.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ser żółty",
+      "patterns": [
+        {
+          "regex": "^ser\\ żółty$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ser.*żółty",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ser.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ser.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*żółty.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Sok jabłkowy",
+      "patterns": [
+        {
+          "regex": "^sok\\ jabłkowy$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "sok.*jabłkowy",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*sok.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*sok.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*jabłkowy.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Sok multiwitamina",
+      "patterns": [
+        {
+          "regex": "^sok\\ multiwitamina$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "sok.*multiwitamina",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*sok.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*sok.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*multiwitamina.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Sok pomarańczowy",
+      "patterns": [
+        {
+          "regex": "^sok\\ pomarańczowy$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "sok.*pomarańczowy",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*sok.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*sok.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*pomarańczowy.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Sok pomidorowy",
+      "patterns": [
+        {
+          "regex": "^sok\\ pomidorowy$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "sok.*pomidorowy",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*sok.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*sok.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*pomidorowy.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Sól himalajska",
+      "patterns": [
+        {
+          "regex": "^sól\\ himalajska$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "sól.*himalajska",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*sól.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*sól.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*himalajska.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Sól morska",
+      "patterns": [
+        {
+          "regex": "^sól\\ morska$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "sól.*morska",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*sól.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*sól.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*morska.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Sól zwykła",
+      "patterns": [
+        {
+          "regex": "^sól\\ zwykła$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "sól.*zwykła",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*sól.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*sól.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*zwykła.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Truskawki mrożone",
+      "patterns": [
+        {
+          "regex": "^truskawki\\ mrożone$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "truskawki.*mrożone",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*truskawki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*truskawki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*mrożone.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Truskawki świeże",
+      "patterns": [
+        {
+          "regex": "^truskawki\\ świeże$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "truskawki.*świeże",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*truskawki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*truskawki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*świeże.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Warzywa brokuły",
+      "patterns": [
+        {
+          "regex": "^warzywa\\ brokuły$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "warzywa.*brokuły",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*warzywa.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*warzywa.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*brokuły.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Warzywa fasolka",
+      "patterns": [
+        {
+          "regex": "^warzywa\\ fasolka$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "warzywa.*fasolka",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*warzywa.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*warzywa.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*fasolka.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Warzywa mieszanka",
+      "patterns": [
+        {
+          "regex": "^warzywa\\ mieszanka$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "warzywa.*mieszanka",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*warzywa.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*warzywa.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*mieszanka.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Warzywa szpinak",
+      "patterns": [
+        {
+          "regex": "^warzywa\\ szpinak$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "warzywa.*szpinak",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*warzywa.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*warzywa.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*szpinak.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Wieprzowina karkówka",
+      "patterns": [
+        {
+          "regex": "^wieprzowina\\ karkówka$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "wieprzowina.*karkówka",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*wieprzowina.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*wieprzowina.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*karkówka.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Wieprzowina schab",
+      "patterns": [
+        {
+          "regex": "^wieprzowina\\ schab$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "wieprzowina.*schab",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*wieprzowina.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*wieprzowina.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*schab.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Wieprzowina szynka",
+      "patterns": [
+        {
+          "regex": "^wieprzowina\\ szynka$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "wieprzowina.*szynka",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*wieprzowina.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*wieprzowina.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*szynka.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Wieprzowina łopatka",
+      "patterns": [
+        {
+          "regex": "^wieprzowina\\ łopatka$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "wieprzowina.*łopatka",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*wieprzowina.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*wieprzowina.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*łopatka.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Winogrona czarne",
+      "patterns": [
+        {
+          "regex": "^winogrona\\ czarne$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "winogrona.*czarne",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*winogrona.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*winogrona.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*czarne.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Winogrona czerwone",
+      "patterns": [
+        {
+          "regex": "^winogrona\\ czerwone$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "winogrona.*czerwone",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*winogrona.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*winogrona.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*czerwone.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Winogrona zielone",
+      "patterns": [
+        {
+          "regex": "^winogrona\\ zielone$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "winogrona.*zielone",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*winogrona.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*winogrona.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*zielone.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Woda gazowana",
+      "patterns": [
+        {
+          "regex": "^woda\\ gazowana$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "woda.*gazowana",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*woda.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*woda.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*gazowana.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Woda mineralna",
+      "patterns": [
+        {
+          "regex": "^woda\\ mineralna$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "woda.*mineralna",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*woda.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*woda.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*mineralna.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Woda niegazowana",
+      "patterns": [
+        {
+          "regex": "^woda\\ niegazowana$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "woda.*niegazowana",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*woda.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*woda.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*niegazowana.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Woda źródlana",
+      "patterns": [
+        {
+          "regex": "^woda\\ źródlana$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "woda.*źródlana",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*woda.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*woda.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*źródlana.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Wołowina gulasz",
+      "patterns": [
+        {
+          "regex": "^wołowina\\ gulasz$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "wołowina.*gulasz",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*wołowina.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*wołowina.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*gulasz.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Wołowina mięso mielone",
+      "patterns": [
+        {
+          "regex": "^wołowina\\ mięso\\ mielone$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "wołowina.*mięso.*mielone",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*wołowina.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*wołowina.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*mięso\\ mielone.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Wołowina stek",
+      "patterns": [
+        {
+          "regex": "^wołowina\\ stek$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "wołowina.*stek",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*wołowina.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*wołowina.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*stek.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ziemniaki młode",
+      "patterns": [
+        {
+          "regex": "^ziemniaki\\ młode$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ziemniaki.*młode",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ziemniaki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ziemniaki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*młode.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ziemniaki stare",
+      "patterns": [
+        {
+          "regex": "^ziemniaki\\ stare$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ziemniaki.*stare",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ziemniaki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ziemniaki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*stare.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Ziemniaki słodkie",
+      "patterns": [
+        {
+          "regex": "^ziemniaki\\ słodkie$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "ziemniaki.*słodkie",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ziemniaki.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*ziemniaki.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*słodkie.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Zioła bazylia",
+      "patterns": [
+        {
+          "regex": "^zioła\\ bazylia$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "zioła.*bazylia",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*zioła.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*zioła.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*bazylia.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Zioła oregano",
+      "patterns": [
+        {
+          "regex": "^zioła\\ oregano$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "zioła.*oregano",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*zioła.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*zioła.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*oregano.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Zioła rozmaryn",
+      "patterns": [
+        {
+          "regex": "^zioła\\ rozmaryn$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "zioła.*rozmaryn",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*zioła.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*zioła.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*rozmaryn.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Zioła tymianek",
+      "patterns": [
+        {
+          "regex": "^zioła\\ tymianek$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "zioła.*tymianek",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*zioła.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*zioła.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*tymianek.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Śmietana 18%",
+      "patterns": [
+        {
+          "regex": "^śmietana\\ 18%$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "śmietana.*18%",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*śmietana.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*śmietana.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*18%.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Śmietana 22%",
+      "patterns": [
+        {
+          "regex": "^śmietana\\ 22%$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "śmietana.*22%",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*śmietana.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*śmietana.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*22%.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Śmietana 30%",
+      "patterns": [
+        {
+          "regex": "^śmietana\\ 30%$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "śmietana.*30%",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*śmietana.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*śmietana.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*30%.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "Śmietana kwaśna",
+      "patterns": [
+        {
+          "regex": "^śmietana\\ kwaśna$",
+          "confidence": 0.98
+        },
+        {
+          "regex": "śmietana.*kwaśna",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*śmietana.*",
+          "confidence": 0.85
+        },
+        {
+          "regex": ".*śmietana.*",
+          "confidence": 0.8
+        },
+        {
+          "regex": ".*kwaśna.*",
+          "confidence": 0.8
+        }
+      ]
+    },
+    {
+      "normalized_name": "POMIŃ",
+      "patterns": [
+        {
+          "regex": ".*torba.*",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*reklamówka.*",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*siatka.*",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*rabat.*",
+          "confidence": 0.9
+        },
+        {
+          "regex": ".*upust.*",
+          "confidence": 0.9
+        },
+        {
+          "regex": ".*sprzedaż opodatkowana.*",
+          "confidence": 0.95
+        },
+        {
+          "regex": ".*ptu.*",
+          "confidence": 0.9
+        },
+        {
+          "regex": ".*suma pln.*",
+          "confidence": 0.95
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "total_rules": 181,
+    "total_patterns": 908,
+    "generated_from": "expanded_products.json"
+  }
+}
