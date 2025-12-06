@@ -3010,6 +3010,23 @@ class App(ctk.CTk):
         self.file_button.configure(state=state)
         self.init_db_button.configure(state=state)
 
+    def _run_migrations_on_startup(self):
+        """Uruchamia migracje bazy danych przy starcie aplikacji (cicho, bez logowania)."""
+        try:
+            from src.migrate_db import migrate_all
+            import os
+            
+            # Sprawdź czy baza danych istnieje
+            project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            db_path = os.path.join(project_root, "ReceiptParser", "data", "receipts.db")
+            
+            if os.path.exists(db_path):
+                # Uruchom migracje cicho (bez printów)
+                migrate_all()
+        except Exception as e:
+            # Loguj błąd, ale nie przerywaj startu aplikacji
+            logger.error(f"Error running migrations on startup: {e}")
+
     def initialize_database(self):
         self.log("INFO: Rozpoczynam inicjalizację bazy danych...")
         try:
