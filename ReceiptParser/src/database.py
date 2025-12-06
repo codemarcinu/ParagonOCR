@@ -63,6 +63,11 @@ class AliasProduktu(Base):
 
 class Paragon(Base):
     __tablename__ = 'paragony'
+    __table_args__ = (
+        Index('idx_paragon_sklep', 'sklep_id'),
+        Index('idx_paragon_data', 'data_zakupu'),
+        Index('idx_paragon_sklep_data', 'sklep_id', 'data_zakupu'),
+    )
     paragon_id = Column(Integer, primary_key=True)
     sklep_id = Column(Integer, ForeignKey('sklepy.sklep_id'))
     data_zakupu = Column(Date)
@@ -74,6 +79,11 @@ class Paragon(Base):
 
 class PozycjaParagonu(Base):
     __tablename__ = 'pozycje_paragonu'
+    __table_args__ = (
+        Index('idx_pozycja_paragon', 'paragon_id'),
+        Index('idx_pozycja_produkt', 'produkt_id'),
+        Index('idx_pozycja_paragon_produkt', 'paragon_id', 'produkt_id'),
+    )
     pozycja_id = Column(Integer, primary_key=True)
     paragon_id = Column(Integer, ForeignKey('paragony.paragon_id'), nullable=False)
     # produkt_id może być pusty, jeśli nie uda się go znormalizować od razu
@@ -92,6 +102,13 @@ class PozycjaParagonu(Base):
 class StanMagazynowy(Base):
     """Tabela do śledzenia stanu magazynowego produktów (ilość, data ważności)"""
     __tablename__ = 'stan_magazynowy'
+    __table_args__ = (
+        Index('idx_stan_produkt', 'produkt_id'),
+        Index('idx_stan_data_waznosci', 'data_waznosci'),
+        Index('idx_stan_ilosc', 'ilosc'),
+        Index('idx_stan_priorytet', 'priorytet_konsumpcji'),
+        Index('idx_stan_produkt_data', 'produkt_id', 'data_waznosci'),
+    )
     stan_id = Column(Integer, primary_key=True)
     produkt_id = Column(Integer, ForeignKey('produkty.produkt_id'), nullable=False)
     ilosc = Column(Numeric(10, 2), nullable=False, default=0.0)
@@ -119,6 +136,11 @@ class Conversation(Base):
 class ChatMessage(Base):
     """Tabela do przechowywania wiadomości w konwersacjach AI chat"""
     __tablename__ = 'chat_messages'
+    __table_args__ = (
+        Index('idx_message_conversation', 'conversation_id'),
+        Index('idx_message_timestamp', 'timestamp'),
+        Index('idx_message_conversation_timestamp', 'conversation_id', 'timestamp'),
+    )
     message_id = Column(Integer, primary_key=True)
     conversation_id = Column(Integer, ForeignKey('conversations.conversation_id'), nullable=False)
     role = Column(String, nullable=False)  # 'user' or 'assistant'
