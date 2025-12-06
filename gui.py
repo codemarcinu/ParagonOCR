@@ -1637,33 +1637,41 @@ class App(ctk.CTk):
 
         for i, stan in enumerate(stany):
             row = i + 1
+            
+            # Create row frame with alternating colors
+            row_frame = ctk.CTkFrame(
+                scrollable,
+                fg_color=AppColors.SURFACE_DARK if i % 2 == 0 else AppColors.BG_DARK
+            )
+            row_frame.grid(row=row, column=0, columnspan=len(headers), sticky="ew", padx=0, pady=1)
+            row_frame.grid_columnconfigure(0, weight=1)
 
             # Produkt (tylko do odczytu)
             ctk.CTkLabel(
-                scrollable, text=stan.produkt.znormalizowana_nazwa, width=250
-            ).grid(row=row, column=0, padx=AppSpacing.XS, pady=2, sticky="w")
+                row_frame, text=stan.produkt.znormalizowana_nazwa, width=250
+            ).grid(row=0, column=0, padx=AppSpacing.XS, pady=2, sticky="w")
 
             # Ilość (edytowalna)
-            ilosc_entry = ctk.CTkEntry(scrollable, width=100)
+            ilosc_entry = ctk.CTkEntry(row_frame, width=100)
             ilosc_entry.insert(0, str(stan.ilosc))
-            ilosc_entry.grid(row=row, column=1, padx=AppSpacing.XS, pady=2)
+            ilosc_entry.grid(row=0, column=1, padx=AppSpacing.XS, pady=2)
 
             # Jednostka (edytowalna)
-            jednostka_entry = ctk.CTkEntry(scrollable, width=100)
+            jednostka_entry = ctk.CTkEntry(row_frame, width=100)
             jednostka_entry.insert(0, stan.jednostka_miary or "szt")
-            jednostka_entry.grid(row=row, column=2, padx=AppSpacing.XS, pady=2)
+            jednostka_entry.grid(row=0, column=2, padx=AppSpacing.XS, pady=2)
 
             # Data ważności (edytowalna)
             data_entry = ctk.CTkEntry(
-                scrollable, width=120, placeholder_text="YYYY-MM-DD"
+                row_frame, width=120, placeholder_text="YYYY-MM-DD"
             )
             if stan.data_waznosci:
                 data_entry.insert(0, stan.data_waznosci.strftime("%Y-%m-%d"))
-            data_entry.grid(row=row, column=3, padx=AppSpacing.XS, pady=2)
+            data_entry.grid(row=0, column=3, padx=AppSpacing.XS, pady=2)
 
             # Checkbox "Zamrożone"
-            zamrozone_checkbox = ctk.CTkCheckBox(scrollable, text="")
-            zamrozone_checkbox.grid(row=row, column=4, padx=AppSpacing.XS, pady=2)
+            zamrozone_checkbox = ctk.CTkCheckBox(row_frame, text="")
+            zamrozone_checkbox.grid(row=0, column=4, padx=AppSpacing.XS, pady=2)
             # Ustaw stan checkboxa na podstawie wartości z bazy (domyślnie False jeśli None)
             (
                 zamrozone_checkbox.select()
@@ -1687,13 +1695,13 @@ class App(ctk.CTk):
                 color = AppColors.UNKNOWN
 
             status_label = ctk.CTkLabel(
-                scrollable, text=status, width=150, text_color=color
+                row_frame, text=status, width=150, text_color=color
             )
-            status_label.grid(row=row, column=5, padx=AppSpacing.XS, pady=2)
+            status_label.grid(row=0, column=5, padx=AppSpacing.XS, pady=2)
 
             # Frame dla przycisków akcji
-            actions_frame = ctk.CTkFrame(scrollable)
-            actions_frame.grid(row=row, column=6, padx=AppSpacing.XS, pady=2)
+            actions_frame = ctk.CTkFrame(row_frame)
+            actions_frame.grid(row=0, column=6, padx=AppSpacing.XS, pady=2)
 
             # Przycisk zmarnowany
             waste_btn = ctk.CTkButton(
@@ -2203,8 +2211,12 @@ class App(ctk.CTk):
                 # Ogólne statystyki
                 stats = analytics.get_total_statistics()
 
-                # Sekcja ogólnych statystyk
-                stats_frame = ctk.CTkFrame(self.analytics_scrollable)
+                # Sekcja ogólnych statystyk (card-based)
+                stats_frame = ctk.CTkFrame(
+                    self.analytics_scrollable,
+                    border_width=1,
+                    border_color=AppColors.BORDER_DARK
+                )
                 stats_frame.grid(row=0, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
                 stats_frame.grid_columnconfigure(0, weight=1)
 
@@ -2244,9 +2256,21 @@ class App(ctk.CTk):
                     ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.LG)
                     return
 
-                # Wydatki według sklepów
-                stores_frame = ctk.CTkFrame(self.analytics_scrollable)
-                stores_frame.grid(row=1, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
+                # Separator
+                separator1 = ctk.CTkFrame(
+                    self.analytics_scrollable,
+                    height=1,
+                    fg_color=AppColors.BORDER_DARK
+                )
+                separator1.grid(row=1, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.XS)
+                
+                # Wydatki według sklepów (card-based)
+                stores_frame = ctk.CTkFrame(
+                    self.analytics_scrollable,
+                    border_width=1,
+                    border_color=AppColors.BORDER_DARK
+                )
+                stores_frame.grid(row=2, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
                 stores_frame.grid_columnconfigure(0, weight=1)
 
                 ctk.CTkLabel(
@@ -2273,9 +2297,21 @@ class App(ctk.CTk):
                     anchor="w",
                 ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.SM, sticky="w")
 
-                # Wydatki według kategorii
-                categories_frame = ctk.CTkFrame(self.analytics_scrollable)
-                categories_frame.grid(row=2, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
+                # Separator
+                separator2 = ctk.CTkFrame(
+                    self.analytics_scrollable,
+                    height=1,
+                    fg_color=AppColors.BORDER_DARK
+                )
+                separator2.grid(row=3, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.XS)
+                
+                # Wydatki według kategorii (card-based)
+                categories_frame = ctk.CTkFrame(
+                    self.analytics_scrollable,
+                    border_width=1,
+                    border_color=AppColors.BORDER_DARK
+                )
+                categories_frame.grid(row=4, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
                 categories_frame.grid_columnconfigure(0, weight=1)
 
                 ctk.CTkLabel(
@@ -2302,9 +2338,21 @@ class App(ctk.CTk):
                     anchor="w",
                 ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.SM, sticky="w")
 
-                # Najczęściej kupowane produkty
-                products_frame = ctk.CTkFrame(self.analytics_scrollable)
-                products_frame.grid(row=3, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
+                # Separator
+                separator3 = ctk.CTkFrame(
+                    self.analytics_scrollable,
+                    height=1,
+                    fg_color=AppColors.BORDER_DARK
+                )
+                separator3.grid(row=5, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.XS)
+                
+                # Najczęściej kupowane produkty (card-based)
+                products_frame = ctk.CTkFrame(
+                    self.analytics_scrollable,
+                    border_width=1,
+                    border_color=AppColors.BORDER_DARK
+                )
+                products_frame.grid(row=6, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
                 products_frame.grid_columnconfigure(0, weight=1)
 
                 ctk.CTkLabel(
@@ -2331,9 +2379,21 @@ class App(ctk.CTk):
                     anchor="w",
                 ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.SM, sticky="w")
 
-                # Statystyki miesięczne
-                monthly_frame = ctk.CTkFrame(self.analytics_scrollable)
-                monthly_frame.grid(row=4, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
+                # Separator
+                separator4 = ctk.CTkFrame(
+                    self.analytics_scrollable,
+                    height=1,
+                    fg_color=AppColors.BORDER_DARK
+                )
+                separator4.grid(row=7, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.XS)
+                
+                # Statystyki miesięczne (card-based)
+                monthly_frame = ctk.CTkFrame(
+                    self.analytics_scrollable,
+                    border_width=1,
+                    border_color=AppColors.BORDER_DARK
+                )
+                monthly_frame.grid(row=8, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
                 monthly_frame.grid_columnconfigure(0, weight=1)
 
                 ctk.CTkLabel(
@@ -2363,9 +2423,21 @@ class App(ctk.CTk):
                     anchor="w",
                 ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.SM, sticky="w")
 
-                # Ostatnie paragony
-                recent_frame = ctk.CTkFrame(self.analytics_scrollable)
-                recent_frame.grid(row=5, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
+                # Separator
+                separator5 = ctk.CTkFrame(
+                    self.analytics_scrollable,
+                    height=1,
+                    fg_color=AppColors.BORDER_DARK
+                )
+                separator5.grid(row=9, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.XS)
+                
+                # Ostatnie paragony (card-based)
+                recent_frame = ctk.CTkFrame(
+                    self.analytics_scrollable,
+                    border_width=1,
+                    border_color=AppColors.BORDER_DARK
+                )
+                recent_frame.grid(row=10, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
                 recent_frame.grid_columnconfigure(0, weight=1)
 
                 ctk.CTkLabel(
