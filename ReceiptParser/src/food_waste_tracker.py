@@ -99,7 +99,7 @@ class FoodWasteTracker:
         """
         query = (
             self.session.query(StanMagazynowy)
-            .join(Produkt)
+            .join(Produkt, StanMagazynowy.produkt_id == Produkt.produkt_id)
             .options(joinedload(StanMagazynowy.produkt).joinedload(Produkt.kategoria))
             .filter(StanMagazynowy.ilosc > 0)
         )
@@ -178,7 +178,7 @@ class FoodWasteTracker:
         # Produkty przeterminowane w ostatnich N dniach
         expired_products = (
             self.session.query(StanMagazynowy)
-            .join(Produkt)
+            .join(Produkt, StanMagazynowy.produkt_id == Produkt.produkt_id)
             .filter(StanMagazynowy.data_waznosci < cutoff_date)
             .filter(StanMagazynowy.ilosc > 0)
             .all()

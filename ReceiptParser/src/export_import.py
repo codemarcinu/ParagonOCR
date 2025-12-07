@@ -70,7 +70,7 @@ class DataExporter:
             output_path = str(validated_path)
             
             # Zapytanie do bazy
-            query = self.session.query(Paragon).join(Sklep)
+            query = self.session.query(Paragon).join(Sklep, Paragon.sklep_id == Sklep.sklep_id)
             
             if date_from:
                 query = query.filter(Paragon.data_zakupu >= date_from)
@@ -139,9 +139,9 @@ class DataExporter:
             
             query = (
                 self.session.query(PozycjaParagonu)
-                .join(Paragon)
-                .join(Produkt, isouter=True)
-                .join(KategoriaProduktu, isouter=True)
+                .join(Paragon, PozycjaParagonu.paragon_id == Paragon.paragon_id)
+                .join(Produkt, PozycjaParagonu.produkt_id == Produkt.produkt_id, isouter=True)
+                .join(KategoriaProduktu, Produkt.kategoria_id == KategoriaProduktu.kategoria_id, isouter=True)
             )
             
             if date_from:

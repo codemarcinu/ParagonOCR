@@ -155,7 +155,7 @@ class BielikAssistant:
         """
         stany = (
             self.session.query(StanMagazynowy)
-            .join(Produkt)
+            .join(Produkt, StanMagazynowy.produkt_id == Produkt.produkt_id)
             .options(joinedload(StanMagazynowy.produkt).joinedload(Produkt.kategoria))
             .filter(StanMagazynowy.ilosc > 0)
             .order_by(StanMagazynowy.data_waznosci)

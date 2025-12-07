@@ -379,7 +379,7 @@ class RAGSearchEngine:
         try:
             stany = (
                 self.session.query(StanMagazynowy)
-                .join(Produkt)
+                .join(Produkt, StanMagazynowy.produkt_id == Produkt.produkt_id)
                 .options(
                     joinedload(StanMagazynowy.produkt)
                     .joinedload(Produkt.kategoria),
