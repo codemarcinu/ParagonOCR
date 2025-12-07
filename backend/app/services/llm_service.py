@@ -30,14 +30,37 @@ def init_ollama_client():
         
         # Test connection by listing models
         try:
-            models = client.list()
+            models_response = client.list()
+            # Handle ListResponse object from Ollama client
+            if hasattr(models_response, 'models'):
+                models_list = models_response.models
+            elif isinstance(models_response, dict):
+                models_list = models_response.get('models', [])
+            elif isinstance(models_response, list):
+                models_list = models_response
+            else:
+                models_list = []
+            
             logger.info(f"Ollama client initialized. Connected to {settings.OLLAMA_HOST}")
-            logger.info(f"Available models: {[m.get('name', 'unknown') for m in models.get('models', [])]}")
+            # Extract model names - handle both Model objects and dicts
+            model_names = []
+            for m in models_list:
+                if hasattr(m, 'model'):
+                    model_names.append(m.model)
+                elif hasattr(m, 'name'):
+                    model_names.append(m.name)
+                elif isinstance(m, dict):
+                    model_names.append(m.get('name', m.get('model', '')))
+                else:
+                    model_names.append(str(m))
+            
+            logger.info(f"Available models: {model_names}")
             
             # Check if required model is available
-            model_names = [m.get('name', '') for m in models.get('models', [])]
             if settings.TEXT_MODEL not in model_names:
                 logger.warning(f"Required model '{settings.TEXT_MODEL}' not found in Ollama. Available: {model_names}")
+                # Still set client - model might be available but not listed yet
+                logger.info("Setting Ollama client anyway - model might be available for use")
             else:
                 logger.info(f"Required model '{settings.TEXT_MODEL}' is available")
             
