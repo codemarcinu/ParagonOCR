@@ -13,7 +13,8 @@ from fastapi.middleware.gzip import GZipMiddleware
 
 from app.config import settings
 from app.database import init_db, engine
-from app.routers import receipts
+from app.database import init_db, engine
+from app.routers import receipts, products, chat, analytics
 
 # Configure logging
 logging.basicConfig(
@@ -32,9 +33,9 @@ async def lifespan(app: FastAPI):
     logger.info("Initializing database...")
     init_db()
     logger.info("Database initialized successfully")
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down application...")
 
@@ -61,6 +62,9 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # Register routers
 app.include_router(receipts.router, prefix="/api/receipts", tags=["receipts"])
+app.include_router(products.router, prefix="/api/products", tags=["products"])
+app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
+app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
 
 
 @app.get("/")
@@ -77,6 +81,7 @@ async def health():
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
@@ -84,4 +89,3 @@ if __name__ == "__main__":
         reload=True,
         log_level="info",
     )
-
