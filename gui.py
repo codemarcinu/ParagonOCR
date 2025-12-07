@@ -2811,12 +2811,16 @@ class App(ctk.CTk):
             text="Kliknij 'Wygeneruj Plan' aby utworzyć plan posiłków na 7 dni",
             font=("Arial", 14),
             text_color="gray",
-        ).pack(pady=AppSpacing.XS0)
+        ).pack(pady=AppSpacing.XS)
 
         self.meal_planner_scrollable = scrollable
 
     def generate_meal_plan(self):
         """Generuje plan posiłków"""
+        # Upewnij się, że meal_planner_scrollable istnieje
+        if not hasattr(self, 'meal_planner_scrollable') or self.meal_planner_scrollable is None:
+            self.refresh_meal_planner()
+        
         # Pokaż progress
         for widget in self.meal_planner_scrollable.winfo_children():
             widget.destroy()
@@ -2826,7 +2830,7 @@ class App(ctk.CTk):
             text="🦅 Bielik generuje plan posiłków...",
             font=("Arial", 14),
         )
-        progress_label.pack(pady=AppSpacing.XS0)
+        progress_label.pack(pady=AppSpacing.XS)
 
         # Generuj w osobnym wątku
         import threading
