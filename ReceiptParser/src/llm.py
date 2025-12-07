@@ -16,6 +16,7 @@ from .config import Config
 from .security import sanitize_path, sanitize_log_message
 from .retry_handler import retry_with_backoff
 from .llm_cache import get_llm_cache
+from .llm_cache_semantic import get_semantic_cache
 
 logger = logging.getLogger(__name__)
 
@@ -195,7 +196,7 @@ def get_llm_suggestion(
     Znormalizowana nazwa:
     """
 
-    # Check cache first
+    # Check exact cache first (fast, O(1))
     llm_cache = get_llm_cache()
     cached_response = llm_cache.get(
         prompt=user_prompt,
@@ -208,6 +209,27 @@ def get_llm_suggestion(
         if suggestion:
             cleaned = clean_llm_suggestion(suggestion)
             return cleaned if cleaned else None
+    
+    # Check semantic cache if enabled (finds similar prompts)
+    semantic_cache = get_semantic_cache()
+    if semantic_cache:
+        semantic_cached = semantic_cache.get(
+            prompt=user_prompt,
+            model=model_name,
+            temperature=None
+        )
+        if semantic_cached:
+            suggestion = semantic_cached.get("message", {}).get("content", "").strip()
+            if suggestion:
+                cleaned = clean_llm_suggestion(suggestion)
+                # Also cache in exact cache for faster future lookups
+                llm_cache.set(
+                    prompt=user_prompt,
+                    model=model_name,
+                    response=semantic_cached,
+                    temperature=None
+                )
+                return cleaned if cleaned else None
     
     @retry_with_backoff(
         max_retries=Config.RETRY_MAX_ATTEMPTS,
@@ -228,13 +250,21 @@ def get_llm_suggestion(
     try:
         response = _call_llm()
         
-        # Cache the response
+        # Cache the response in both exact and semantic caches
         llm_cache.set(
             prompt=user_prompt,
             model=model_name,
             response=response,
             temperature=None
         )
+        # Also cache in semantic cache if enabled
+        if semantic_cache:
+            semantic_cache.set(
+                prompt=user_prompt,
+                model=model_name,
+                response=response,
+                temperature=None
+            )
         
         suggestion = response["message"]["content"].strip()
         # Czyścimy sugestię z prefiksów i artefaktów
@@ -383,13 +413,16 @@ def normalize_products_batch(
     log_callback: Optional[Callable] = None
 ) -> Dict[str, Optional[str]]:
     """
-    Normalizuje wiele produktów używając batch processing z równoległym przetwarzaniem.
+    Normalizuje wiele produktów używając zoptymalizowanego batch processing.
+    
+    OPTIMIZATION: Dla małych list (< 50 produktów) przetwarza wszystko w jednym requeście.
+    Dla większych list dzieli na batche, ale używa większego rozmiaru batcha (25 zamiast 5).
     
     Args:
         raw_names: Lista surowych nazw produktów do normalizacji
         session: Sesja SQLAlchemy do pobrania przykładów uczenia
         model_name: Nazwa modelu Ollama do użycia
-        batch_size: Rozmiar batcha (domyślnie z Config.BATCH_SIZE)
+        batch_size: Rozmiar batcha (domyślnie z Config.BATCH_SIZE, teraz 25)
         max_workers: Liczba równoległych workerów (domyślnie z Config.BATCH_MAX_WORKERS)
         log_callback: Opcjonalna funkcja callback do logowania
     
@@ -402,7 +435,29 @@ def normalize_products_batch(
     batch_size = batch_size or Config.BATCH_SIZE
     max_workers = max_workers or Config.BATCH_MAX_WORKERS
     
-    # Podziel produkty na batche
+    # OPTIMIZATION: Dla małych list (< 50 produktów) przetwarzaj wszystko w jednym requeście
+    # To eliminuje overhead równoległego przetwarzania i zmniejsza liczbę requestów z N do 1
+    if len(raw_names) <= 50:
+        if log_callback:
+            try:
+                log_callback(f"INFO: Przetwarzam {len(raw_names)} produktów w jednym requeście (optimized batch)")
+            except Exception:
+                pass
+        
+        # Pobierz przykłady uczenia
+        learning_examples = []
+        if raw_names:
+            try:
+                learning_examples = get_learning_examples(
+                    raw_names[0], session, max_examples=5, min_similarity=30
+                )
+            except Exception:
+                pass
+        
+        # Jeden request dla wszystkich produktów
+        return normalize_batch(raw_names, model_name, learning_examples)
+    
+    # Dla większych list, dziel na batche (ale większe batche niż wcześniej)
     batches = [raw_names[i:i + batch_size] for i in range(0, len(raw_names), batch_size)]
     
     if log_callback:
@@ -421,7 +476,7 @@ def normalize_products_batch(
         except Exception:
             pass  # Ignoruj błędy przy pobieraniu przykładów
     
-    # Przetwarzaj batche równolegle
+    # Przetwarzaj batche równolegle (ale mniej batchy dzięki większemu batch_size)
     all_results = {}
     
     with ThreadPoolExecutor(max_workers=max_workers) as executor:

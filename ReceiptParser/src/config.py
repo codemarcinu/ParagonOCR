@@ -13,7 +13,8 @@ load_dotenv(env_path)
 class Config:
     OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
     VISION_MODEL = os.getenv("VISION_MODEL", "llava:latest")
-    TEXT_MODEL = os.getenv("TEXT_MODEL", "SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M")
+    # OPTIMIZED: Bielik-4.5B-v3.0-Instruct (3.75x faster, 33% less VRAM than 11B)
+    TEXT_MODEL = os.getenv("TEXT_MODEL", "bielik-4.5b-v3.0-instruct:Q4_K_M")
     MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "")
     # Timeout dla zapytań do Ollama (w sekundach)
     OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "300"))  # Domyślnie 5 minut
@@ -55,10 +56,17 @@ class Config:
     RETRY_JITTER = os.getenv("RETRY_JITTER", "true").lower() == "true"
 
     # --- Konfiguracja Batch Processing LLM ---
-    # Rozmiar batcha dla normalizacji produktów (5-10 to sweet spot)
-    BATCH_SIZE = int(os.getenv("BATCH_SIZE", "5"))
+    # OPTIMIZED: Większy batch size dla mniejszej liczby requestów (50 produktów w 1-2 batchach zamiast 10)
+    # Rozmiar batcha dla normalizacji produktów (zwiększony z 5 do 25 dla optymalizacji)
+    BATCH_SIZE = int(os.getenv("BATCH_SIZE", "25"))
     # Maksymalna liczba równoległych batchy (ThreadPoolExecutor workers)
-    BATCH_MAX_WORKERS = int(os.getenv("BATCH_MAX_WORKERS", "3"))
+    # Zmniejszone do 2, bo większe batche = mniej równoległych requestów potrzebnych
+    BATCH_MAX_WORKERS = int(os.getenv("BATCH_MAX_WORKERS", "2"))
+    
+    # --- Semantic Cache Configuration (Phase 2) ---
+    SEMANTIC_CACHE_ENABLED = os.getenv("SEMANTIC_CACHE_ENABLED", "false").lower() == "true"
+    SEMANTIC_CACHE_SIMILARITY_THRESHOLD = float(os.getenv("SEMANTIC_CACHE_SIMILARITY_THRESHOLD", "0.94"))
+    SEMANTIC_CACHE_MAX_SIZE = int(os.getenv("SEMANTIC_CACHE_MAX_SIZE", "1000"))
 
     @staticmethod
     def print_config():
