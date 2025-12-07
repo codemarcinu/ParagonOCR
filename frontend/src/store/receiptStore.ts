@@ -3,7 +3,7 @@
  */
 
 import { create } from 'zustand';
-import apiClient from '@/lib/api';
+import api from '@/lib/api';
 import { showSuccess, showError } from '@/lib/toast';
 
 export interface Receipt {
@@ -67,7 +67,7 @@ export const useReceiptStore = create<ReceiptStore>((set) => ({
         ...params,
       };
 
-      const response = await apiClient.get('/receipts', { params: queryParams });
+      const response = await api.get('/receipts', { params: queryParams });
       const data = response.data;
 
       // Handle response structure { receipts: [], total: ... }
@@ -116,7 +116,7 @@ export const useReceiptStore = create<ReceiptStore>((set) => ({
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const response = await apiClient.post('/receipts/upload', formData, {
+      const response = await api.post('/receipts/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         }

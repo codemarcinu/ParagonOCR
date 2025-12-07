@@ -98,4 +98,5 @@ const PasskeyLogin: React.FC<PasskeyLoginProps> = ({
 };
 
 export default PasskeyLogin;
+export { PasskeyLogin };
 

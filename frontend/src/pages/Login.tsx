@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import PasskeyLogin from '../components/PasskeyLogin';
+import { PasskeyLogin } from '../components/PasskeyLogin';
 
 const Login: React.FC = () => {
     const [error, setError] = useState('');
