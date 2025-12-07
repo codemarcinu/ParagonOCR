@@ -11,3 +11,4 @@ pytest
 pytest-cov
 rapidfuzz
 easyocr
+sentence-transformers>=2.2.0
