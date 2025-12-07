@@ -173,3 +173,34 @@ class UserResponse(UserBase):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+# --- Passkey (WebAuthn) ---
+class PasskeyRegistrationOptionsRequest(BaseModel):
+    device_name: Optional[str] = None
+
+
+class PasskeyRegistrationVerifyRequest(BaseModel):
+    credential: dict = Field(..., description="Registration credential from WebAuthn API")
+    challenge: str = Field(..., description="Challenge from registration options")
+
+
+class PasskeyAuthenticationOptionsRequest(BaseModel):
+    username: Optional[str] = None
+
+
+class PasskeyAuthenticationVerifyRequest(BaseModel):
+    credential: dict = Field(..., description="Authentication credential from WebAuthn API")
+    challenge: str = Field(..., description="Challenge from authentication options")
+
+
+class WebAuthnKeyResponse(BaseModel):
+    id: int
+    device_name: Optional[str]
+    device_type: str
+    last_used: Optional[datetime]
+    created_at: datetime
+    transports: Optional[List[str]]
+
+    class Config:
+        from_attributes = True

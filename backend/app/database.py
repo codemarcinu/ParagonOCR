@@ -44,7 +44,7 @@ def init_db():
     Initialize database by creating all tables.
     """
     # Import models to ensure they're registered
-    from app.models import receipt, product, category, shop
+    from app.models import receipt, product, category, shop, webauthn_key, user
     
     Base.metadata.create_all(bind=engine)
 
