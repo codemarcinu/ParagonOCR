@@ -106,86 +106,86 @@ async def process_receipt_async(receipt_id: int, file_path: str):
         try:
             # Update receipt status
             receipt = db.query(Receipt).filter(Receipt.id == receipt_id).first()
-        if not receipt:
-            logger.error(f"Receipt {receipt_id} not found")
-            return
-        
-        # Step 1: OCR
-        logger.info(f"Processing OCR for receipt {receipt_id}")
-        if file_path.lower().endswith(".pdf"):
-            ocr_result = extract_from_pdf(file_path)
-        else:
-            ocr_result = extract_from_image(file_path)
-        
-        if ocr_result.error:
-            receipt.ocr_text = f"OCR Error: {ocr_result.error}"
-            db.commit()
-            return
-        
-        receipt.ocr_text = ocr_result.text
-        
-        # Step 2: LLM Parsing
-        logger.info(f"Parsing receipt {receipt_id} with LLM")
-        parsed_receipt = parse_receipt_text(ocr_result.text)
-        
-        if parsed_receipt.error:
-            receipt.ocr_text = f"LLM Error: {parsed_receipt.error}"
-            db.commit()
-            return
-        
-        # Step 3: Save to database
-        # Get or create shop
-        shop = db.query(Shop).filter(Shop.name == parsed_receipt.shop).first()
-        if not shop:
-            shop = Shop(name=parsed_receipt.shop)
-            db.add(shop)
-            db.flush()
-        
-        # Update receipt
-        receipt.shop_id = shop.id
-        receipt.purchase_date = datetime.strptime(parsed_receipt.date, "%Y-%m-%d").date()
-        receipt.purchase_time = parsed_receipt.time
-        receipt.total_amount = parsed_receipt.total
-        receipt.subtotal = parsed_receipt.subtotal
-        receipt.tax = parsed_receipt.tax
-        
-        # Save items
-        for item_data in parsed_receipt.items:
-            # Get or create product
-            product = None
-            if item_data.get("name"):
-                # Try to find by alias first
-                alias = db.query(ProductAlias).filter(
-                    ProductAlias.raw_name == item_data["name"]
-                ).first()
-                
-                if alias:
-                    product = alias.product
-                else:
-                    # Create new product (simplified - in production, use normalization)
-                    product = Product(normalized_name=item_data["name"])
-                    db.add(product)
-                    db.flush()
-                    
-                    # Create alias
-                    alias = ProductAlias(
-                        product_id=product.id,
-                        raw_name=item_data["name"],
-                    )
-                    db.add(alias)
+            if not receipt:
+                logger.error(f"Receipt {receipt_id} not found")
+                return
             
-            # Create receipt item
-            receipt_item = ReceiptItem(
-                receipt_id=receipt.id,
-                product_id=product.id if product else None,
-                raw_name=item_data.get("name", ""),
-                quantity=item_data.get("quantity", 1.0),
-                unit=item_data.get("unit"),
-                unit_price=item_data.get("unit_price"),
-                total_price=item_data.get("total_price", 0.0),
-            )
-            db.add(receipt_item)
-        
+            # Step 1: OCR
+            logger.info(f"Processing OCR for receipt {receipt_id}")
+            if file_path.lower().endswith(".pdf"):
+                ocr_result = extract_from_pdf(file_path)
+            else:
+                ocr_result = extract_from_image(file_path)
+            
+            if ocr_result.error:
+                receipt.ocr_text = f"OCR Error: {ocr_result.error}"
+                db.commit()
+                return
+            
+            receipt.ocr_text = ocr_result.text
+            
+            # Step 2: LLM Parsing
+            logger.info(f"Parsing receipt {receipt_id} with LLM")
+            parsed_receipt = parse_receipt_text(ocr_result.text)
+            
+            if parsed_receipt.error:
+                receipt.ocr_text = f"LLM Error: {parsed_receipt.error}"
+                db.commit()
+                return
+            
+            # Step 3: Save to database
+            # Get or create shop
+            shop = db.query(Shop).filter(Shop.name == parsed_receipt.shop).first()
+            if not shop:
+                shop = Shop(name=parsed_receipt.shop)
+                db.add(shop)
+                db.flush()
+            
+            # Update receipt
+            receipt.shop_id = shop.id
+            receipt.purchase_date = datetime.strptime(parsed_receipt.date, "%Y-%m-%d").date()
+            receipt.purchase_time = parsed_receipt.time
+            receipt.total_amount = parsed_receipt.total
+            receipt.subtotal = parsed_receipt.subtotal
+            receipt.tax = parsed_receipt.tax
+            
+            # Save items
+            for item_data in parsed_receipt.items:
+                # Get or create product
+                product = None
+                if item_data.get("name"):
+                    # Try to find by alias first
+                    alias = db.query(ProductAlias).filter(
+                        ProductAlias.raw_name == item_data["name"]
+                    ).first()
+                    
+                    if alias:
+                        product = alias.product
+                    else:
+                        # Create new product (simplified - in production, use normalization)
+                        product = Product(normalized_name=item_data["name"])
+                        db.add(product)
+                        db.flush()
+                        
+                        # Create alias
+                        alias = ProductAlias(
+                            product_id=product.id,
+                            raw_name=item_data["name"],
+                        )
+                        db.add(alias)
+                
+                # Create receipt item
+                receipt_item = ReceiptItem(
+                    receipt_id=receipt.id,
+                    product_id=product.id if product else None,
+                    raw_name=item_data.get("name", ""),
+                    quantity=item_data.get("quantity", 1.0),
+                    unit=item_data.get("unit"),
+                    unit_price=item_data.get("unit_price"),
+                    total_price=item_data.get("total_price", 0.0),
+                )
+                db.add(receipt_item)
+            
             db.commit()
             logger.info(f"Successfully processed receipt {receipt_id}")
             
