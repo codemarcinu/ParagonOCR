@@ -17,6 +17,7 @@ export function Button({
   children,
   className = '',
   disabled,
+  'aria-label': ariaLabel,
   ...props
 }: ButtonProps) {
   const baseClasses = 'inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
@@ -34,18 +35,26 @@ export function Button({
     lg: 'px-6 py-3 text-base'
   };
   
+  // Auto-generate aria-label for icon-only buttons
+  const finalAriaLabel = ariaLabel || (!children && (leftIcon || rightIcon) ? props.title || 'Button' : undefined);
+  
   return (
     <button
       className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       disabled={disabled || isLoading}
+      aria-label={finalAriaLabel}
+      aria-busy={isLoading}
       {...props}
     >
       {isLoading && (
-        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2" />
+        <span className="sr-only">Loading</span>
       )}
-      {leftIcon && !isLoading && <span className="mr-2">{leftIcon}</span>}
+      {isLoading && (
+        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2" aria-hidden="true" />
+      )}
+      {leftIcon && !isLoading && <span className="mr-2" aria-hidden="true">{leftIcon}</span>}
       {children}
-      {rightIcon && <span className="ml-2">{rightIcon}</span>}
+      {rightIcon && <span className="ml-2" aria-hidden="true">{rightIcon}</span>}
     </button>
   );
 }
