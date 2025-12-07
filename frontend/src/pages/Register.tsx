@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { register } from '../lib/api';
+import { register, fetchMe } from '../lib/api';
+import { useAuthStore } from '../store/authStore';
 import { Button, Input } from '../components/ui';
+import PasskeyRegistration from '../components/PasskeyRegistration';
 
 const Register: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -9,8 +11,11 @@ const Register: React.FC = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showPasskeyOption, setShowPasskeyOption] = useState(false);
+    const [passkeyRegistered, setPasskeyRegistered] = useState(false);
 
     const navigate = useNavigate();
+    const { login: loginAction } = useAuthStore();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -25,7 +30,8 @@ const Register: React.FC = () => {
 
         try {
             await register({ email, password });
-            navigate('/login');
+            // After registration, show passkey option
+            setShowPasskeyOption(true);
         } catch (err: any) {
             console.error(err);
             setError(err.response?.data?.detail || 'Registration failed');
@@ -88,7 +94,7 @@ const Register: React.FC = () => {
 
                     <Button
                         type="submit"
-                        disabled={loading}
+                        disabled={loading || showPasskeyOption}
                         isLoading={loading}
                         className="w-full"
                         size="lg"
@@ -97,14 +103,56 @@ const Register: React.FC = () => {
                     </Button>
                 </form>
 
-                <div className="mt-4 text-center text-sm">
-                    <p className="text-gray-600">
-                        Already have an account?{' '}
-                        <Link to="/login" className="font-bold text-blue-600 hover:text-blue-800">
-                            Sign In
-                        </Link>
-                    </p>
-                </div>
+                {showPasskeyOption && !passkeyRegistered && (
+                    <>
+                        <div className="my-6 flex items-center">
+                            <div className="flex-1 border-t border-gray-300"></div>
+                            <span className="px-4 text-sm text-gray-500">Optional</span>
+                            <div className="flex-1 border-t border-gray-300"></div>
+                        </div>
+                        <div className="mb-4">
+                            <p className="mb-3 text-sm text-gray-600">
+                                Register a passkey for faster, more secure login:
+                            </p>
+                            <PasskeyRegistration
+                                deviceName={`${email.split('@')[0]}'s device`}
+                                onSuccess={() => {
+                                    setPasskeyRegistered(true);
+                                    setTimeout(() => {
+                                        navigate('/login');
+                                    }, 1500);
+                                }}
+                                onError={(err) => setError(err)}
+                            />
+                        </div>
+                        <Button
+                            type="button"
+                            onClick={() => navigate('/login')}
+                            variant="secondary"
+                            className="w-full"
+                            size="lg"
+                        >
+                            Skip and Continue to Login
+                        </Button>
+                    </>
+                )}
+
+                {passkeyRegistered && (
+                    <div className="mb-4 rounded bg-green-100 p-3 text-sm text-green-700">
+                        Passkey registered successfully! Redirecting to login...
+                    </div>
+                )}
+
+                {!showPasskeyOption && (
+                    <div className="mt-4 text-center text-sm">
+                        <p className="text-gray-600">
+                            Already have an account?{' '}
+                            <Link to="/login" className="font-bold text-blue-600 hover:text-blue-800">
+                                Sign In
+                            </Link>
+                        </p>
+                    </div>
+                )}
             </div>
         </div>
     );

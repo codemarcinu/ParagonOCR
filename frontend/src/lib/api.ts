@@ -121,4 +121,102 @@ export const fetchMe = async (): Promise<UserResponse> => {
   return response.data;
 }
 
+// Passkey (WebAuthn) API
+export interface PasskeyRegistrationOptionsResponse {
+  challenge: string;
+  rp: {
+    id: string;
+    name: string;
+  };
+  user: {
+    id: string;
+    name: string;
+    displayName: string;
+  };
+  pubKeyCredParams: Array<{
+    type: string;
+    alg: number;
+  }>;
+  authenticatorSelection?: {
+    authenticatorAttachment?: string;
+    userVerification?: string;
+    requireResidentKey?: boolean;
+  };
+  timeout?: number;
+  attestation?: string;
+}
+
+export interface PasskeyRegistrationVerifyRequest {
+  credential: any; // WebAuthn credential object
+  challenge: string;
+}
+
+export interface PasskeyAuthenticationOptionsRequest {
+  username?: string;
+}
+
+export interface PasskeyAuthenticationOptionsResponse {
+  challenge: string;
+  rpId: string;
+  allowCredentials?: Array<{
+    id: string;
+    type: string;
+    transports?: string[];
+  }>;
+  userVerification?: string;
+  timeout?: number;
+}
+
+export interface PasskeyAuthenticationVerifyRequest {
+  credential: any; // WebAuthn credential object
+  challenge: string;
+}
+
+export interface WebAuthnKeyResponse {
+  id: number;
+  device_name?: string;
+  device_type: string;
+  last_used?: string;
+  created_at: string;
+  transports?: string[];
+}
+
+export const getPasskeyRegistrationOptions = async (
+  deviceName?: string
+): Promise<PasskeyRegistrationOptionsResponse> => {
+  const params = deviceName ? { device_name: deviceName } : {};
+  const response = await api.get('/auth/passkey/register/options', { params });
+  return response.data;
+};
+
+export const verifyPasskeyRegistration = async (
+  data: PasskeyRegistrationVerifyRequest
+): Promise<{ success: boolean; message: string; credential: WebAuthnKeyResponse }> => {
+  const response = await api.post('/auth/passkey/register/verify', data);
+  return response.data;
+};
+
+export const getPasskeyAuthenticationOptions = async (
+  username?: string
+): Promise<PasskeyAuthenticationOptionsResponse> => {
+  const response = await api.post('/auth/passkey/authenticate/options', { username });
+  return response.data;
+};
+
+export const verifyPasskeyAuthentication = async (
+  data: PasskeyAuthenticationVerifyRequest
+): Promise<LoginResponse> => {
+  const response = await api.post('/auth/passkey/authenticate/verify', data);
+  return response.data;
+};
+
+export const listPasskeys = async (): Promise<WebAuthnKeyResponse[]> => {
+  const response = await api.get('/auth/passkey/credentials');
+  return response.data;
+};
+
+export const deletePasskey = async (credentialId: number): Promise<void> => {
+  await api.delete(`/auth/passkey/credentials/${credentialId}`);
+};
+
 export default api;

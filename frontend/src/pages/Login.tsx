@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { login, fetchMe } from '../lib/api';
 import { useAuthStore } from '../store/authStore';
 import { Button, Input } from '../components/ui';
+import PasskeyLogin from '../components/PasskeyLogin';
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -57,6 +58,21 @@ const Login: React.FC = () => {
                     </div>
                 )}
 
+                {/* Passkey Login */}
+                <div className="mb-6">
+                    <PasskeyLogin
+                        username={email}
+                        onSuccess={() => navigate('/')}
+                        onError={(err) => setError(err)}
+                    />
+                </div>
+
+                <div className="mb-6 flex items-center">
+                    <div className="flex-1 border-t border-gray-300"></div>
+                    <span className="px-4 text-sm text-gray-500">or</span>
+                    <div className="flex-1 border-t border-gray-300"></div>
+                </div>
+
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <Input
@@ -89,7 +105,7 @@ const Login: React.FC = () => {
                         className="w-full"
                         size="lg"
                     >
-                        {loading ? 'Signing In...' : 'Sign In'}
+                        {loading ? 'Signing In...' : 'Sign In with Password'}
                     </Button>
                 </form>
 
