@@ -307,8 +307,10 @@ We welcome contributions! See [docs/guides/CONTRIBUTING.md](docs/guides/CONTRIBU
 **In Progress:**
 - 🔄 RAG service optimization
 - 🔄 WebSocket real-time updates
-- 🔄 Authentication/authorization
 - 🔄 Comprehensive testing
+
+**Recently Added:**
+- ✅ FIDO2 WebAuthn Passkeys authentication
 
 **Planned:**
 - 📋 WebSocket support for real-time chat

@@ -56,6 +56,20 @@ The application uses **SQLite** database with **SQLAlchemy ORM**. The database i
 └──────────────┘         │ tokens_used  │
                          │ rag_context  │
                          └──────────────┘
+
+┌──────────┐         ┌──────────────┐
+│   User   │         │  WebAuthnKey │
+├──────────┤         ├──────────────┤
+│ id (PK)  │◄────────│ id (PK)      │
+│ email    │         │ user_id      │
+│ password │         │ credential_id│
+│          │         │ public_key   │
+└──────────┘         │ device_name  │
+                     │ device_type  │
+                     │ last_used    │
+                     │ created_at   │
+                     │ transports   │
+                     └──────────────┘
 ```
 
 ## Tables
@@ -218,11 +232,32 @@ Shopping list items.
 - `idx_shopping_lists_user` on `user_id`
 - `idx_shopping_lists_created` on `created_at`
 
+### webauthn_keys
+
+FIDO2 WebAuthn passkey credentials for passwordless authentication.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | INTEGER | PRIMARY KEY | Auto-increment ID |
+| user_id | INTEGER | FK → users.id | Owner user |
+| credential_id | VARCHAR | UNIQUE, NOT NULL | Base64-encoded credential ID |
+| public_key | VARCHAR | NOT NULL | Base64-encoded public key |
+| device_name | VARCHAR | | User-friendly device name (e.g., 'iPhone 15') |
+| device_type | VARCHAR | DEFAULT 'single-device' | Device type: 'single-device' or 'cross-device' |
+| last_used | DATETIME | | Last authentication timestamp |
+| created_at | DATETIME | DEFAULT NOW | Credential creation timestamp |
+| transports | JSON | | Array of transport methods: ["internal", "usb", "ble", "nfc", "hybrid"] |
+
+**Indexes:**
+- `idx_webauthn_user_credential` on `(user_id, credential_id)`
+- `idx_webauthn_credential_id` on `credential_id` (unique)
+
 ## Relationships
 
 ### One-to-Many
 
 - **User → Receipts** - One user has many receipts
+- **User → WebAuthnKeys** - One user can have multiple passkey credentials
 - **User → Conversations** - One user has many conversations
 - **User → Shopping Lists** - One user has many shopping lists
 - **Shop → Receipts** - One shop has many receipts

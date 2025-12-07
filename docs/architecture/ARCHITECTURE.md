@@ -191,8 +191,10 @@ See [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) for detailed entity-relationship di
 
 ### Authentication
 - **OAuth2** with password flow
+- **FIDO2 WebAuthn Passkeys** for passwordless authentication
 - **JWT tokens** for API authentication
 - **Rate limiting** on auth endpoints (5 requests/minute)
+- **Challenge-based authentication** with 10-minute expiration
 
 ### Authorization
 - All endpoints require authentication (except `/health`)

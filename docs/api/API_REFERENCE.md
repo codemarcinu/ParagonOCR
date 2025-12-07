@@ -55,6 +55,172 @@ Register a new user.
 }
 ```
 
+### GET /api/auth/passkey/register/options
+
+Generate challenge for passkey registration. Requires authentication.
+
+**Request:**
+```http
+GET /api/auth/passkey/register/options?device_name=iPhone%2015
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "challenge": "random-challenge-string",
+  "rp": {
+    "id": "localhost",
+    "name": "ParagonOCR"
+  },
+  "user": {
+    "id": "base64-encoded-user-id",
+    "name": "user@example.com",
+    "displayName": "user@example.com"
+  },
+  "pubKeyCredParams": [
+    {
+      "type": "public-key",
+      "alg": -7
+    }
+  ],
+  "authenticatorSelection": {
+    "authenticatorAttachment": "platform",
+    "userVerification": "required",
+    "requireResidentKey": true
+  }
+}
+```
+
+**Rate Limit:** 5 requests/minute
+
+### POST /api/auth/passkey/register/verify
+
+Verify registration response and store credential. Requires authentication.
+
+**Request:**
+```json
+{
+  "credential": {
+    "id": "credential-id",
+    "rawId": "base64-encoded-id",
+    "response": {
+      "clientDataJSON": "base64-encoded-json",
+      "attestationObject": "base64-encoded-object"
+    },
+    "type": "public-key"
+  },
+  "challenge": "challenge-from-options"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Passkey registered successfully",
+  "credential": {
+    "id": 1,
+    "device_name": "iPhone 15",
+    "device_type": "single-device",
+    "created_at": "2025-12-07T10:00:00Z"
+  }
+}
+```
+
+**Rate Limit:** 5 requests/minute
+
+### POST /api/auth/passkey/authenticate/options
+
+Generate challenge for passkey authentication. No authentication required.
+
+**Request:**
+```json
+{
+  "username": "user@example.com"
+}
+```
+
+**Response:**
+```json
+{
+  "challenge": "random-challenge-string",
+  "rpId": "localhost",
+  "allowCredentials": [
+    {
+      "id": "credential-id",
+      "type": "public-key",
+      "transports": ["internal"]
+    }
+  ],
+  "userVerification": "required"
+}
+```
+
+**Rate Limit:** 5 requests/minute
+
+### POST /api/auth/passkey/authenticate/verify
+
+Verify authentication response and create session/token. No authentication required.
+
+**Request:**
+```json
+{
+  "credential": {
+    "id": "credential-id",
+    "rawId": "base64-encoded-id",
+    "response": {
+      "clientDataJSON": "base64-encoded-json",
+      "authenticatorData": "base64-encoded-data",
+      "signature": "base64-encoded-signature",
+      "userHandle": "base64-encoded-user-handle"
+    },
+    "type": "public-key"
+  },
+  "challenge": "challenge-from-options"
+}
+```
+
+**Response:**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer"
+}
+```
+
+**Rate Limit:** 5 requests/minute
+
+### GET /api/auth/passkey/credentials
+
+List all passkeys for the current user. Requires authentication.
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "device_name": "iPhone 15",
+    "device_type": "single-device",
+    "last_used": "2025-12-07T10:00:00Z",
+    "created_at": "2025-12-07T09:00:00Z",
+    "transports": ["internal"]
+  }
+]
+```
+
+### DELETE /api/auth/passkey/credentials/{credential_id}
+
+Delete a passkey credential. Requires authentication.
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Passkey deleted successfully"
+}
+```
+
 ## Receipts
 
 ### POST /api/receipts/upload
