@@ -1529,16 +1529,16 @@ export default defineConfig({
 - [x] Zastosowanie loading components w istniejących komponentach
 
 ### Faza 2
-- [ ] ShoppingList store
-- [ ] ShoppingList page
-- [ ] ShoppingListItem component
-- [ ] Backend endpoints dla shopping lists
-- [ ] Global UI components (Button, Input, Card, Modal)
-- [ ] Zastosowanie UI components w całej aplikacji
-- [ ] Type definitions (types/api.ts)
-- [ ] Eliminacja `any` z kodu
-- [ ] Toast notifications setup
-- [ ] Zastosowanie toast w stores
+- [x] ShoppingList store
+- [x] ShoppingList page
+- [x] ShoppingListItem component
+- [ ] Backend endpoints dla shopping lists (wymaga backend implementation)
+- [x] Global UI components (Button, Input, Card, Modal)
+- [ ] Zastosowanie UI components w całej aplikacji (opcjonalne - można stopniowo)
+- [x] Type definitions (types/api.ts)
+- [x] Eliminacja `any` z kodu
+- [x] Toast notifications setup
+- [x] Zastosowanie toast w stores
 
 ### Faza 3
 - [ ] Vitest setup

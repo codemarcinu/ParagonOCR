@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { fetchProducts, fetchCategories } from '@/lib/api';
 import type { Product, Category } from '@/lib/api';
+import { showSuccess, showError } from '@/lib/toast';
 
 interface ProductStore {
     products: Product[];
@@ -51,8 +52,11 @@ export const useProductStore = create<ProductStore>((set) => ({
             // For MVP, just refetching
             await useProductStore.getState().fetchProducts();
             set({ loading: false });
+            showSuccess('Product added successfully!');
         } catch (error) {
-            set({ loading: false, error: 'Failed to add product' });
+            const errorMessage = 'Failed to add product';
+            set({ loading: false, error: errorMessage });
+            showError(errorMessage);
         }
     },
 
@@ -62,8 +66,11 @@ export const useProductStore = create<ProductStore>((set) => ({
             // await apiClient.put(`/products/${id}`, productData);
             await useProductStore.getState().fetchProducts();
             set({ loading: false });
+            showSuccess('Product updated successfully!');
         } catch (error) {
-            set({ loading: false, error: 'Failed to update product' });
+            const errorMessage = 'Failed to update product';
+            set({ loading: false, error: errorMessage });
+            showError(errorMessage);
         }
     }
 }));

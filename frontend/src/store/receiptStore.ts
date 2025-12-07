@@ -4,6 +4,7 @@
 
 import { create } from 'zustand';
 import apiClient from '@/lib/api';
+import { showSuccess, showError } from '@/lib/toast';
 
 export interface Receipt {
   id: number;
@@ -121,10 +122,12 @@ export const useReceiptStore = create<ReceiptStore>((set) => ({
         }
       });
       set({ loading: false });
+      showSuccess('Receipt uploaded successfully!');
       return response.data;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to upload receipt';
       set({ error: errorMessage, loading: false });
+      showError(errorMessage);
       throw error;
     }
   },

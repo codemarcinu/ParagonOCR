@@ -3,6 +3,7 @@ import { useProductStore } from '@/store/productStore';
 import { Plus, Search, Edit2, TrendingUp, AlertCircle } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Skeleton } from '@/components/ui';
+import type { ProductResponse } from '@/types/api';
 
 export function Products() {
     const {
@@ -19,7 +20,7 @@ export function Products() {
     const [search, setSearch] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [editingProduct, setEditingProduct] = useState<any>(null); // Type properly ideally
+    const [editingProduct, setEditingProduct] = useState<ProductResponse | null>(null);
     const [showPriceHistory, setShowPriceHistory] = useState<number | null>(null);
 
     useEffect(() => {
@@ -27,7 +28,7 @@ export function Products() {
         fetchCategories();
     }, [fetchProducts, fetchCategories, search, selectedCategory]);
 
-    const handleEditClick = (product: any) => {
+    const handleEditClick = (product: ProductResponse) => {
         setEditingProduct(product);
         setIsEditModalOpen(true);
     };
