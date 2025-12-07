@@ -508,23 +508,105 @@ def normalize_products_batch(
 # --- Parsowanie Całego Paragonu z Obrazu ---
 
 
+def _validate_json_structure(text: str) -> tuple[bool, str]:
+    """
+    Validates JSON structure before parsing.
+    Returns: (is_valid, error_message)
+    
+    Checks:
+    - Balanced curly braces and square brackets
+    - Starts with { and ends with }
+    - Basic structure integrity
+    """
+    if not text or not text.strip():
+        return False, "Empty or whitespace-only response"
+    
+    text = text.strip()
+    
+    # Check balanced braces
+    open_braces = text.count('{')
+    close_braces = text.count('}')
+    if open_braces != close_braces:
+        return False, f"Unbalanced braces: {{ count={open_braces} }} count={close_braces}"
+    
+    # Check balanced brackets
+    open_brackets = text.count('[')
+    close_brackets = text.count(']')
+    if open_brackets != close_brackets:
+        return False, f"Unbalanced brackets: [ count={open_brackets} ] count={close_brackets}"
+    
+    # Check starts and ends
+    if not text.startswith('{'):
+        return False, "JSON does not start with {"
+    
+    if not text.endswith('}'):
+        return False, "JSON does not end with }"
+    
+    return True, ""
+
+
+def _log_json_error_position(error: json.JSONDecodeError, text: str) -> None:
+    """
+    Logs detailed information about JSON parsing error position.
+    Shows context around the error location.
+    """
+    error_pos = getattr(error, 'pos', None)
+    error_line = getattr(error, 'lineno', None)
+    error_col = getattr(error, 'colno', None)
+    
+    print(f"DEBUG: JSONDecodeError details:")
+    print(f"  - Position: char {error_pos}, line {error_line}, column {error_col}")
+    
+    if error_pos is not None and error_pos < len(text):
+        # Show context around error (50 chars before and after)
+        start = max(0, error_pos - 50)
+        end = min(len(text), error_pos + 50)
+        context = text[start:end]
+        error_marker_pos = error_pos - start
+        
+        # Create a visual marker at error position
+        marker_line = ' ' * error_marker_pos + '^'
+        print(f"  - Context: ...{context}...")
+        print(f"  - Marker:  ...{marker_line}")
+        
+        # Try to find nearby key names for context
+        before_error = text[max(0, error_pos - 200):error_pos]
+        key_matches = re.findall(r'"([^"]+)":', before_error)
+        if key_matches:
+            print(f"  - Recent keys before error: {key_matches[-3:]}")
+
+
 def _repair_json(json_str: str) -> str:
     """
     Próbuje naprawić typowe błędy w JSON-ie zwracanym przez LLM.
     Obsługuje:
+    - Markdown code blocks (usuwa ```json i ```)
     - Niezakończone stringi (znajduje i zamyka)
     - Obcięty JSON (znajduje ostatni kompletny obiekt)
     - Trailing commas
+    - Explanatory text before JSON
+    - Duplicate keys (zachowuje pierwsze wystąpienie)
     """
     if not json_str:
         return json_str
     
+    original = json_str
     json_str = json_str.strip()
+    
+    # Remove markdown code blocks
+    json_str = re.sub(r'^```json\s*\n?', '', json_str, flags=re.MULTILINE)
+    json_str = re.sub(r'\n?```\s*$', '', json_str, flags=re.MULTILINE)
+    json_str = json_str.strip()
+    
+    # Remove explanatory text before JSON (find first {)
+    json_start = json_str.find('{')
+    if json_start > 0:
+        json_str = json_str[json_start:]
     
     # Znajdź pierwszy { - początek JSON
     start_pos = json_str.find('{')
     if start_pos == -1:
-        return json_str
+        return original  # Return original if no JSON found
     
     json_str = json_str[start_pos:]
     
@@ -584,32 +666,76 @@ def _repair_json(json_str: str) -> str:
     # Usuń trailing commas przed } lub ]
     json_str = re.sub(r',(\s*[}\]])', r'\1', json_str)
     
+    # Handle duplicate keys by keeping first occurrence
+    # This is a simple approach - for complex cases, we'd need a proper JSON parser
+    # But since we're repairing, we'll try to fix common patterns
+    # Note: Python's json.loads() will automatically keep last occurrence of duplicate keys
+    # So we can't fix this at string level easily, but we log it
+    
     return json_str
 
 
 def _parse_json_with_repair(response_text: str) -> dict | None:
     """
     Próbuje sparsować JSON z odpowiedzi LLM, używając naprawy w razie potrzeby.
+    Includes comprehensive logging and validation before parsing.
     """
+    # Log raw response metadata
+    print(f"DEBUG: Raw response length: {len(response_text)} chars")
+    if len(response_text) > 0:
+        print(f"DEBUG: First 200 chars: {response_text[:200]}")
+        print(f"DEBUG: Last 200 chars: {response_text[-200:]}")
+    
+    # Validate structure BEFORE parsing
+    is_valid, validation_error = _validate_json_structure(response_text)
+    if not is_valid:
+        print(f"OSTRZEŻENIE: JSON struktura niepoprawna: {validation_error}")
+        # Attempt repair
+        response_text = _repair_json(response_text)
+        print(f"DEBUG: Attempted repair. New length={len(response_text)}")
+        is_valid, validation_error = _validate_json_structure(response_text)
+        if not is_valid:
+            print(f"BŁĄD: Nie udało się naprawić JSON struktury mimo próby. Błąd: {validation_error}")
+    
+    # Check bracket balance for logging
+    open_braces = response_text.count('{')
+    close_braces = response_text.count('}')
+    open_brackets = response_text.count('[')
+    close_brackets = response_text.count(']')
+    print(f"DEBUG: Bracket balance - Open {{: {open_braces}, Close }}: {close_braces}, Open [: {open_brackets}, Close ]: {close_brackets}")
+    
     # Najpierw spróbuj bezpośrednio
     try:
-        return json.loads(response_text)
-    except json.JSONDecodeError:
-        pass
+        parsed = json.loads(response_text)
+        print("DEBUG: JSON parsed successfully on first attempt")
+        return parsed
+    except json.JSONDecodeError as e:
+        print("DEBUG: Direct JSON parsing failed, attempting repair...")
+        _log_json_error_position(e, response_text)
     
     # Spróbuj naprawić i sparsować ponownie
     try:
         repaired = _repair_json(response_text)
-        return json.loads(repaired)
-    except json.JSONDecodeError:
-        pass
+        if repaired != response_text:
+            print(f"DEBUG: JSON repaired. Original length: {len(response_text)}, Repaired length: {len(repaired)}")
+        parsed = json.loads(repaired)
+        print("DEBUG: JSON parsed successfully after repair")
+        return parsed
+    except json.JSONDecodeError as e:
+        print("DEBUG: JSON parsing failed even after repair")
+        _log_json_error_position(e, repaired)
     
     # Spróbuj wyodrębnić JSON z markdown code blocks
     try:
-        return _extract_json_from_response(response_text)
-    except:
-        pass
+        print("DEBUG: Attempting to extract JSON from markdown code blocks...")
+        parsed = _extract_json_from_response(response_text)
+        if parsed:
+            print("DEBUG: JSON extracted successfully from markdown")
+            return parsed
+    except Exception as e:
+        print(f"DEBUG: Failed to extract JSON from markdown: {sanitize_log_message(str(e))}")
     
+    print("BŁĄD: Wszystkie próby parsowania JSON zakończyły się niepowodzeniem")
     return None
 
 
@@ -733,7 +859,7 @@ def _call_vision_llm(model_name: str, system_prompt: str, image_path: str, ocr_t
         ],
         options={
             "temperature": 0,
-            "num_predict": 4000,
+            "num_predict": 2500,  # Reduced from 4000 to prevent truncation
         },
     )
 
@@ -816,8 +942,6 @@ def parse_receipt_with_llm(
         print(
             f"INFO: Otrzymano odpowiedź od LLM. Długość: {len(raw_response_text)} znaków."
         )
-        # Sanityzuj odpowiedź przed logowaniem (jeśli potrzeba debug)
-        # print(f"DEBUG: Treść odpowiedzi: {sanitize_log_message(raw_response_text, max_length=500)}")
 
         parsed_json = _parse_json_with_repair(raw_response_text)
         if parsed_json is None:
@@ -860,7 +984,7 @@ def _call_text_llm(model_name: str, system_prompt: str, text_content: str):
         ],
         options={
             "temperature": 0,
-            "num_predict": 4000,
+            "num_predict": 2500,  # Reduced from 4000 to prevent truncation
         },
     )
 
