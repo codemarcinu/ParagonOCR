@@ -6,9 +6,21 @@ Projekt zawiera kompleksowe testy jednostkowe i integracyjne dla systemu parsowa
 
 ## Statystyki testów
 
-- **Łączna liczba testów**: 109
-- **Status**: ✅ Wszystkie testy przechodzą
-- **Pokrycie kodu**: 73% (główne moduły: 70-100%)
+- **Łączna liczba testów**: 168+ (109 istniejących + 59 nowych)
+- **Status**: ✅ Większość testów przechodzi (8 pre-existing failures)
+- **Pokrycie kodu**: 26% overall, 73%+ dla głównych modułów (70-100%)
+
+### Testing Phase 2 (2025-12-07)
+
+- **Nowe testy dodane**: 59 testów
+- **Nowe pliki testowe**: 5 plików
+- **Kategorie testów**:
+  - Batch Processing: 12 testów
+  - Async Queue: 9 testów
+  - Database: 13 testów
+  - GUI: 16 testów
+  - E2E Workflow: 9 testów
+- **Infrastruktura**: pytest.ini, conftest.py z fixtures
 
 ## Struktura testów
 
@@ -70,6 +82,36 @@ Projekt zawiera kompleksowe testy jednostkowe i integracyjne dla systemu parsowa
 - Tworzenie nowych produktów i kategorii
 
 ### 11. `test_bielik.py` - Testy asystenta AI Bielik
+
+### 12. `tests/unit/test_batch_processing.py` - Testy batch processing LLM (2025-12-07)
+- **TestBatchLLMProcessor**: 8 testów dla normalize_batch()
+- **TestBatchProcessingPerformance**: 4 testy dla normalize_products_batch()
+- Testy równoległego przetwarzania, obsługi błędów, log callback
+
+### 13. `tests/unit/test_async_queue.py` - Testy async queue processing (2025-12-07)
+- **TestAsyncReceiptProcessor**: 5 testów async processing
+- **TestAsyncQueuePerformance**: 2 testy wydajności
+- **TestAsyncQueueIntegration**: 2 testy integracyjne
+- Testy równoległości, obsługi błędów, benchmarki
+
+### 14. `tests/unit/test_database.py` - Testy bazy danych (2025-12-07)
+- **TestDatabaseModels**: 7 testów CRUD operations
+- **TestDatabaseIndices**: 3 testy indeksów
+- **TestDatabaseBatchOperations**: 3 testy operacji batch
+- Testy relacji, constraints, cascade delete
+
+### 15. `tests/gui/test_main_window.py` - Testy GUI (2025-12-07)
+- **TestMainWindow**: 5 testów głównego okna
+- **TestTabs**: 2 testy zakładek
+- **TestNotifications**: 4 testy powiadomień
+- **TestGUIComponents**: 3 testy komponentów
+- Testy mogą być pominięte jeśli CustomTkinter nie jest dostępny
+
+### 16. `tests/e2e/test_receipt_workflow.py` - Testy E2E workflow (2025-12-07)
+- **TestReceiptFullWorkflow**: 2 testy pełnego workflow
+- **TestErrorRecovery**: 3 testy obsługi błędów
+- **TestPerformanceBenchmarks**: 2 testy wydajności
+- **TestIntegrationScenarios**: 2 testy scenariuszy integracyjnych
 - **Wyszukiwanie produktów (RAG)**: Testy fuzzy matching, filtrowanie po podobieństwie
 - **Dostępne produkty**: Pobieranie produktów z magazynu, grupowanie
 - **Proponowanie potraw**: Generowanie sugestii na podstawie dostępnych produktów
@@ -86,6 +128,18 @@ Projekt zawiera kompleksowe testy jednostkowe i integracyjne dla systemu parsowa
 cd /home/marcin/Projekty/ParagonOCR
 source venv/bin/activate
 pytest tests/ -v
+```
+
+### Nowe testy (Phase 2)
+```bash
+# Testy jednostkowe
+pytest tests/unit/ -v
+
+# Testy GUI
+pytest tests/gui/ -v
+
+# Testy E2E
+pytest tests/e2e/ -v
 ```
 
 ### Z pokryciem kodu
