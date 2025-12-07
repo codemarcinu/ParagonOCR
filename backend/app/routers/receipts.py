@@ -32,6 +32,7 @@ from app.dependencies import get_current_user
 from app.services.ocr_service import extract_from_pdf, extract_from_image, OCRResult
 from app.services.llm_service import parse_receipt_text, ParsedReceipt
 from app.config import settings
+from app.schemas import ReceiptResponse, ReceiptListResponse
 
 logger = logging.getLogger(__name__)
 
@@ -271,7 +272,7 @@ async def process_receipt_async(receipt_id: int, file_path: str):
             await send_update("error", 0, "Unexpected Error", error=str(e))
 
 
-@router.get("")
+@router.get("", response_model=ReceiptListResponse)
 async def list_receipts(
     skip: int = 0,
     limit: int = 50,
@@ -279,6 +280,7 @@ async def list_receipts(
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """
     List receipts with optional filters.
@@ -298,30 +300,18 @@ async def list_receipts(
     total = query.count()
 
     return {
-        "receipts": [
-            {
-                "id": r.id,
-                "shop": r.shop.name if r.shop else None,
-                "purchase_date": (
-                    r.purchase_date.isoformat() if r.purchase_date else None
-                ),
-                "purchase_time": r.purchase_time,
-                "total_amount": float(r.total_amount) if r.total_amount else 0.0,
-                "items_count": len(r.items),
-                "created_at": r.created_at.isoformat() if r.created_at else None,
-            }
-            for r in receipts
-        ],
+        "receipts": receipts,
         "total": total,
         "skip": skip,
         "limit": limit,
     }
 
 
-@router.get("/{receipt_id}")
+@router.get("/{receipt_id}", response_model=ReceiptResponse)
 async def get_receipt(
     receipt_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     """
     Get receipt details with items.
@@ -334,40 +324,7 @@ async def get_receipt(
             detail=f"Receipt {receipt_id} not found",
         )
 
-    return {
-        "id": receipt.id,
-        "shop": {
-            "id": receipt.shop.id if receipt.shop else None,
-            "name": receipt.shop.name if receipt.shop else None,
-            "location": receipt.shop.location if receipt.shop else None,
-        },
-        "purchase_date": (
-            receipt.purchase_date.isoformat() if receipt.purchase_date else None
-        ),
-        "purchase_time": receipt.purchase_time,
-        "total_amount": float(receipt.total_amount) if receipt.total_amount else 0.0,
-        "subtotal": float(receipt.subtotal) if receipt.subtotal else None,
-        "tax": float(receipt.tax) if receipt.tax else None,
-        "items": [
-            {
-                "id": item.id,
-                "product": {
-                    "id": item.product.id if item.product else None,
-                    "name": item.product.normalized_name if item.product else None,
-                },
-                "raw_name": item.raw_name,
-                "quantity": float(item.quantity) if item.quantity else 0.0,
-                "unit": item.unit,
-                "unit_price": float(item.unit_price) if item.unit_price else None,
-                "total_price": float(item.total_price) if item.total_price else 0.0,
-                "discount": float(item.discount) if item.discount else None,
-            }
-            for item in receipt.items
-        ],
-        "source_file": receipt.source_file,
-        "created_at": receipt.created_at.isoformat() if receipt.created_at else None,
-        "ocr_text": receipt.ocr_text,  # Added this to debug
-    }
+    return receipt
 
 
 @router.websocket("/ws/processing/{receipt_id}")

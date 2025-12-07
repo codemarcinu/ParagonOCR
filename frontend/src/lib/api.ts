@@ -1,11 +1,34 @@
 import axios from 'axios';
 
+import { useAuthStore } from '../store/authStore';
+
 const api = axios.create({
   baseURL: 'http://localhost:8000/api',
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// Request interceptor to add token
+api.interceptors.request.use((config) => {
+  const token = useAuthStore.getState().token;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Response interceptor to handle 401
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      useAuthStore.getState().logout();
+      // Optional: Redirect to login if not already there, but Router usually handles this via ProtectedRoute
+    }
+    return Promise.reject(error);
+  }
+);
 
 export interface SpendingSummary {
   period_days: number;
@@ -66,5 +89,23 @@ export const getReceipt = async (id: number) => {
   const response = await api.get(`/receipts/${id}`);
   return response.data;
 };
+
+// Auth
+export const login = async (formData: FormData) => {
+  const response = await api.post('/auth/token', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data; // { access_token, token_type }
+};
+
+export const register = async (data: any) => {
+  const response = await api.post('/auth/register', data);
+  return response.data;
+};
+
+export const fetchMe = async () => {
+  const response = await api.get('/auth/users/me');
+  return response.data;
+}
 
 export default api;

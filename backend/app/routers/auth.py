@@ -14,11 +14,13 @@ from app.services.auth_service import auth_service
 from app.models.user import User
 from app.config import settings
 from app.main import limiter
+from app.schemas import UserCreate, UserResponse, Token
+from app.dependencies import get_current_user
 
 router = APIRouter()
 
 
-@router.post("/token")
+@router.post("/token", response_model=Token)
 @limiter.limit("5/minute")
 async def login_access_token(
     request: Request,
@@ -39,45 +41,22 @@ async def login_access_token(
     return auth_service.create_user_token(user)
 
 
-@router.post("/register")
-async def register(email: str, password: str, db: Session = Depends(get_db)) -> Any:
+@router.post("/register", response_model=UserResponse)
+async def register(user_in: UserCreate, db: Session = Depends(get_db)) -> Any:
     """
     Register a new user.
     """
-    user = auth_service.create_user(db=db, email=email, password=password)
-    return {"email": user.email, "id": user.id}
+    user = auth_service.create_user(
+        db=db, email=user_in.email, password=user_in.password
+    )
+    return user
 
 
-@router.get("/users/me")
+@router.get("/users/me", response_model=UserResponse)
 async def read_users_me(
-    db: Session = Depends(get_db), token: str = Depends(auth_service.oauth2_scheme)
+    current_user: User = Depends(get_current_user),
 ) -> Any:
     """
     Get current user.
     """
-    # Ideally use a dependency to get current user from token
-    # For now, minimal implementation
-    from app.core import security
-    from jose import jwt, JWTError
-
-    try:
-        payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
-        )
-        email: str = payload.get("sub")
-        if email is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate credentials",
-            )
-    except JWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-        )
-
-    user = auth_service.get_user_by_email(db, email=email)
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return {"email": user.email, "id": user.id, "is_active": user.is_active}
+    return current_user
