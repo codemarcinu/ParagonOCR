@@ -41,6 +41,14 @@ Thumbs.db
 *.log
 logs/
 
+# Test artifacts
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+test_results.txt
+
 # Database
 *.db
 *.sqlite
