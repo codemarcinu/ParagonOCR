@@ -1036,9 +1036,9 @@ class BielikChatDialog(ctk.CTkToplevel):
         """Inicjalizuje asystenta Bielik"""
         try:
             self.assistant = BielikAssistant()
-            self.status_label.configure(text="Gotowy", text_color="green")
+            self.status_label.configure(text="Gotowy", text_color=AppColors.SUCCESS)
         except Exception as e:
-            self.status_label.configure(text=f"Błąd: {e}", text_color="red")
+            self.status_label.configure(text=f"Błąd: {e}", text_color=AppColors.ERROR)
             messagebox.showerror("Błąd", f"Nie udało się połączyć z bazą danych: {e}")
 
     def add_message(self, sender: str, message: str):
@@ -1098,7 +1098,7 @@ class BielikChatDialog(ctk.CTkToplevel):
 
         # Wyłącz przycisk podczas przetwarzania
         self.send_button.configure(state="disabled")
-        self.status_label.configure(text="Bielik myśli...", text_color="orange")
+        self.status_label.configure(text="Bielik myśli...", text_color=AppColors.WARNING)
 
         # Uruchom w osobnym wątku, żeby nie blokować GUI
         import threading
@@ -1119,14 +1119,14 @@ class BielikChatDialog(ctk.CTkToplevel):
             self.after(0, lambda: self.add_message("Bielik", answer))
             self.after(
                 0,
-                lambda: self.status_label.configure(text="Gotowy", text_color="green"),
+                lambda: self.status_label.configure(text="Gotowy", text_color=AppColors.SUCCESS),
             )
             self.after(0, lambda: self.send_button.configure(state="normal"))
         except Exception as e:
             error_msg = f"Przepraszam, wystąpił błąd: {str(e)}"
             self.after(0, lambda: self.add_message("Bielik", error_msg))
             self.after(
-                0, lambda: self.status_label.configure(text="Błąd", text_color="red")
+                0, lambda: self.status_label.configure(text="Błąd", text_color=AppColors.ERROR)
             )
             self.after(0, lambda: self.send_button.configure(state="normal"))
 
@@ -1748,7 +1748,7 @@ class App(ctk.CTk):
         inv_window.geometry("1200x700")
 
         # Frame dla przycisków akcji
-        action_frame = ctk.CTkFrame(inv_window)
+        action_frame = ctk.CTkFrame(inv_window, fg_color=AppColors.BG_SECONDARY)
         action_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.XS)
 
         # Get data first
@@ -2392,7 +2392,7 @@ class App(ctk.CTk):
                 self.expiry_alert_frame,
                 text=f"Błąd podczas ładowania alertów: {str(e)}",
                 font=("Arial", 12),
-                text_color="red",
+                text_color=AppColors.ERROR,
             )
             error_label.pack(pady=AppSpacing.SM, padx=AppSpacing.SM)
 
@@ -2526,7 +2526,7 @@ class App(ctk.CTk):
                 scrollable,
                 text=f"Błąd: {str(e)}",
                 font=("Arial", 12),
-                text_color="red",
+                text_color=AppColors.ERROR,
             ).pack(pady=AppSpacing.LG)
 
     def refresh_analytics(self):
@@ -2546,6 +2546,7 @@ class App(ctk.CTk):
                 # Sekcja ogólnych statystyk (card-based)
                 stats_frame = ctk.CTkFrame(
                     self.analytics_scrollable,
+                    fg_color=AppColors.SURFACE_DARK,
                     border_width=1,
                     border_color=AppColors.BORDER_DARK
                 )
@@ -2555,7 +2556,8 @@ class App(ctk.CTk):
                 ctk.CTkLabel(
                     stats_frame,
                     text=f"{Icons.ANALYTICS} Ogólne Statystyki",
-                    font=("Arial", 16, "bold"),
+                    font=AppFont.TITLE_SECTION(),
+                    text_color=AppColors.TEXT_PRIMARY,
                 ).grid(
                     row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w"
                 )
@@ -2574,7 +2576,8 @@ class App(ctk.CTk):
                 ctk.CTkLabel(
                     stats_frame,
                     text=stats_text.strip(),
-                    font=("Arial", 12),
+                    font=AppFont.BODY(),
+                    text_color=AppColors.TEXT_SECONDARY,
                     justify="left",
                     anchor="w",
                 ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.SM, sticky="w")
@@ -2584,7 +2587,7 @@ class App(ctk.CTk):
                         self.analytics_scrollable,
                         text="Brak danych do wyświetlenia. Dodaj paragony, aby zobaczyć analitykę.",
                         font=("Arial", 14),
-                        text_color="gray",
+                        text_color=AppColors.TEXT_TERTIARY,
                     ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.LG)
                     return
 
@@ -2599,6 +2602,7 @@ class App(ctk.CTk):
                 # Wydatki według sklepów (card-based)
                 stores_frame = ctk.CTkFrame(
                     self.analytics_scrollable,
+                    fg_color=AppColors.SURFACE_DARK,
                     border_width=1,
                     border_color=AppColors.BORDER_DARK
                 )
@@ -2608,7 +2612,8 @@ class App(ctk.CTk):
                 ctk.CTkLabel(
                     stores_frame,
                     text=f"{Icons.SHOP} Wydatki według Sklepów",
-                    font=("Arial", 16, "bold"),
+                    font=AppFont.TITLE_SECTION(),
+                    text_color=AppColors.TEXT_PRIMARY,
                 ).grid(
                     row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w"
                 )
@@ -2624,7 +2629,8 @@ class App(ctk.CTk):
                 ctk.CTkLabel(
                     stores_frame,
                     text=stores_text if stores_text else "Brak danych",
-                    font=("Arial", 12),
+                    font=AppFont.BODY(),
+                    text_color=AppColors.TEXT_SECONDARY,
                     justify="left",
                     anchor="w",
                 ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.SM, sticky="w")
@@ -2640,6 +2646,7 @@ class App(ctk.CTk):
                 # Wydatki według kategorii (card-based)
                 categories_frame = ctk.CTkFrame(
                     self.analytics_scrollable,
+                    fg_color=AppColors.SURFACE_DARK,
                     border_width=1,
                     border_color=AppColors.BORDER_DARK
                 )
@@ -2649,7 +2656,8 @@ class App(ctk.CTk):
                 ctk.CTkLabel(
                     categories_frame,
                     text=f"{Icons.CATEGORY} Wydatki według Kategorii",
-                    font=("Arial", 16, "bold"),
+                    font=AppFont.TITLE_SECTION(),
+                    text_color=AppColors.TEXT_PRIMARY,
                 ).grid(
                     row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w"
                 )
@@ -2665,7 +2673,8 @@ class App(ctk.CTk):
                 ctk.CTkLabel(
                     categories_frame,
                     text=categories_text if categories_text else "Brak danych",
-                    font=("Arial", 12),
+                    font=AppFont.BODY(),
+                    text_color=AppColors.TEXT_SECONDARY,
                     justify="left",
                     anchor="w",
                 ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.SM, sticky="w")
@@ -2681,6 +2690,7 @@ class App(ctk.CTk):
                 # Najczęściej kupowane produkty (card-based)
                 products_frame = ctk.CTkFrame(
                     self.analytics_scrollable,
+                    fg_color=AppColors.SURFACE_DARK,
                     border_width=1,
                     border_color=AppColors.BORDER_DARK
                 )
@@ -2690,7 +2700,8 @@ class App(ctk.CTk):
                 ctk.CTkLabel(
                     products_frame,
                     text=f"{Icons.PRODUCT} Najczęściej Kupowane Produkty",
-                    font=("Arial", 16, "bold"),
+                    font=AppFont.TITLE_SECTION(),
+                    text_color=AppColors.TEXT_PRIMARY,
                 ).grid(
                     row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w"
                 )
@@ -2706,7 +2717,8 @@ class App(ctk.CTk):
                 ctk.CTkLabel(
                     products_frame,
                     text=products_text if products_text else "Brak danych",
-                    font=("Arial", 12),
+                    font=AppFont.BODY(),
+                    text_color=AppColors.TEXT_SECONDARY,
                     justify="left",
                     anchor="w",
                 ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.SM, sticky="w")
@@ -2722,6 +2734,7 @@ class App(ctk.CTk):
                 # Statystyki miesięczne (card-based)
                 monthly_frame = ctk.CTkFrame(
                     self.analytics_scrollable,
+                    fg_color=AppColors.SURFACE_DARK,
                     border_width=1,
                     border_color=AppColors.BORDER_DARK
                 )
@@ -2731,7 +2744,8 @@ class App(ctk.CTk):
                 ctk.CTkLabel(
                     monthly_frame,
                     text=f"{Icons.CALENDAR} Statystyki Miesięczne",
-                    font=("Arial", 16, "bold"),
+                    font=AppFont.TITLE_SECTION(),
+                    text_color=AppColors.TEXT_PRIMARY,
                 ).grid(
                     row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w"
                 )
@@ -2802,7 +2816,7 @@ class App(ctk.CTk):
                 self.analytics_scrollable,
                 text=f"Błąd podczas ładowania analityki: {str(e)}",
                 font=("Arial", 12),
-                text_color="red",
+                text_color=AppColors.ERROR,
             ).grid(row=0, column=0, padx=AppSpacing.LG, pady=AppSpacing.LG)
 
     def refresh_meal_planner(self):
@@ -2904,7 +2918,7 @@ class App(ctk.CTk):
                 self.meal_planner_scrollable,
                 text="Nie udało się wygenerować planu",
                 font=("Arial", 14),
-                text_color="red",
+                text_color=AppColors.ERROR,
             ).pack(pady=AppSpacing.LG)
             return
 
