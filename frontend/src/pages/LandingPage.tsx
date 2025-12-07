@@ -81,7 +81,7 @@ export function LandingPage() {
                         <div>
                             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Wydatki (30 dni)</p>
                             <p className="text-3xl font-bold mt-1">
-                                {loading ? "..." : formatCurrency(summary?.total_spending || 0)}
+                                {loading ? "..." : formatCurrency(summary?.total_spent || 0)}
                             </p>
                         </div>
                         <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
@@ -97,7 +97,7 @@ export function LandingPage() {
                                 <p className="text-xl font-bold mt-1">Ładowanie...</p>
                             ) : recentReceipt ? (
                                 <>
-                                    <p className="text-xl font-bold mt-1 truncate max-w-[150px]">{recentReceipt.shop_name || "Nieznany Sklep"}</p>
+                                    <p className="text-xl font-bold mt-1 truncate max-w-[150px]">{recentReceipt.shop?.name || "Nieznany Sklep"}</p>
                                     <p className="text-xs text-gray-400">{recentReceipt.purchase_date}</p>
                                 </>
                             ) : (

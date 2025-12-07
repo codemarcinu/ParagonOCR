@@ -39,6 +39,7 @@ export function ShoppingList() {
     if (!newItemName.trim() || !currentList) return;
     
     await addItem({
+      product_id: null,
       product_name: newItemName,
       quantity: parseFloat(newItemQuantity) || 1,
       unit: 'szt',

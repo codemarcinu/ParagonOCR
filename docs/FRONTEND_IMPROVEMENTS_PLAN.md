@@ -1541,11 +1541,11 @@ export default defineConfig({
 - [x] Zastosowanie toast w stores
 
 ### Faza 3
-- [ ] Vitest setup
-- [ ] Przykładowe testy komponentów
-- [ ] Storybook setup
-- [ ] Bundle optimization
-- [ ] Accessibility improvements
+- [x] Vitest setup
+- [x] Przykładowe testy komponentów (Button, LoadingSpinner)
+- [ ] Storybook setup (opcjonalne)
+- [x] Bundle optimization (code splitting z lazy loading)
+- [ ] Accessibility improvements (opcjonalne)
 
 ---
 

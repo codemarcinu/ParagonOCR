@@ -5,7 +5,7 @@
 import { useEffect } from 'react';
 import { useReceiptStore } from '@/store/receiptStore';
 import { ReceiptUploader } from '@/components/ReceiptUploader';
-import { LoadingCard, Skeleton } from '@/components/ui';
+import { Skeleton } from '@/components/ui';
 
 export function Dashboard() {
   const { receipts, loading, error, fetchReceipts } = useReceiptStore();

@@ -2,6 +2,7 @@ import axios from 'axios';
 
 import { useAuthStore } from '../store/authStore';
 import type {
+  ReceiptResponse,
   ReceiptListResponse,
   ReceiptDetailsResponse,
   ProductResponse,
