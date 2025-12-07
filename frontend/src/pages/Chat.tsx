@@ -115,7 +115,7 @@ export function Chat() {
                             onClick={() => selectConversation(conv.id)}
                             className={`w-full text-left px-4 py-3 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${currentConversationId === conv.id ? 'bg-blue-50 dark:bg-blue-900/20' : ''
                                 }`}
-                            aria-label={`${conv.title || 'New Chat'} conversation, ${conv.items?.length || 0} items`}
+                            aria-label={`${conv.title || 'New Chat'} conversation`}
                             aria-current={currentConversationId === conv.id ? 'true' : undefined}
                         >
                             <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
