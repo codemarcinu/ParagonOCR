@@ -200,6 +200,7 @@ class ReviewDialog(ctk.CTkToplevel):
         
         self.scrollable_frame = ctk.CTkScrollableFrame(products_card, fg_color=AppColors.BG_PRIMARY)
         self.scrollable_frame.pack(fill="both", expand=True, padx=1, pady=1)
+        App._enable_mousewheel_scrolling(self.scrollable_frame)
 
         # Headers - dodano kolumnę "Status"
         header_frame = ctk.CTkFrame(self.scrollable_frame, fg_color=AppColors.BG_TERTIARY)
@@ -486,6 +487,7 @@ class CookingDialog(ctk.CTkToplevel):
         
         self.scrollable_frame = ctk.CTkScrollableFrame(products_card, fg_color=AppColors.BG_PRIMARY)
         self.scrollable_frame.pack(fill="both", expand=True, padx=1, pady=1)
+        App._enable_mousewheel_scrolling(self.scrollable_frame)
 
         # Headers
         headers = ["Zaznacz", "Produkt", "Ilość", "Jednostka", "Data ważności"]
@@ -987,6 +989,7 @@ class BielikChatDialog(ctk.CTkToplevel):
         chat_bg = AppColors.BG_PRIMARY if mode == "Dark" else AppColors.BG_PRIMARY_LIGHT
         self.chat_frame = ctk.CTkScrollableFrame(self, fg_color=chat_bg)
         self.chat_frame.pack(fill="both", expand=True, padx=AppSpacing.LG, pady=AppSpacing.MD)
+        App._enable_mousewheel_scrolling(self.chat_frame)
 
         # Input area
         input_frame = ctk.CTkFrame(self)
@@ -1154,6 +1157,7 @@ class SettingsDialog(ctk.CTkToplevel):
         # Scrollable frame dla promptów
         scrollable = ctk.CTkScrollableFrame(self)
         scrollable.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.XS)
+        App._enable_mousewheel_scrolling(scrollable)
 
         # --- Sekcja OCR ---
         ocr_frame = ctk.CTkFrame(scrollable)
@@ -1331,6 +1335,36 @@ class App(ctk.CTk):
     @staticmethod
     def _adjust_color(color, amount):
         """Przyciemnia lub rozjaśnia kolor o określoną wartość"""
+    
+    @staticmethod
+    def _enable_mousewheel_scrolling(scrollable_frame):
+        """Włącza scrollowanie myszką dla CTkScrollableFrame"""
+        def _on_mousewheel(event):
+            # Pobierz canvas z scrollable frame
+            canvas = scrollable_frame._parent_canvas
+            if canvas:
+                # Przewiń w górę lub w dół
+                if event.delta > 0:
+                    canvas.yview_scroll(-1, "units")
+                else:
+                    canvas.yview_scroll(1, "units")
+        
+        # Bind dla Windows i Linux
+        scrollable_frame.bind("<MouseWheel>", _on_mousewheel)
+        # Bind dla Linux (button-4 i button-5)
+        scrollable_frame.bind("<Button-4>", lambda e: scrollable_frame._parent_canvas.yview_scroll(-1, "units") if scrollable_frame._parent_canvas else None)
+        scrollable_frame.bind("<Button-5>", lambda e: scrollable_frame._parent_canvas.yview_scroll(1, "units") if scrollable_frame._parent_canvas else None)
+        
+        # Bind również dla canvas
+        def bind_to_canvas():
+            canvas = scrollable_frame._parent_canvas
+            if canvas:
+                canvas.bind("<MouseWheel>", _on_mousewheel)
+                canvas.bind("<Button-4>", lambda e: canvas.yview_scroll(-1, "units"))
+                canvas.bind("<Button-5>", lambda e: canvas.yview_scroll(1, "units"))
+        
+        # Spróbuj zbindować po krótkim opóźnieniu (canvas może nie być jeszcze gotowy)
+        scrollable_frame.after(100, bind_to_canvas)
         # Prosta implementacja - można użyć biblioteki colorsys dla lepszej kontroli
         try:
             # Konwertuj hex na RGB
@@ -1427,13 +1461,13 @@ class App(ctk.CTk):
 
         btn_inventory = ModernButton(
             menu_buttons_frame,
-            text=f"{Icons.INVENTORY} Magazyn",
+            text=f"{Icons.INVENTORY} Spiżarnia",
             command=self.show_inventory,
             variant="primary",
             size="md"
         )
         btn_inventory.pack(side="left", padx=AppSpacing.SM)
-        ToolTip(btn_inventory, "Przeglądaj i edytuj stan magazynu")
+        ToolTip(btn_inventory, "Przeglądaj i edytuj stan spiżarni")
 
         btn_bielik = ModernButton(
             menu_buttons_frame,
@@ -1531,6 +1565,7 @@ class App(ctk.CTk):
         self.analytics_scrollable = ctk.CTkScrollableFrame(self.receipts_frame)
         self.analytics_scrollable.grid(row=2, column=0, sticky="nsew", padx=AppSpacing.SM, pady=AppSpacing.SM)
         self.analytics_scrollable.grid_columnconfigure(0, weight=1)
+        App._enable_mousewheel_scrolling(self.analytics_scrollable)
 
         # Stary widok przetwarzania (ukryty, dostępny przez dialog)
         self.processing_frame = ctk.CTkFrame(self.content_frame)
@@ -1709,7 +1744,7 @@ class App(ctk.CTk):
 
         # Create inventory window
         inv_window = ctk.CTkToplevel(self)
-        inv_window.title("Stan Magazynu - Edycja")
+        inv_window.title("Spiżarnia - Edycja")
         inv_window.geometry("1200x700")
 
         # Frame dla przycisków akcji
@@ -1883,6 +1918,7 @@ class App(ctk.CTk):
             # Standard scrolling for smaller datasets
             scrollable = ctk.CTkScrollableFrame(inv_window)
             scrollable.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.SM)
+            App._enable_mousewheel_scrolling(scrollable)
 
             # Headers
             headers = [
@@ -2380,6 +2416,7 @@ class App(ctk.CTk):
 
                 scrollable = ctk.CTkScrollableFrame(dialog)
                 scrollable.pack(fill="both", expand=True, padx=AppSpacing.LG, pady=AppSpacing.SM)
+                App._enable_mousewheel_scrolling(scrollable)
 
                 suggestion_label = ctk.CTkLabel(
                     scrollable,
@@ -2413,6 +2450,7 @@ class App(ctk.CTk):
         # Scrollable frame
         scrollable = ctk.CTkScrollableFrame(details_window)
         scrollable.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.SM)
+        App._enable_mousewheel_scrolling(scrollable)
 
         try:
             with FoodWasteTracker() as tracker:
@@ -2804,6 +2842,7 @@ class App(ctk.CTk):
         scrollable = ctk.CTkScrollableFrame(self.meal_planner_frame)
         scrollable.grid(row=1, column=0, sticky="nsew", padx=AppSpacing.SM, pady=AppSpacing.SM)
         scrollable.grid_columnconfigure(0, weight=1)
+        App._enable_mousewheel_scrolling(scrollable)
 
         # Placeholder
         ctk.CTkLabel(
