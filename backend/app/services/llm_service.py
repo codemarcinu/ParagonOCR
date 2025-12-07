@@ -19,12 +19,39 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 # Initialize Ollama client
-try:
-    timeout = httpx.Timeout(settings.OLLAMA_TIMEOUT, connect=10.0)
-    ollama_client = ollama.Client(host=settings.OLLAMA_HOST, timeout=timeout)
-except Exception as e:
-    logger.error(f"Failed to connect to Ollama at {settings.OLLAMA_HOST}: {e}")
-    ollama_client = None
+ollama_client = None
+
+def init_ollama_client():
+    """Initialize Ollama client and verify connection."""
+    global ollama_client
+    try:
+        timeout = httpx.Timeout(settings.OLLAMA_TIMEOUT, connect=10.0)
+        client = ollama.Client(host=settings.OLLAMA_HOST, timeout=timeout)
+        
+        # Test connection by listing models
+        try:
+            models = client.list()
+            logger.info(f"Ollama client initialized. Connected to {settings.OLLAMA_HOST}")
+            logger.info(f"Available models: {[m.get('name', 'unknown') for m in models.get('models', [])]}")
+            
+            # Check if required model is available
+            model_names = [m.get('name', '') for m in models.get('models', [])]
+            if settings.TEXT_MODEL not in model_names:
+                logger.warning(f"Required model '{settings.TEXT_MODEL}' not found in Ollama. Available: {model_names}")
+            else:
+                logger.info(f"Required model '{settings.TEXT_MODEL}' is available")
+            
+            ollama_client = client
+        except Exception as e:
+            logger.error(f"Failed to verify Ollama connection: {e}")
+            ollama_client = None
+            
+    except Exception as e:
+        logger.error(f"Failed to initialize Ollama client at {settings.OLLAMA_HOST}: {e}")
+        ollama_client = None
+
+# Initialize on module load
+init_ollama_client()
 
 
 class ParsedReceipt:
@@ -75,17 +102,24 @@ def parse_receipt_text(ocr_text: str) -> ParsedReceipt:
         ParsedReceipt with extracted data
     """
     if not ollama_client:
+        logger.error("Ollama client not initialized. Check Ollama connection.")
         return ParsedReceipt(
             error="Ollama client not initialized. Check Ollama connection."
         )
     
     if not ocr_text or not ocr_text.strip():
+        logger.warning("Empty OCR text provided to LLM parser")
         return ParsedReceipt(error="Empty OCR text provided")
+    
+    # Log OCR text length for debugging
+    logger.info(f"Parsing receipt with LLM. OCR text length: {len(ocr_text)} chars")
+    logger.debug(f"OCR text preview: {ocr_text[:200]}...")
     
     # Create prompt for receipt parsing
     prompt = create_receipt_parsing_prompt(ocr_text)
     
     try:
+        logger.info(f"Calling Ollama API with model: {settings.TEXT_MODEL}")
         # Call Ollama API
         response = ollama_client.generate(
             model=settings.TEXT_MODEL,
@@ -97,20 +131,29 @@ def parse_receipt_text(ocr_text: str) -> ParsedReceipt:
         )
         
         response_text = response.get("response", "")
+        logger.info(f"Received LLM response. Length: {len(response_text)} chars")
+        logger.debug(f"LLM response preview: {response_text[:500]}...")
+        
+        if not response_text:
+            logger.error("Empty response from Ollama API")
+            return ParsedReceipt(error="Empty response from Ollama API")
         
         # Parse JSON from response
         parsed_data = extract_json_from_response(response_text)
         
         if not parsed_data:
+            logger.error(f"Failed to extract JSON from LLM response. Response: {response_text[:500]}")
             return ParsedReceipt(
-                error="Failed to extract JSON from LLM response"
+                error=f"Failed to extract JSON from LLM response. Response preview: {response_text[:200]}"
             )
+        
+        logger.info("Successfully parsed JSON from LLM response")
         
         # Validate and normalize parsed data
         return validate_and_normalize_receipt(parsed_data)
         
     except Exception as e:
-        logger.error(f"Error parsing receipt with LLM: {e}")
+        logger.error(f"Error parsing receipt with LLM: {e}", exc_info=True)
         return ParsedReceipt(error=f"LLM parsing error: {str(e)}")
 
 
@@ -172,22 +215,32 @@ def extract_json_from_response(response_text: str) -> Optional[Dict[str, Any]]:
     Returns:
         Parsed JSON dictionary or None
     """
+    if not response_text:
+        logger.error("Empty response text provided to JSON extractor")
+        return None
+    
     # Remove markdown code blocks if present
     json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', response_text, re.DOTALL)
     if json_match:
         json_str = json_match.group(1)
+        logger.debug("Found JSON in markdown code block")
     else:
         # Try to find JSON object directly
         json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
         if json_match:
             json_str = json_match.group(0)
+            logger.debug("Found JSON object directly in response")
         else:
             json_str = response_text.strip()
+            logger.debug("Using full response text as JSON")
     
     try:
-        return json.loads(json_str)
+        parsed = json.loads(json_str)
+        logger.debug(f"Successfully parsed JSON with keys: {list(parsed.keys()) if isinstance(parsed, dict) else 'not a dict'}")
+        return parsed
     except json.JSONDecodeError as e:
-        logger.error(f"JSON decode error: {e}, text: {response_text[:200]}")
+        logger.error(f"JSON decode error: {e}")
+        logger.error(f"Attempted to parse: {json_str[:500]}")
         return None
 
 

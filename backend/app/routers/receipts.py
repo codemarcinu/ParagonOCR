@@ -38,6 +38,10 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+# Upload directory - ensure it exists
+upload_dir = Path(settings.UPLOAD_DIR)
+upload_dir.mkdir(parents=True, exist_ok=True)
+
 
 # Connection Manager for WebSockets
 class ConnectionManager:
@@ -114,6 +118,7 @@ async def upload_receipt(
         purchase_date=date.today(),
         total_amount=0.0,
         source_file=str(file_path),
+        status="processing",  # Set initial status
     )
     db.add(receipt)
     db.flush()  # Get receipt.id
@@ -183,14 +188,26 @@ async def process_receipt_async(receipt_id: int, file_path: str):
                 return
 
             receipt.ocr_text = ocr_result.text
+            db.commit()  # Save OCR text to database
             await send_update("ocr", 50, "OCR completed, text extracted")
+            
+            # Log OCR result for debugging
+            logger.info(f"Receipt {receipt_id}: OCR extracted {len(ocr_result.text)} characters")
+            if not ocr_result.text or not ocr_result.text.strip():
+                logger.warning(f"Receipt {receipt_id}: OCR text is empty or whitespace only")
+                await send_update("error", 0, "OCR Failed", error="No text extracted from receipt")
+                return
 
             # Step 2: LLM Parsing
             await send_update("llm", 60, "Analyzing with AI (Bielik)...")
+            logger.info(f"Receipt {receipt_id}: Starting LLM parsing...")
             parsed_receipt = parse_receipt_text(ocr_result.text)
 
             if parsed_receipt.error:
-                receipt.ocr_text = f"LLM Error: {parsed_receipt.error}"
+                error_msg = f"LLM Error: {parsed_receipt.error}"
+                logger.error(f"Receipt {receipt_id}: {error_msg}")
+                receipt.ocr_text = f"{receipt.ocr_text}\n\n{error_msg}"
+                receipt.status = "error"
                 db.commit()
                 await send_update(
                     "error", 0, "AI Analysis Failed", error=parsed_receipt.error
@@ -198,6 +215,7 @@ async def process_receipt_async(receipt_id: int, file_path: str):
                 return
 
             await send_update("llm", 80, "AI analysis complete")
+            logger.info(f"Receipt {receipt_id}: LLM parsing successful. Shop: {parsed_receipt.shop}, Items: {len(parsed_receipt.items)}")
 
             # Step 3: Save to database
             await send_update("saving", 90, "Saving data...")
@@ -208,16 +226,24 @@ async def process_receipt_async(receipt_id: int, file_path: str):
                 shop = Shop(name=parsed_receipt.shop)
                 db.add(shop)
                 db.flush()
+                logger.info(f"Receipt {receipt_id}: Created new shop: {shop.name}")
 
             # Update receipt
             receipt.shop_id = shop.id
-            receipt.purchase_date = datetime.strptime(
-                parsed_receipt.date, "%Y-%m-%d"
-            ).date()
+            try:
+                receipt.purchase_date = datetime.strptime(
+                    parsed_receipt.date, "%Y-%m-%d"
+                ).date()
+            except (ValueError, TypeError) as e:
+                logger.warning(f"Receipt {receipt_id}: Invalid date format '{parsed_receipt.date}', using today's date. Error: {e}")
+                receipt.purchase_date = date.today()
+            
             receipt.purchase_time = parsed_receipt.time
-            receipt.total_amount = parsed_receipt.total
+            # Ensure total_amount is not None (required field)
+            receipt.total_amount = parsed_receipt.total if parsed_receipt.total is not None else 0.0
             receipt.subtotal = parsed_receipt.subtotal
             receipt.tax = parsed_receipt.tax
+            receipt.status = "completed"
 
             # Save items
             for item_data in parsed_receipt.items:
@@ -264,13 +290,20 @@ async def process_receipt_async(receipt_id: int, file_path: str):
             logger.info(f"Successfully processed receipt {receipt_id}")
 
         except Exception as e:
-            logger.error(f"Error processing receipt {receipt_id}: {e}")
-            db.rollback()
-            # Update receipt with error
-            receipt = db.query(Receipt).filter(Receipt.id == receipt_id).first()
-            if receipt:
-                receipt.ocr_text = f"Processing Error: {str(e)}"
-                db.commit()
+            logger.error(f"Error processing receipt {receipt_id}: {e}", exc_info=True)
+            try:
+                db.rollback()
+                # Update receipt with error
+                receipt = db.query(Receipt).filter(Receipt.id == receipt_id).first()
+                if receipt:
+                    receipt.status = "error"
+                    if receipt.ocr_text:
+                        receipt.ocr_text = f"{receipt.ocr_text}\n\nProcessing Error: {str(e)}"
+                    else:
+                        receipt.ocr_text = f"Processing Error: {str(e)}"
+                    db.commit()
+            except Exception as db_error:
+                logger.error(f"Error updating receipt status in error handler: {db_error}")
             await send_update("error", 0, "Unexpected Error", error=str(e))
 
 
