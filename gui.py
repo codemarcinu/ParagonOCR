@@ -982,9 +982,11 @@ class BielikChatDialog(ctk.CTkToplevel):
             variant="primary"
         ).pack(pady=AppSpacing.SM)
 
-        # Chat area (scrollable)
-        self.chat_frame = ctk.CTkScrollableFrame(self)
-        self.chat_frame.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.XS)
+        # Chat area (scrollable) - użyj odpowiedniego tła
+        mode = ctk.get_appearance_mode()
+        chat_bg = AppColors.BG_PRIMARY if mode == "Dark" else AppColors.BG_PRIMARY_LIGHT
+        self.chat_frame = ctk.CTkScrollableFrame(self, fg_color=chat_bg)
+        self.chat_frame.pack(fill="both", expand=True, padx=AppSpacing.LG, pady=AppSpacing.MD)
 
         # Input area
         input_frame = ctk.CTkFrame(self)
@@ -993,19 +995,28 @@ class BielikChatDialog(ctk.CTkToplevel):
         self.input_entry = ctk.CTkEntry(
             input_frame,
             placeholder_text="Zadaj pytanie Bielikowi...",
-            font=("Arial", 14),
+            font=AppFont.BODY(),
         )
-        self.input_entry.pack(side="left", fill="x", expand=True, padx=AppSpacing.XS)
+        self.input_entry.pack(side="left", fill="x", expand=True, padx=AppSpacing.SM)
         self.input_entry.bind("<Return>", lambda e: self.send_message())
 
-        self.send_button = ctk.CTkButton(
-            input_frame, text="Wyślij", command=self.send_message, width=100
+        self.send_button = ModernButton(
+            input_frame,
+            text=f"{Icons.SEND} Wyślij",
+            command=self.send_message,
+            variant="primary",
+            size="md"
         )
-        self.send_button.pack(side="right", padx=AppSpacing.XS)
+        self.send_button.pack(side="right", padx=AppSpacing.SM)
 
         # Status label
-        self.status_label = ctk.CTkLabel(self, text="Gotowy", font=("Arial", 10))
-        self.status_label.pack(pady=AppSpacing.XS)
+        self.status_label = ModernLabel(
+            self,
+            text="Gotowy",
+            size="sm",
+            variant="secondary"
+        )
+        self.status_label.pack(pady=AppSpacing.SM)
 
         # Inicjalizuj asystenta
         self.init_assistant()
@@ -1033,22 +1044,36 @@ class BielikChatDialog(ctk.CTkToplevel):
         msg_frame = ctk.CTkFrame(self.chat_frame)
         msg_frame.pack(fill="x", padx=AppSpacing.XS, pady=AppSpacing.XS)
 
-        # Kolor w zależności od nadawcy
+        # Kolor w zależności od nadawcy - użyj ciemniejszych kolorów dla lepszego kontrastu
+        mode = ctk.get_appearance_mode()
         if sender == "Bielik":
-            msg_frame.configure(fg_color=AppColors.CHAT_BOT)
+            # Ciemniejszy niebieski dla Bielika (bot)
+            if mode == "Dark":
+                msg_frame.configure(fg_color=AppColors.BG_SECONDARY)
+                text_color = AppColors.TEXT_PRIMARY
+            else:
+                msg_frame.configure(fg_color=AppColors.INFO_LIGHT)
+                text_color = AppColors.TEXT_PRIMARY_LIGHT
             sender_text = f"{Icons.BEAR} Bielik:"
         else:
-            msg_frame.configure(fg_color=AppColors.CHAT_USER)
+            # Ciemniejszy zielony dla użytkownika
+            if mode == "Dark":
+                msg_frame.configure(fg_color=AppColors.BG_TERTIARY)
+                text_color = AppColors.TEXT_PRIMARY
+            else:
+                msg_frame.configure(fg_color=AppColors.SUCCESS_LIGHT)
+                text_color = AppColors.TEXT_PRIMARY_LIGHT
             sender_text = "Ty:"
 
         # Label z wiadomością
         msg_label = ctk.CTkLabel(
             msg_frame,
             text=f"{sender_text} {message}",
-            font=("Arial", 12),
+            font=AppFont.BODY(),
             wraplength=700,
             justify="left",
             anchor="w",
+            text_color=text_color,
         )
         msg_label.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.XS)
 
@@ -1451,6 +1476,14 @@ class App(ctk.CTk):
         self.receipts_frame.grid(row=0, column=0, sticky="nsew")
         self.receipts_frame.grid_columnconfigure(0, weight=1)
         self.receipts_frame.grid_rowconfigure(2, weight=1)  # Zmieniono z 1 na 2 dla alertów
+        
+        # --- WIDGETY DLA PLANERA POSIŁKÓW ---
+        self.meal_planner_frame = ctk.CTkFrame(self.content_frame)
+        self.meal_planner_frame.grid(row=0, column=0, sticky="nsew")
+        self.meal_planner_frame.grid_columnconfigure(0, weight=1)
+        self.meal_planner_frame.grid_rowconfigure(1, weight=1)
+        # Ukryj domyślnie
+        self.meal_planner_frame.grid_remove()
 
         # Header z przyciskami
         header_frame = ctk.CTkFrame(self.receipts_frame)
