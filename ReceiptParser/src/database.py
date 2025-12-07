@@ -168,6 +168,27 @@ def init_db():
     Base.metadata.create_all(bind=engine)
     print("Tabele zostały utworzone (jeśli nie istniały).")
 
+
+def clear_db():
+    """
+    Usuwa wszystkie tabele z bazy danych.
+    UWAGA: Ta operacja jest nieodwracalna i usunie wszystkie dane!
+    """
+    print("UWAGA: Usuwanie wszystkich tabel z bazy danych...")
+    Base.metadata.drop_all(bind=engine)
+    print("Wszystkie tabele zostały usunięte.")
+
+
+def reset_db():
+    """
+    Czyści bazę danych (usuwa wszystkie tabele) i tworzy je ponownie.
+    UWAGA: Ta operacja jest nieodwracalna i usunie wszystkie dane!
+    """
+    print("UWAGA: Resetowanie bazy danych...")
+    clear_db()
+    init_db()
+    print("Baza danych została zresetowana.")
+
 # --- Uruchomienie Inicjalizacji ---
 
 if __name__ == '__main__':

@@ -770,6 +770,85 @@ def migrate():
 
 
 @cli.command()
+@click.confirmation_option(prompt='Czy na pewno chcesz wyczyścić bazę danych? Ta operacja jest nieodwracalna!')
+def clear_db():
+    """Czyści bazę danych - usuwa wszystkie tabele i dane."""
+    from .database import clear_db as clear_database
+    
+    click.echo("Czyszczenie bazy danych...")
+    clear_database()
+    click.secho("Baza danych została wyczyszczona!", fg="yellow")
+
+
+@cli.command()
+@click.confirmation_option(prompt='Czy na pewno chcesz zresetować bazę danych? Ta operacja jest nieodwracalna!')
+def reset_db():
+    """Resetuje bazę danych - usuwa wszystkie tabele i tworzy je ponownie."""
+    from .database import reset_db as reset_database
+    from .migrate_db import migrate_all
+    
+    click.echo("Resetowanie bazy danych...")
+    reset_database()
+    
+    click.echo("Sprawdzam i aktualizuję schemat bazy danych...")
+    migrate_all()
+    
+    click.secho("Baza danych została zresetowana!", fg="green")
+
+
+@cli.command()
+@click.option('--name', '-n', help='Nazwa backupu (bez rozszerzenia)')
+@click.option('--format', '-f', type=click.Choice(['db', 'zip', 'sql']), default='db', help='Format backupu')
+@click.option('--path', '-p', type=click.Path(), help='Ścieżka do pliku backupu (opcjonalne)')
+def backup_db(name, format, path):
+    """Tworzy backup bazy danych."""
+    from .export_import import DatabaseBackup
+    
+    result = DatabaseBackup.create_backup(backup_path=path, format=format, name=name)
+    if result:
+        click.secho(f"Backup utworzony: {result}", fg="green")
+    else:
+        click.secho("Błąd podczas tworzenia backupu!", fg="red")
+
+
+@cli.command()
+@click.argument('backup_path', type=click.Path(exists=True))
+@click.option('--no-validate', is_flag=True, help='Pomiń walidację schematu')
+def restore_db(backup_path, no_validate):
+    """Przywraca backup bazy danych."""
+    from .export_import import DatabaseBackup
+    
+    click.echo(f"Przywracanie backupu z: {backup_path}")
+    if DatabaseBackup.restore_backup(backup_path, validate_schema=not no_validate):
+        click.secho("Backup przywrócony pomyślnie!", fg="green")
+    else:
+        click.secho("Błąd podczas przywracania backupu!", fg="red")
+
+
+@cli.command()
+@click.option('--dir', '-d', type=click.Path(), help='Katalog z backupami (domyślnie: data/backups)')
+def list_backups(dir):
+    """Listuje dostępne backupy bazy danych."""
+    from .export_import import DatabaseBackup
+    from datetime import datetime
+    
+    backups = DatabaseBackup.list_backups(backup_dir=dir)
+    
+    if not backups:
+        click.echo("Brak dostępnych backupów.")
+        return
+    
+    click.echo(f"\nZnaleziono {len(backups)} backup(ów):\n")
+    click.echo(f"{'Nazwa':<40} {'Rozmiar':<15} {'Data utworzenia':<20} {'Format':<10}")
+    click.echo("-" * 85)
+    
+    for backup in backups:
+        size_mb = backup['size'] / (1024 * 1024)
+        date_str = backup['created'].strftime("%Y-%m-%d %H:%M:%S")
+        click.echo(f"{backup['name']:<40} {size_mb:.2f} MB{'':<8} {date_str:<20} {backup['format']:<10}")
+
+
+@cli.command()
 @click.option(
     "--file",
     "file_path",

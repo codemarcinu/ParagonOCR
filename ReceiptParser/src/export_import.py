@@ -268,23 +268,82 @@ class DatabaseBackup:
     """Klasa do tworzenia i przywracania backupów bazy danych."""
     
     @staticmethod
-    def create_backup(backup_path: str, format: str = 'db') -> bool:
+    def list_backups(backup_dir: Optional[str] = None) -> List[Dict[str, Any]]:
+        """
+        Listuje dostępne backupy bazy danych.
+        
+        Args:
+            backup_dir: Katalog z backupami (domyślnie: data/backups)
+        
+        Returns:
+            Lista słowników z informacjami o backupach
+        """
+        try:
+            from .database import db_path
+            
+            if backup_dir is None:
+                backup_dir = os.path.join(os.path.dirname(db_path), 'backups')
+            
+            if not os.path.exists(backup_dir):
+                return []
+            
+            backups = []
+            for filename in os.listdir(backup_dir):
+                filepath = os.path.join(backup_dir, filename)
+                if os.path.isfile(filepath) and (
+                    filename.endswith('.db') or 
+                    filename.endswith('.zip') or 
+                    filename.endswith('.sql')
+                ):
+                    stat = os.stat(filepath)
+                    backups.append({
+                        'name': filename,
+                        'path': filepath,
+                        'size': stat.st_size,
+                        'created': datetime.fromtimestamp(stat.st_mtime),
+                        'format': 'db' if filename.endswith('.db') else 
+                                 'zip' if filename.endswith('.zip') else 'sql'
+                    })
+            
+            # Sortuj po dacie utworzenia (najnowsze pierwsze)
+            backups.sort(key=lambda x: x['created'], reverse=True)
+            return backups
+        except Exception as e:
+            logger.error(f"Błąd podczas listowania backupów: {sanitize_log_message(str(e))}")
+            return []
+    
+    @staticmethod
+    def create_backup(backup_path: Optional[str] = None, format: str = 'db', name: Optional[str] = None) -> Optional[str]:
         """
         Tworzy backup bazy danych.
         
         Args:
-            backup_path: Ścieżka do pliku backupu
+            backup_path: Ścieżka do pliku backupu (opcjonalne - wygeneruje automatycznie)
             format: Format backupu ('db', 'zip', 'sql')
+            name: Nazwa backupu (bez rozszerzenia, opcjonalne - użyje daty/czasu)
         
         Returns:
-            True jeśli sukces, False w przeciwnym razie
+            Ścieżka do utworzonego backupu lub None w przypadku błędu
         """
         try:
             from .database import db_path
             
             if not os.path.exists(db_path):
                 print(f"BŁĄD: Baza danych nie istnieje: {db_path}")
-                return False
+                return None
+            
+            # Jeśli backup_path nie podano, wygeneruj automatycznie
+            if backup_path is None:
+                backup_dir = os.path.join(os.path.dirname(db_path), 'backups')
+                os.makedirs(backup_dir, exist_ok=True)
+                
+                if name:
+                    filename = f"{name}.{format}"
+                else:
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    filename = f"backup_{timestamp}.{format}"
+                
+                backup_path = os.path.join(backup_dir, filename)
             
             # Waliduj ścieżkę wyjściową
             validated_path = validate_file_path(
@@ -313,12 +372,13 @@ class DatabaseBackup:
             
             else:
                 print(f"BŁĄD: Nieobsługiwany format backupu: {format}")
-                return False
+                return None
             
-            return True
+            print(f"Backup utworzony: {backup_path}")
+            return backup_path
         except Exception as e:
             print(f"BŁĄD podczas tworzenia backupu: {sanitize_log_message(str(e))}")
-            return False
+            return None
     
     @staticmethod
     def restore_backup(backup_path: str, validate_schema: bool = True) -> bool:
