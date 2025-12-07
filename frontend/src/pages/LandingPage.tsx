@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     ScanLine,
     LayoutDashboard,
@@ -11,8 +11,37 @@ import {
     Clock
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { fetchSummary, fetchRecentReceipts, type SpendingSummary, type Receipt as ReceiptType } from '../lib/api';
 
 export function LandingPage() {
+    const [summary, setSummary] = useState<SpendingSummary | null>(null);
+    const [recentReceipt, setRecentReceipt] = useState<ReceiptType | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                const stats = await fetchSummary();
+                setSummary(stats);
+
+                const receipts = await fetchRecentReceipts(1);
+                if (receipts.length > 0) {
+                    setRecentReceipt(receipts[0]);
+                }
+            } catch (error) {
+                console.error("Failed to load landing page data", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadData();
+    }, []);
+
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('pl-PL', { style: 'currency', currency: 'PLN' }).format(amount);
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 font-sans">
 
@@ -43,32 +72,48 @@ export function LandingPage() {
                 </div>
             </div>
 
-            {/* Stats Overview (Mock Data for Looks) */}
+            {/* Stats Overview */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                    {/* Spending Card */}
                     <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Wydatki (Ten miesiąc)</p>
-                            <p className="text-3xl font-bold mt-1">2 450.00 PLN</p>
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Wydatki (30 dni)</p>
+                            <p className="text-3xl font-bold mt-1">
+                                {loading ? "..." : formatCurrency(summary?.total_spending || 0)}
+                            </p>
                         </div>
                         <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
                             <TrendingUp className="h-6 w-6 text-red-600 dark:text-red-400" />
                         </div>
                     </div>
+
+                    {/* Recent Receipt Card */}
                     <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Ostatni Paragon</p>
-                            <p className="text-xl font-bold mt-1 truncate max-w-[150px]">Lidl - Zakupy</p>
-                            <p className="text-xs text-gray-400">Dzisiaj, 14:30</p>
+                            {loading ? (
+                                <p className="text-xl font-bold mt-1">Ładowanie...</p>
+                            ) : recentReceipt ? (
+                                <>
+                                    <p className="text-xl font-bold mt-1 truncate max-w-[150px]">{recentReceipt.shop_name || "Nieznany Sklep"}</p>
+                                    <p className="text-xs text-gray-400">{recentReceipt.purchase_date}</p>
+                                </>
+                            ) : (
+                                <p className="text-xl font-bold mt-1 text-gray-400">Brak paragonów</p>
+                            )}
                         </div>
                         <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
                             <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                         </div>
                     </div>
+
+                    {/* Stats Card */}
                     <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between">
                         <div>
-                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Produkty w Bazie</p>
-                            <p className="text-3xl font-bold mt-1">1,248</p>
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Paragony (30 dni)</p>
+                            <p className="text-3xl font-bold mt-1">{loading ? "..." : summary?.receipt_count || 0}</p>
                         </div>
                         <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
                             <Database className="h-6 w-6 text-green-600 dark:text-green-400" />
