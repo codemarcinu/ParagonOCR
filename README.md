@@ -6,6 +6,9 @@
 **Data dokumentacji:** 2025-12-06  
 **Status:** ✅ Wszystkie fazy implementacji zakończone (5/5)
 
+> [!IMPORTANT]
+> **Nowa Edycja Webowa (2025)**: Sprawdź [README_WEB.md](README_WEB.md) dla instrukcji dotyczących nowej wersji opartej na React/FastAPI/Docker z Landing Page i zaawansowaną analityką.
+
 ---
 
 ## 🚀 Główne Funkcjonalności

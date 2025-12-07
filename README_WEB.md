@@ -458,4 +458,4 @@ Projekt jest aktywnie rozwijany. Struktura jest modularna i łatwa do rozszerzen
 ---
 
 **Ostatnia aktualizacja:** 7 grudnia 2025
-**Wersja:** 1.0.0-alpha
+**Wersja:** 1.0.0-beta (Landing Page & Real Data Integration)
