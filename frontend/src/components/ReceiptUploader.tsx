@@ -91,7 +91,7 @@ export function ReceiptUploader() {
     try {
       setStage({ stage: 'uploading', progress: 10, message: 'Uploading file...' });
 
-      const result = await uploadReceipt(file);
+      await uploadReceipt(file);
 
       setStage({
         stage: 'ocr',
