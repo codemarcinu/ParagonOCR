@@ -57,12 +57,11 @@ Register a new user.
 
 ### GET /api/auth/passkey/register/options
 
-Generate challenge for passkey registration. Requires authentication.
+Generate challenge for passkey registration. **No authentication required** - creates user automatically on verification.
 
 **Request:**
 ```http
 GET /api/auth/passkey/register/options?device_name=iPhone%2015
-Authorization: Bearer <token>
 ```
 
 **Response:**
@@ -96,7 +95,7 @@ Authorization: Bearer <token>
 
 ### POST /api/auth/passkey/register/verify
 
-Verify registration response and store credential. Requires authentication.
+Verify registration response and store credential. **No authentication required** - creates user automatically and returns JWT token for immediate login.
 
 **Request:**
 ```json
@@ -119,8 +118,10 @@ Verify registration response and store credential. Requires authentication.
 {
   "success": true,
   "message": "Passkey registered successfully",
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer",
   "credential": {
-    "id": 1,
+    "id": "uuid-here",
     "device_name": "iPhone 15",
     "device_type": "single-device",
     "created_at": "2025-12-07T10:00:00Z"

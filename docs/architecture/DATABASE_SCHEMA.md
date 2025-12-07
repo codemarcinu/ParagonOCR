@@ -238,10 +238,10 @@ FIDO2 WebAuthn passkey credentials for passwordless authentication.
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| id | INTEGER | PRIMARY KEY | Auto-increment ID |
+| id | UUID | PRIMARY KEY | UUID primary key |
 | user_id | INTEGER | FK → users.id | Owner user |
-| credential_id | VARCHAR | UNIQUE, NOT NULL | Base64-encoded credential ID |
-| public_key | VARCHAR | NOT NULL | Base64-encoded public key |
+| credential_id | BLOB | UNIQUE, NOT NULL | Binary credential ID (indexed) |
+| public_key | BLOB | NOT NULL | Binary public key |
 | device_name | VARCHAR | | User-friendly device name (e.g., 'iPhone 15') |
 | device_type | VARCHAR | DEFAULT 'single-device' | Device type: 'single-device' or 'cross-device' |
 | last_used | DATETIME | | Last authentication timestamp |

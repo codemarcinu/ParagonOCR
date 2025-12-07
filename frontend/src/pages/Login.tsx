@@ -1,55 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { login, fetchMe } from '../lib/api';
-import { useAuthStore } from '../store/authStore';
-import { Button, Input } from '../components/ui';
 import PasskeyLogin from '../components/PasskeyLogin';
 
 const Login: React.FC = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
-    const { login: loginAction } = useAuthStore();
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        setLoading(true);
-
-        try {
-            // Create FormData compatible with OAuth2PasswordRequestForm
-            const formData = new FormData();
-            formData.append('username', email); // ID is username for OAuth2
-            formData.append('password', password);
-
-            const data = await login(formData);
-            const token = data.access_token;
-
-            // Temporarily set token to fetch user
-            useAuthStore.getState().setToken(token);
-
-            const user = await fetchMe();
-            loginAction(token, user);
-
-            navigate('/');
-        } catch (err: any) {
-            console.error(err);
-            setError('Invalid email or password');
-            useAuthStore.getState().logout(); // Clear potentially bad state
-        } finally {
-            setLoading(false);
-        }
-    };
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-slate-100">
             <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
                 <div className="mb-6 text-center">
                     <h1 className="text-3xl font-bold text-gray-800">ParagonOCR</h1>
-                    <p className="text-gray-500">Sign in to your account</p>
+                    <p className="text-gray-500">Sign in with passkey</p>
                 </div>
 
                 {error && (
@@ -58,56 +21,12 @@ const Login: React.FC = () => {
                     </div>
                 )}
 
-                {/* Passkey Login */}
                 <div className="mb-6">
                     <PasskeyLogin
-                        username={email}
                         onSuccess={() => navigate('/')}
                         onError={(err) => setError(err)}
                     />
                 </div>
-
-                <div className="mb-6 flex items-center">
-                    <div className="flex-1 border-t border-gray-300"></div>
-                    <span className="px-4 text-sm text-gray-500">or</span>
-                    <div className="flex-1 border-t border-gray-300"></div>
-                </div>
-
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <Input
-                            id="email"
-                            type="email"
-                            label="Email"
-                            placeholder="Enter your email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                    </div>
-
-                    <div className="mb-6">
-                        <Input
-                            id="password"
-                            type="password"
-                            label="Password"
-                            placeholder="Enter your password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
-
-                    <Button
-                        type="submit"
-                        disabled={loading}
-                        isLoading={loading}
-                        className="w-full"
-                        size="lg"
-                    >
-                        {loading ? 'Signing In...' : 'Sign In with Password'}
-                    </Button>
-                </form>
 
                 <div className="mt-4 text-center text-sm">
                     <p className="text-gray-600">

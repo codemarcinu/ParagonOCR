@@ -22,7 +22,6 @@ async def list_products(
     category_id: Optional[int] = None,
     skip: int = 0,
     limit: int = 50,
-    limit: int = 50,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
@@ -39,8 +38,6 @@ async def list_products(
 
     if category_id:
         query = query.filter(Product.category_id == category_id)
-
-    products = query.offset(skip).limit(limit).all()
 
     products = query.offset(skip).limit(limit).all()
     return products

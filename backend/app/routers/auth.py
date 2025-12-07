@@ -3,6 +3,7 @@ Authentication API endpoints.
 """
 
 import logging
+import secrets
 from typing import Any, Optional
 from datetime import timedelta
 
@@ -82,17 +83,38 @@ async def read_users_me(
 async def passkey_register_options(
     request: Request,
     device_name: Optional[str] = None,
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> Any:
     """
     Generate challenge for passkey registration.
-    User must be authenticated to register a passkey.
+    No authentication required - creates user automatically on verification.
     """
     try:
+        # Create a temporary user for passkey registration
+        # This user will be used for the passkey
+        from app.models.user import User
+        
+        # Create user with unique identifier
+        user_id_str = secrets.token_urlsafe(12)
+        temp_email = f"user_{user_id_str}@local"
+        
+        # Check if user already exists (shouldn't happen, but just in case)
+        existing = db.query(User).filter(User.email == temp_email).first()
+        if existing:
+            temp_user = existing
+        else:
+            temp_user = User(
+                email=temp_email,
+                hashed_password="",  # Empty string for passkey-only users
+                is_active=True,
+            )
+            db.add(temp_user)
+            db.commit()
+            db.refresh(temp_user)
+        
         options = passkey_service.generate_registration_options(
             request=request,
-            user=current_user,
+            user=temp_user,
             device_name=device_name,
         )
         return options
@@ -104,17 +126,17 @@ async def passkey_register_options(
         )
 
 
-@router.post("/passkey/register/verify")
+@router.post("/passkey/register/verify", response_model=Token)
 @limiter.limit("5/minute")
 async def passkey_register_verify(
     request: Request,
     data: PasskeyRegistrationVerifyRequest,
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> Any:
     """
     Verify registration response and store credential.
-    User must be authenticated to register a passkey.
+    No authentication required - creates user automatically.
+    Returns JWT token for immediate login.
     """
     try:
         webauthn_key = passkey_service.verify_registration(
@@ -123,10 +145,23 @@ async def passkey_register_verify(
             credential=data.credential,
             challenge=data.challenge,
         )
+        
+        # Get the user and create token
+        user = db.query(User).filter(User.id == webauthn_key.user_id).first()
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found",
+            )
+        
+        # Create token for immediate login
+        token_data = auth_service.create_user_token(user)
+        
         return {
             "success": True,
             "message": "Passkey registered successfully",
             "credential": WebAuthnKeyResponse.model_validate(webauthn_key),
+            **token_data,  # Include access_token and token_type
         }
     except HTTPException:
         raise

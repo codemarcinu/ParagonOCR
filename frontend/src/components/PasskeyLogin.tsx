@@ -53,10 +53,15 @@ const PasskeyLogin: React.FC<PasskeyLoginProps> = ({
 
       onSuccess?.();
     } catch (err: any) {
-      const errorMessage =
-        err.name === 'NotSupportedError'
-          ? 'Passkeys are not supported on this device. Please use a different authentication method.'
-          : err.message || 'Failed to authenticate with passkey';
+      let errorMessage = 'Failed to authenticate with passkey';
+      
+      if (err.name === 'NotSupportedError') {
+        errorMessage = 'Passkeys are not supported on this device. Please use a different authentication method.';
+      } else if (err.name === 'NotAllowedError' || err.message?.includes('timeout') || err.message?.includes('not allowed')) {
+        errorMessage = 'Operation was canceled, timed out, or not allowed. Please try again and make sure to complete the biometric prompt.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
       
       setError(errorMessage);
       onError?.(errorMessage);

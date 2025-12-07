@@ -155,15 +155,17 @@ class ConversationResponse(ConversationBase):
 
 # --- Auth ---
 class UserBase(BaseModel):
-    email: EmailStr
+    email: Optional[str] = None  # Optional for passkey-only users
 
 
 class UserCreate(UserBase):
+    email: EmailStr  # Required and validated for traditional registration
     password: str = Field(..., min_length=8)
 
 
-class UserResponse(UserBase):
+class UserResponse(BaseModel):
     id: int
+    email: Optional[str] = None  # Optional for passkey-only users
     is_active: bool = True
 
     class Config:

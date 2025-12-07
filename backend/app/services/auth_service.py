@@ -50,10 +50,16 @@ class AuthService:
     def create_user_token(self, user: User) -> dict:
         """Create access token for user."""
         access_token_expires = timedelta(minutes=30)  # Default or from settings
+        # Use user_id for passkey-only auth (email may be None)
+        token_subject = user.email or str(user.id)
         access_token = security.create_access_token(
-            data={"sub": user.email}, expires_delta=access_token_expires
+            data={"sub": token_subject, "user_id": user.id}, expires_delta=access_token_expires
         )
         return {"access_token": access_token, "token_type": "bearer"}
+    
+    def get_user_by_id(self, db: Session, user_id: int) -> Optional[User]:
+        """Get a user by ID."""
+        return db.query(User).filter(User.id == user_id).first()
 
 
 auth_service = AuthService()

@@ -2,16 +2,16 @@
 Security utilities including password hashing and JWT token generation.
 """
 
+import bcrypt
 from datetime import datetime, timedelta
 from typing import Optional, Union
 
 from jose import jwt
-from passlib.context import CryptContext
 
 from app.config import settings
 
-# Password hashing context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Use bcrypt directly instead of passlib to avoid initialization issues
+# passlib has problems with bcrypt 5.0.0+ during initialization
 
 # JWT configuration
 ALGORITHM = "HS256"
@@ -19,12 +19,27 @@ ALGORITHM = "HS256"
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against a hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    # Ensure password is bytes for bcrypt
+    if isinstance(plain_password, str):
+        plain_password = plain_password.encode('utf-8')
+    if isinstance(hashed_password, str):
+        hashed_password = hashed_password.encode('utf-8')
+    try:
+        return bcrypt.checkpw(plain_password, hashed_password)
+    except Exception:
+        return False
 
 
 def get_password_hash(password: str) -> str:
     """Generate a password hash."""
-    return pwd_context.hash(password)
+    # Ensure password is bytes for bcrypt
+    if isinstance(password, str):
+        password = password.encode('utf-8')
+    # Generate salt and hash
+    salt = bcrypt.gensalt(rounds=12)
+    hashed = bcrypt.hashpw(password, salt)
+    # Return as string
+    return hashed.decode('utf-8')
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:

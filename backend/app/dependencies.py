@@ -32,13 +32,19 @@ async def get_current_user(
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
         )
-        email: str = payload.get("sub")
-        if email is None:
+        # Support both email and user_id for passkey-only auth
+        user_id = payload.get("user_id")
+        email = payload.get("sub")
+        
+        if user_id:
+            user = auth_service.get_user_by_id(db, user_id=user_id)
+        elif email:
+            user = auth_service.get_user_by_email(db, email=email)
+        else:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
 
-    user = auth_service.get_user_by_email(db, email=email)
     if user is None:
         raise credentials_exception
 

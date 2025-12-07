@@ -190,11 +190,15 @@ See [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) for detailed entity-relationship di
 ## Security Architecture
 
 ### Authentication
-- **OAuth2** with password flow
-- **FIDO2 WebAuthn Passkeys** for passwordless authentication
-- **JWT tokens** for API authentication
+- **FIDO2 WebAuthn Passkeys** - Primary authentication method (passwordless)
+  - Registration: No authentication required, creates user automatically
+  - Login: Biometric authentication (Face ID, Touch ID, Windows Hello, etc.)
+  - Supports both platform and cross-platform authenticators
+  - Challenge-based with 5-minute expiration
+- **JWT tokens** for API authentication after passkey verification
 - **Rate limiting** on auth endpoints (5 requests/minute)
-- **Challenge-based authentication** with 10-minute expiration
+- **Origin verification** - Validates request origin matches RP ID
+- **Public key cryptography** - Only public keys stored, never private keys
 
 ### Authorization
 - All endpoints require authentication (except `/health`)

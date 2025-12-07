@@ -9,7 +9,7 @@ from app.models.product import Product, ProductAlias
 from app.models.category import Category
 from app.models.shop import Shop
 from app.models.shopping_list import ShoppingList
-from app.models.chat_history import ChatHistory
+from app.models.chat_history import Conversation, Message
 from app.models.webauthn_key import WebAuthnKey
 
 __all__ = [
@@ -20,7 +20,8 @@ __all__ = [
     "Category",
     "Shop",
     "ShoppingList",
-    "ChatHistory",
+    "Conversation",
+    "Message",
     "WebAuthnKey",
 ]
 

@@ -6,6 +6,7 @@ Handles challenge generation, credential registration, and authentication verifi
 
 import base64
 import secrets
+import json
 import logging
 from typing import Optional, Dict, Any, List
 from datetime import datetime, timedelta
@@ -30,6 +31,9 @@ try:
         UserVerificationRequirement,
         RegistrationCredential,
         AuthenticationCredential,
+        AuthenticatorAttestationResponse,
+        AuthenticatorAssertionResponse,
+        AuthenticatorTransport,
     )
     from webauthn.helpers import bytes_to_base64url, base64url_to_bytes
 except ImportError:
@@ -56,13 +60,32 @@ def _get_origin(request: Request) -> str:
         host = request.headers.get("host", "localhost:8000")
         scheme = "https" if request.url.scheme == "https" else "http"
         origin = f"{scheme}://{host}"
+    
+    # For localhost development, normalize origin
+    # Frontend on :5173 and backend on :8000 should both use localhost as RP ID
+    parsed = urlparse(origin)
+    if parsed.hostname in ["localhost", "127.0.0.1"]:
+        # Keep the original origin for validation, but RP ID will be just "localhost"
+        pass
+    
     return origin
 
 
 def _get_rp_id(origin: str) -> str:
-    """Extract RP ID from origin."""
+    """Extract RP ID from origin.
+    
+    For localhost, always use "localhost" as RP ID regardless of port.
+    This allows frontend (localhost:5173) and backend (localhost:8000) to work together.
+    """
     parsed = urlparse(origin)
-    return parsed.hostname or "localhost"
+    hostname = parsed.hostname or "localhost"
+    
+    # For localhost/127.0.0.1, always use "localhost" as RP ID
+    # This is required for WebAuthn to work across different ports on localhost
+    if hostname in ["localhost", "127.0.0.1"]:
+        return "localhost"
+    
+    return hostname
 
 
 def _store_challenge(challenge: str, data: Dict[str, Any], expiry_minutes: int = CHALLENGE_EXPIRY_MINUTES):
@@ -124,18 +147,23 @@ class PasskeyService:
         challenge = secrets.token_urlsafe(32)
         
         # Generate registration options
+        # Use user ID as username for passkey-only auth
+        user_name = user.email or f"user_{user.id}"
+        user_display_name = user.email or f"User {user.id}"
+        
         options = generate_registration_options(
             rp_id=rp_id,
             rp_name="ParagonOCR",
             user_id=base64url_to_bytes(str(user.id).encode()),
-            user_name=user.email,
-            user_display_name=user.email,
+            user_name=user_name,
+            user_display_name=user_display_name,
             challenge=base64url_to_bytes(challenge),
             authenticator_selection=AuthenticatorSelectionCriteria(
-                authenticator_attachment=AuthenticatorAttachment.PLATFORM,
-                user_verification=UserVerificationRequirement.REQUIRED,
-                require_resident_key=True,
+                authenticator_attachment=None,  # Allow both platform and cross-platform
+                user_verification=UserVerificationRequirement.DISCOURAGED,  # Most compatible
+                require_resident_key=False,  # Don't require resident key
             ),
+            timeout=300000,  # 5 minutes timeout (more generous)
         )
         
         # Store challenge with user info
@@ -152,10 +180,17 @@ class PasskeyService:
         )
         
         # Convert to JSON-serializable dict
-        options_dict = options_to_json(options)
+        # options_to_json returns a JSON string, parse it to dict
+        options_json = options_to_json(options)
+        options_dict = json.loads(options_json) if isinstance(options_json, str) else options_json
         options_dict["challenge"] = challenge  # Replace bytes with string
         
-        logger.info(f"Generated registration options for user {user.email}")
+        # Ensure rpId is set (SimpleWebAuthn expects rpId, not rp.id)
+        if "rp" in options_dict and "id" in options_dict["rp"]:
+            options_dict["rpId"] = options_dict["rp"]["id"]
+        
+        user_name = user.email or f"user_{user.id}"
+        logger.info(f"Generated registration options for user {user_name}, rp_id={rp_id}, origin={origin}")
         return options_dict
 
     def verify_registration(
@@ -199,8 +234,54 @@ class PasskeyService:
         
         # Verify registration
         try:
+            # Parse credential from dict (frontend sends JSON)
+            # credential structure: { id, rawId, response: { clientDataJSON, attestationObject, transports }, type }
+            cred_id = credential.get("id") or credential.get("credentialId")
+            raw_id = credential.get("rawId")
+            if isinstance(raw_id, str):
+                raw_id_bytes = base64url_to_bytes(raw_id)
+            else:
+                raw_id_bytes = raw_id
+            
+            response_data = credential.get("response", {})
+            client_data_json = response_data.get("clientDataJSON")
+            attestation_object = response_data.get("attestationObject")
+            
+            # Convert to bytes if strings
+            if isinstance(client_data_json, str):
+                client_data_json_bytes = base64url_to_bytes(client_data_json)
+            else:
+                client_data_json_bytes = client_data_json
+            
+            if isinstance(attestation_object, str):
+                attestation_object_bytes = base64url_to_bytes(attestation_object)
+            else:
+                attestation_object_bytes = attestation_object
+            
+            # Parse transports
+            transports_list = response_data.get("transports", [])
+            if transports_list:
+                transports = [AuthenticatorTransport(t) for t in transports_list if t]
+            else:
+                transports = None
+            
+            # Create response object
+            attestation_response = AuthenticatorAttestationResponse(
+                client_data_json=client_data_json_bytes,
+                attestation_object=attestation_object_bytes,
+                transports=transports,
+            )
+            
+            # Create credential object
+            cred_obj = RegistrationCredential(
+                id=cred_id,
+                raw_id=raw_id_bytes,
+                response=attestation_response,
+                authenticator_attachment=None,  # Optional
+            )
+            
             registration_verification = verify_registration_response(
-                credential=RegistrationCredential.parse_obj(credential),
+                credential=cred_obj,
                 expected_challenge=base64url_to_bytes(challenge),
                 expected_rp_id=rp_id,
                 expected_origin=origin,
@@ -290,7 +371,8 @@ class PasskeyService:
             rp_id=rp_id,
             challenge=base64url_to_bytes(challenge),
             allow_credentials=allow_credentials if allow_credentials else None,
-            user_verification=UserVerificationRequirement.REQUIRED,
+            user_verification=UserVerificationRequirement.DISCOURAGED,  # Most compatible
+            timeout=300000,  # 5 minutes timeout (more generous)
         )
         
         # Store challenge
@@ -305,10 +387,16 @@ class PasskeyService:
         )
         
         # Convert to JSON-serializable dict
-        options_dict = options_to_json(options)
+        # options_to_json returns a JSON string, parse it to dict
+        options_json = options_to_json(options)
+        options_dict = json.loads(options_json) if isinstance(options_json, str) else options_json
         options_dict["challenge"] = challenge  # Replace bytes with string
         
-        logger.info(f"Generated authentication options for {username or 'any user'}")
+        # Ensure rpId is set (SimpleWebAuthn expects rpId)
+        if "rpId" not in options_dict:
+            options_dict["rpId"] = rp_id
+        
+        logger.info(f"Generated authentication options for {username or 'any user'}, rp_id={rp_id}, origin={origin}")
         return options_dict
 
     def verify_authentication(
@@ -382,8 +470,63 @@ class PasskeyService:
         # Verify authentication
         try:
             public_key_bytes = base64.b64decode(webauthn_key.public_key)
+            
+            # Parse credential from dict (frontend sends JSON)
+            # credential structure: { id, rawId, response: { clientDataJSON, authenticatorData, signature, userHandle }, type }
+            cred_id = credential.get("id") or credential.get("credentialId")
+            raw_id = credential.get("rawId")
+            if isinstance(raw_id, str):
+                raw_id_bytes = base64url_to_bytes(raw_id)
+            else:
+                raw_id_bytes = raw_id
+            
+            response_data = credential.get("response", {})
+            client_data_json = response_data.get("clientDataJSON")
+            authenticator_data = response_data.get("authenticatorData")
+            signature = response_data.get("signature")
+            user_handle = response_data.get("userHandle")
+            
+            # Convert to bytes if strings
+            if isinstance(client_data_json, str):
+                client_data_json_bytes = base64url_to_bytes(client_data_json)
+            else:
+                client_data_json_bytes = client_data_json
+            
+            if isinstance(authenticator_data, str):
+                authenticator_data_bytes = base64url_to_bytes(authenticator_data)
+            else:
+                authenticator_data_bytes = authenticator_data
+            
+            if isinstance(signature, str):
+                signature_bytes = base64url_to_bytes(signature)
+            else:
+                signature_bytes = signature
+            
+            user_handle_bytes = None
+            if user_handle:
+                if isinstance(user_handle, str):
+                    user_handle_bytes = base64url_to_bytes(user_handle)
+                else:
+                    user_handle_bytes = user_handle
+            
+            # Create response object
+            assertion_response = AuthenticatorAssertionResponse(
+                client_data_json=client_data_json_bytes,
+                authenticator_data=authenticator_data_bytes,
+                signature=signature_bytes,
+                user_handle=user_handle_bytes,
+            )
+            
+            # Create credential object
+            cred_obj = AuthenticationCredential(
+                id=cred_id,
+                raw_id=raw_id_bytes,
+                response=assertion_response,
+                authenticator_attachment=None,  # Optional
+            )
+            
             authentication_verification = verify_authentication_response(
-                credential=AuthenticationCredential.parse_obj(credential),
+                credential=cred_obj,
                 expected_challenge=base64url_to_bytes(challenge),
                 expected_rp_id=rp_id,
                 expected_origin=origin,

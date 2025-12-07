@@ -191,7 +191,7 @@ export const getPasskeyRegistrationOptions = async (
 
 export const verifyPasskeyRegistration = async (
   data: PasskeyRegistrationVerifyRequest
-): Promise<{ success: boolean; message: string; credential: WebAuthnKeyResponse }> => {
+): Promise<{ success: boolean; message: string; credential: WebAuthnKeyResponse; access_token?: string; token_type?: string }> => {
   const response = await api.post('/auth/passkey/register/verify', data);
   return response.data;
 };

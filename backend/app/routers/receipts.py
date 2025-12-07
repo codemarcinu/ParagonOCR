@@ -36,6 +36,8 @@ from app.schemas import ReceiptResponse, ReceiptListResponse
 
 logger = logging.getLogger(__name__)
 
+router = APIRouter()
+
 
 # Connection Manager for WebSockets
 class ConnectionManager:

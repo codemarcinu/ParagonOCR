@@ -5,7 +5,7 @@ import { Button } from './ui';
 
 interface PasskeyRegistrationProps {
   deviceName?: string;
-  onSuccess?: () => void;
+  onSuccess?: (tokenData?: any) => void;
   onError?: (error: string) => void;
   className?: string;
 }
@@ -41,16 +41,22 @@ const PasskeyRegistration: React.FC<PasskeyRegistrationProps> = ({
         challenge: options.challenge,
       });
 
-      if (result.success) {
-        onSuccess?.();
+      if (result.success || result.access_token) {
+        // Pass token data to onSuccess callback
+        onSuccess?.(result);
       } else {
         throw new Error(result.message || 'Registration failed');
       }
     } catch (err: any) {
-      const errorMessage =
-        err.name === 'NotSupportedError'
-          ? 'Passkeys are not supported on this device. Please use a different authentication method.'
-          : err.message || 'Failed to register passkey';
+      let errorMessage = 'Failed to register passkey';
+      
+      if (err.name === 'NotSupportedError') {
+        errorMessage = 'Passkeys are not supported on this device. Please use a different authentication method.';
+      } else if (err.name === 'NotAllowedError' || err.message?.includes('timeout') || err.message?.includes('not allowed')) {
+        errorMessage = 'Operation was canceled, timed out, or not allowed. Please try again and make sure to complete the biometric prompt.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
       
       setError(errorMessage);
       onError?.(errorMessage);
