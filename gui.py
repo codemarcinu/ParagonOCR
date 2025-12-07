@@ -36,7 +36,8 @@ from src.food_waste_tracker import FoodWasteTracker, get_expiring_products_summa
 from src.quick_add import QuickAddHelper
 from src.meal_planner import MealPlanner
 from history_manager import load_history, add_to_history
-from src.unified_design_system import AppColors, AppSpacing, AppFont, Icons
+from src.unified_design_system import AppColors, AppSpacing, AppFont, Icons, VisualConstants
+from src.gui_components import ModernButton, ModernLabel, ModernCard, ModernTable
 from src.gui_optimizations import (
     VirtualScrollableFrame,
     MemoryProfiler,
@@ -156,58 +157,77 @@ class ReviewDialog(ctk.CTkToplevel):
     def __init__(self, parent, parsed_data):
         super().__init__(parent)
         self.title("Weryfikacja Paragonu")
-        self.geometry("1000x700")
+        self.geometry(f"{VisualConstants.REVIEW_DIALOG_WIDTH}x{VisualConstants.REVIEW_DIALOG_HEIGHT}")
+        self.minsize(VisualConstants.DIALOG_MIN_WIDTH, VisualConstants.DIALOG_MIN_HEIGHT)
         self.parsed_data = parsed_data
         self.result_data = None
 
         # --- Header ---
-        self.header_frame = ctk.CTkFrame(self)
-        self.header_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
+        header_card = ModernCard(self, title=f"{Icons.RECEIPT} Dane Paragonu")
+        header_card.pack(fill="x", padx=AppSpacing.LG, pady=AppSpacing.MD)
+        
+        self.header_frame = ctk.CTkFrame(header_card, fg_color="transparent")
+        self.header_frame.pack(fill="x", padx=AppSpacing.LG, pady=AppSpacing.MD)
 
-        ctk.CTkLabel(self.header_frame, text="Sklep:").grid(
-            row=0, column=0, padx=AppSpacing.XS, pady=AppSpacing.XS
+        ModernLabel(self.header_frame, text="Sklep:", size="base").grid(
+            row=0, column=0, sticky="w", padx=AppSpacing.MD, pady=AppSpacing.SM
         )
-        self.store_entry = ctk.CTkEntry(self.header_frame, width=200)
-        self.store_entry.grid(row=0, column=1, padx=AppSpacing.XS, pady=AppSpacing.XS)
+        self.store_entry = ctk.CTkEntry(self.header_frame, width=200, font=AppFont.BODY())
+        self.store_entry.grid(row=0, column=1, padx=AppSpacing.MD, pady=AppSpacing.SM)
         self.store_entry.insert(0, parsed_data["sklep_info"]["nazwa"])
 
-        ctk.CTkLabel(self.header_frame, text="Data:").grid(
-            row=0, column=2, padx=AppSpacing.XS, pady=AppSpacing.XS
+        ModernLabel(self.header_frame, text="Data:", size="base").grid(
+            row=0, column=2, sticky="w", padx=AppSpacing.MD, pady=AppSpacing.SM
         )
-        self.date_entry = ctk.CTkEntry(self.header_frame, width=150)
-        self.date_entry.grid(row=0, column=3, padx=AppSpacing.XS, pady=AppSpacing.XS)
+        self.date_entry = ctk.CTkEntry(self.header_frame, width=150, font=AppFont.BODY())
+        self.date_entry.grid(row=0, column=3, padx=AppSpacing.MD, pady=AppSpacing.SM)
         # Format daty do stringa
         date_val = parsed_data["paragon_info"]["data_zakupu"]
         if isinstance(date_val, datetime):
             date_val = date_val.strftime("%Y-%m-%d")
         self.date_entry.insert(0, str(date_val))
 
-        ctk.CTkLabel(self.header_frame, text="Suma:").grid(
-            row=0, column=4, padx=AppSpacing.XS, pady=AppSpacing.XS
+        ModernLabel(self.header_frame, text="Suma:", size="base").grid(
+            row=0, column=4, sticky="w", padx=AppSpacing.MD, pady=AppSpacing.SM
         )
-        self.total_entry = ctk.CTkEntry(self.header_frame, width=100)
-        self.total_entry.grid(row=0, column=5, padx=AppSpacing.XS, pady=AppSpacing.XS)
+        self.total_entry = ctk.CTkEntry(self.header_frame, width=100, font=AppFont.BODY())
+        self.total_entry.grid(row=0, column=5, padx=AppSpacing.MD, pady=AppSpacing.SM)
         self.total_entry.insert(0, str(parsed_data["paragon_info"]["suma_calkowita"]))
 
         # --- Body (Items) ---
-        self.scrollable_frame = ctk.CTkScrollableFrame(self)
-        self.scrollable_frame.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.XS)
+        products_card = ModernCard(self, title=f"{Icons.PRODUCT} Produkty")
+        products_card.pack(fill="both", expand=True, padx=AppSpacing.LG, pady=AppSpacing.MD)
+        
+        self.scrollable_frame = ctk.CTkScrollableFrame(products_card, fg_color=AppColors.BG_PRIMARY)
+        self.scrollable_frame.pack(fill="both", expand=True, padx=1, pady=1)
 
-        # Headers - dodano kolumnę "Znormalizowana nazwa" i "Data ważności"
+        # Headers - dodano kolumnę "Status"
+        header_frame = ctk.CTkFrame(self.scrollable_frame, fg_color=AppColors.BG_TERTIARY)
+        header_frame.pack(fill="x", padx=1, pady=1)
+        
         headers = [
-            "Nazwa (raw)",
-            "Znormalizowana nazwa",
+            "Nazwa raw",
+            "Znormalizowana",
             "Ilość",
             "Cena jedn.",
             "Wartość",
             "Rabat",
             "Po rabacie",
-            "Data ważności",
+            "Status",
         ]
+        
+        for col in range(len(headers)):
+            header_frame.grid_columnconfigure(col, weight=1)
+        
         for col, text in enumerate(headers):
-            ctk.CTkLabel(
-                self.scrollable_frame, text=text, font=("Arial", 12, "bold")
-            ).grid(row=0, column=col, padx=AppSpacing.XS, pady=AppSpacing.XS)
+            ModernLabel(
+                header_frame, text=text, size="sm", variant="primary"
+            ).grid(
+                row=0, column=col,
+                padx=AppSpacing.TABLE_CELL_PADDING_H,
+                pady=AppSpacing.TABLE_CELL_PADDING_V,
+                sticky="ew"
+            )
 
         # Pobierz sugestie znormalizowanych nazw z bazy danych (jeśli dostępna)
         SessionLocal = sessionmaker(bind=engine)
@@ -250,7 +270,7 @@ class ReviewDialog(ctk.CTkToplevel):
 
             # Utwórz ramkę dla wiersza (dla kolorowania tła)
             row_frame = ctk.CTkFrame(self.scrollable_frame)
-            row_frame.grid(row=row, column=0, columnspan=8, padx=2, pady=2, sticky="ew")
+            row_frame.pack(fill="x", padx=1, pady=1)
             self.row_frames.append(row_frame)
 
             # Ustaw kolor tła w zależności od typu produktu
@@ -258,43 +278,38 @@ class ReviewDialog(ctk.CTkToplevel):
             is_even = i % 2 == 0
             mode = ctk.get_appearance_mode()
 
+            # Kolor wiersza na podstawie statusu
             if is_skip:
-                row_frame.configure(fg_color=AppColors.ERROR)
+                row_bg = AppColors.PRODUCT_EXPIRED
                 tooltip_text = "Ta pozycja została oznaczona do pominięcia"
             elif is_unknown:
-                row_frame.configure(fg_color=AppColors.WARNING)
+                row_bg = AppColors.PRODUCT_EXPIRING_MEDIUM
                 tooltip_text = "Nieznany produkt - wymaga weryfikacji"
             else:
-                # Alternatywne kolory dla parzystych/nieparzystych wierszy
-                if mode == "Dark":
-                    row_frame.configure(
-                        fg_color=AppColors.ROW_EVEN if is_even else AppColors.ROW_ODD
-                    )
-                else:
-                    row_frame.configure(
-                        fg_color=(
-                            AppColors.ROW_EVEN_LIGHT
-                            if is_even
-                            else AppColors.ROW_ODD_LIGHT
-                        )
-                    )
+                row_bg = AppColors.ROW_EVEN if is_even else AppColors.ROW_ODD
                 tooltip_text = f"Produkt: {nazwa_raw}"
+            
+            row_frame.configure(
+                fg_color=row_bg,
+                border_width=VisualConstants.BORDER_WIDTH_THIN,
+                border_color=AppColors.BORDER_LIGHT
+            )
 
             # Konfiguruj kolumny w ramce
             for col in range(8):
                 row_frame.grid_columnconfigure(col, weight=1)
 
             # Nazwa raw
-            e_name = ctk.CTkEntry(row_frame, width=200)
-            e_name.grid(row=0, column=0, padx=2, pady=2, sticky="ew")
+            e_name = ctk.CTkEntry(row_frame, width=200, font=AppFont.BODY())
+            e_name.grid(row=0, column=0, padx=AppSpacing.TABLE_CELL_PADDING_H, pady=AppSpacing.TABLE_CELL_PADDING_V, sticky="ew")
             e_name.insert(0, nazwa_raw)
             entries["nazwa_raw"] = e_name
             ToolTip(e_name, tooltip_text)
 
             # Znormalizowana nazwa (sugestia)
             normalized_name = normalized_suggestions.get(nazwa_raw, "")
-            e_normalized = ctk.CTkEntry(row_frame, width=200)
-            e_normalized.grid(row=0, column=1, padx=2, pady=2, sticky="ew")
+            e_normalized = ctk.CTkEntry(row_frame, width=200, font=AppFont.BODY())
+            e_normalized.grid(row=0, column=1, padx=AppSpacing.TABLE_CELL_PADDING_H, pady=AppSpacing.TABLE_CELL_PADDING_V, sticky="ew")
             e_normalized.insert(0, normalized_name)
             entries["nazwa_znormalizowana"] = e_normalized
             if normalized_name:
@@ -303,26 +318,26 @@ class ReviewDialog(ctk.CTkToplevel):
                 )
 
             # Ilość
-            e_qty = ctk.CTkEntry(row_frame, width=60)
-            e_qty.grid(row=0, column=2, padx=2, pady=2, sticky="ew")
+            e_qty = ctk.CTkEntry(row_frame, width=60, font=AppFont.BODY())
+            e_qty.grid(row=0, column=2, padx=AppSpacing.TABLE_CELL_PADDING_H, pady=AppSpacing.TABLE_CELL_PADDING_V, sticky="ew")
             e_qty.insert(0, str(item["ilosc"]))
             entries["ilosc"] = e_qty
 
             # Cena jedn
-            e_unit = ctk.CTkEntry(row_frame, width=80)
-            e_unit.grid(row=0, column=3, padx=2, pady=2, sticky="ew")
+            e_unit = ctk.CTkEntry(row_frame, width=80, font=AppFont.BODY())
+            e_unit.grid(row=0, column=3, padx=AppSpacing.TABLE_CELL_PADDING_H, pady=AppSpacing.TABLE_CELL_PADDING_V, sticky="ew")
             e_unit.insert(0, str(item["cena_jedn"]))
             entries["cena_jedn"] = e_unit
 
             # Cena całk
-            e_total = ctk.CTkEntry(row_frame, width=80)
-            e_total.grid(row=0, column=4, padx=2, pady=2, sticky="ew")
+            e_total = ctk.CTkEntry(row_frame, width=80, font=AppFont.BODY())
+            e_total.grid(row=0, column=4, padx=AppSpacing.TABLE_CELL_PADDING_H, pady=AppSpacing.TABLE_CELL_PADDING_V, sticky="ew")
             e_total.insert(0, str(item["cena_calk"]))
             entries["cena_calk"] = e_total
 
             # Rabat
-            e_disc = ctk.CTkEntry(row_frame, width=80)
-            e_disc.grid(row=0, column=5, padx=2, pady=2, sticky="ew")
+            e_disc = ctk.CTkEntry(row_frame, width=80, font=AppFont.BODY())
+            e_disc.grid(row=0, column=5, padx=AppSpacing.TABLE_CELL_PADDING_H, pady=AppSpacing.TABLE_CELL_PADDING_V, sticky="ew")
             val_disc = item.get("rabat", "0.00")
             if val_disc is None:
                 val_disc = "0.00"
@@ -330,16 +345,24 @@ class ReviewDialog(ctk.CTkToplevel):
             entries["rabat"] = e_disc
 
             # Po rabacie
-            e_final = ctk.CTkEntry(row_frame, width=80)
-            e_final.grid(row=0, column=6, padx=2, pady=2, sticky="ew")
+            e_final = ctk.CTkEntry(row_frame, width=80, font=AppFont.BODY())
+            e_final.grid(row=0, column=6, padx=AppSpacing.TABLE_CELL_PADDING_H, pady=AppSpacing.TABLE_CELL_PADDING_V, sticky="ew")
             e_final.insert(0, str(item["cena_po_rab"]))
             entries["cena_po_rab"] = e_final
 
-            # Data ważności
-            e_expiry = ctk.CTkEntry(row_frame, width=120, placeholder_text="YYYY-MM-DD")
-            e_expiry.grid(row=0, column=7, padx=2, pady=2, sticky="ew")
-            # Domyślnie ustawiamy datę za 7 dni (można zmienić)
+            # Status (nowa kolumna)
+            status_text = "Pominięty" if is_skip else ("Nieznany" if is_unknown else "OK")
+            status_label = ModernLabel(
+                row_frame,
+                text=status_text,
+                size="sm",
+                variant="error" if is_skip else ("warning" if is_unknown else "success")
+            )
+            status_label.grid(row=0, column=7, padx=AppSpacing.TABLE_CELL_PADDING_H, pady=AppSpacing.TABLE_CELL_PADDING_V, sticky="w")
+
+            # Data ważności (ukryte pole - można edytować w przyszłości)
             default_expiry = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
+            e_expiry = ctk.CTkEntry(row_frame, width=0, font=AppFont.BODY())  # Ukryte
             e_expiry.insert(0, default_expiry)
             entries["data_waznosci"] = e_expiry
 
@@ -349,24 +372,24 @@ class ReviewDialog(ctk.CTkToplevel):
             self.item_entries.append(entries)
 
         # --- Footer ---
-        self.footer_frame = ctk.CTkFrame(self)
-        self.footer_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
+        footer_frame = ctk.CTkFrame(self, fg_color="transparent")
+        footer_frame.pack(fill="x", padx=AppSpacing.LG, pady=AppSpacing.MD)
 
-        self.save_btn = ctk.CTkButton(
-            self.footer_frame,
+        self.save_btn = ModernButton(
+            footer_frame,
             text=f"{Icons.SAVE} Zatwierdź i Zapisz",
             command=self.on_save,
-            fg_color=AppColors.SUCCESS,
-            hover_color=App._adjust_color(AppColors.SUCCESS, -15),
+            variant="success",
+            size="md"
         )
         self.save_btn.pack(side="right", padx=AppSpacing.SM)
 
-        self.discard_btn = ctk.CTkButton(
-            self.footer_frame,
-            text="Odrzuć",
+        self.discard_btn = ModernButton(
+            footer_frame,
+            text=f"{Icons.CANCEL} Odrzuć",
             command=self.on_discard,
-            fg_color=AppColors.ERROR,
-            hover_color=App._adjust_color(AppColors.ERROR, -15),
+            variant="error",
+            size="md"
         )
         self.discard_btn.pack(side="left", padx=AppSpacing.SM)
 
@@ -446,31 +469,44 @@ class CookingDialog(ctk.CTkToplevel):
     def __init__(self, parent):
         super().__init__(parent)
         self.title("Gotowanie - Zużycie produktów")
-        self.geometry("900x600")
+        self.geometry(f"{VisualConstants.DIALOG_MIN_WIDTH}x600")
+        self.minsize(VisualConstants.DIALOG_MIN_WIDTH, VisualConstants.DIALOG_MIN_HEIGHT)
         self.result = None
 
         SessionLocal = sessionmaker(bind=engine)
         self.session = SessionLocal()
 
         # Header
-        header_frame = ctk.CTkFrame(self)
-        header_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
-        ctk.CTkLabel(
-            header_frame,
-            text="Zaznacz produkty do zużycia:",
-            font=("Arial", 16, "bold"),
-        ).pack(pady=AppSpacing.SM)
+        header_card = ModernCard(self, title=f"{Icons.COOK} Gotowanie - Zużycie produktów")
+        header_card.pack(fill="x", padx=AppSpacing.LG, pady=AppSpacing.MD)
 
         # Scrollable list of products
-        self.scrollable_frame = ctk.CTkScrollableFrame(self)
-        self.scrollable_frame.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.XS)
+        products_card = ModernCard(self, title=f"{Icons.PRODUCT} Produkty do zużycia")
+        products_card.pack(fill="both", expand=True, padx=AppSpacing.LG, pady=AppSpacing.MD)
+        
+        self.scrollable_frame = ctk.CTkScrollableFrame(products_card, fg_color=AppColors.BG_PRIMARY)
+        self.scrollable_frame.pack(fill="both", expand=True, padx=1, pady=1)
 
         # Headers
         headers = ["Zaznacz", "Produkt", "Ilość", "Jednostka", "Data ważności"]
+        for col in range(len(headers)):
+            self.scrollable_frame.grid_columnconfigure(col, weight=1)
+        
+        header_frame = ctk.CTkFrame(self.scrollable_frame, fg_color=AppColors.BG_TERTIARY)
+        header_frame.grid(row=0, column=0, columnspan=len(headers), sticky="ew", padx=1, pady=1)
+        
+        for col in range(len(headers)):
+            header_frame.grid_columnconfigure(col, weight=1)
+        
         for col, text in enumerate(headers):
-            ctk.CTkLabel(
-                self.scrollable_frame, text=text, font=("Arial", 12, "bold")
-            ).grid(row=0, column=col, padx=AppSpacing.XS, pady=AppSpacing.XS)
+            ModernLabel(
+                header_frame, text=text, size="sm", variant="primary"
+            ).grid(
+                row=0, column=col,
+                padx=AppSpacing.TABLE_CELL_PADDING_H,
+                pady=AppSpacing.TABLE_CELL_PADDING_V,
+                sticky="ew"
+            )
 
         # Load products from database
         self.checkboxes = []
@@ -478,20 +514,23 @@ class CookingDialog(ctk.CTkToplevel):
         self.load_products()
 
         # Footer
-        footer_frame = ctk.CTkFrame(self)
-        footer_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
+        footer_frame = ctk.CTkFrame(self, fg_color="transparent")
+        footer_frame.pack(fill="x", padx=AppSpacing.LG, pady=AppSpacing.MD)
 
-        ctk.CTkButton(
+        ModernButton(
             footer_frame,
-            text="Zużyj zaznaczone",
+            text=f"{Icons.SAVE} Zużyj zaznaczone",
             command=self.consume_products,
-            fg_color=AppColors.SUCCESS,
-            hover_color=App._adjust_color(AppColors.SUCCESS, -15),
-            width=200,
+            variant="success",
+            size="md"
         ).pack(side="right", padx=AppSpacing.SM)
 
-        ctk.CTkButton(
-            footer_frame, text="Anuluj", command=self.on_cancel, width=200
+        ModernButton(
+            footer_frame,
+            text=f"{Icons.CANCEL} Anuluj",
+            command=self.on_cancel,
+            variant="secondary",
+            size="md"
         ).pack(side="left", padx=AppSpacing.SM)
 
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
@@ -510,43 +549,40 @@ class CookingDialog(ctk.CTkToplevel):
         )
 
         if not stany:
-            ctk.CTkLabel(
+            ModernLabel(
                 self.scrollable_frame,
                 text="Brak produktów w magazynie",
-                font=("Arial", 14),
+                size="md",
+                variant="secondary"
             ).grid(row=1, column=0, columnspan=5, pady=AppSpacing.LG)
             return
 
         for i, stan in enumerate(stany):
             row = i + 1
             checkbox = ctk.CTkCheckBox(self.scrollable_frame, text="")
-            checkbox.grid(row=row, column=0, padx=AppSpacing.XS, pady=2)
+            checkbox.grid(row=row, column=0, padx=AppSpacing.TABLE_CELL_PADDING_H, pady=AppSpacing.TABLE_CELL_PADDING_V)
 
-            ctk.CTkLabel(
-                self.scrollable_frame, text=stan.produkt.znormalizowana_nazwa, width=300
-            ).grid(row=row, column=1, padx=AppSpacing.XS, pady=2, sticky="w")
+            ModernLabel(
+                self.scrollable_frame, text=stan.produkt.znormalizowana_nazwa, size="sm", variant="secondary"
+            ).grid(row=row, column=1, padx=AppSpacing.TABLE_CELL_PADDING_H, pady=AppSpacing.TABLE_CELL_PADDING_V, sticky="w")
 
-            ilosc_entry = ctk.CTkEntry(self.scrollable_frame, width=80)
+            ilosc_entry = ctk.CTkEntry(self.scrollable_frame, width=80, font=AppFont.BODY())
             ilosc_entry.insert(0, str(stan.ilosc))
-            ilosc_entry.grid(row=row, column=2, padx=AppSpacing.XS, pady=2)
+            ilosc_entry.grid(row=row, column=2, padx=AppSpacing.TABLE_CELL_PADDING_H, pady=AppSpacing.TABLE_CELL_PADDING_V)
 
-            ctk.CTkLabel(
-                self.scrollable_frame, text=stan.jednostka_miary or "szt", width=80
-            ).grid(row=row, column=3, padx=AppSpacing.XS, pady=2)
+            ModernLabel(
+                self.scrollable_frame, text=stan.jednostka_miary or "szt", size="sm", variant="secondary"
+            ).grid(row=row, column=3, padx=AppSpacing.TABLE_CELL_PADDING_H, pady=AppSpacing.TABLE_CELL_PADDING_V)
 
             data_waz = (
                 stan.data_waznosci.strftime("%Y-%m-%d")
                 if stan.data_waznosci
                 else "Brak"
             )
-            color = (
-                "red"
-                if stan.data_waznosci and stan.data_waznosci < date.today()
-                else "green"
-            )
-            ctk.CTkLabel(
-                self.scrollable_frame, text=data_waz, width=120, text_color=color
-            ).grid(row=row, column=4, padx=AppSpacing.XS, pady=2)
+            status_color = AppColors.PRODUCT_EXPIRED if (stan.data_waznosci and stan.data_waznosci < date.today()) else AppColors.PRODUCT_OK
+            ModernLabel(
+                self.scrollable_frame, text=data_waz, size="sm", variant="error" if (stan.data_waznosci and stan.data_waznosci < date.today()) else "success"
+            ).grid(row=row, column=4, padx=AppSpacing.TABLE_CELL_PADDING_H, pady=AppSpacing.TABLE_CELL_PADDING_V)
 
             self.checkboxes.append(
                 {
@@ -618,16 +654,18 @@ class QuickAddDialog(ctk.CTkToplevel):
     def __init__(self, parent):
         super().__init__(parent)
         self.title("⚡ Quick Add - Szybkie Dodawanie")
-        self.geometry("500x400")
+        self.geometry(f"{VisualConstants.DIALOG_MIN_WIDTH}x400")
+        self.minsize(VisualConstants.DIALOG_MIN_WIDTH, VisualConstants.DIALOG_MIN_HEIGHT)
         self.result = None
 
         # Header
         header_frame = ctk.CTkFrame(self)
-        header_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
-        ctk.CTkLabel(
+        header_frame.pack(fill="x", padx=AppSpacing.LG, pady=AppSpacing.MD)
+        ModernLabel(
             header_frame,
-            text="⚡ Quick Add - Dodaj produkt w 5 sekund",
-            font=("Arial", 16, "bold"),
+            text=f"{Icons.ADD} ⚡ Quick Add - Dodaj produkt w 5 sekund",
+            size="lg",
+            variant="primary"
         ).pack(pady=AppSpacing.SM)
 
         # Form
@@ -635,11 +673,11 @@ class QuickAddDialog(ctk.CTkToplevel):
         form_frame.pack(fill="both", expand=True, padx=AppSpacing.LG, pady=AppSpacing.SM)
 
         # Nazwa produktu z autocomplete
-        ctk.CTkLabel(form_frame, text="Nazwa produktu:", font=("Arial", 14)).grid(
-            row=0, column=0, sticky="w", pady=AppSpacing.SM
+        ModernLabel(form_frame, text="Nazwa produktu:", size="base").grid(
+            row=0, column=0, sticky="w", pady=AppSpacing.FORM_FIELD_SPACING, padx=AppSpacing.MD
         )
-        self.name_entry = ctk.CTkEntry(form_frame, width=300, font=("Arial", 14))
-        self.name_entry.grid(row=0, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM, sticky="ew")
+        self.name_entry = ctk.CTkEntry(form_frame, width=300, font=AppFont.BODY())
+        self.name_entry.grid(row=0, column=1, pady=AppSpacing.FORM_FIELD_SPACING, padx=AppSpacing.MD, sticky="ew")
         self.name_entry.focus_set()
         form_frame.grid_columnconfigure(1, weight=1)
 
@@ -648,45 +686,48 @@ class QuickAddDialog(ctk.CTkToplevel):
         self.autocomplete_listbox = None
 
         # Ilość
-        ctk.CTkLabel(form_frame, text="Ilość:", font=("Arial", 14)).grid(
-            row=1, column=0, sticky="w", pady=AppSpacing.SM
+        ModernLabel(form_frame, text="Ilość:", size="base").grid(
+            row=1, column=0, sticky="w", pady=AppSpacing.FORM_FIELD_SPACING, padx=AppSpacing.MD
         )
-        self.quantity_entry = ctk.CTkEntry(form_frame, width=300)
+        self.quantity_entry = ctk.CTkEntry(form_frame, width=300, font=AppFont.BODY())
         self.quantity_entry.insert(0, "1.0")
-        self.quantity_entry.grid(row=1, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM, sticky="ew")
+        self.quantity_entry.grid(row=1, column=1, pady=AppSpacing.FORM_FIELD_SPACING, padx=AppSpacing.MD, sticky="ew")
 
         # Jednostka
-        ctk.CTkLabel(form_frame, text="Jednostka:", font=("Arial", 14)).grid(
-            row=2, column=0, sticky="w", pady=AppSpacing.SM
+        ModernLabel(form_frame, text="Jednostka:", size="base").grid(
+            row=2, column=0, sticky="w", pady=AppSpacing.FORM_FIELD_SPACING, padx=AppSpacing.MD
         )
-        self.unit_entry = ctk.CTkEntry(form_frame, width=300)
+        self.unit_entry = ctk.CTkEntry(form_frame, width=300, font=AppFont.BODY())
         self.unit_entry.insert(0, "szt")
-        self.unit_entry.grid(row=2, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM, sticky="ew")
+        self.unit_entry.grid(row=2, column=1, pady=AppSpacing.FORM_FIELD_SPACING, padx=AppSpacing.MD, sticky="ew")
 
         # Data ważności (opcjonalna)
-        ctk.CTkLabel(
-            form_frame, text="Data ważności (opcjonalna):", font=("Arial", 14)
-        ).grid(row=3, column=0, sticky="w", pady=AppSpacing.SM)
+        ModernLabel(
+            form_frame, text="Data ważności (opcjonalna):", size="base"
+        ).grid(row=3, column=0, sticky="w", pady=AppSpacing.FORM_FIELD_SPACING, padx=AppSpacing.MD)
         self.expiry_entry = ctk.CTkEntry(
-            form_frame, width=300, placeholder_text="YYYY-MM-DD"
+            form_frame, width=300, placeholder_text="YYYY-MM-DD", font=AppFont.BODY()
         )
-        self.expiry_entry.grid(row=3, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM, sticky="ew")
+        self.expiry_entry.grid(row=3, column=1, pady=AppSpacing.FORM_FIELD_SPACING, padx=AppSpacing.MD, sticky="ew")
 
         # Buttons
-        button_frame = ctk.CTkFrame(self)
-        button_frame.pack(fill="x", padx=AppSpacing.LG, pady=AppSpacing.SM)
+        button_frame = ctk.CTkFrame(self, fg_color="transparent")
+        button_frame.pack(fill="x", padx=AppSpacing.LG, pady=AppSpacing.MD)
 
-        ctk.CTkButton(
+        ModernButton(
             button_frame,
-            text="⚡ Dodaj (Enter)",
+            text=f"{Icons.ADD} ⚡ Dodaj (Enter)",
             command=self.quick_add,
-            fg_color=AppColors.SUCCESS,
-            hover_color=App._adjust_color(AppColors.SUCCESS, -15),
-            width=200,
+            variant="success",
+            size="md"
         ).pack(side="right", padx=AppSpacing.SM)
 
-        ctk.CTkButton(
-            button_frame, text="Anuluj (Esc)", command=self.on_cancel, width=200
+        ModernButton(
+            button_frame,
+            text=f"{Icons.CANCEL} Anuluj (Esc)",
+            command=self.on_cancel,
+            variant="secondary",
+            size="md"
         ).pack(side="left", padx=AppSpacing.SM)
 
         self.bind("<Return>", lambda event: self.quick_add())
@@ -797,7 +838,8 @@ class AddProductDialog(ctk.CTkToplevel):
     def __init__(self, parent):
         super().__init__(parent)
         self.title("Dodaj produkt ręcznie")
-        self.geometry("500x400")
+        self.geometry(f"{VisualConstants.DIALOG_MIN_WIDTH}x500")
+        self.minsize(VisualConstants.DIALOG_MIN_WIDTH, VisualConstants.DIALOG_MIN_HEIGHT)
         self.result = None
 
         SessionLocal = sessionmaker(bind=engine)
@@ -807,51 +849,55 @@ class AddProductDialog(ctk.CTkToplevel):
         form_frame = ctk.CTkFrame(self)
         form_frame.pack(fill="both", expand=True, padx=AppSpacing.LG, pady=AppSpacing.LG)
 
-        ctk.CTkLabel(form_frame, text="Nazwa produktu:", font=("Arial", 14)).grid(
-            row=0, column=0, sticky="w", pady=AppSpacing.SM
+        ModernLabel(form_frame, text="Nazwa produktu:", size="base").grid(
+            row=0, column=0, sticky="w", pady=AppSpacing.FORM_FIELD_SPACING, padx=AppSpacing.MD
         )
-        self.name_entry = ctk.CTkEntry(form_frame, width=300)
-        self.name_entry.grid(row=0, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM)
+        self.name_entry = ctk.CTkEntry(form_frame, width=300, font=AppFont.BODY())
+        self.name_entry.grid(row=0, column=1, pady=AppSpacing.FORM_FIELD_SPACING, padx=AppSpacing.MD, sticky="ew")
+        form_frame.grid_columnconfigure(1, weight=1)
 
-        ctk.CTkLabel(form_frame, text="Ilość:", font=("Arial", 14)).grid(
-            row=1, column=0, sticky="w", pady=AppSpacing.SM
+        ModernLabel(form_frame, text="Ilość:", size="base").grid(
+            row=1, column=0, sticky="w", pady=AppSpacing.FORM_FIELD_SPACING, padx=AppSpacing.MD
         )
-        self.quantity_entry = ctk.CTkEntry(form_frame, width=300)
+        self.quantity_entry = ctk.CTkEntry(form_frame, width=300, font=AppFont.BODY())
         self.quantity_entry.insert(0, "1.0")
-        self.quantity_entry.grid(row=1, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM)
+        self.quantity_entry.grid(row=1, column=1, pady=AppSpacing.FORM_FIELD_SPACING, padx=AppSpacing.MD, sticky="ew")
 
-        ctk.CTkLabel(form_frame, text="Jednostka:", font=("Arial", 14)).grid(
-            row=2, column=0, sticky="w", pady=AppSpacing.SM
+        ModernLabel(form_frame, text="Jednostka:", size="base").grid(
+            row=2, column=0, sticky="w", pady=AppSpacing.FORM_FIELD_SPACING, padx=AppSpacing.MD
         )
-        self.unit_entry = ctk.CTkEntry(form_frame, width=300)
+        self.unit_entry = ctk.CTkEntry(form_frame, width=300, font=AppFont.BODY())
         self.unit_entry.insert(0, "szt")
-        self.unit_entry.grid(row=2, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM)
+        self.unit_entry.grid(row=2, column=1, pady=AppSpacing.FORM_FIELD_SPACING, padx=AppSpacing.MD, sticky="ew")
 
-        ctk.CTkLabel(
-            form_frame, text="Data ważności (YYYY-MM-DD):", font=("Arial", 14)
-        ).grid(row=3, column=0, sticky="w", pady=AppSpacing.SM)
+        ModernLabel(
+            form_frame, text="Data ważności (YYYY-MM-DD):", size="base"
+        ).grid(row=3, column=0, sticky="w", pady=AppSpacing.FORM_FIELD_SPACING, padx=AppSpacing.MD)
         self.expiry_entry = ctk.CTkEntry(
-            form_frame, width=300, placeholder_text="YYYY-MM-DD"
+            form_frame, width=300, placeholder_text="YYYY-MM-DD", font=AppFont.BODY()
         )
         default_expiry = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
         self.expiry_entry.insert(0, default_expiry)
-        self.expiry_entry.grid(row=3, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM)
+        self.expiry_entry.grid(row=3, column=1, pady=AppSpacing.FORM_FIELD_SPACING, padx=AppSpacing.MD, sticky="ew")
 
         # Buttons
-        button_frame = ctk.CTkFrame(self)
-        button_frame.pack(fill="x", padx=AppSpacing.LG, pady=AppSpacing.SM)
+        button_frame = ctk.CTkFrame(self, fg_color="transparent")
+        button_frame.pack(fill="x", padx=AppSpacing.LG, pady=AppSpacing.MD)
 
-        ctk.CTkButton(
+        ModernButton(
             button_frame,
-            text="Dodaj",
+            text=f"{Icons.ADD} Dodaj",
             command=self.add_product,
-            fg_color=AppColors.SUCCESS,
-            hover_color=App._adjust_color(AppColors.SUCCESS, -15),
-            width=200,
+            variant="success",
+            size="md"
         ).pack(side="right", padx=AppSpacing.SM)
 
-        ctk.CTkButton(
-            button_frame, text="Anuluj", command=self.on_cancel, width=200
+        ModernButton(
+            button_frame,
+            text=f"{Icons.CANCEL} Anuluj",
+            command=self.on_cancel,
+            variant="secondary",
+            size="md"
         ).pack(side="left", padx=AppSpacing.SM)
 
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
@@ -921,17 +967,19 @@ class BielikChatDialog(ctk.CTkToplevel):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.title("🦅 Bielik - Asystent Kulinarny")
-        self.geometry("800x600")
+        self.title(f"{Icons.ASSISTANT} {Icons.CHAT} Bielik - Asystent Kulinarny")
+        self.geometry(f"{VisualConstants.DIALOG_MIN_WIDTH}x600")
+        self.minsize(VisualConstants.DIALOG_MIN_WIDTH, VisualConstants.DIALOG_MIN_HEIGHT)
         self.assistant = None
 
         # Header
         header_frame = ctk.CTkFrame(self)
-        header_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
-        ctk.CTkLabel(
+        header_frame.pack(fill="x", padx=AppSpacing.LG, pady=AppSpacing.MD)
+        ModernLabel(
             header_frame,
-            text="🦅 Bielik - Asystent Kulinarny",
-            font=("Arial", 18, "bold"),
+            text=f"{Icons.ASSISTANT} {Icons.CHAT} Bielik - Asystent Kulinarny",
+            size="xl",
+            variant="primary"
         ).pack(pady=AppSpacing.SM)
 
         # Chat area (scrollable)
@@ -1275,9 +1323,22 @@ class App(ctk.CTk):
         super().__init__()
 
         self.title("ReceiptParser - System Zarządzania Paragonami")
-        self.geometry("1200x700")
-        self.minsize(1200, 700)  # Minimalny rozmiar okna
+        self.geometry("1200x800")
+        self.minsize(VisualConstants.WINDOW_MIN_WIDTH, VisualConstants.WINDOW_MIN_HEIGHT)
         ctk.set_appearance_mode("System")
+        
+        # Title with new design system
+        title_label = ModernLabel(
+            self,
+            text=f"{Icons.RECEIPT} Paragon OCR v2.0",
+            size="xl",
+            variant="primary"
+        )
+        title_label.grid(row=0, column=0, pady=AppSpacing.LG, sticky="ew")
+        
+        # Separator
+        separator = ctk.CTkFrame(self, fg_color=AppColors.BORDER_LIGHT, height=1)
+        separator.grid(row=1, column=0, sticky="ew", padx=AppSpacing.LG)
         
         # Thread safety for processing
         self.processing_lock = threading.Lock()
@@ -1293,103 +1354,95 @@ class App(ctk.CTk):
         # memory_profiler.start()
 
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=1)
-        self.grid_rowconfigure(2, weight=0)  # Status bar row
-        self.grid_rowconfigure(2, weight=0)  # Status bar row
+        self.grid_rowconfigure(3, weight=1)  # Content area row (shifted by title/separator/menu)
+        self.grid_rowconfigure(4, weight=0)  # Status bar row
         
         # Automatycznie uruchom migracje bazy danych przy starcie (jeśli baza istnieje)
         self.after(100, self._run_migrations_on_startup)
 
         # --- MENU BAR ---
         self.menu_frame = ctk.CTkFrame(self)
-        self.menu_frame.grid(row=0, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.XS)
+        self.menu_frame.grid(row=2, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.XS)
         self.menu_frame.grid_columnconfigure(0, weight=1)
 
         # Menu buttons
         menu_buttons_frame = ctk.CTkFrame(self.menu_frame)
         menu_buttons_frame.pack(side="left", padx=AppSpacing.XS, pady=AppSpacing.XS)
 
-        # Menu buttons z ujednoliconymi kolorami i tooltips
-        btn_receipts = ctk.CTkButton(
+        # Menu buttons z nowymi komponentami ModernButton
+        btn_receipts = ModernButton(
             menu_buttons_frame,
             text=f"{Icons.RECEIPT} Paragony",
             command=self.show_receipts_tab,
-            width=120,
-            fg_color=AppColors.PRIMARY,
-            hover_color=App._adjust_color(AppColors.PRIMARY, -15),
+            variant="primary",
+            size="md"
         )
-        btn_receipts.pack(side="left", padx=AppSpacing.XS)
+        btn_receipts.pack(side="left", padx=AppSpacing.SM)
         ToolTip(btn_receipts, "Wyświetl analitykę zakupów i paragony")
 
-        btn_cooking = ctk.CTkButton(
+        btn_cooking = ModernButton(
             menu_buttons_frame,
             text=f"{Icons.COOKING} Gotowanie",
             command=self.show_cooking_dialog,
-            width=120,
-            fg_color=AppColors.PRIMARY,
-            hover_color=App._adjust_color(AppColors.PRIMARY, -15),
+            variant="primary",
+            size="md"
         )
-        btn_cooking.pack(side="left", padx=AppSpacing.XS)
+        btn_cooking.pack(side="left", padx=AppSpacing.SM)
         ToolTip(btn_cooking, "Zaznacz produkty do zużycia podczas gotowania")
 
-        btn_add = ctk.CTkButton(
+        btn_add = ModernButton(
             menu_buttons_frame,
             text=f"{Icons.ADD} Dodaj produkt",
             command=self.show_add_product_dialog,
-            width=120,
-            fg_color=AppColors.PRIMARY,
-            hover_color=App._adjust_color(AppColors.PRIMARY, -15),
+            variant="primary",
+            size="md"
         )
-        btn_add.pack(side="left", padx=AppSpacing.XS)
+        btn_add.pack(side="left", padx=AppSpacing.SM)
         ToolTip(btn_add, "Dodaj produkt ręcznie do magazynu")
 
-        btn_inventory = ctk.CTkButton(
+        btn_inventory = ModernButton(
             menu_buttons_frame,
             text=f"{Icons.INVENTORY} Magazyn",
             command=self.show_inventory,
-            width=120,
-            fg_color=AppColors.PRIMARY,
-            hover_color=App._adjust_color(AppColors.PRIMARY, -15),
+            variant="primary",
+            size="md"
         )
-        btn_inventory.pack(side="left", padx=AppSpacing.XS)
+        btn_inventory.pack(side="left", padx=AppSpacing.SM)
         ToolTip(btn_inventory, "Przeglądaj i edytuj stan magazynu")
 
-        btn_bielik = ctk.CTkButton(
+        btn_bielik = ModernButton(
             menu_buttons_frame,
             text=f"{Icons.BEAR} Bielik",
             command=self.show_bielik_chat,
-            width=120,
-            fg_color=AppColors.PRIMARY,
-            hover_color=App._adjust_color(AppColors.PRIMARY, -15),
+            variant="info",
+            size="md"
         )
-        btn_bielik.pack(side="left", padx=AppSpacing.XS)
+        btn_bielik.pack(side="left", padx=AppSpacing.SM)
         ToolTip(btn_bielik, "Otwórz czat z asystentem kulinarnym Bielik")
 
-        btn_meal_planner = ctk.CTkButton(
+        btn_meal_planner = ModernButton(
             menu_buttons_frame,
             text=f"{Icons.MEAL_PLANNER} Plan Posiłków",
             command=self.show_meal_planner,
-            width=120,
-            fg_color=AppColors.PRIMARY,
-            hover_color=App._adjust_color(AppColors.PRIMARY, -15),
+            variant="primary",
+            size="md"
         )
-        btn_meal_planner.pack(side="left", padx=AppSpacing.XS)
+        btn_meal_planner.pack(side="left", padx=AppSpacing.SM)
         ToolTip(btn_meal_planner, "Tygodniowy planer posiłków")
 
-        btn_settings = ctk.CTkButton(
+        btn_settings = ModernButton(
             menu_buttons_frame,
             text=f"{Icons.SETTINGS} Ustawienia",
             command=self.show_settings,
-            width=120,
-            fg_color=AppColors.PRIMARY,
-            hover_color=App._adjust_color(AppColors.PRIMARY, -15),
+            variant="secondary",
+            size="md"
         )
-        btn_settings.pack(side="left", padx=AppSpacing.XS)
+        btn_settings.pack(side="left", padx=AppSpacing.SM)
         ToolTip(btn_settings, "Ustawienia i konfiguracja promptów")
 
         # --- MAIN CONTENT AREA ---
         self.content_frame = ctk.CTkFrame(self)
-        self.content_frame.grid(row=1, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="nsew")
+        self.content_frame.grid(row=3, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="nsew")
         self.content_frame.grid_columnconfigure(0, weight=1)
         self.content_frame.grid_rowconfigure(0, weight=1)
 
@@ -1538,7 +1591,7 @@ class App(ctk.CTk):
 
         # --- STATUS BAR ---
         self.status_bar = ctk.CTkFrame(self)
-        self.status_bar.grid(row=2, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.XS)
+        self.status_bar.grid(row=4, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.XS)
         self.status_bar.grid_columnconfigure(0, weight=1)
         
         self.status_label = ctk.CTkLabel(
