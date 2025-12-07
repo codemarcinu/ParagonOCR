@@ -66,6 +66,12 @@ class AppColors:
     # Chat colors
     CHAT_BOT: Final[str] = "#e0f2fe"  # Light blue for bot messages
     CHAT_USER: Final[str] = "#f0fdf4"  # Light green for user messages
+    
+    # Row colors for alternating rows in tables/lists
+    ROW_EVEN: Final[str] = "#2a2a2a"  # Even row color (dark mode)
+    ROW_ODD: Final[str] = "#333333"  # Odd row color (dark mode)
+    ROW_EVEN_LIGHT: Final[str] = "#ffffff"  # Even row color (light mode)
+    ROW_ODD_LIGHT: Final[str] = "#f9fafb"  # Odd row color (light mode)
 
 
 class AppSpacing:
