@@ -1598,7 +1598,7 @@ class App(ctk.CTk):
             self.status_bar,
             text="Gotowy",
             anchor="w",
-            font=(AppFont.FAMILY, AppFont.SIZE_SM)
+            font=(AppFont.FAMILY_BASE[0], AppFont.SIZE_SM)
         )
         self.status_label.grid(row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.XS, sticky="w")
         
