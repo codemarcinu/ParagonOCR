@@ -1,41 +1,56 @@
-# Environment variables
-.env
-.env.local
-
 # Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
+*.so
 .Python
 venv/
-.venv/
-*.egg-info/
-dist/
-build/
+env/
+ENV/
+.venv
 
-# Testing & Coverage
-htmlcov/
-.coverage
-.coverage.*
-.pytest_cache/
-.tox/
-*.cover
+# Backend
+backend/data/
+backend/.env
+backend/__pycache__/
+backend/**/__pycache__/
+backend/**/*.pyc
+backend/alembic/versions/*.py
+!backend/alembic/versions/.gitkeep
 
-# Logs
-logs/
-*.log
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+frontend/.vite/
 
 # IDE
-.idea/
 .vscode/
+.idea/
 *.swp
 *.swo
 *~
 
-# System
+# OS
 .DS_Store
 Thumbs.db
 
-# Database (opcjonalnie - usuń jeśli chcesz commitować bazę)
-# ReceiptParser/data/receipts.db
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads
+data/uploads/
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.tiff
+*.tif
