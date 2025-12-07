@@ -1,8 +1,197 @@
+import { useEffect, useState, useRef, type KeyboardEvent } from 'react';
+import * as ReactWindow from 'react-window';
+const VariableSizeList = (ReactWindow as any).VariableSizeList || (ReactWindow as any).default?.VariableSizeList;
+import { useChatStore } from '@/store/chatStore';
+
 export function Chat() {
+    const {
+        messages,
+        conversations,
+        currentConversationId,
+        streaming,
+        fetchConversations,
+        selectConversation,
+        createConversation,
+        sendMessage
+    } = useChatStore();
+
+    const [input, setInput] = useState('');
+    const listRef = useRef<any>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    useEffect(() => {
+        fetchConversations();
+    }, [fetchConversations]);
+
+    useEffect(() => {
+        if (conversations.length > 0 && !currentConversationId) {
+            selectConversation(conversations[0].id);
+        }
+    }, [conversations, currentConversationId, selectConversation]);
+
+    useEffect(() => {
+        // Scroll to bottom when messages change
+        if (listRef.current && messages.length > 0) {
+            listRef.current.scrollToItem(messages.length - 1, 'end');
+        }
+    }, [messages]);
+
+    const handleSend = async () => {
+        if (!input.trim() || streaming) return;
+
+        const content = input;
+        setInput('');
+
+        // Reset height
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+        }
+
+        await sendMessage(content);
+    };
+
+    const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && e.ctrlKey) {
+            handleSend();
+        }
+    };
+
+    const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setInput(e.target.value);
+        // Auto-resize
+        e.target.style.height = 'auto';
+        e.target.style.height = `${e.target.scrollHeight} px`;
+    };
+
+    const getItemSize = (index: number) => {
+        // Approximate height calculation or dynamic measurement
+        // For simplicity, a base height + content length factor
+        const msg = messages[index];
+        const baseHeight = 60;
+        const contentLength = msg.content.length;
+        return baseHeight + Math.ceil(contentLength / 80) * 20;
+    };
+
+    const Row = ({ index, style }: { index: number; style: React.CSSProperties }) => {
+        const msg = messages[index];
+        const isUser = msg.role === 'user';
+
+        return (
+            <div style={style} className={`px - 4 py - 2 flex ${isUser ? 'justify-end' : 'justify-start'} `}>
+                <div
+                    className={`max - w - [80 %] rounded - lg p - 3 ${isUser
+                        ? 'bg-blue-600 text-white rounded-br-none'
+                        : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-bl-none shadow-sm'
+                        } `}
+                >
+                    <p className={`text - sm whitespace - pre - wrap ${isUser ? 'text-white' : 'text-gray-900 dark:text-gray-100'} `}>
+                        {msg.content}
+                    </p>
+                    <span className={`text - xs mt - 1 block ${isUser ? 'text-blue-100' : 'text-gray-500'} `}>
+                        {new Date(msg.timestamp).toLocaleTimeString()}
+                    </span>
+                </div>
+            </div>
+        );
+    };
+
     return (
-        <div className="p-4">
-            <h1 className="text-2xl font-bold mb-4">AI Chat Assistant</h1>
-            <p>Chat interface coming soon...</p>
+        <div className="flex h-[calc(100vh-64px)] bg-gray-50 dark:bg-gray-900">
+            {/* Sidebar */}
+            <div className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                    <button
+                        onClick={createConversation}
+                        className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                        + New Chat
+                    </button>
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                    {conversations.map((conv) => (
+                        <button
+                            key={conv.id}
+                            onClick={() => selectConversation(conv.id)}
+                            className={`w - full text - left px - 4 py - 3 border - b border - gray - 100 dark: border - gray - 700 hover: bg - gray - 50 dark: hover: bg - gray - 700 transition - colors ${currentConversationId === conv.id ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                                } `}
+                        >
+                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                {conv.title || 'New Chat'}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                {new Date(conv.created_at).toLocaleDateString()}
+                            </p>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Main Chat Area */}
+            <div className="flex-1 flex flex-col">
+                {/* Header */}
+                <div className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6">
+                    <h2 className="text-lg font-medium text-gray-900 dark:text-white">
+                        {conversations.find(c => c.id === currentConversationId)?.title || 'Chat'}
+                    </h2>
+                    <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                        </svg>
+                    </button>
+                </div>
+
+                {/* Messages List */}
+                <div className="flex-1 relative">
+                    {messages.length > 0 ? (
+                        <VariableSizeList
+                            ref={listRef}
+                            height={600} // This should be dynamic based on container
+                            width="100%"
+                            itemCount={messages.length}
+                            itemSize={getItemSize}
+                            className="no-scrollbar"
+                            style={{ overflowX: 'hidden' }}
+                        >
+                            {Row}
+                        </VariableSizeList>
+                    ) : (
+                        <div className="h-full flex items-center justify-center text-gray-400">
+                            <div className="text-center">
+                                <p className="text-lg mb-2">Welcome to ParagonChat</p>
+                                <p className="text-sm">Start a conversation to analyze your receipts.</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Input Area */}
+                <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                    <div className="max-w-4xl mx-auto relative">
+                        <textarea
+                            ref={textareaRef}
+                            value={input}
+                            onChange={handleInput}
+                            onKeyDown={handleKeyDown}
+                            placeholder="Type your message... (Ctrl+Enter to send)"
+                            className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500 pr-12 resize-none min-h-[44px] max-h-[120px] py-2"
+                            rows={1}
+                        />
+                        <button
+                            onClick={handleSend}
+                            disabled={!input.trim() || streaming}
+                            className="absolute right-2 bottom-2 p-2 text-blue-600 hover:text-blue-700 disabled:text-gray-400"
+                        >
+                            {streaming ? (
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600" />
+                            ) : (
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                </svg>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

@@ -3,7 +3,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { apiClient } from '@/lib/api';
+import { getReceipt } from '@/lib/api';
 
 interface ReceiptViewerProps {
   receiptId: number;
@@ -48,7 +48,7 @@ export function ReceiptViewer({ receiptId, onClose }: ReceiptViewerProps) {
     const fetchReceipt = async () => {
       try {
         setLoading(true);
-        const data = await apiClient.getReceipt(receiptId);
+        const data = await getReceipt(receiptId);
         setReceipt(data);
         setError(null);
       } catch (err) {

@@ -7,14 +7,22 @@ and registers all API routers.
 
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.openapi.utils import get_openapi
+
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 from app.config import settings
 from app.database import init_db, engine
-from app.database import init_db, engine
-from app.routers import receipts, products, chat, analytics
+
+# Initialize Limiter
+limiter = Limiter(key_func=get_remote_address)
+from app.routers import receipts, products, chat, analytics, auth
 
 # Configure logging
 logging.basicConfig(
@@ -47,6 +55,8 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Add CORS middleware
 app.add_middleware(
@@ -65,6 +75,33 @@ app.include_router(receipts.router, prefix="/api/receipts", tags=["receipts"])
 app.include_router(products.router, prefix="/api/products", tags=["products"])
 app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
+app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
+
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title="ParagonOCR Web API",
+        version="1.0.0",
+        description="API for receipt processing and expense tracking",
+        routes=app.routes,
+    )
+    # Add custom logos or other metadata here if needed
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Global exception: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"message": "Internal Server Error", "details": str(exc)},
+    )
 
 
 @app.get("/")

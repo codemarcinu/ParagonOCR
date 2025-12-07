@@ -99,6 +99,7 @@ class AnalyticsService:
             db.query(
                 func.strftime("%Y-%m", Receipt.purchase_date).label("month"),
                 func.sum(Receipt.total_amount).label("total"),
+                func.count(Receipt.id).label("count"),
             )
             .filter(Receipt.purchase_date >= start_date)
             .group_by("month")
@@ -106,7 +107,27 @@ class AnalyticsService:
             .all()
         )
 
-        return [{"month": month, "amount": float(total)} for month, total in results]
+        return [
+            {"month": month, "amount": float(total), "count": count}
+            for month, total, count in results
+        ]
+
+    def get_daily_trend(self, db: Session, days: int = 30) -> List[Dict[str, Any]]:
+        """Get daily spending trend for chart."""
+        start_date = datetime.now() - timedelta(days=days)
+
+        results = (
+            db.query(
+                func.strftime("%Y-%m-%d", Receipt.purchase_date).label("day"),
+                func.sum(Receipt.total_amount).label("total"),
+            )
+            .filter(Receipt.purchase_date >= start_date)
+            .group_by("day")
+            .order_by("day")
+            .all()
+        )
+
+        return [{"date": day, "amount": float(total)} for day, total in results]
 
 
 analytics_service = AnalyticsService()

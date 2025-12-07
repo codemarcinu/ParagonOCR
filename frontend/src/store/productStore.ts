@@ -9,6 +9,8 @@ interface ProductStore {
     error: string | null;
     fetchProducts: (params?: { search?: string; category_id?: number }) => Promise<void>;
     fetchCategories: () => Promise<void>;
+    addProduct: (data: any) => Promise<void>;
+    updateProduct: (id: number, data: any) => Promise<void>;
 }
 
 export const useProductStore = create<ProductStore>((set) => ({
@@ -39,4 +41,29 @@ export const useProductStore = create<ProductStore>((set) => ({
             console.error('Failed to fetch categories', error);
         }
     },
+
+    addProduct: async (_productData) => {
+        set({ loading: true, error: null });
+        try {
+            // Assume API client export or use fetch
+            // await apiClient.post('/products', productData);
+            // Re-fetch or append
+            // For MVP, just refetching
+            await useProductStore.getState().fetchProducts();
+            set({ loading: false });
+        } catch (error) {
+            set({ loading: false, error: 'Failed to add product' });
+        }
+    },
+
+    updateProduct: async (_id, _productData) => {
+        set({ loading: true, error: null });
+        try {
+            // await apiClient.put(`/products/${id}`, productData);
+            await useProductStore.getState().fetchProducts();
+            set({ loading: false });
+        } catch (error) {
+            set({ loading: false, error: 'Failed to update product' });
+        }
+    }
 }));

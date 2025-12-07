@@ -62,4 +62,9 @@ export const fetchCategories = async (): Promise<Category[]> => {
   return response.data;
 };
 
+export const getReceipt = async (id: number) => {
+  const response = await api.get(`/receipts/${id}`);
+  return response.data;
+};
+
 export default api;

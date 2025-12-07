@@ -17,6 +17,14 @@ export interface Receipt {
 
 interface ReceiptStore {
   receipts: Receipt[];
+  total: number;
+  limit: number;
+  skip: number;
+  filters: {
+    shop_id?: number;
+    start_date?: string;
+    end_date?: string;
+  };
   loading: boolean;
   error: string | null;
   fetchReceipts: (params?: {
@@ -26,6 +34,9 @@ interface ReceiptStore {
     start_date?: string;
     end_date?: string;
   }) => Promise<void>;
+  setFilters: (filters: { shop_id?: number; start_date?: string; end_date?: string }) => void;
+  resetFilters: () => void;
+  setPage: (page: number) => void;
   uploadReceipt: (file: File) => Promise<{ receipt_id: number; status: string }>;
   clearError: () => void;
 }
@@ -35,28 +46,68 @@ export const useReceiptStore = create<ReceiptStore>((set) => ({
   loading: false,
   error: null,
 
+  total: 0,
+  limit: 50,
+  skip: 0,
+  filters: {},
+
   fetchReceipts: async (params) => {
     set({ loading: true, error: null });
     try {
-      const response = await apiClient.get('/receipts', { params });
-      // Backend might return list directly or wrapped. 
-      // Based on receipts.py: return query.all() -> list.
-      // So response.data is the list.
-      // But receiptStore expects { receipts: data.receipts } ?
-      // Let's assume the store was written for a wrapped response but checks backend.
-      // If backend returns list, we set receipts: response.data.
-      // Updating store expectation to match likely backend response (List[Receipt]).
-      // Backend returns { receipts: [...], total: ... }
-      // So we need to access response.data.receipts
+      // Merge current filters with new params if provided
+      const currentFilters = useReceiptStore.getState().filters;
+      const currentSkip = useReceiptStore.getState().skip;
+      const currentLimit = useReceiptStore.getState().limit;
+
+      const queryParams = {
+        skip: currentSkip,
+        limit: currentLimit,
+        ...currentFilters,
+        ...params,
+      };
+
+      const response = await apiClient.get('/receipts', { params: queryParams });
       const data = response.data;
+
+      // Handle response structure { receipts: [], total: ... }
       const receiptsList = Array.isArray(data) ? data : (data.receipts || []);
-      set({ receipts: receiptsList, loading: false });
+      const totalCount = data.total || receiptsList.length;
+
+      set({
+        receipts: receiptsList,
+        total: totalCount,
+        loading: false,
+        skip: queryParams.skip,
+        limit: queryParams.limit,
+        filters: {
+          shop_id: queryParams.shop_id,
+          start_date: queryParams.start_date,
+          end_date: queryParams.end_date
+        }
+      });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Failed to fetch receipts',
         loading: false,
       });
     }
+  },
+
+  setFilters: (filters) => {
+    set((state) => ({ filters: { ...state.filters, ...filters }, skip: 0 }));
+    useReceiptStore.getState().fetchReceipts({ skip: 0 });
+  },
+
+  resetFilters: () => {
+    set({ filters: {}, skip: 0 });
+    useReceiptStore.getState().fetchReceipts({ skip: 0 });
+  },
+
+  setPage: (page: number) => {
+    const { limit } = useReceiptStore.getState();
+    const newSkip = (page - 1) * limit;
+    set({ skip: newSkip });
+    useReceiptStore.getState().fetchReceipts({ skip: newSkip });
   },
 
   uploadReceipt: async (file) => {

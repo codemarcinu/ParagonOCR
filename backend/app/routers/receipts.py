@@ -28,6 +28,7 @@ from app.models.receipt import Receipt, ReceiptItem
 from app.models.product import Product, ProductAlias
 from app.models.category import Category
 from app.models.shop import Shop
+from app.dependencies import get_current_user
 from app.services.ocr_service import extract_from_pdf, extract_from_image, OCRResult
 from app.services.llm_service import parse_receipt_text, ParsedReceipt
 from app.config import settings
@@ -73,6 +74,7 @@ manager = ConnectionManager()
 async def upload_receipt(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),  # Require auth
 ):
     """
     Upload and process a receipt file (PDF or image).

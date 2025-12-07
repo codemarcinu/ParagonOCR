@@ -26,5 +26,16 @@ async def get_shop_spending(days: int = 30, db: Session = Depends(get_db)):
 @router.get("/categories")
 async def get_category_spending(days: int = 30, db: Session = Depends(get_db)):
     """Get spending breakdown by category."""
-    # Placeholder until categories are fully implemented
     return analytics_service.get_spending_by_category(db, days)
+
+
+@router.get("/trend")
+async def get_daily_trend(days: int = 30, db: Session = Depends(get_db)):
+    """Get daily spending trend."""
+    return analytics_service.get_daily_trend(db, days)
+
+
+@router.get("/monthly")
+async def get_monthly_stats(months: int = 6, db: Session = Depends(get_db)):
+    """Get monthly spending statistics."""
+    return analytics_service.get_monthly_trend(db, months)
