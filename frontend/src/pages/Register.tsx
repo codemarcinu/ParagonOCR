@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { register } from '../lib/api';
+import { Button, Input } from '../components/ui';
 
 const Register: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -49,13 +50,10 @@ const Register: React.FC = () => {
 
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
-                        <label className="mb-2 block text-sm font-bold text-gray-700" htmlFor="email">
-                            Email
-                        </label>
-                        <input
+                        <Input
                             id="email"
                             type="email"
-                            className="w-full rounded border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
+                            label="Email"
                             placeholder="Enter your email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -64,13 +62,10 @@ const Register: React.FC = () => {
                     </div>
 
                     <div className="mb-4">
-                        <label className="mb-2 block text-sm font-bold text-gray-700" htmlFor="password">
-                            Password
-                        </label>
-                        <input
+                        <Input
                             id="password"
                             type="password"
-                            className="w-full rounded border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
+                            label="Password"
                             placeholder="Create a password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -79,27 +74,27 @@ const Register: React.FC = () => {
                     </div>
 
                     <div className="mb-6">
-                        <label className="mb-2 block text-sm font-bold text-gray-700" htmlFor="confirmPassword">
-                            Confirm Password
-                        </label>
-                        <input
+                        <Input
                             id="confirmPassword"
                             type="password"
-                            className="w-full rounded border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
+                            label="Confirm Password"
                             placeholder="Confirm your password"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
+                            error={password !== confirmPassword && confirmPassword ? "Passwords don't match" : undefined}
                             required
                         />
                     </div>
 
-                    <button
+                    <Button
                         type="submit"
                         disabled={loading}
-                        className="w-full rounded bg-blue-600 py-2 font-bold text-white hover:bg-blue-700 disabled:opacity-50"
+                        isLoading={loading}
+                        className="w-full"
+                        size="lg"
                     >
                         {loading ? 'Creating Account...' : 'Register'}
-                    </button>
+                    </Button>
                 </form>
 
                 <div className="mt-4 text-center text-sm">

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useShoppingListStore } from '@/store/shoppingListStore';
 import { Plus } from 'lucide-react';
 import { ShoppingListItem } from '@/components/ShoppingListItem';
-import { LoadingSpinner, Skeleton } from '@/components/ui';
+import { LoadingSpinner, Skeleton, Button, Input, Modal } from '@/components/ui';
 
 export function ShoppingList() {
   const {
@@ -67,13 +67,12 @@ export function ShoppingList() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Shopping Lists
           </h1>
-          <button
+          <Button
             onClick={() => setShowNewListModal(true)}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            leftIcon={<Plus className="w-5 h-5" />}
           >
-            <Plus className="w-5 h-5 mr-2" />
             New List
-          </button>
+          </Button>
         </div>
         
         {/* Lists Sidebar */}
@@ -97,6 +96,8 @@ export function ShoppingList() {
                         ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
                         : 'hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
+                    aria-label={`${list.title}, ${list.items.length} items`}
+                    aria-current={currentList?.id === list.id ? 'true' : undefined}
                   >
                     <p className="font-medium text-gray-900 dark:text-white">{list.title}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -131,12 +132,13 @@ export function ShoppingList() {
                         Completed
                       </span>
                     ) : (
-                      <button
+                      <Button
                         onClick={completeList}
-                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                        variant="primary"
+                        className="bg-green-600 hover:bg-green-700"
                       >
                         Mark Complete
-                      </button>
+                      </Button>
                     )}
                   </div>
                 </div>
@@ -144,26 +146,24 @@ export function ShoppingList() {
                 {/* Add Item Form */}
                 <form onSubmit={handleAddItem} className="p-4 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex gap-2">
-                    <input
+                    <Input
                       type="text"
                       value={newItemName}
                       onChange={(e) => setNewItemName(e.target.value)}
                       placeholder="Item name..."
-                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
+                      className="flex-1"
                     />
-                    <input
+                    <Input
                       type="number"
                       value={newItemQuantity}
                       onChange={(e) => setNewItemQuantity(e.target.value)}
                       placeholder="Qty"
-                      className="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
+                      className="w-20"
                     />
-                    <button
+                    <Button
                       type="submit"
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                    >
-                      <Plus className="w-5 h-5" />
-                    </button>
+                      leftIcon={<Plus className="w-5 h-5" />}
+                    />
                   </div>
                 </form>
                 
@@ -204,41 +204,42 @@ export function ShoppingList() {
       </div>
       
       {/* New List Modal */}
-      {showNewListModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold mb-4">Create New List</h3>
-            <input
-              type="text"
-              value={newListTitle}
-              onChange={(e) => setNewListTitle(e.target.value)}
-              placeholder="List title..."
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white mb-4"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleCreateList();
-                } else if (e.key === 'Escape') {
-                  setShowNewListModal(false);
-                }
-              }}
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowNewListModal(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreateList}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
-                Create
-              </button>
-            </div>
-          </div>
+      <Modal
+        isOpen={showNewListModal}
+        onClose={() => setShowNewListModal(false)}
+        title="Create New List"
+        size="sm"
+      >
+        <Input
+          type="text"
+          value={newListTitle}
+          onChange={(e) => setNewListTitle(e.target.value)}
+          placeholder="List title..."
+          className="mb-4"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleCreateList();
+            } else if (e.key === 'Escape') {
+              setShowNewListModal(false);
+            }
+          }}
+        />
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setShowNewListModal(false)}
+            variant="secondary"
+            className="flex-1"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleCreateList}
+            className="flex-1"
+          >
+            Create
+          </Button>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

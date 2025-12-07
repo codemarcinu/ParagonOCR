@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useReceiptStore } from '@/store/receiptStore';
 import { ReceiptViewer } from '@/components/ReceiptViewer';
-import { Skeleton } from '@/components/ui';
+import { Skeleton, Button, Input, Modal } from '@/components/ui';
 
 export function Receipts() {
     const {
@@ -54,12 +54,12 @@ export function Receipts() {
                         All Receipts
                     </h1>
                     <div className="mt-4 md:mt-0 flex space-x-2">
-                        <button
+                        <Button
                             onClick={resetFilters}
-                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                            variant="secondary"
                         >
                             Reset Filters
-                        </button>
+                        </Button>
                     </div>
                 </div>
 
@@ -68,18 +68,18 @@ export function Receipts() {
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date Range</label>
                         <div className="flex space-x-2">
-                            <input
+                            <Input
                                 type="date"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                 value={filters.start_date || ''}
                                 onChange={(e) => handleDateChange(e, 'start_date')}
+                                className="flex-1"
                             />
                             <span className="text-gray-500 self-center">-</span>
-                            <input
+                            <Input
                                 type="date"
-                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                 value={filters.end_date || ''}
                                 onChange={(e) => handleDateChange(e, 'end_date')}
+                                className="flex-1"
                             />
                         </div>
                     </div>
@@ -148,12 +148,13 @@ export function Receipts() {
                                                     {receipt.total_amount.toFixed(2)} PLN
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                    <button
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
                                                         onClick={() => openModal(receipt.id)}
-                                                        className="text-blue-600 hover:text-blue-900 dark:hover:text-blue-400"
                                                     >
                                                         View Details
-                                                    </button>
+                                                    </Button>
                                                 </td>
                                             </tr>
                                         ))}
@@ -171,23 +172,27 @@ export function Receipts() {
                                     </div>
                                     <div>
                                         <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                            <button
+                                            <Button
                                                 onClick={() => handlePageChange(currentPage - 1)}
                                                 disabled={currentPage === 1}
-                                                className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400"
+                                                variant="secondary"
+                                                size="sm"
+                                                className="rounded-l-md"
                                             >
                                                 Previous
-                                            </button>
+                                            </Button>
                                             <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
                                                 Page {currentPage} of {totalPages}
                                             </span>
-                                            <button
+                                            <Button
                                                 onClick={() => handlePageChange(currentPage + 1)}
                                                 disabled={currentPage === totalPages}
-                                                className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400"
+                                                variant="secondary"
+                                                size="sm"
+                                                className="rounded-r-md"
                                             >
                                                 Next
-                                            </button>
+                                            </Button>
                                         </nav>
                                     </div>
                                 </div>
@@ -198,17 +203,13 @@ export function Receipts() {
             </div>
 
             {/* Modal */}
-            {modalOpen && selectedReceiptId && (
-                <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                    <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onClick={closeModal}></div>
-                        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-                            <ReceiptViewer receiptId={selectedReceiptId} onClose={closeModal} />
-                        </div>
-                    </div>
-                </div>
-            )}
+            <Modal
+                isOpen={modalOpen && selectedReceiptId !== null}
+                onClose={closeModal}
+                size="xl"
+            >
+                {selectedReceiptId && <ReceiptViewer receiptId={selectedReceiptId} onClose={closeModal} />}
+            </Modal>
         </div>
     );
 }

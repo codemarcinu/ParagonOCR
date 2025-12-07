@@ -5,6 +5,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useReceiptStore } from '@/store/receiptStore';
 import { WS_BASE_URL } from '@/lib/api';
+import { Button } from '@/components/ui';
 
 interface ProcessingStage {
   stage: 'idle' | 'uploading' | 'ocr' | 'llm' | 'saving' | 'completed' | 'error';
@@ -179,6 +180,8 @@ export function ReceiptUploader() {
           onChange={handleFileSelect}
           className="hidden"
           id="file-upload"
+          aria-describedby="file-upload-help"
+          aria-label="Upload receipt file"
         />
 
         {stage.stage === 'idle' && (
@@ -188,6 +191,7 @@ export function ReceiptUploader() {
               stroke="currentColor"
               fill="none"
               viewBox="0 0 48 48"
+              aria-hidden="true"
             >
               <path
                 d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-4h4m-4-4v4m0 4v4m0-4h4m-4-4h4"
@@ -197,17 +201,16 @@ export function ReceiptUploader() {
               />
             </svg>
             <div className="mt-4">
-              <label
-                htmlFor="file-upload"
-                className="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Select a file
+              <label htmlFor="file-upload" className="cursor-pointer inline-block">
+                <span className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 pointer-events-none">
+                  Select a file
+                </span>
               </label>
               <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                 or drag and drop
               </p>
             </div>
-            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400" id="file-upload-help">
               PDF, PNG, JPG, TIFF up to 10MB
             </p>
           </>
@@ -218,16 +221,23 @@ export function ReceiptUploader() {
           stage.stage === 'llm' ||
           stage.stage === 'saving') && (
             <>
-              <div className="mb-4">
+              <div className="mb-4" role="status" aria-live="polite" aria-atomic="true">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     {stage.message}
                   </span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                  <span className="text-sm text-gray-500 dark:text-gray-400" aria-label={`Progress: ${stage.progress} percent`}>
                     {stage.progress}%
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                <div 
+                  className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700"
+                  role="progressbar"
+                  aria-valuenow={stage.progress}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={stage.message}
+                >
                   <div
                     className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
                     style={{ width: `${stage.progress}%` }}
@@ -235,7 +245,7 @@ export function ReceiptUploader() {
                 </div>
               </div>
               <div className="flex items-center justify-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" aria-hidden="true" />
                 <span>Processing...</span>
               </div>
             </>
@@ -287,12 +297,12 @@ export function ReceiptUploader() {
             {error && (
               <p className="mt-2 text-xs text-red-500 dark:text-red-400">{error}</p>
             )}
-            <button
+            <Button
               onClick={handleRetry}
-              className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="mt-4"
             >
               Try Again
-            </button>
+            </Button>
           </div>
         )}
       </div>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { login, fetchMe } from '../lib/api';
 import { useAuthStore } from '../store/authStore';
+import { Button, Input } from '../components/ui';
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -58,13 +59,10 @@ const Login: React.FC = () => {
 
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
-                        <label className="mb-2 block text-sm font-bold text-gray-700" htmlFor="email">
-                            Email
-                        </label>
-                        <input
+                        <Input
                             id="email"
                             type="email"
-                            className="w-full rounded border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
+                            label="Email"
                             placeholder="Enter your email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -73,13 +71,10 @@ const Login: React.FC = () => {
                     </div>
 
                     <div className="mb-6">
-                        <label className="mb-2 block text-sm font-bold text-gray-700" htmlFor="password">
-                            Password
-                        </label>
-                        <input
+                        <Input
                             id="password"
                             type="password"
-                            className="w-full rounded border border-gray-300 px-3 py-2 outline-none focus:border-blue-500"
+                            label="Password"
                             placeholder="Enter your password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -87,13 +82,15 @@ const Login: React.FC = () => {
                         />
                     </div>
 
-                    <button
+                    <Button
                         type="submit"
                         disabled={loading}
-                        className="w-full rounded bg-blue-600 py-2 font-bold text-white hover:bg-blue-700 disabled:opacity-50"
+                        isLoading={loading}
+                        className="w-full"
+                        size="lg"
                     >
                         {loading ? 'Signing In...' : 'Sign In'}
-                    </button>
+                    </Button>
                 </form>
 
                 <div className="mt-4 text-center text-sm">

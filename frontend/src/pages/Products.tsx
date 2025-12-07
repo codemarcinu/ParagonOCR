@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useProductStore } from '@/store/productStore';
 import { Plus, Search, Edit2, TrendingUp, AlertCircle } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Skeleton } from '@/components/ui';
+import { Skeleton, Button, Input, Modal } from '@/components/ui';
 import type { ProductResponse } from '@/types/api';
 
 export function Products() {
@@ -71,25 +71,24 @@ export function Products() {
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                         Product Database
                     </h1>
-                    <button
+                    <Button
                         onClick={handleAddClick}
-                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                        leftIcon={<Plus className="w-5 h-5" />}
                     >
-                        <Plus className="w-5 h-5 mr-2" />
                         Add Product
-                    </button>
+                    </Button>
                 </div>
 
                 {/* Filters */}
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6 flex flex-col md:flex-row gap-4">
                     <div className="relative flex-1">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
                             <Search className="h-5 w-5 text-gray-400" />
                         </div>
-                        <input
+                        <Input
                             type="text"
                             placeholder="Search products..."
-                            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            className="pl-10"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -97,7 +96,7 @@ export function Products() {
                     <div className="w-full md:w-64">
                         <div className="relative">
                             <select
-                                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white border"
                                 value={selectedCategory || ''}
                                 onChange={(e) => setSelectedCategory(Number(e.target.value) || null)}
                             >
@@ -169,20 +168,23 @@ export function Products() {
                                                         {product.unit}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                        <button
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
                                                             onClick={() => setShowPriceHistory(isExpanded ? null : product.id)}
-                                                            className="text-gray-400 hover:text-blue-600 mx-2"
+                                                            className="mx-2"
                                                             title="Price History"
                                                         >
                                                             <TrendingUp className="w-4 h-4" />
-                                                        </button>
-                                                        <button
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
                                                             onClick={() => handleEditClick(product)}
-                                                            className="text-gray-400 hover:text-blue-600"
                                                             title="Edit"
                                                         >
                                                             <Edit2 className="w-4 h-4" />
-                                                        </button>
+                                                        </Button>
                                                     </td>
                                                 </tr>
                                                 {isExpanded && (
@@ -214,72 +216,55 @@ export function Products() {
             </div>
 
             {/* Edit Modal */}
-            {isEditModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
-                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                                {editingProduct ? 'Edit Product' : 'Add New Product'}
-                            </h3>
-                            <button onClick={() => setIsEditModalOpen(false)} className="text-gray-400 hover:text-gray-500">
-                                <span className="sr-only">Close</span>
-                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
+            <Modal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                title={editingProduct ? 'Edit Product' : 'Add New Product'}
+                size="md"
+            >
+                <form onSubmit={handleSaveProduct}>
+                    <div className="space-y-4">
+                        <Input
+                            name="name"
+                            label="Name"
+                            defaultValue={editingProduct?.name}
+                            required
+                        />
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                            <select
+                                name="category_id"
+                                defaultValue={editingProduct?.category_id || ''}
+                                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm px-3 py-2 border"
+                            >
+                                <option value="">Select Category</option>
+                                {categories.map(cat => (
+                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                ))}
+                            </select>
                         </div>
-                        <form onSubmit={handleSaveProduct}>
-                            <div className="px-6 py-4 space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
-                                    <input
-                                        name="name"
-                                        defaultValue={editingProduct?.name}
-                                        required
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm px-3 py-2 border"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
-                                    <select
-                                        name="category_id"
-                                        defaultValue={editingProduct?.category_id || ''}
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm px-3 py-2 border"
-                                    >
-                                        <option value="">Select Category</option>
-                                        {categories.map(cat => (
-                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Unit</label>
-                                    <input
-                                        name="unit"
-                                        defaultValue={editingProduct?.unit || 'pcs'}
-                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm px-3 py-2 border"
-                                    />
-                                </div>
-                            </div>
-                            <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 rounded-b-lg flex justify-end gap-3">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsEditModalOpen(false)}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                >
-                                    Save
-                                </button>
-                            </div>
-                        </form>
+                        <Input
+                            name="unit"
+                            label="Unit"
+                            defaultValue={editingProduct?.unit || 'pcs'}
+                        />
                     </div>
-                </div>
-            )}
+                    <div className="mt-6 flex justify-end gap-3">
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={() => setIsEditModalOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                        >
+                            Save
+                        </Button>
+                    </div>
+                </form>
+            </Modal>
         </div>
     );
 }

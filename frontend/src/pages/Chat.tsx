@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, type KeyboardEvent } from 'react';
 import * as ReactWindow from 'react-window';
 const VariableSizeList = (ReactWindow as any).VariableSizeList || (ReactWindow as any).default?.VariableSizeList;
 import { useChatStore } from '@/store/chatStore';
+import { Button } from '@/components/ui';
 
 export function Chat() {
     const {
@@ -100,20 +101,22 @@ export function Chat() {
             {/* Sidebar */}
             <div className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
                 <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                    <button
+                    <Button
                         onClick={createConversation}
-                        className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        className="w-full"
                     >
                         + New Chat
-                    </button>
+                    </Button>
                 </div>
                 <div className="flex-1 overflow-y-auto">
                     {conversations.map((conv) => (
                         <button
                             key={conv.id}
                             onClick={() => selectConversation(conv.id)}
-                            className={`w - full text - left px - 4 py - 3 border - b border - gray - 100 dark: border - gray - 700 hover: bg - gray - 50 dark: hover: bg - gray - 700 transition - colors ${currentConversationId === conv.id ? 'bg-blue-50 dark:bg-blue-900/20' : ''
-                                } `}
+                            className={`w-full text-left px-4 py-3 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${currentConversationId === conv.id ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                                }`}
+                            aria-label={`${conv.title || 'New Chat'} conversation, ${conv.items?.length || 0} items`}
+                            aria-current={currentConversationId === conv.id ? 'true' : undefined}
                         >
                             <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                                 {conv.title || 'New Chat'}
@@ -141,7 +144,7 @@ export function Chat() {
                 </div>
 
                 {/* Messages List */}
-                <div className="flex-1 relative">
+                <div className="flex-1 relative" role="log" aria-live="polite" aria-label="Chat messages">
                     {messages.length > 0 ? (
                         <VariableSizeList
                             ref={listRef}
@@ -175,20 +178,26 @@ export function Chat() {
                             placeholder="Type your message... (Ctrl+Enter to send)"
                             className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500 pr-12 resize-none min-h-[44px] max-h-[120px] py-2"
                             rows={1}
+                            aria-label="Message input"
+                            aria-describedby="chat-input-help"
                         />
-                        <button
+                        <span id="chat-input-help" className="sr-only">
+                            Type your message and press Ctrl+Enter to send
+                        </span>
+                        <Button
                             onClick={handleSend}
                             disabled={!input.trim() || streaming}
-                            className="absolute right-2 bottom-2 p-2 text-blue-600 hover:text-blue-700 disabled:text-gray-400"
+                            isLoading={streaming}
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-2 bottom-2"
+                            aria-label="Send message"
+                            title="Send message (Ctrl+Enter)"
                         >
-                            {streaming ? (
-                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600" />
-                            ) : (
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                </svg>
-                            )}
-                        </button>
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                            </svg>
+                        </Button>
                     </div>
                 </div>
             </div>
