@@ -91,46 +91,61 @@ export function ReceiptUploader() {
     try {
       setStage({ stage: 'uploading', progress: 10, message: 'Uploading file...' });
 
-      await uploadReceipt(file);
+      // Upload file
+      const result = await uploadReceipt(file);
+      const receiptId = result.receipt_id;
 
-      setStage({
-        stage: 'ocr',
-        progress: 30,
-        message: 'Processing OCR...',
-      });
+      // Connect to WebSocket for real-time updates
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${wsProtocol}//${window.location.hostname}:8000/api/receipts/ws/processing/${receiptId}`;
+      const ws = new WebSocket(wsUrl);
 
-      // Simulate progress (in production, use WebSocket for real-time updates)
-      setTimeout(() => {
-        setStage({
-          stage: 'llm',
-          progress: 60,
-          message: 'Parsing with LLM...',
-        });
-      }, 2000);
+      ws.onopen = () => {
+        console.log('Connected to processing WebSocket');
+      };
 
-      setTimeout(() => {
-        setStage({
-          stage: 'saving',
-          progress: 80,
-          message: 'Saving to database...',
-        });
-      }, 4000);
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
 
-      setTimeout(() => {
-        setStage({
-          stage: 'completed',
-          progress: 100,
-          message: 'Receipt processed successfully!',
-        });
-      }, 6000);
+        if (data.type === 'update') {
+          setStage({
+            stage: data.stage as any, // Cast to stage type
+            progress: data.progress,
+            message: data.message,
+          });
 
-      // Reset after 3 seconds
-      setTimeout(() => {
-        setStage({ stage: 'idle', progress: 0, message: '' });
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
+          if (data.stage === 'completed') {
+            ws.close();
+            // Refresh dashboard (optional, but good UX)
+            // handleRetry(); // Reset uploader state after delay
+            setTimeout(() => {
+              setStage({ stage: 'idle', progress: 0, message: '' });
+              if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+              }
+              // Trigger refresh if needed (e.g. reload receipts list)
+              window.dispatchEvent(new Event('receipt-uploaded'));
+            }, 3000);
+          }
+        } else if (data.status === 'error') {
+          setStage({
+            stage: 'error',
+            progress: 0,
+            message: data.message || data.error || 'Unknown error',
+          });
+          ws.close();
         }
-      }, 9000);
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        // Don't necessarily fail UI if WS fails, might just lose progress updates
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket connection closed');
+      };
+
     } catch (err) {
       setStage({
         stage: 'error',
@@ -148,11 +163,10 @@ export function ReceiptUploader() {
   return (
     <div className="w-full max-w-2xl mx-auto p-6">
       <div
-        className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-          isDragging
+        className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${isDragging
             ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
             : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
-        }`}
+          }`}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -203,29 +217,29 @@ export function ReceiptUploader() {
           stage.stage === 'ocr' ||
           stage.stage === 'llm' ||
           stage.stage === 'saving') && (
-          <>
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {stage.message}
-                </span>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  {stage.progress}%
-                </span>
+            <>
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {stage.message}
+                  </span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    {stage.progress}%
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                  <div
+                    className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                    style={{ width: `${stage.progress}%` }}
+                  />
+                </div>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                <div
-                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
-                  style={{ width: `${stage.progress}%` }}
-                />
+              <div className="flex items-center justify-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
+                <span>Processing...</span>
               </div>
-            </div>
-            <div className="flex items-center justify-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" />
-              <span>Processing...</span>
-            </div>
-          </>
-        )}
+            </>
+          )}
 
         {stage.stage === 'completed' && (
           <div className="text-center">

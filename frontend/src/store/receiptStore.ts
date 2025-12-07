@@ -46,7 +46,11 @@ export const useReceiptStore = create<ReceiptStore>((set) => ({
       // Let's assume the store was written for a wrapped response but checks backend.
       // If backend returns list, we set receipts: response.data.
       // Updating store expectation to match likely backend response (List[Receipt]).
-      set({ receipts: Array.isArray(response.data) ? response.data : [], loading: false });
+      // Backend returns { receipts: [...], total: ... }
+      // So we need to access response.data.receipts
+      const data = response.data;
+      const receiptsList = Array.isArray(data) ? data : (data.receipts || []);
+      set({ receipts: receiptsList, loading: false });
     } catch (error) {
       set({
         error: error instanceof Error ? error.message : 'Failed to fetch receipts',
