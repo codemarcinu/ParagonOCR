@@ -1335,6 +1335,18 @@ class App(ctk.CTk):
     @staticmethod
     def _adjust_color(color, amount):
         """Przyciemnia lub rozjaśnia kolor o określoną wartość"""
+        # Prosta implementacja - można użyć biblioteki colorsys dla lepszej kontroli
+        try:
+            # Konwertuj hex na RGB
+            color = color.lstrip("#")
+            rgb = tuple(int(color[i : i + 2], 16) for i in (0, 2, 4))
+            # Dostosuj jasność
+            new_rgb = tuple(max(0, min(255, c + amount)) for c in rgb)
+            # Konwertuj z powrotem na hex
+            return "#%02x%02x%02x" % new_rgb
+        except Exception as e:
+            logger.warning(f"Error adjusting color {color}: {e}")
+            return color
     
     @staticmethod
     def _enable_mousewheel_scrolling(scrollable_frame):
@@ -1365,18 +1377,6 @@ class App(ctk.CTk):
         
         # Spróbuj zbindować po krótkim opóźnieniu (canvas może nie być jeszcze gotowy)
         scrollable_frame.after(100, bind_to_canvas)
-        # Prosta implementacja - można użyć biblioteki colorsys dla lepszej kontroli
-        try:
-            # Konwertuj hex na RGB
-            color = color.lstrip("#")
-            rgb = tuple(int(color[i : i + 2], 16) for i in (0, 2, 4))
-            # Dostosuj jasność
-            new_rgb = tuple(max(0, min(255, c + amount)) for c in rgb)
-            # Konwertuj z powrotem na hex
-            return "#%02x%02x%02x" % new_rgb
-        except Exception as e:
-            logger.warning(f"Error adjusting color {color}: {e}")
-            return color
 
     def __init__(self):
         super().__init__()
