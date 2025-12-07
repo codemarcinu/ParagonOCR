@@ -1534,7 +1534,7 @@ export default defineConfig({
 - [x] ShoppingListItem component
 - [ ] Backend endpoints dla shopping lists (wymaga backend implementation)
 - [x] Global UI components (Button, Input, Card, Modal)
-- [ ] Zastosowanie UI components w całej aplikacji (opcjonalne - można stopniowo)
+- [x] Zastosowanie UI components w całej aplikacji (Login, Register, Products, Receipts, Chat, ReceiptUploader)
 - [x] Type definitions (types/api.ts)
 - [x] Eliminacja `any` z kodu
 - [x] Toast notifications setup
@@ -1542,10 +1542,10 @@ export default defineConfig({
 
 ### Faza 3
 - [x] Vitest setup
-- [x] Przykładowe testy komponentów (Button, LoadingSpinner)
-- [ ] Storybook setup (opcjonalne)
+- [x] Testy komponentów UI (Button, Input, Modal, Card, Skeleton, LoadingSpinner) - 50 testów
+- [x] Storybook setup z stories dla wszystkich komponentów UI
 - [x] Bundle optimization (code splitting z lazy loading)
-- [ ] Accessibility improvements (opcjonalne)
+- [x] Accessibility improvements (ARIA labels, keyboard navigation, screen reader support)
 
 ---
 
