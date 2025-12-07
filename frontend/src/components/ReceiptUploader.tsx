@@ -4,6 +4,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { useReceiptStore } from '@/store/receiptStore';
+import { WS_BASE_URL } from '@/lib/api';
 
 interface ProcessingStage {
   stage: 'idle' | 'uploading' | 'ocr' | 'llm' | 'saving' | 'completed' | 'error';
@@ -96,8 +97,7 @@ export function ReceiptUploader() {
       const receiptId = result.receipt_id;
 
       // Connect to WebSocket for real-time updates
-      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${wsProtocol}//${window.location.hostname}:8000/api/receipts/ws/processing/${receiptId}`;
+      const wsUrl = `${WS_BASE_URL}/api/receipts/ws/processing/${receiptId}`;
       const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {

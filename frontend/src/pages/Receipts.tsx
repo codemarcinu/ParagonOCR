@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useReceiptStore } from '@/store/receiptStore';
 import { ReceiptViewer } from '@/components/ReceiptViewer';
+import { Skeleton } from '@/components/ui';
 
 export function Receipts() {
     const {
@@ -90,7 +91,17 @@ export function Receipts() {
 
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
                     {loading && receipts.length === 0 ? (
-                        <div className="p-8 text-center text-gray-500">Loading receipts...</div>
+                        <div className="p-6 space-y-4">
+                            {[1, 2, 3, 4, 5].map((i) => (
+                                <div key={i} className="flex items-center gap-4 p-4 border-b border-gray-200 dark:border-gray-700">
+                                    <Skeleton className="h-4 w-24" variant="text" />
+                                    <Skeleton className="h-4 w-32" variant="text" />
+                                    <Skeleton className="h-4 w-16" variant="text" />
+                                    <Skeleton className="h-4 w-20" variant="text" />
+                                    <Skeleton className="h-4 w-24 ml-auto" variant="text" />
+                                </div>
+                            ))}
+                        </div>
                     ) : error ? (
                         <div className="p-8 text-center text-red-500">{error}</div>
                     ) : receipts.length === 0 ? (

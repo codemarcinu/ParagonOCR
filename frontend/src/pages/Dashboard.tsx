@@ -5,6 +5,7 @@
 import { useEffect } from 'react';
 import { useReceiptStore } from '@/store/receiptStore';
 import { ReceiptUploader } from '@/components/ReceiptUploader';
+import { LoadingCard, Skeleton } from '@/components/ui';
 
 export function Dashboard() {
   const { receipts, loading, error, fetchReceipts } = useReceiptStore();
@@ -66,9 +67,15 @@ export function Dashboard() {
           </div>
           <div className="p-6">
             {loading && (
-              <div className="text-center py-8">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading...</p>
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center gap-4 p-4 border-b border-gray-200 dark:border-gray-700">
+                    <Skeleton className="h-4 w-24" variant="text" />
+                    <Skeleton className="h-4 w-32" variant="text" />
+                    <Skeleton className="h-4 w-16" variant="text" />
+                    <Skeleton className="h-4 w-20" variant="text" />
+                  </div>
+                ))}
               </div>
             )}
 

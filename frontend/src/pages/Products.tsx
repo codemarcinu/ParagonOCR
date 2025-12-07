@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useProductStore } from '@/store/productStore';
 import { Plus, Search, Edit2, TrendingUp, AlertCircle } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Skeleton } from '@/components/ui';
 
 export function Products() {
     const {
@@ -111,9 +112,15 @@ export function Products() {
                 {/* Product List */}
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
                     {loading && products.length === 0 ? (
-                        <div className="p-12 text-center">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                            <p className="mt-4 text-gray-500">Loading products...</p>
+                        <div className="p-6 space-y-4">
+                            {[1, 2, 3, 4, 5].map((i) => (
+                                <div key={i} className="flex items-center gap-4 p-4 border-b border-gray-200 dark:border-gray-700">
+                                    <Skeleton className="h-4 w-48" variant="text" />
+                                    <Skeleton className="h-4 w-32" variant="text" />
+                                    <Skeleton className="h-4 w-16" variant="text" />
+                                    <Skeleton className="h-4 w-16 ml-auto" variant="text" />
+                                </div>
+                            ))}
                         </div>
                     ) : error ? (
                         <div className="p-8 text-center text-red-500">{error}</div>

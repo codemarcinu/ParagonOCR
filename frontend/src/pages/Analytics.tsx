@@ -3,6 +3,7 @@ import { useAnalyticsStore } from '@/store/analyticsStore';
 import { SpendingChart } from '@/components/SpendingChart';
 import { CategoryPieChart } from '@/components/CategoryPieChart';
 import { ShopBarChart } from '@/components/ShopBarChart';
+import { LoadingSpinner } from '@/components/ui';
 
 export function Analytics() {
     const {
@@ -49,7 +50,7 @@ export function Analytics() {
 
                 {loading && !spendingTrend.length ? (
                     <div className="flex h-64 items-center justify-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                        <LoadingSpinner size="lg" />
                     </div>
                 ) : error ? (
                     <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 mb-8">
