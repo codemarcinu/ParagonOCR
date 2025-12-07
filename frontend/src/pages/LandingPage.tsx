@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
     ScanLine,
-    LayoutDashboard,
     ShoppingBasket,
     MessageSquare,
     Database,
@@ -46,7 +45,7 @@ export function LandingPage() {
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-gray-100 font-sans">
 
             {/* Hero Section */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
                 <div className="text-center">
                     <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
                         ParagonOCR <span className="text-gray-400 font-light text-3xl align-top">Web</span>
@@ -56,7 +55,7 @@ export function LandingPage() {
                     </p>
 
                     <div className="mt-8 flex justify-center gap-4">
-                        <Link to="/receipts" className="group">
+                        <Link to="/receipts/upload" className="group">
                             <button className="flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-full text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
                                 <ScanLine className="mr-2 h-6 w-6 group-hover:animate-pulse" />
                                 Skanuj Paragon
@@ -126,14 +125,6 @@ export function LandingPage() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
                 <h2 className="text-2xl font-bold mb-8 text-gray-800 dark:text-gray-100">Główne Moduły</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-                    <FeatureCard
-                        to="/dashboard"
-                        icon={<LayoutDashboard className="h-8 w-8 text-purple-600" />}
-                        title="Dashboard"
-                        description="Pełny przegląd Twoich finansów i statystyk zakupowych."
-                        color="hover:border-purple-500"
-                    />
 
                     <FeatureCard
                         to="/receipts"

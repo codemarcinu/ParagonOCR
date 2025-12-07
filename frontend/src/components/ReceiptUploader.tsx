@@ -3,6 +3,7 @@
  */
 
 import { useState, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useReceiptStore } from '@/store/receiptStore';
 import { WS_BASE_URL } from '@/lib/api';
 import { Button } from '@/components/ui';
@@ -14,6 +15,7 @@ interface ProcessingStage {
 }
 
 export function ReceiptUploader() {
+  const navigate = useNavigate();
   const [isDragging, setIsDragging] = useState(false);
   const [stage, setStage] = useState<ProcessingStage>({
     stage: 'idle',
@@ -74,7 +76,7 @@ export function ReceiptUploader() {
       setStage({
         stage: 'error',
         progress: 0,
-        message: `Invalid file type. Allowed: ${allowedExtensions.join(', ')}`,
+        message: `Nieprawidłowy typ pliku. Dozwolone: ${allowedExtensions.join(', ')}`,
       });
       return;
     }
@@ -85,13 +87,13 @@ export function ReceiptUploader() {
       setStage({
         stage: 'error',
         progress: 0,
-        message: `File too large. Max size: ${maxSize / 1024 / 1024} MB`,
+        message: `Plik zbyt duży. Maksymalny rozmiar: ${maxSize / 1024 / 1024} MB`,
       });
       return;
     }
 
     try {
-      setStage({ stage: 'uploading', progress: 10, message: 'Uploading file...' });
+      setStage({ stage: 'uploading', progress: 10, message: 'Przesyłanie pliku...' });
 
       // Upload file
       const result = await uploadReceipt(file);
@@ -117,8 +119,7 @@ export function ReceiptUploader() {
 
           if (data.stage === 'completed') {
             ws.close();
-            // Refresh dashboard (optional, but good UX)
-            // handleRetry(); // Reset uploader state after delay
+            // Redirect to receipts list after successful upload
             setTimeout(() => {
               setStage({ stage: 'idle', progress: 0, message: '' });
               if (fileInputRef.current) {
@@ -126,6 +127,10 @@ export function ReceiptUploader() {
               }
               // Trigger refresh if needed (e.g. reload receipts list)
               window.dispatchEvent(new Event('receipt-uploaded'));
+              // Navigate to receipts list after 2 seconds
+              setTimeout(() => {
+                navigate('/receipts');
+              }, 2000);
             }, 3000);
           }
         } else if (data.status === 'error') {
@@ -151,7 +156,7 @@ export function ReceiptUploader() {
       setStage({
         stage: 'error',
         progress: 0,
-        message: err instanceof Error ? err.message : 'Failed to upload receipt',
+        message: err instanceof Error ? err.message : 'Nie udało się przesłać paragonu',
       });
     }
   };
@@ -181,7 +186,7 @@ export function ReceiptUploader() {
           className="hidden"
           id="file-upload"
           aria-describedby="file-upload-help"
-          aria-label="Upload receipt file"
+          aria-label="Prześlij plik paragonu"
         />
 
         {stage.stage === 'idle' && (
@@ -203,15 +208,15 @@ export function ReceiptUploader() {
             <div className="mt-4">
               <label htmlFor="file-upload" className="cursor-pointer inline-block">
                 <span className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 pointer-events-none">
-                  Select a file
+                  Wybierz plik
                 </span>
               </label>
               <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                or drag and drop
+                lub przeciągnij i upuść
               </p>
             </div>
             <p className="mt-2 text-xs text-gray-500 dark:text-gray-400" id="file-upload-help">
-              PDF, PNG, JPG, TIFF up to 10MB
+              PDF, PNG, JPG, TIFF do 10MB
             </p>
           </>
         )}
@@ -226,7 +231,7 @@ export function ReceiptUploader() {
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     {stage.message}
                   </span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400" aria-label={`Progress: ${stage.progress} percent`}>
+                  <span className="text-sm text-gray-500 dark:text-gray-400" aria-label={`Postęp: ${stage.progress} procent`}>
                     {stage.progress}%
                   </span>
                 </div>
@@ -246,7 +251,7 @@ export function ReceiptUploader() {
               </div>
               <div className="flex items-center justify-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600" aria-hidden="true" />
-                <span>Processing...</span>
+                <span>Przetwarzanie...</span>
               </div>
             </>
           )}
@@ -301,7 +306,7 @@ export function ReceiptUploader() {
               onClick={handleRetry}
               className="mt-4"
             >
-              Try Again
+              Spróbuj Ponownie
             </Button>
           </div>
         )}

@@ -3,6 +3,8 @@
  */
 
 import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Home } from 'lucide-react';
 import { useReceiptStore } from '@/store/receiptStore';
 import { ReceiptUploader } from '@/components/ReceiptUploader';
 import { Skeleton } from '@/components/ui';
@@ -21,9 +23,18 @@ export function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-          ParagonOCR Dashboard
-        </h1>
+        <div className="flex items-center space-x-4 mb-8">
+          <Link 
+            to="/" 
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+            title="Powrót do strony głównej"
+          >
+            <Home className="h-5 w-5" />
+          </Link>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Panel ParagonOCR
+          </h1>
+        </div>
 
         {/* Upload Section */}
         <div className="mb-8">
@@ -34,7 +45,7 @@ export function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              Total Receipts
+              Wszystkie Paragony
             </h3>
             <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
               {receipts.length}
@@ -42,7 +53,7 @@ export function Dashboard() {
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              Total Spending (30 days)
+              Wydatki (30 dni)
             </h3>
             <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
               {totalSpending.toFixed(2)} PLN
@@ -50,7 +61,7 @@ export function Dashboard() {
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              Average Receipt
+              Średni Paragon
             </h3>
             <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
               {avgReceipt.toFixed(2)} PLN
@@ -62,7 +73,7 @@ export function Dashboard() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Recent Receipts
+              Ostatnie Paragony
             </h2>
           </div>
           <div className="p-6">
@@ -88,7 +99,7 @@ export function Dashboard() {
             {!loading && !error && receipts.length === 0 && (
               <div className="text-center py-8">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  No receipts yet. Upload your first receipt above!
+                  Brak paragonów. Prześlij swój pierwszy paragon powyżej!
                 </p>
               </div>
             )}
@@ -99,16 +110,16 @@ export function Dashboard() {
                   <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Date
+                        Data
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Shop
+                        Sklep
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Items
+                        Pozycje
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Total
+                        Suma
                       </th>
                     </tr>
                   </thead>
@@ -117,7 +128,7 @@ export function Dashboard() {
                       <tr key={receipt.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                           {receipt.purchase_date
-                            ? new Date(receipt.purchase_date).toLocaleDateString()
+                            ? new Date(receipt.purchase_date).toLocaleDateString('pl-PL')
                             : '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useProductStore } from '@/store/productStore';
-import { Plus, Search, Edit2, TrendingUp, AlertCircle } from 'lucide-react';
+import { Plus, Search, Edit2, TrendingUp, AlertCircle, Home } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Skeleton, Button, Input, Modal } from '@/components/ui';
 import type { ProductResponse } from '@/types/api';
@@ -68,14 +69,23 @@ export function Products() {
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
             <div className="max-w-7xl mx-auto">
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        Product Database
-                    </h1>
+                    <div className="flex items-center space-x-4">
+                        <Link 
+                            to="/" 
+                            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                            title="Powrót do strony głównej"
+                        >
+                            <Home className="h-5 w-5" />
+                        </Link>
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                            Baza Produktów
+                        </h1>
+                    </div>
                     <Button
                         onClick={handleAddClick}
                         leftIcon={<Plus className="w-5 h-5" />}
                     >
-                        Add Product
+                        Dodaj Produkt
                     </Button>
                 </div>
 
@@ -87,7 +97,7 @@ export function Products() {
                         </div>
                         <Input
                             type="text"
-                            placeholder="Search products..."
+                            placeholder="Szukaj produktów..."
                             className="pl-10"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
@@ -100,7 +110,7 @@ export function Products() {
                                 value={selectedCategory || ''}
                                 onChange={(e) => setSelectedCategory(Number(e.target.value) || null)}
                             >
-                                <option value="">All Categories</option>
+                                <option value="">Wszystkie Kategorie</option>
                                 {categories.map(cat => (
                                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                                 ))}
@@ -129,17 +139,17 @@ export function Products() {
                             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead className="bg-gray-50 dark:bg-gray-700">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Product Name</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Category</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Unit</th>
-                                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nazwa Produktu</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Kategoria</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jednostka</th>
+                                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Akcje</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                     {products.length === 0 ? (
                                         <tr>
                                             <td colSpan={4} className="px-6 py-12 text-center text-gray-500">
-                                                No products found matching your criteria.
+                                                Nie znaleziono produktów spełniających kryteria.
                                             </td>
                                         </tr>
                                     ) : products.map((product) => {
@@ -153,7 +163,7 @@ export function Products() {
                                                         {product.name}
                                                         {Math.random() > 0.8 && (
                                                             <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                                <AlertCircle className="w-3 h-3 mr-1" /> Alternative available
+                                                                <AlertCircle className="w-3 h-3 mr-1" /> Dostępna alternatywa
                                                             </span>
                                                         )}
                                                     </td>
@@ -173,7 +183,7 @@ export function Products() {
                                                             size="sm"
                                                             onClick={() => setShowPriceHistory(isExpanded ? null : product.id)}
                                                             className="mx-2"
-                                                            title="Price History"
+                                                            title="Historia Cen"
                                                         >
                                                             <TrendingUp className="w-4 h-4" />
                                                         </Button>
@@ -181,7 +191,7 @@ export function Products() {
                                                             variant="ghost"
                                                             size="sm"
                                                             onClick={() => handleEditClick(product)}
-                                                            title="Edit"
+                                                            title="Edytuj"
                                                         >
                                                             <Edit2 className="w-4 h-4" />
                                                         </Button>
@@ -191,7 +201,7 @@ export function Products() {
                                                     <tr className="bg-gray-50 dark:bg-gray-800/50">
                                                         <td colSpan={4} className="px-6 py-4">
                                                             <div className="h-48 w-full max-w-lg mx-auto bg-white dark:bg-gray-800 rounded p-4 border border-gray-200 dark:border-gray-700">
-                                                                <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2">Price History (Last 6 Months)</h4>
+                                                                <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2">Historia Cen (Ostatnie 6 Miesięcy)</h4>
                                                                 <ResponsiveContainer width="100%" height="100%">
                                                                     <AreaChart data={priceHistoryData}>
                                                                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -219,25 +229,25 @@ export function Products() {
             <Modal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
-                title={editingProduct ? 'Edit Product' : 'Add New Product'}
+                title={editingProduct ? 'Edytuj Produkt' : 'Dodaj Nowy Produkt'}
                 size="md"
             >
                 <form onSubmit={handleSaveProduct}>
                     <div className="space-y-4">
                         <Input
                             name="name"
-                            label="Name"
+                            label="Nazwa"
                             defaultValue={editingProduct?.name}
                             required
                         />
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kategoria</label>
                             <select
                                 name="category_id"
                                 defaultValue={editingProduct?.category_id || ''}
                                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm px-3 py-2 border"
                             >
-                                <option value="">Select Category</option>
+                                <option value="">Wybierz Kategorię</option>
                                 {categories.map(cat => (
                                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                                 ))}
@@ -245,8 +255,8 @@ export function Products() {
                         </div>
                         <Input
                             name="unit"
-                            label="Unit"
-                            defaultValue={editingProduct?.unit || 'pcs'}
+                            label="Jednostka"
+                            defaultValue={editingProduct?.unit || 'szt'}
                         />
                     </div>
                     <div className="mt-6 flex justify-end gap-3">
@@ -255,12 +265,12 @@ export function Products() {
                             variant="secondary"
                             onClick={() => setIsEditModalOpen(false)}
                         >
-                            Cancel
+                            Anuluj
                         </Button>
                         <Button
                             type="submit"
                         >
-                            Save
+                            Zapisz
                         </Button>
                     </div>
                 </form>

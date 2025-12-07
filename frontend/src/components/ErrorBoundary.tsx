@@ -40,10 +40,10 @@ export class ErrorBoundary extends Component<Props, State> {
               <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
             </div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white text-center mb-2">
-              Something went wrong
+              Coś poszło nie tak
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
-              {this.state.error?.message || 'An unexpected error occurred'}
+              {this.state.error?.message || 'Wystąpił nieoczekiwany błąd'}
             </p>
             <button
               onClick={() => {
@@ -52,7 +52,7 @@ export class ErrorBoundary extends Component<Props, State> {
               }}
               className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
-              Go to Home
+              Przejdź do Strony Głównej
             </button>
           </div>
         </div>

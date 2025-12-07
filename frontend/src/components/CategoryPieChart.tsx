@@ -31,7 +31,7 @@ export function CategoryPieChart({ data }: CategoryPieChartProps) {
     return (
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow h-80">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                Spending by Category
+                Wydatki według Kategorii
             </h3>
             <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -51,7 +51,7 @@ export function CategoryPieChart({ data }: CategoryPieChartProps) {
                             ))}
                         </Pie>
                         <Tooltip
-                            formatter={(value: number) => [`${value.toFixed(2)} PLN`, 'Amount']}
+                            formatter={(value: number) => [`${value.toFixed(2)} PLN`, 'Kwota']}
                             contentStyle={{ backgroundColor: '#fff', borderRadius: '0.5rem', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
                         />
                         <Legend layout="vertical" align="right" verticalAlign="middle" />

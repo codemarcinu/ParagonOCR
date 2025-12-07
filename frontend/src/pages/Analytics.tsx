@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Home } from 'lucide-react';
 import { useAnalyticsStore } from '@/store/analyticsStore';
 import { SpendingChart } from '@/components/SpendingChart';
 import { CategoryPieChart } from '@/components/CategoryPieChart';
@@ -29,9 +31,18 @@ export function Analytics() {
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
             <div className="max-w-7xl mx-auto">
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        Analytics & Reports
-                    </h1>
+                    <div className="flex items-center space-x-4 mb-4 md:mb-0">
+                        <Link 
+                            to="/" 
+                            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                            title="Powrót do strony głównej"
+                        >
+                            <Home className="h-5 w-5" />
+                        </Link>
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                            Analityka i Raporty
+                        </h1>
+                    </div>
                     <div className="mt-4 md:mt-0 bg-white dark:bg-gray-800 rounded-lg shadow p-1 inline-flex">
                         {ranges.map((range) => (
                             <button
@@ -42,7 +53,7 @@ export function Analytics() {
                                         : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
                                     }`}
                             >
-                                {range} Days
+                                {range} Dni
                             </button>
                         ))}
                     </div>
@@ -71,7 +82,7 @@ export function Analytics() {
                         <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
                             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                                 <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                                    Monthly Breakdown
+                                    Podział Miesięczny
                                 </h3>
                             </div>
                             <div className="overflow-x-auto">
@@ -79,16 +90,16 @@ export function Analytics() {
                                     <thead className="bg-gray-50 dark:bg-gray-700">
                                         <tr>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                                Month
+                                                Miesiąc
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                                Receipts
+                                                Paragony
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                                Total Spending
+                                                Wydatki Razem
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                                Avg / Receipt
+                                                Średnia / Paragon
                                             </th>
                                         </tr>
                                     </thead>

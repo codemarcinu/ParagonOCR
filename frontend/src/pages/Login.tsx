@@ -12,7 +12,7 @@ const Login: React.FC = () => {
             <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
                 <div className="mb-6 text-center">
                     <h1 className="text-3xl font-bold text-gray-800">ParagonOCR</h1>
-                    <p className="text-gray-500">Sign in with passkey</p>
+                    <p className="text-gray-500">Zaloguj się za pomocą klucza dostępu</p>
                 </div>
 
                 {error && (
@@ -30,9 +30,9 @@ const Login: React.FC = () => {
 
                 <div className="mt-4 text-center text-sm">
                     <p className="text-gray-600">
-                        Don't have an account?{' '}
+                        Nie masz konta?{' '}
                         <Link to="/register" className="font-bold text-blue-600 hover:text-blue-800">
-                            Register
+                            Zarejestruj się
                         </Link>
                     </p>
                 </div>

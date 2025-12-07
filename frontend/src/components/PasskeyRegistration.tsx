@@ -26,7 +26,7 @@ const PasskeyRegistration: React.FC<PasskeyRegistrationProps> = ({
     try {
       // Check if WebAuthn is supported
       if (!window.PublicKeyCredential) {
-        throw new Error('WebAuthn is not supported in this browser');
+        throw new Error('WebAuthn nie jest obsługiwane w tej przeglądarce');
       }
 
       // Get registration options from server
@@ -45,15 +45,15 @@ const PasskeyRegistration: React.FC<PasskeyRegistrationProps> = ({
         // Pass token data to onSuccess callback
         onSuccess?.(result);
       } else {
-        throw new Error(result.message || 'Registration failed');
+        throw new Error(result.message || 'Rejestracja nie powiodła się');
       }
     } catch (err: any) {
-      let errorMessage = 'Failed to register passkey';
+      let errorMessage = 'Nie udało się zarejestrować klucza dostępu';
       
       if (err.name === 'NotSupportedError') {
-        errorMessage = 'Passkeys are not supported on this device. Please use a different authentication method.';
+        errorMessage = 'Klucze dostępu nie są obsługiwane na tym urządzeniu. Użyj innej metody uwierzytelniania.';
       } else if (err.name === 'NotAllowedError' || err.message?.includes('timeout') || err.message?.includes('not allowed')) {
-        errorMessage = 'Operation was canceled, timed out, or not allowed. Please try again and make sure to complete the biometric prompt.';
+        errorMessage = 'Operacja została anulowana, przekroczono limit czasu lub nie została dozwolona. Spróbuj ponownie i upewnij się, że ukończysz monit biometryczny.';
       } else if (err.message) {
         errorMessage = err.message;
       }
@@ -82,10 +82,10 @@ const PasskeyRegistration: React.FC<PasskeyRegistrationProps> = ({
         className="w-full"
         size="lg"
       >
-        {loading ? 'Registering Passkey...' : 'Register Passkey'}
+        {loading ? 'Rejestrowanie Klucza Dostępu...' : 'Zarejestruj Klucz Dostępu'}
       </Button>
       <p className="mt-2 text-xs text-gray-500">
-        Use your device's biometric authentication (Face ID, Touch ID, Windows Hello, etc.)
+        Użyj biometrii swojego urządzenia (Face ID, Touch ID, Windows Hello, itp.)
       </p>
     </div>
   );

@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Home, Plus } from 'lucide-react';
 import { useReceiptStore } from '@/store/receiptStore';
 import { ReceiptViewer } from '@/components/ReceiptViewer';
 import { Skeleton, Button, Input, Modal } from '@/components/ui';
 
 export function Receipts() {
+    const navigate = useNavigate();
     const {
         receipts,
         loading,
@@ -50,15 +53,30 @@ export function Receipts() {
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8 relative">
             <div className="max-w-7xl mx-auto">
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        All Receipts
-                    </h1>
+                    <div className="flex items-center space-x-4">
+                        <Link 
+                            to="/" 
+                            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                            title="Powrót do strony głównej"
+                        >
+                            <Home className="h-5 w-5" />
+                        </Link>
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                            Wszystkie Paragony
+                        </h1>
+                    </div>
                     <div className="mt-4 md:mt-0 flex space-x-2">
+                        <Button
+                            onClick={() => navigate('/receipts/upload')}
+                            leftIcon={<Plus className="h-4 w-4" />}
+                        >
+                            Dodaj Paragon
+                        </Button>
                         <Button
                             onClick={resetFilters}
                             variant="secondary"
                         >
-                            Reset Filters
+                            Resetuj Filtry
                         </Button>
                     </div>
                 </div>
@@ -66,7 +84,7 @@ export function Receipts() {
                 {/* Filters */}
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date Range</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Zakres Dat</label>
                         <div className="flex space-x-2">
                             <Input
                                 type="date"
@@ -85,7 +103,7 @@ export function Receipts() {
                     </div>
                     {/* Placeholder for Shop Filter */}
                     <div className="flex items-end">
-                        <span className="text-xs text-gray-500 italic">Shop filtering by ID available in backend, name search TODO.</span>
+                        <span className="text-xs text-gray-500 italic">Filtrowanie sklepów po ID dostępne w backendzie, wyszukiwanie po nazwie TODO.</span>
                     </div>
                 </div>
 
@@ -105,7 +123,7 @@ export function Receipts() {
                     ) : error ? (
                         <div className="p-8 text-center text-red-500">{error}</div>
                     ) : receipts.length === 0 ? (
-                        <div className="p-8 text-center text-gray-500">No receipts found.</div>
+                        <div className="p-8 text-center text-gray-500">Nie znaleziono paragonów.</div>
                     ) : (
                         <>
                             <div className="overflow-x-auto">
@@ -113,19 +131,19 @@ export function Receipts() {
                                     <thead className="bg-gray-50 dark:bg-gray-700">
                                         <tr>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                                Date
+                                                Data
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                                Shop
+                                                Sklep
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                                Items
+                                                Pozycje
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                                Total
+                                                Suma
                                             </th>
                                             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                                Actions
+                                                Akcje
                                             </th>
                                         </tr>
                                     </thead>
@@ -134,12 +152,12 @@ export function Receipts() {
                                             <tr key={receipt.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                                     {receipt.purchase_date
-                                                        ? new Date(receipt.purchase_date).toLocaleDateString()
+                                                        ? new Date(receipt.purchase_date).toLocaleDateString('pl-PL')
                                                         : '-'}
                                                     {receipt.purchase_time && <span className="text-gray-500 ml-2 text-xs">{receipt.purchase_time}</span>}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                                    {receipt.shop || 'Unknown Shop'}
+                                                    {receipt.shop || 'Nieznany Sklep'}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                                     {receipt.items_count}
@@ -153,7 +171,7 @@ export function Receipts() {
                                                         size="sm"
                                                         onClick={() => openModal(receipt.id)}
                                                     >
-                                                        View Details
+                                                        Zobacz Szczegóły
                                                     </Button>
                                                 </td>
                                             </tr>
@@ -167,11 +185,11 @@ export function Receipts() {
                                 <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                                     <div>
                                         <p className="text-sm text-gray-700 dark:text-gray-300">
-                                            Showing <span className="font-medium">{skip + 1}</span> to <span className="font-medium">{Math.min(skip + limit, total)}</span> of <span className="font-medium">{total}</span> results
+                                            Wyświetlanie <span className="font-medium">{skip + 1}</span> do <span className="font-medium">{Math.min(skip + limit, total)}</span> z <span className="font-medium">{total}</span> wyników
                                         </p>
                                     </div>
                                     <div>
-                                        <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                        <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Paginacja">
                                             <Button
                                                 onClick={() => handlePageChange(currentPage - 1)}
                                                 disabled={currentPage === 1}
@@ -179,10 +197,10 @@ export function Receipts() {
                                                 size="sm"
                                                 className="rounded-l-md"
                                             >
-                                                Previous
+                                                Poprzednia
                                             </Button>
                                             <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200">
-                                                Page {currentPage} of {totalPages}
+                                                Strona {currentPage} z {totalPages}
                                             </span>
                                             <Button
                                                 onClick={() => handlePageChange(currentPage + 1)}
@@ -191,7 +209,7 @@ export function Receipts() {
                                                 size="sm"
                                                 className="rounded-r-md"
                                             >
-                                                Next
+                                                Następna
                                             </Button>
                                         </nav>
                                     </div>

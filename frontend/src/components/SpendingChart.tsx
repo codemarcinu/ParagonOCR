@@ -29,7 +29,7 @@ export function SpendingChart({ data, days = 30 }: SpendingChartProps) {
     return (
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow h-80">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                Spending Trend ({days} days)
+                Trend Wydatków ({days} dni)
             </h3>
             <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -51,7 +51,7 @@ export function SpendingChart({ data, days = 30 }: SpendingChartProps) {
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
                         <XAxis
                             dataKey="date"
-                            tickFormatter={(date) => new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                            tickFormatter={(date) => new Date(date).toLocaleDateString('pl-PL', { month: 'short', day: 'numeric' })}
                             stroke="#9ca3af"
                             tick={{ fontSize: 12 }}
                         />
@@ -62,8 +62,8 @@ export function SpendingChart({ data, days = 30 }: SpendingChartProps) {
                         />
                         <Tooltip
                             contentStyle={{ backgroundColor: '#fff', borderRadius: '0.5rem', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                            formatter={(value: number) => [`${value.toFixed(2)} PLN`, 'Amount']}
-                            labelFormatter={(label) => new Date(label).toLocaleDateString()}
+                            formatter={(value: number) => [`${value.toFixed(2)} PLN`, 'Kwota']}
+                            labelFormatter={(label) => new Date(label).toLocaleDateString('pl-PL')}
                         />
                         <Area
                             type="monotone"

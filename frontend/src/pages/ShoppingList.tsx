@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useShoppingListStore } from '@/store/shoppingListStore';
-import { Plus } from 'lucide-react';
+import { Plus, Home } from 'lucide-react';
 import { ShoppingListItem } from '@/components/ShoppingListItem';
 import { LoadingSpinner, Skeleton, Button, Input, Modal } from '@/components/ui';
 
@@ -64,14 +65,23 @@ export function ShoppingList() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Shopping Lists
-          </h1>
+          <div className="flex items-center space-x-4">
+            <Link 
+              to="/" 
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+              title="Powrót do strony głównej"
+            >
+              <Home className="h-5 w-5" />
+            </Link>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Listy Zakupów
+            </h1>
+          </div>
           <Button
             onClick={() => setShowNewListModal(true)}
             leftIcon={<Plus className="w-5 h-5" />}
           >
-            New List
+            Nowa Lista
           </Button>
         </div>
         
@@ -79,7 +89,7 @@ export function ShoppingList() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-              <h2 className="text-lg font-semibold mb-4">Your Lists</h2>
+              <h2 className="text-lg font-semibold mb-4">Twoje Listy</h2>
               {loading && lists.length === 0 ? (
                 <div className="space-y-2">
                   {[1, 2, 3].map((i) => (
@@ -101,7 +111,7 @@ export function ShoppingList() {
                   >
                     <p className="font-medium text-gray-900 dark:text-white">{list.title}</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {list.items.length} items
+                      {list.items.length} pozycji
                     </p>
                   </button>
                 ))
@@ -124,12 +134,12 @@ export function ShoppingList() {
                         {currentList.title}
                       </h2>
                       <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        {checkedCount} / {totalCount} completed
+                        {checkedCount} / {totalCount} ukończonych
                       </p>
                     </div>
                     {currentList.completed_at ? (
                       <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm">
-                        Completed
+                        Ukończona
                       </span>
                     ) : (
                       <Button
@@ -137,7 +147,7 @@ export function ShoppingList() {
                         variant="primary"
                         className="bg-green-600 hover:bg-green-700"
                       >
-                        Mark Complete
+                        Oznacz jako Ukończoną
                       </Button>
                     )}
                   </div>
@@ -150,14 +160,14 @@ export function ShoppingList() {
                       type="text"
                       value={newItemName}
                       onChange={(e) => setNewItemName(e.target.value)}
-                      placeholder="Item name..."
+                      placeholder="Nazwa produktu..."
                       className="flex-1"
                     />
                     <Input
                       type="number"
                       value={newItemQuantity}
                       onChange={(e) => setNewItemQuantity(e.target.value)}
-                      placeholder="Qty"
+                      placeholder="Ilość"
                       className="w-20"
                     />
                     <Button
@@ -176,7 +186,7 @@ export function ShoppingList() {
                   )}
                   {currentList.items.length === 0 ? (
                     <p className="text-center text-gray-500 dark:text-gray-400 py-8">
-                      No items yet. Add your first item above!
+                      Brak pozycji. Dodaj pierwszą pozycję powyżej!
                     </p>
                   ) : (
                     <div className="space-y-2">
@@ -195,7 +205,7 @@ export function ShoppingList() {
             ) : (
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
                 <p className="text-gray-500 dark:text-gray-400">
-                  Select a list or create a new one to get started
+                  Wybierz listę lub utwórz nową, aby rozpocząć
                 </p>
               </div>
             )}
@@ -207,14 +217,14 @@ export function ShoppingList() {
       <Modal
         isOpen={showNewListModal}
         onClose={() => setShowNewListModal(false)}
-        title="Create New List"
+        title="Utwórz Nową Listę"
         size="sm"
       >
         <Input
           type="text"
           value={newListTitle}
           onChange={(e) => setNewListTitle(e.target.value)}
-          placeholder="List title..."
+          placeholder="Tytuł listy..."
           className="mb-4"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
@@ -230,13 +240,13 @@ export function ShoppingList() {
             variant="secondary"
             className="flex-1"
           >
-            Cancel
+            Anuluj
           </Button>
           <Button
             onClick={handleCreateList}
             className="flex-1"
           >
-            Create
+            Utwórz
           </Button>
         </div>
       </Modal>

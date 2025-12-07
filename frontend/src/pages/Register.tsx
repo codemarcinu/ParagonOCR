@@ -39,7 +39,7 @@ const Register: React.FC = () => {
             <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
                 <div className="mb-6 text-center">
                     <h1 className="text-3xl font-bold text-gray-800">ParagonOCR</h1>
-                    <p className="text-gray-500">Create a new account with passkey</p>
+                    <p className="text-gray-500">Utwórz nowe konto za pomocą klucza dostępu</p>
                 </div>
 
                 {error && (
@@ -50,15 +50,15 @@ const Register: React.FC = () => {
 
                 {passkeyRegistered ? (
                     <div className="mb-4 rounded bg-green-100 p-3 text-sm text-green-700">
-                        Passkey registered successfully! Redirecting...
+                        Klucz dostępu zarejestrowany pomyślnie! Przekierowywanie...
                     </div>
                 ) : (
                     <div className="mb-4">
                         <p className="mb-4 text-sm text-gray-600">
-                            Register using your device's biometric authentication (Face ID, Touch ID, Windows Hello, etc.)
+                            Zarejestruj się używając biometrii swojego urządzenia (Face ID, Touch ID, Windows Hello, itp.)
                         </p>
                         <PasskeyRegistration
-                            deviceName="My Device"
+                            deviceName="Moje Urządzenie"
                             onSuccess={handlePasskeySuccess}
                             onError={(err) => setError(err)}
                         />
@@ -67,9 +67,9 @@ const Register: React.FC = () => {
 
                 <div className="mt-4 text-center text-sm">
                     <p className="text-gray-600">
-                        Already have an account?{' '}
+                        Masz już konto?{' '}
                         <Link to="/login" className="font-bold text-blue-600 hover:text-blue-800">
-                            Sign In
+                            Zaloguj się
                         </Link>
                     </p>
                 </div>

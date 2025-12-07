@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
+import { Layout } from './components/Layout';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoadingSpinner } from './components/ui';
 import './App.css';
@@ -9,8 +10,8 @@ import './App.css';
 const Login = lazy(() => import('./pages/Login').then(m => ({ default: m.default })));
 const Register = lazy(() => import('./pages/Register').then(m => ({ default: m.default })));
 const LandingPage = lazy(() => import('./pages/LandingPage').then(m => ({ default: m.LandingPage })));
-const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
 const Receipts = lazy(() => import('./pages/Receipts').then(m => ({ default: m.Receipts })));
+const UploadReceipt = lazy(() => import('./pages/UploadReceipt').then(m => ({ default: m.UploadReceipt })));
 const Products = lazy(() => import('./pages/Products').then(m => ({ default: m.Products })));
 const Chat = lazy(() => import('./pages/Chat').then(m => ({ default: m.Chat })));
 const Analytics = lazy(() => import('./pages/Analytics').then(m => ({ default: m.Analytics })));
@@ -33,13 +34,15 @@ function App() {
             <Route path="/register" element={<Register />} />
 
             <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/receipts" element={<Receipts />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/chat" element={<Chat />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/shopping-list" element={<ShoppingList />} />
+              <Route element={<Layout />}>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/receipts" element={<Receipts />} />
+                <Route path="/receipts/upload" element={<UploadReceipt />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/chat" element={<Chat />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/shopping-list" element={<ShoppingList />} />
+              </Route>
             </Route>
           </Routes>
         </Suspense>

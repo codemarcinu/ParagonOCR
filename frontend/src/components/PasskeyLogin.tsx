@@ -29,7 +29,7 @@ const PasskeyLogin: React.FC<PasskeyLoginProps> = ({
     try {
       // Check if WebAuthn is supported
       if (!window.PublicKeyCredential) {
-        throw new Error('WebAuthn is not supported in this browser');
+        throw new Error('WebAuthn nie jest obsługiwane w tej przeglądarce');
       }
 
       // Get authentication options from server
@@ -53,12 +53,12 @@ const PasskeyLogin: React.FC<PasskeyLoginProps> = ({
 
       onSuccess?.();
     } catch (err: any) {
-      let errorMessage = 'Failed to authenticate with passkey';
+      let errorMessage = 'Nie udało się uwierzytelnić za pomocą klucza dostępu';
       
       if (err.name === 'NotSupportedError') {
-        errorMessage = 'Passkeys are not supported on this device. Please use a different authentication method.';
+        errorMessage = 'Klucze dostępu nie są obsługiwane na tym urządzeniu. Użyj innej metody uwierzytelniania.';
       } else if (err.name === 'NotAllowedError' || err.message?.includes('timeout') || err.message?.includes('not allowed')) {
-        errorMessage = 'Operation was canceled, timed out, or not allowed. Please try again and make sure to complete the biometric prompt.';
+        errorMessage = 'Operacja została anulowana, przekroczono limit czasu lub nie została dozwolona. Spróbuj ponownie i upewnij się, że ukończysz monit biometryczny.';
       } else if (err.message) {
         errorMessage = err.message;
       }
@@ -88,10 +88,10 @@ const PasskeyLogin: React.FC<PasskeyLoginProps> = ({
         size="lg"
         variant="secondary"
       >
-        {loading ? 'Authenticating...' : 'Login with Passkey'}
+        {loading ? 'Uwierzytelnianie...' : 'Zaloguj się Kluczem Dostępu'}
       </Button>
       <p className="mt-2 text-xs text-gray-500">
-        Use your device's biometric authentication to sign in
+        Użyj biometrii swojego urządzenia, aby się zalogować
       </p>
     </div>
   );

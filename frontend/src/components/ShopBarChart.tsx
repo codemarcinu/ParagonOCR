@@ -27,7 +27,7 @@ export function ShopBarChart({ data }: ShopBarChartProps) {
     return (
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow h-80">
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                Top Shops by Spending
+                Najpopularniejsze Sklepy według Wydatków
             </h3>
             <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -53,7 +53,7 @@ export function ShopBarChart({ data }: ShopBarChartProps) {
                         <Tooltip
                             cursor={{ fill: 'transparent' }}
                             contentStyle={{ backgroundColor: '#fff', borderRadius: '0.5rem', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                            formatter={(value: number) => [`${value.toFixed(2)} PLN`, 'Total']}
+                            formatter={(value: number) => [`${value.toFixed(2)} PLN`, 'Suma']}
                         />
                         <Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]}>
                             {sortedData.map((_, index) => (
