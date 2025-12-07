@@ -508,25 +508,141 @@ def normalize_products_batch(
 # --- Parsowanie Całego Paragonu z Obrazu ---
 
 
+def _repair_json(json_str: str) -> str:
+    """
+    Próbuje naprawić typowe błędy w JSON-ie zwracanym przez LLM.
+    Obsługuje:
+    - Niezakończone stringi (znajduje i zamyka)
+    - Obcięty JSON (znajduje ostatni kompletny obiekt)
+    - Trailing commas
+    """
+    if not json_str:
+        return json_str
+    
+    json_str = json_str.strip()
+    
+    # Znajdź pierwszy { - początek JSON
+    start_pos = json_str.find('{')
+    if start_pos == -1:
+        return json_str
+    
+    json_str = json_str[start_pos:]
+    
+    # Znajdź ostatni kompletny obiekt JSON przez liczenie nawiasów
+    depth = 0
+    in_string = False
+    escape_next = False
+    last_valid_pos = -1
+    
+    for i, char in enumerate(json_str):
+        if escape_next:
+            escape_next = False
+            continue
+        
+        if char == '\\':
+            escape_next = True
+            continue
+        
+        if char == '"' and not escape_next:
+            in_string = not in_string
+            continue
+        
+        if not in_string:
+            if char == '{':
+                depth += 1
+            elif char == '}':
+                depth -= 1
+                if depth == 0:
+                    last_valid_pos = i
+                elif depth < 0:
+                    # Zbyt wiele zamknięć - użyj ostatniej poprawnej pozycji
+                    break
+    
+    # Jeśli znaleźliśmy kompletny obiekt, użyj go
+    if last_valid_pos > 0:
+        json_str = json_str[:last_valid_pos + 1]
+    elif depth > 0 or in_string:
+        # Obiekt nie jest kompletny - spróbuj naprawić
+        # Najpierw zamknij niezakończony string jeśli jesteśmy w stringu
+        if in_string:
+            # Usuń trailing whitespace i dodaj cudzysłów
+            json_str = json_str.rstrip() + '"'
+            in_string = False
+        
+        # Teraz zamknij wszystkie otwarte nawiasy klamrowe
+        if depth > 0:
+            json_str = json_str.rstrip()
+            # Usuń trailing comma jeśli jest
+            if json_str.endswith(','):
+                json_str = json_str[:-1]
+            # Dodaj brakujące zamknięcia
+            json_str += '}' * depth
+        
+        # Spróbuj sparsować ponownie, aby upewnić się, że jest poprawny
+        # (ale nie robimy tego tutaj, tylko zwracamy naprawiony string)
+    
+    # Usuń trailing commas przed } lub ]
+    json_str = re.sub(r',(\s*[}\]])', r'\1', json_str)
+    
+    return json_str
+
+
+def _parse_json_with_repair(response_text: str) -> dict | None:
+    """
+    Próbuje sparsować JSON z odpowiedzi LLM, używając naprawy w razie potrzeby.
+    """
+    # Najpierw spróbuj bezpośrednio
+    try:
+        return json.loads(response_text)
+    except json.JSONDecodeError:
+        pass
+    
+    # Spróbuj naprawić i sparsować ponownie
+    try:
+        repaired = _repair_json(response_text)
+        return json.loads(repaired)
+    except json.JSONDecodeError:
+        pass
+    
+    # Spróbuj wyodrębnić JSON z markdown code blocks
+    try:
+        return _extract_json_from_response(response_text)
+    except:
+        pass
+    
+    return None
+
+
 def _extract_json_from_response(response_text: str) -> dict | None:
     """Wyszukuje i parsuje blok JSON z odpowiedzi tekstowej modelu."""
-    # Wzorzec do znalezienia bloku JSON, nawet jeśli jest otoczony innym tekstem
-    match = re.search(r"```json\n(\{.*?\})\n```|\{.*?\}|", response_text, re.DOTALL)
+    # Najpierw spróbuj znaleźć JSON w markdown code block
+    match = re.search(r"```json\n(\{.*?)\n```", response_text, re.DOTALL)
     if match:
-        # Wybierz pierwszą grupę, która nie jest pusta
-        json_str = next((g for g in match.groups() if g is not None), match.group(0))
+        json_str = match.group(1)
+    else:
+        # Jeśli nie ma markdown, znajdź pierwszy { i użyj całej reszty tekstu
+        start_pos = response_text.find('{')
+        if start_pos == -1:
+            print(
+                f"BŁĄD: W odpowiedzi LLM nie znaleziono bloku JSON. Otrzymany tekst (repr, obcięty): {repr(response_text[:200])}"
+            )
+            return None
+        json_str = response_text[start_pos:]
+    
+    # Spróbuj sparsować bezpośrednio
+    try:
+        return json.loads(json_str)
+    except json.JSONDecodeError:
+        # Spróbuj naprawić i sparsować ponownie
         try:
-            return json.loads(json_str)
+            repaired = _repair_json(json_str)
+            return json.loads(repaired)
         except json.JSONDecodeError as e:
             print(
-                f"BŁĄD: Nie udało się sparsować JSON-a z odpowiedzi LLM. Szczegóły: {e}"
+                f"BŁĄD: Nie udało się sparsować JSON-a z odpowiedzi LLM nawet po naprawie. Szczegóły: {e}"
             )
-            print(f"Otrzymany tekst (repr): {repr(json_str)}")
+            print(f"Otrzymany tekst (repr, obcięty): {repr(json_str[:200])}")
             return None
-    print(
-        f"BŁĄD: W odpowiedzi LLM nie znaleziono bloku JSON. Otrzymany tekst (repr): {repr(response_text)}"
-    )
-    return None
 
 
 def _convert_types(data: dict) -> dict:
@@ -703,11 +819,10 @@ def parse_receipt_with_llm(
         # Sanityzuj odpowiedź przed logowaniem (jeśli potrzeba debug)
         # print(f"DEBUG: Treść odpowiedzi: {sanitize_log_message(raw_response_text, max_length=500)}")
 
-        try:
-            parsed_json = json.loads(raw_response_text)
-        except json.JSONDecodeError as e:
+        parsed_json = _parse_json_with_repair(raw_response_text)
+        if parsed_json is None:
             print(
-                f"BŁĄD: Model zwrócił niepoprawny JSON mimo format='json'. Szczegóły: {sanitize_log_message(str(e))}"
+                f"BŁĄD: Model zwrócił niepoprawny JSON mimo format='json'. Próbowano naprawić, ale nie udało się."
             )
             print(f"Treść (obcięta): {sanitize_log_message(raw_response_text, max_length=500)}")
             return None
@@ -859,10 +974,9 @@ def parse_receipt_from_text(
             f"INFO: Otrzymano odpowiedź od LLM. Długość: {len(raw_response_text)} znaków."
         )
 
-        try:
-            parsed_json = json.loads(raw_response_text)
-        except json.JSONDecodeError as e:
-            print(f"BŁĄD: Model zwrócił niepoprawny JSON. Szczegóły: {sanitize_log_message(str(e))}")
+        parsed_json = _parse_json_with_repair(raw_response_text)
+        if parsed_json is None:
+            print(f"BŁĄD: Model zwrócił niepoprawny JSON. Próbowano naprawić, ale nie udało się.")
             print(f"Treść (obcięta): {sanitize_log_message(raw_response_text, max_length=500)}")
             return None
 
