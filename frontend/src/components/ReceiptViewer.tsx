@@ -116,7 +116,7 @@ export function ReceiptViewer({ receiptId, onClose }: ReceiptViewerProps) {
         <div>
           <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Sklep</p>
           <p className="text-lg font-semibold text-gray-900 dark:text-white">
-            {receipt.shop.name || 'Nieznany'}
+            {receipt.shop?.name || 'Nieznany'}
           </p>
         </div>
         <div>

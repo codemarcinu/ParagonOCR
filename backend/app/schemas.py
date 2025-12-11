@@ -1,6 +1,6 @@
 from typing import List, Optional
 from datetime import datetime, date
-from pydantic import BaseModel, Field, EmailStr, validator
+from pydantic import BaseModel, Field, EmailStr, validator, root_validator, model_validator
 
 
 # --- Shared ---
@@ -60,10 +60,32 @@ class ProductUpdate(ProductBase):
     pass
 
 
-class ProductResponse(ProductBase):
+class ProductResponse(BaseModel):
+    """Product response with normalized_name mapped to name."""
     id: int
+    name: str = Field(..., min_length=1, max_length=200)  # Maps from normalized_name
     normalized_name: str
-
+    category_id: Optional[int] = None
+    unit: Optional[str] = Field(None, max_length=20)
+    
+    @model_validator(mode='before')
+    @classmethod
+    def map_normalized_name_to_name(cls, data):
+        """Map normalized_name to name for ProductBase compatibility."""
+        if isinstance(data, dict):
+            if 'normalized_name' in data and 'name' not in data:
+                data['name'] = data['normalized_name']
+        elif hasattr(data, 'normalized_name'):
+            # SQLAlchemy model
+            return {
+                'id': data.id,
+                'name': data.normalized_name,
+                'normalized_name': data.normalized_name,
+                'category_id': data.category_id,
+                'unit': data.unit,
+            }
+        return data
+    
     class Config:
         from_attributes = True
 

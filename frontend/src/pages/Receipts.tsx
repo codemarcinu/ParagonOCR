@@ -157,7 +157,7 @@ export function Receipts() {
                                                     {receipt.purchase_time && <span className="text-gray-500 ml-2 text-xs">{receipt.purchase_time}</span>}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                                    {receipt.shop || 'Nieznany Sklep'}
+                                                    {receipt.shop?.name || 'Nieznany Sklep'}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                                     {receipt.items_count}

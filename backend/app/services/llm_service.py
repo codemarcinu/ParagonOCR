@@ -143,17 +143,25 @@ def parse_receipt_text(ocr_text: str) -> ParsedReceipt:
     
     try:
         logger.info(f"Calling Ollama API with model: {settings.TEXT_MODEL}")
-        # Call Ollama API
-        response = ollama_client.generate(
+        # Call Ollama API using chat() with format='json' to force JSON output
+        response = ollama_client.chat(
             model=settings.TEXT_MODEL,
-            prompt=prompt,
+            messages=[
+                {"role": "user", "content": prompt}
+            ],
             options={
                 "temperature": 0.1,  # Low temperature for structured output
                 "num_predict": 2000,  # Max tokens for response
             },
+            format="json",  # Force JSON output format
         )
         
-        response_text = response.get("response", "")
+        # Extract response from chat format
+        response_text = response.get("message", {}).get("content", "")
+        if not response_text:
+            # Fallback to old format if message structure is different
+            response_text = response.get("response", "")
+        
         logger.info(f"Received LLM response. Length: {len(response_text)} chars")
         logger.debug(f"LLM response preview: {response_text[:500]}...")
         
@@ -190,7 +198,16 @@ def create_receipt_parsing_prompt(ocr_text: str) -> str:
     Returns:
         Formatted prompt string
     """
-    return f"""Analizuj tekst z paragonu i wyodrębnij następujące informacje:
+    return f"""Jesteś asystentem do analizy paragonów. Twoim zadaniem jest wyodrębnienie danych z tekstu paragonu i zwrócenie ich w formacie JSON.
+
+WAŻNE: Zwróć TYLKO i WYŁĄCZNIE poprawny JSON. NIE generuj kodu Python, NIE pisz wyjaśnień, NIE używaj markdown. Tylko czysty JSON.
+
+Tekst z paragonu:
+---
+{ocr_text}
+---
+
+Wyodrębnij następujące informacje:
 1. Data i godzina zakupu
 2. Nazwa sklepu
 3. Lista produktów: nazwa, ilość, jednostka miary, cena jednostkowa, cena całkowita
@@ -198,12 +215,7 @@ def create_receipt_parsing_prompt(ocr_text: str) -> str:
 5. Podatek VAT (jeśli widoczny)
 6. Suma całkowita
 
-Tekst z paragonu:
----
-{ocr_text}
----
-
-Zwróć TYLKO poprawny JSON w następującym formacie (bez dodatkowego tekstu):
+Zwróć TYLKO JSON w następującym formacie (bez żadnego dodatkowego tekstu):
 {{
   "date": "YYYY-MM-DD",
   "time": "HH:MM",
@@ -222,15 +234,17 @@ Zwróć TYLKO poprawny JSON w następującym formacie (bez dodatkowego tekstu):
   "total": 99.99
 }}
 
-Jeśli jakiejś informacji nie możesz wyodrębnić, użyj null dla wartości opcjonalnych.
-Dla daty użyj formatu YYYY-MM-DD. Jeśli data nie jest dostępna, użyj dzisiejszej daty.
-Dla czasu użyj formatu HH:MM (24h).
+Zasady:
+- Jeśli jakiejś informacji nie możesz wyodrębnić, użyj null dla wartości opcjonalnych
+- Dla daty użyj formatu YYYY-MM-DD. Jeśli data nie jest dostępna, użyj dzisiejszej daty
+- Dla czasu użyj formatu HH:MM (24h)
+- Zwróć TYLKO JSON, bez kodu, bez wyjaśnień, bez markdown
 """
 
 
 def extract_json_from_response(response_text: str) -> Optional[Dict[str, Any]]:
     """
-    Extract JSON from LLM response, handling markdown code blocks.
+    Extract JSON from LLM response, handling markdown code blocks and edge cases.
     
     Args:
         response_text: Raw LLM response
@@ -242,29 +256,50 @@ def extract_json_from_response(response_text: str) -> Optional[Dict[str, Any]]:
         logger.error("Empty response text provided to JSON extractor")
         return None
     
-    # Remove markdown code blocks if present
+    # Clean up response text - remove any leading/trailing whitespace
+    response_text = response_text.strip()
+    
+    # Remove any instruction tokens or end-of-text markers that might appear
+    response_text = re.sub(r'<\|im_end\|>', '', response_text)
+    response_text = re.sub(r'<\|im_start\|>', '', response_text)
+    response_text = response_text.strip()
+    
+    # Try to find JSON in markdown code blocks first
     json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', response_text, re.DOTALL)
     if json_match:
         json_str = json_match.group(1)
         logger.debug("Found JSON in markdown code block")
     else:
-        # Try to find JSON object directly
+        # Try to find JSON object directly - match from first { to last }
         json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
         if json_match:
             json_str = json_match.group(0)
             logger.debug("Found JSON object directly in response")
         else:
+            # If format='json' was used, the response should be pure JSON
             json_str = response_text.strip()
             logger.debug("Using full response text as JSON")
     
     try:
         parsed = json.loads(json_str)
-        logger.debug(f"Successfully parsed JSON with keys: {list(parsed.keys()) if isinstance(parsed, dict) else 'not a dict'}")
+        if not isinstance(parsed, dict):
+            logger.error(f"Parsed JSON is not a dictionary: {type(parsed)}")
+            return None
+        logger.debug(f"Successfully parsed JSON with keys: {list(parsed.keys())}")
         return parsed
     except json.JSONDecodeError as e:
         logger.error(f"JSON decode error: {e}")
         logger.error(f"Attempted to parse: {json_str[:500]}")
-        return None
+        # Try to repair common JSON issues
+        try:
+            # Remove trailing commas
+            json_str = re.sub(r',\s*}', '}', json_str)
+            json_str = re.sub(r',\s*]', ']', json_str)
+            parsed = json.loads(json_str)
+            logger.info("Successfully parsed JSON after repair")
+            return parsed if isinstance(parsed, dict) else None
+        except:
+            return None
 
 
 def validate_and_normalize_receipt(data: Dict[str, Any]) -> ParsedReceipt:
