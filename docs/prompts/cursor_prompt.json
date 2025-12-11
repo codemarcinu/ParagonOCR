@@ -1,0 +1,44 @@
+{
+    "project_name": "ParagonOCR Web Edition",
+    "mode": "Full-stack development",
+    "role": "Senior developer",
+    "language": "Polish preferred for docs",
+    "phase_1_setup": {
+        "backend_modules": [
+            "app/main.py - FastAPI initialization",
+            "app/config.py - Environment configuration",
+            "app/database.py - SQLAlchemy ORM models",
+            "services/ocr_service.py - Tesseract wrapper",
+            "services/llm_service.py - Ollama client",
+            "services/rag_service.py - RAG engine"
+        ],
+        "frontend_pages": [
+            "src/pages/Dashboard.tsx",
+            "src/pages/Receipts.tsx",
+            "src/components/ReceiptUploader.tsx",
+            "src/components/ChatUI.tsx"
+        ]
+    },
+    "code_tasks": [
+        {
+            "id": 1,
+            "task": "OCR Service - Create a Python class that wraps Tesseract for PDF and image extraction"
+        },
+        {
+            "id": 2,
+            "task": "LLM Service - Build Ollama client for receipt parsing and chat with streaming"
+        },
+        {
+            "id": 3,
+            "task": "FastAPI Endpoints - Create POST /api/receipts/upload with WebSocket integration"
+        },
+        {
+            "id": 4,
+            "task": "React Component - Build ReceiptUploader with drag-drop and progress tracking"
+        },
+        {
+            "id": 5,
+            "task": "RAG Engine - Implement semantic search with sentence-transformers"
+        }
+    ]
+}

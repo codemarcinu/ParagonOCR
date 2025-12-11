@@ -62,3 +62,4 @@ data/uploads/
 *.jpeg
 *.tiff
 *.tif
+*.pid
