@@ -11,6 +11,7 @@ from typing import List, Tuple, Optional, Dict, Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from queue import Queue
 import threading
+from functools import lru_cache
 from rapidfuzz import fuzz
 from .config import Config
 from .security import sanitize_path, sanitize_log_message
@@ -137,40 +138,54 @@ def get_learning_examples(
         return []
 
 
+@lru_cache(maxsize=500)
+def _get_llm_suggestion_impl(
+    raw_name: str, 
+    model_name: str = Config.TEXT_MODEL,
+    learning_examples: Optional[Tuple[Tuple[str, str]]] = None
+) -> Optional[str]:
+    """
+    Internal cached implementation of get_llm_suggestion.
+    learning_examples must be a tuple of tuples to be hashable.
+    """
+    system_prompt = PromptTemplates.NORMALIZATION_SYSTEM_PROMPT
+    
+    # Buduj prompt dla użytkownika
+    user_prompt = f"Znormalizuj nazwę produktu z paragonu: '{raw_name}'."
+    
+    if learning_examples:
+        examples_str = "\n".join([f"- '{rn}' -> '{nn}'" for rn, nn in learning_examples])
+        user_prompt += f"\n\nOto przykłady z Twojej historii:\n{examples_str}\nUżyj tej samej konwencji nazewnictwa."
+        
+    try:
+        response = _call_text_llm(model_name, system_prompt, user_prompt)
+        if response:
+            return clean_llm_suggestion(response)
+        return None
+    except Exception as e:
+        logger.error(f"Error in _get_llm_suggestion_impl: {e}")
+        return None
+
 def get_llm_suggestion(
     raw_name: str, 
     model_name: str = Config.TEXT_MODEL,
     learning_examples: Optional[List[Tuple[str, str]]] = None
-) -> str | None:
+) -> Optional[str]:
     """
     Używa modelu językowego do normalizacji "brudnej" nazwy produktu.
     Może używać przykładów uczenia z poprzednich wyborów użytkownika.
     
-    Funkcja jest automatycznie retry'owana przez dekorator retry_with_backoff.
+    Funkcja jest automatycznie retry'owana przez dekorator retry_with_backoff wewnątrz _call_text_llm.
+    WYNIKI SĄ CACHOWANE (LRU CACHE).
 
     Args:
-        raw_name: Surowa nazwa produktu z paragonu.
+        raw_name: Surowa nazwa produktu z paragonu (OCR).
         model_name: Nazwa modelu Ollama do użycia.
-        learning_examples: Opcjonalna lista przykładów uczenia (raw_name, normalized_name).
+        learning_examples: Opcjonalna lista krotek (raw, normalized) jako kontekst.
 
     Returns:
         Znormalizowana nazwa produktu jako string, lub None w przypadku błędu.
     """
-    if not client:
-        print("BŁĄD: Klient Ollama nie jest skonfigurowany.")
-        return None
-
-    system_prompt = """
-    Jesteś wirtualnym magazynierem. Twoim zadaniem jest zamiana nazwy z paragonu na KRÓTKĄ, GENERYCZNĄ nazwę produktu do domowej spiżarni.
-    
-    ZASADY KRYTYCZNE:
-    1. USUWASZ marki (np. "Krakus", "Mlekovita", "Winiary" -> USUŃ).
-    2. USUWASZ gramaturę i opakowania (np. "1L", "500g", "butelka", "szt" -> USUŃ).
-    3. USUWASZ przymiotniki marketingowe (np. "tradycyjne", "babuni", "pyszne", "luksusowe" -> USUŃ).
-    4. Zmieniasz na Mianownik Liczby Pojedynczej (np. "Bułki" -> "Bułka", "Jaja" -> "Jajka").
-    5. Jeśli produkt to plastikowa torba/reklamówka, zwróć dokładnie słowo: "POMIŃ".
-    """
-
     # Buduj sekcję z przykładami uczenia
     learning_section = ""
     if learning_examples and len(learning_examples) > 0:

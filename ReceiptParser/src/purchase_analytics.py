@@ -6,7 +6,7 @@ from typing import Dict, List, Tuple, Optional
 from datetime import datetime, date, timedelta
 from decimal import Decimal
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import func, extract
+from sqlalchemy import func, extract, asc, desc
 
 from .database import (
     engine,
@@ -225,23 +225,39 @@ class PurchaseAnalytics:
         
         return stats
 
-    def get_recent_receipts(self, limit: int = 10) -> List[Dict]:
+    def get_receipts(
+        self, 
+        limit: int = 50, 
+        sort_by: str = "date", 
+        sort_desc: bool = True
+    ) -> List[Dict]:
         """
-        Zwraca ostatnie paragony.
+        Zwraca listę paragonów z możliwością sortowania.
         
         Args:
             limit: Maksymalna liczba paragonów
+            sort_by: Kolumna do sortowania ("date", "store", "total", "items")
+            sort_desc: Czy sortować malejąco
             
         Returns:
             Lista słowników z informacjami o paragonach
         """
-        receipts = (
-            self.session.query(Paragon)
-            .options(joinedload(Paragon.sklep))
-            .order_by(Paragon.data_zakupu.desc())
-            .limit(limit)
-            .all()
-        )
+        query = self.session.query(Paragon).options(joinedload(Paragon.sklep))
+        
+        # Determine sorting
+        order_func = desc if sort_desc else asc
+        
+        if sort_by == "store":
+            query = query.join(Sklep).order_by(order_func(Sklep.nazwa_sklepu))
+        elif sort_by == "total":
+            query = query.order_by(order_func(Paragon.suma_paragonu))
+        # Note: sorting by items_count is complex in SQL (needs subquery/count), 
+        # so for simplicity we might do it in Python or just stick to simple cols.
+        # Let's try basic date default.
+        else: # date
+            query = query.order_by(order_func(Paragon.data_zakupu))
+
+        receipts = query.limit(limit).all()
         
         result = []
         for receipt in receipts:
@@ -252,7 +268,11 @@ class PurchaseAnalytics:
                 "total": float(receipt.suma_paragonu or 0),
                 "items_count": len(receipt.pozycje),
             })
-        
+            
+        # If sorting by items_count, do it in memory (since we have limited results anyway)
+        if sort_by == "items":
+            result.sort(key=lambda x: x["items_count"], reverse=sort_desc)
+            
         return result
 
     def close(self):

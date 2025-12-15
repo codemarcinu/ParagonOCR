@@ -181,18 +181,7 @@ def run_processing_pipeline(
                 f"INFO: Wybrano strategię (na podstawie Mistral OCR): {strategy.__class__.__name__}"
             )
 
-        # Sprzątanie po PDF - zawsze wykonaj cleanup, nawet przy błędach
-        if temp_image_path and os.path.exists(temp_image_path):
-            try:
-                os.unlink(temp_image_path)
-                _call_log_callback(
-                    log_callback, "INFO: Usunięto tymczasowy plik obrazu."
-                )
-            except Exception as e:
-                _call_log_callback(
-                    log_callback,
-                    f"OSTRZEŻENIE: Nie udało się usunąć pliku tymczasowego: {e}",
-                )
+
 
         if not parsed_data:
             raise Exception("Parsowanie za pomocą LLM nie zwróciło danych.")
@@ -249,6 +238,17 @@ def run_processing_pipeline(
             log_callback,
             f"BŁĄD KRYTYCZNY na etapie parsowania LLM: {sanitize_log_message(str(e))}",
         )
+    finally:
+        # Sprzątanie po PDF - zawsze wykonaj cleanup na samym końcu
+        if temp_image_path and os.path.exists(temp_image_path):
+            try:
+                os.unlink(temp_image_path)
+                _call_log_callback(
+                    log_callback, "INFO: Usunięto tymczasowy plik obrazu (cleanup)."
+                )
+            except Exception as cleanup_error:
+                 # Log to logger instead of UI to avoid clutter if UI is gone
+                 pass
         _call_log_callback(
             log_callback, "Upewnij się, że serwer Ollama działa i model jest dostępny."
         )

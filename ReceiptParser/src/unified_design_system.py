@@ -199,3 +199,26 @@ class Icons:
     CALENDAR: Final[str] = "📅"  # Calendar icon
     STATUS_DOT: Final[str] = "●"  # Circle dot for status indicators
 
+
+def adjust_color(color: str, amount: int) -> str:
+    """
+    Brightern or darken a hex color by a given amount.
+    
+    Args:
+        color: Hex color string (e.g. "#1f538d")
+        amount: Amount to adjust (-255 to 255). Positive for lighter, negative for darker.
+        
+    Returns:
+        Adjusted hex color string.
+    """
+    try:
+        # Convert hex to RGB
+        color = color.lstrip("#")
+        rgb = tuple(int(color[i : i + 2], 16) for i in (0, 2, 4))
+        # Adjust brightness
+        new_rgb = tuple(max(0, min(255, c + amount)) for c in rgb)
+        # Convert back to hex
+        return "#%02x%02x%02x" % new_rgb
+    except Exception:
+        return color
+

@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from tkinter import filedialog, messagebox, Toplevel
+from tkinter import filedialog, Toplevel
 from PIL import Image
 import threading
 import queue
@@ -38,7 +38,17 @@ from src.food_waste_tracker import FoodWasteTracker, get_expiring_products_summa
 from src.quick_add import QuickAddHelper
 from src.meal_planner import MealPlanner
 from history_manager import load_history, add_to_history
-from src.unified_design_system import AppColors, AppSpacing, AppFont, Icons
+from src.unified_design_system import AppColors, AppSpacing, AppFont, Icons, adjust_color
+from src.notifications import NotificationToast, NotificationDialog
+
+# Imported Dialogs
+from gui_modules.dialogs.mapping_dialog import ProductMappingDialog
+from gui_modules.dialogs.review_dialog import ReviewDialog
+from gui_modules.dialogs.cooking_dialog import CookingDialog
+from gui_modules.dialogs.quick_add_dialog import QuickAddDialog
+from gui_modules.dialogs.add_product_dialog import AddProductDialog
+from gui_modules.dialogs.chat_dialog import BielikChatDialog
+from gui_modules.dialogs.settings_dialog import SettingsDialog
 from src.gui_optimizations import (
     VirtualScrollableFrame,
     MemoryProfiler,
@@ -115,1219 +125,11 @@ class ToolTip:
             tw.destroy()
 
 
-class ProductMappingDialog(ctk.CTkToplevel):
-    def __init__(self, parent, title, text, initial_value=""):
-        super().__init__(parent)
-        self.title(title)
-        self.geometry("500x300")
-        self.user_input = None
 
-        self.label = ctk.CTkLabel(self, text=text, wraplength=480, font=("Arial", 14))
-        self.label.pack(pady=AppSpacing.LG, padx=AppSpacing.LG)
-
-        self.entry = ctk.CTkEntry(self, width=400, font=("Arial", 14))
-        self.entry.pack(pady=AppSpacing.SM)
-        self.entry.insert(0, initial_value)
-        self.entry.focus_set()
-
-        self.ok_button = ctk.CTkButton(
-            self, text="Zatwierdź", command=self.on_ok, width=200
-        )
-        self.ok_button.pack(pady=AppSpacing.LG)
-
-        self.bind("<Return>", lambda event: self.on_ok())
-        self.bind("<Escape>", lambda event: self.on_close())
-
-        self.protocol("WM_DELETE_WINDOW", self.on_close)
-        # Użyj after() aby upewnić się, że okno jest widoczne przed grab_set
-        self.after(100, self.grab_set)  # Make modal
-
-    def on_ok(self):
-        self.user_input = self.entry.get()
-        self.destroy()
-
-    def on_close(self):
-        self.destroy()
-
-    def get_input(self):
-        self.master.wait_window(self)
-        return self.user_input
-
-
-class ReviewDialog(ctk.CTkToplevel):
-    def __init__(self, parent, parsed_data):
-        super().__init__(parent)
-        self.title("Weryfikacja Paragonu")
-        self.geometry("1000x700")
-        self.parsed_data = parsed_data
-        self.result_data = None
-
-        # --- Header ---
-        self.header_frame = ctk.CTkFrame(self)
-        self.header_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
-
-        ctk.CTkLabel(self.header_frame, text="Sklep:").grid(
-            row=0, column=0, padx=AppSpacing.XS, pady=AppSpacing.XS
-        )
-        self.store_entry = ctk.CTkEntry(self.header_frame, width=200)
-        self.store_entry.grid(row=0, column=1, padx=AppSpacing.XS, pady=AppSpacing.XS)
-        self.store_entry.insert(0, parsed_data["sklep_info"]["nazwa"])
-
-        ctk.CTkLabel(self.header_frame, text="Data:").grid(
-            row=0, column=2, padx=AppSpacing.XS, pady=AppSpacing.XS
-        )
-        self.date_entry = ctk.CTkEntry(self.header_frame, width=150)
-        self.date_entry.grid(row=0, column=3, padx=AppSpacing.XS, pady=AppSpacing.XS)
-        # Format daty do stringa
-        date_val = parsed_data["paragon_info"]["data_zakupu"]
-        if isinstance(date_val, datetime):
-            date_val = date_val.strftime("%Y-%m-%d")
-        self.date_entry.insert(0, str(date_val))
-
-        ctk.CTkLabel(self.header_frame, text="Suma:").grid(
-            row=0, column=4, padx=AppSpacing.XS, pady=AppSpacing.XS
-        )
-        self.total_entry = ctk.CTkEntry(self.header_frame, width=100)
-        self.total_entry.grid(row=0, column=5, padx=AppSpacing.XS, pady=AppSpacing.XS)
-        self.total_entry.insert(0, str(parsed_data["paragon_info"]["suma_calkowita"]))
-
-
-
-        # --- Body (Items) ---
-        # Kontener główny
-        self.main_container = ctk.CTkFrame(self, fg_color="transparent")
-        self.main_container.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.XS)
-
-        # Sprawdź czy mamy podgląd obrazu
-        file_path = parsed_data.get("file_path")
-        if file_path and os.path.exists(file_path):
-            # Poszerz okno dla podglądu
-            self.geometry("1400x800")
-            
-            self.main_container.grid_columnconfigure(0, weight=1) # Preview
-            self.main_container.grid_columnconfigure(1, weight=2) # Form
-            
-            # --- Left: Preview ---
-            self.preview_frame = ctk.CTkScrollableFrame(self.main_container, label_text="Podgląd Paragonu")
-            self.preview_frame.grid(row=0, column=0, sticky="nsew", padx=(0, AppSpacing.SM), pady=0)
-            
-            try:
-                img = Image.open(file_path)
-                # Resize for display (width ~400px, keep aspect ratio)
-                target_width = 450
-                aspect_ratio = img.height / img.width
-                target_height = int(target_width * aspect_ratio)
-                
-                ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=(target_width, target_height))
-                
-                self.img_label = ctk.CTkLabel(self.preview_frame, text="", image=ctk_img)
-                self.img_label.pack(fill="both", expand=True)
-            except Exception as e:
-                ctk.CTkLabel(self.preview_frame, text=f"Błąd ładowania obrazu:\n{e}").pack()
-
-            # --- Right: Form ---
-            self.form_container = ctk.CTkFrame(self.main_container, fg_color="transparent")
-            self.form_container.grid(row=0, column=1, sticky="nsew")
-            
-            self.scrollable_frame = ctk.CTkScrollableFrame(self.form_container)
-            self.scrollable_frame.pack(fill="both", expand=True)
-        else:
-            # Brak obrazu - standardowy widok
-            self.scrollable_frame = ctk.CTkScrollableFrame(self.main_container)
-            self.scrollable_frame.pack(fill="both", expand=True)
-
-        # Headers - dodano kolumnę "Znormalizowana nazwa" i "Data ważności"
-        headers = [
-            "Nazwa (raw)",
-            "Znormalizowana nazwa",
-            "Ilość",
-            "Cena jedn.",
-            "Wartość",
-            "Rabat",
-            "Po rabacie",
-            "Data ważności",
-        ]
-        for col, text in enumerate(headers):
-            ctk.CTkLabel(
-                self.scrollable_frame, text=text, font=("Arial", 12, "bold")
-            ).grid(row=0, column=col, padx=AppSpacing.XS, pady=AppSpacing.XS)
-
-        # Pobierz sugestie znormalizowanych nazw z bazy danych (jeśli dostępna)
-        SessionLocal = sessionmaker(bind=engine)
-        session = SessionLocal()
-        normalized_suggestions = {}
-        try:
-            for item in parsed_data["pozycje"]:
-                nazwa_raw = item.get("nazwa_raw", "").strip()
-                # Sprawdź czy istnieje alias w bazie
-                alias = (
-                    session.query(AliasProduktu)
-                    .options(joinedload(AliasProduktu.produkt))
-                    .filter_by(nazwa_z_paragonu=nazwa_raw)
-                    .first()
-                )
-                if alias:
-                    normalized_suggestions[nazwa_raw] = (
-                        alias.produkt.znormalizowana_nazwa
-                    )
-                else:
-                    # Użyj reguł statycznych
-                    suggestion = find_static_match(nazwa_raw)
-                    if suggestion:
-                        normalized_suggestions[nazwa_raw] = suggestion
-        except Exception as e:
-            print(f"Błąd podczas pobierania sugestii normalizacji: {e}")
-        finally:
-            session.close()
-
-        self.item_entries = []
-        self.row_frames = []  # Przechowuj ramki wierszy dla kolorowania
-        for i, item in enumerate(parsed_data["pozycje"]):
-            row = i + 1
-            entries = {}
-
-            # Sprawdź czy produkt powinien być oznaczony specjalnie
-            nazwa_raw = item.get("nazwa_raw", "").strip()
-            is_skip = nazwa_raw.upper() == "POMIŃ" or nazwa_raw.upper() == "SKIP"
-            is_unknown = not nazwa_raw or len(nazwa_raw) < 2
-
-            # Utwórz ramkę dla wiersza (dla kolorowania tła)
-            row_frame = ctk.CTkFrame(self.scrollable_frame)
-            row_frame.grid(row=row, column=0, columnspan=8, padx=2, pady=2, sticky="ew")
-            self.row_frames.append(row_frame)
-
-            # Ustaw kolor tła w zależności od typu produktu
-            # Alternatywne kolory dla lepszej czytelności
-            is_even = i % 2 == 0
-            mode = ctk.get_appearance_mode()
-
-            if is_skip:
-                row_frame.configure(fg_color=AppColors.ERROR)
-                tooltip_text = "Ta pozycja została oznaczona do pominięcia"
-            elif is_unknown:
-                row_frame.configure(fg_color=AppColors.WARNING)
-                tooltip_text = "Nieznany produkt - wymaga weryfikacji"
-            else:
-                # Alternatywne kolory dla parzystych/nieparzystych wierszy
-                if mode == "Dark":
-                    row_frame.configure(
-                        fg_color=AppColors.ROW_EVEN if is_even else AppColors.ROW_ODD
-                    )
-                else:
-                    row_frame.configure(
-                        fg_color=(
-                            AppColors.ROW_EVEN_LIGHT
-                            if is_even
-                            else AppColors.ROW_ODD_LIGHT
-                        )
-                    )
-                tooltip_text = f"Produkt: {nazwa_raw}"
-
-            # Konfiguruj kolumny w ramce
-            for col in range(8):
-                row_frame.grid_columnconfigure(col, weight=1)
-
-            # Nazwa raw
-            e_name = ctk.CTkEntry(row_frame, width=200)
-            e_name.grid(row=0, column=0, padx=2, pady=2, sticky="ew")
-            e_name.insert(0, nazwa_raw)
-            entries["nazwa_raw"] = e_name
-            ToolTip(e_name, tooltip_text)
-
-            # Znormalizowana nazwa (sugestia)
-            normalized_name = normalized_suggestions.get(nazwa_raw, "")
-            e_normalized = ctk.CTkEntry(row_frame, width=200)
-            e_normalized.grid(row=0, column=1, padx=2, pady=2, sticky="ew")
-            e_normalized.insert(0, normalized_name)
-            entries["nazwa_znormalizowana"] = e_normalized
-            if normalized_name:
-                ToolTip(
-                    e_normalized, f"Sugestia znormalizowanej nazwy: {normalized_name}"
-                )
-
-            # Ilość
-            e_qty = ctk.CTkEntry(row_frame, width=60)
-            e_qty.grid(row=0, column=2, padx=2, pady=2, sticky="ew")
-            e_qty.insert(0, str(item["ilosc"]))
-            entries["ilosc"] = e_qty
-
-            # Cena jedn
-            e_unit = ctk.CTkEntry(row_frame, width=80)
-            e_unit.grid(row=0, column=3, padx=2, pady=2, sticky="ew")
-            e_unit.insert(0, str(item["cena_jedn"]))
-            entries["cena_jedn"] = e_unit
-
-            # Cena całk
-            e_total = ctk.CTkEntry(row_frame, width=80)
-            e_total.grid(row=0, column=4, padx=2, pady=2, sticky="ew")
-            e_total.insert(0, str(item["cena_calk"]))
-            entries["cena_calk"] = e_total
-
-            # Rabat
-            e_disc = ctk.CTkEntry(row_frame, width=80)
-            e_disc.grid(row=0, column=5, padx=2, pady=2, sticky="ew")
-            val_disc = item.get("rabat", "0.00")
-            if val_disc is None:
-                val_disc = "0.00"
-            e_disc.insert(0, str(val_disc))
-            entries["rabat"] = e_disc
-
-            # Po rabacie
-            e_final = ctk.CTkEntry(row_frame, width=80)
-            e_final.grid(row=0, column=6, padx=2, pady=2, sticky="ew")
-            e_final.insert(0, str(item["cena_po_rab"]))
-            entries["cena_po_rab"] = e_final
-
-            # Data ważności
-            e_expiry = ctk.CTkEntry(row_frame, width=120, placeholder_text="YYYY-MM-DD")
-            e_expiry.grid(row=0, column=7, padx=2, pady=2, sticky="ew")
-            # Domyślnie ustawiamy datę za 7 dni (można zmienić)
-            default_expiry = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
-            e_expiry.insert(0, default_expiry)
-            entries["data_waznosci"] = e_expiry
-
-            # Hidden fields
-            entries["jednostka"] = item.get("jednostka", "")
-
-            self.item_entries.append(entries)
-
-        # --- Footer ---
-        self.footer_frame = ctk.CTkFrame(self)
-        self.footer_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
-
-        self.save_btn = ctk.CTkButton(
-            self.footer_frame,
-            text=f"{Icons.SAVE} Zatwierdź i Zapisz",
-            command=self.on_save,
-            fg_color=AppColors.SUCCESS,
-            hover_color=App._adjust_color(AppColors.SUCCESS, -15),
-        )
-        self.save_btn.pack(side="right", padx=AppSpacing.SM)
-
-        self.discard_btn = ctk.CTkButton(
-            self.footer_frame,
-            text="Odrzuć",
-            command=self.on_discard,
-            fg_color=AppColors.ERROR,
-            hover_color=App._adjust_color(AppColors.ERROR, -15),
-        )
-        self.discard_btn.pack(side="left", padx=AppSpacing.SM)
-
-        self.protocol("WM_DELETE_WINDOW", self.on_discard)
-        # Użyj after() aby upewnić się, że okno jest widoczne przed grab_set
-        self.after(100, self.grab_set)
-
-    def on_save(self):
-        try:
-            # Update parsed_data with values from entries
-            self.parsed_data["sklep_info"]["nazwa"] = self.store_entry.get()
-
-            # Date conversion
-            raw_date = self.date_entry.get()
-            try:
-                self.parsed_data["paragon_info"]["data_zakupu"] = datetime.strptime(
-                    raw_date, "%Y-%m-%d"
-                )
-            except ValueError:
-                # Fallback if user entered something weird, keep original or now
-                pass
-
-            self.parsed_data["paragon_info"]["suma_calkowita"] = Decimal(
-                self.total_entry.get().replace(",", ".")
-            )
-
-            new_items = []
-            for entries in self.item_entries:
-                # Parsowanie daty ważności
-                data_waznosci_str = entries["data_waznosci"].get().strip()
-                data_waznosci = None
-                if data_waznosci_str:
-                    try:
-                        data_waznosci = datetime.strptime(
-                            data_waznosci_str, "%Y-%m-%d"
-                        ).date()
-                    except ValueError:
-                        messagebox.showerror(
-                            "Błąd",
-                            f"Nieprawidłowy format daty ważności: {data_waznosci_str}\nUżyj formatu YYYY-MM-DD",
-                        )
-                        return
-
-                item = {
-                    "nazwa_raw": entries["nazwa_raw"].get(),
-                    "ilosc": Decimal(entries["ilosc"].get().replace(",", ".")),
-                    "jednostka": entries["jednostka"],
-                    "cena_jedn": Decimal(entries["cena_jedn"].get().replace(",", ".")),
-                    "cena_calk": Decimal(entries["cena_calk"].get().replace(",", ".")),
-                    "rabat": Decimal(entries["rabat"].get().replace(",", ".")),
-                    "cena_po_rab": Decimal(
-                        entries["cena_po_rab"].get().replace(",", ".")
-                    ),
-                    "data_waznosci": data_waznosci,  # Dodano datę ważności
-                }
-                new_items.append(item)
-
-            self.parsed_data["pozycje"] = new_items
-            self.result_data = self.parsed_data
-            self.destroy()
-        except Exception as e:
-            print(f"Error saving review: {e}")
-            # Optionally show error dialog
-
-    def on_discard(self):
-        self.result_data = None
-        self.destroy()
-
-    def get_result(self):
-        self.master.wait_window(self)
-        return self.result_data
-
-
-class CookingDialog(ctk.CTkToplevel):
-    """Okno do zaznaczania produktów do zużycia podczas gotowania"""
-
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.title("Gotowanie - Zużycie produktów")
-        self.geometry("900x600")
-        self.result = None
-
-        SessionLocal = sessionmaker(bind=engine)
-        self.session = SessionLocal()
-
-        # Header
-        header_frame = ctk.CTkFrame(self)
-        header_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
-        ctk.CTkLabel(
-            header_frame,
-            text="Zaznacz produkty do zużycia:",
-            font=("Arial", 16, "bold"),
-        ).pack(pady=AppSpacing.SM)
-
-        # Scrollable list of products
-        self.scrollable_frame = ctk.CTkScrollableFrame(self)
-        self.scrollable_frame.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.XS)
-
-        # Headers
-        headers = ["Zaznacz", "Produkt", "Ilość", "Jednostka", "Data ważności"]
-        for col, text in enumerate(headers):
-            ctk.CTkLabel(
-                self.scrollable_frame, text=text, font=("Arial", 12, "bold")
-            ).grid(row=0, column=col, padx=AppSpacing.XS, pady=AppSpacing.XS)
-
-        # Load products from database
-        self.checkboxes = []
-        self.product_data = []
-        self.load_products()
-
-        # Footer
-        footer_frame = ctk.CTkFrame(self)
-        footer_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
-
-        ctk.CTkButton(
-            footer_frame,
-            text="Zużyj zaznaczone",
-            command=self.consume_products,
-            fg_color=AppColors.SUCCESS,
-            hover_color=App._adjust_color(AppColors.SUCCESS, -15),
-            width=200,
-        ).pack(side="right", padx=AppSpacing.SM)
-
-        ctk.CTkButton(
-            footer_frame, text="Anuluj", command=self.on_cancel, width=200
-        ).pack(side="left", padx=AppSpacing.SM)
-
-        self.protocol("WM_DELETE_WINDOW", self.on_cancel)
-        # Użyj after() aby upewnić się, że okno jest widoczne przed grab_set
-        self.after(100, self.grab_set)
-
-    def load_products(self):
-        """Wczytuje produkty z magazynu"""
-        # Pobierz wszystkie produkty ze stanem magazynowym > 0
-        stany = (
-            self.session.query(StanMagazynowy)
-            .join(Produkt)
-            .filter(StanMagazynowy.ilosc > 0)
-            .order_by(StanMagazynowy.data_waznosci)
-            .all()
-        )
-
-        if not stany:
-            ctk.CTkLabel(
-                self.scrollable_frame,
-                text="Brak produktów w magazynie",
-                font=("Arial", 14),
-            ).grid(row=1, column=0, columnspan=5, pady=AppSpacing.LG)
-            return
-
-        for i, stan in enumerate(stany):
-            row = i + 1
-            checkbox = ctk.CTkCheckBox(self.scrollable_frame, text="")
-            checkbox.grid(row=row, column=0, padx=AppSpacing.XS, pady=2)
-
-            ctk.CTkLabel(
-                self.scrollable_frame, text=stan.produkt.znormalizowana_nazwa, width=300
-            ).grid(row=row, column=1, padx=AppSpacing.XS, pady=2, sticky="w")
-
-            ilosc_entry = ctk.CTkEntry(self.scrollable_frame, width=80)
-            ilosc_entry.insert(0, str(stan.ilosc))
-            ilosc_entry.grid(row=row, column=2, padx=AppSpacing.XS, pady=2)
-
-            ctk.CTkLabel(
-                self.scrollable_frame, text=stan.jednostka_miary or "szt", width=80
-            ).grid(row=row, column=3, padx=AppSpacing.XS, pady=2)
-
-            data_waz = (
-                stan.data_waznosci.strftime("%Y-%m-%d")
-                if stan.data_waznosci
-                else "Brak"
-            )
-            color = (
-                "red"
-                if stan.data_waznosci and stan.data_waznosci < date.today()
-                else "green"
-            )
-            ctk.CTkLabel(
-                self.scrollable_frame, text=data_waz, width=120, text_color=color
-            ).grid(row=row, column=4, padx=AppSpacing.XS, pady=2)
-
-            self.checkboxes.append(
-                {
-                    "checkbox": checkbox,
-                    "ilosc_entry": ilosc_entry,
-                    "stan": stan,
-                    "max_ilosc": stan.ilosc,
-                }
-            )
-
-    def consume_products(self):
-        """Zużywa zaznaczone produkty"""
-        consumed = []
-        try:
-            for item in self.checkboxes:
-                if item["checkbox"].get():
-                    try:
-                        ilosc_do_zuzycia = Decimal(
-                            item["ilosc_entry"].get().replace(",", ".")
-                        )
-                        if ilosc_do_zuzycia <= 0:
-                            continue
-                        if ilosc_do_zuzycia > item["max_ilosc"]:
-                            self.session.rollback()
-                            messagebox.showerror(
-                                "Błąd",
-                                f"Nie można zużyć więcej niż dostępne {item['max_ilosc']} dla produktu {item['stan'].produkt.znormalizowana_nazwa}",
-                            )
-                            return
-
-                        # Zmniejsz ilość w magazynie
-                        item["stan"].ilosc -= ilosc_do_zuzycia
-                        if item["stan"].ilosc <= 0:
-                            self.session.delete(item["stan"])
-
-                        consumed.append(
-                            {
-                                "produkt": item["stan"].produkt.znormalizowana_nazwa,
-                                "ilosc": ilosc_do_zuzycia,
-                            }
-                        )
-                    except (ValueError, InvalidOperation):
-                        self.session.rollback()
-                        messagebox.showerror(
-                            "Błąd",
-                            f"Nieprawidłowa ilość dla produktu {item['stan'].produkt.znormalizowana_nazwa}",
-                        )
-                        return
-
-            if consumed:
-                self.session.commit()
-                messagebox.showinfo("Sukces", f"Zużyto {len(consumed)} produktów")
-                self.result = consumed
-                self.destroy()
-            else:
-                messagebox.showwarning("Uwaga", "Nie zaznaczono żadnych produktów")
-        except Exception as e:
-            self.session.rollback()
-            messagebox.showerror("Błąd", f"Nie udało się zużyć produktów: {e}")
-
-    def on_cancel(self):
-        self.session.close()
-        self.destroy()
-
-
-class QuickAddDialog(ctk.CTkToplevel):
-    """Okno Quick Add - szybkie dodawanie produktu z autocomplete"""
-
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.title("⚡ Quick Add - Szybkie Dodawanie")
-        self.geometry("500x400")
-        self.result = None
-
-        # Header
-        header_frame = ctk.CTkFrame(self)
-        header_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
-        ctk.CTkLabel(
-            header_frame,
-            text="⚡ Quick Add - Dodaj produkt w 5 sekund",
-            font=("Arial", 16, "bold"),
-        ).pack(pady=AppSpacing.SM)
-
-        # Form
-        form_frame = ctk.CTkFrame(self)
-        form_frame.pack(fill="both", expand=True, padx=AppSpacing.LG, pady=AppSpacing.SM)
-
-        # Nazwa produktu z autocomplete
-        ctk.CTkLabel(form_frame, text="Nazwa produktu:", font=("Arial", 14)).grid(
-            row=0, column=0, sticky="w", pady=AppSpacing.SM
-        )
-        self.name_entry = ctk.CTkEntry(form_frame, width=300, font=("Arial", 14))
-        self.name_entry.grid(row=0, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM, sticky="ew")
-        self.name_entry.focus_set()
-        form_frame.grid_columnconfigure(1, weight=1)
-
-        # Bind autocomplete
-        self.name_entry.bind("<KeyRelease>", self.on_name_changed)
-        self.autocomplete_listbox = None
-
-        # Ilość
-        ctk.CTkLabel(form_frame, text="Ilość:", font=("Arial", 14)).grid(
-            row=1, column=0, sticky="w", pady=AppSpacing.SM
-        )
-        self.quantity_entry = ctk.CTkEntry(form_frame, width=300)
-        self.quantity_entry.insert(0, "1.0")
-        self.quantity_entry.grid(row=1, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM, sticky="ew")
-
-        # Jednostka
-        ctk.CTkLabel(form_frame, text="Jednostka:", font=("Arial", 14)).grid(
-            row=2, column=0, sticky="w", pady=AppSpacing.SM
-        )
-        self.unit_entry = ctk.CTkEntry(form_frame, width=300)
-        self.unit_entry.insert(0, "szt")
-        self.unit_entry.grid(row=2, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM, sticky="ew")
-
-        # Data ważności (opcjonalna)
-        ctk.CTkLabel(
-            form_frame, text="Data ważności (opcjonalna):", font=("Arial", 14)
-        ).grid(row=3, column=0, sticky="w", pady=AppSpacing.SM)
-        self.expiry_entry = ctk.CTkEntry(
-            form_frame, width=300, placeholder_text="YYYY-MM-DD"
-        )
-        self.expiry_entry.grid(row=3, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM, sticky="ew")
-
-        # Buttons
-        button_frame = ctk.CTkFrame(self)
-        button_frame.pack(fill="x", padx=AppSpacing.LG, pady=AppSpacing.SM)
-
-        btn_add = ctk.CTkButton(
-            button_frame,
-            text="⚡ Dodaj (Enter)",
-            command=self.quick_add,
-            fg_color=AppColors.SUCCESS,
-            hover_color=App._adjust_color(AppColors.SUCCESS, -15),
-            width=200,
-        )
-        btn_add.pack(side="right", padx=AppSpacing.SM)
-        ToolTip(btn_add, "Zatwierdź i dodaj produkt")
-
-        btn_cancel = ctk.CTkButton(
-            button_frame, text="Anuluj (Esc)", command=self.on_cancel, width=200
-        )
-        btn_cancel.pack(side="left", padx=AppSpacing.SM)
-        ToolTip(btn_cancel, "Anuluj dodawanie")
-
-        self.bind("<Return>", lambda event: self.quick_add())
-        self.bind("<Escape>", lambda event: self.on_cancel())
-        self.protocol("WM_DELETE_WINDOW", self.on_cancel)
-        self.after(100, self.grab_set)
-
-    def on_name_changed(self, event=None):
-        """Obsługuje zmiany w polu nazwy - pokazuje autocomplete"""
-        query = self.name_entry.get().strip()
-
-        # Usuń poprzednią listę autocomplete
-        if self.autocomplete_listbox:
-            self.autocomplete_listbox.destroy()
-            self.autocomplete_listbox = None
-
-        if len(query) < 2:
-            return
-
-        # Pobierz sugestie
-        try:
-            with QuickAddHelper() as helper:
-                suggestions = helper.get_autocomplete_suggestions(query, limit=5)
-
-            if suggestions:
-                # Utwórz listbox z sugestiami
-                self.autocomplete_listbox = ctk.CTkFrame(self)
-                self.autocomplete_listbox.place(
-                    x=self.name_entry.winfo_x() + 20,
-                    y=self.name_entry.winfo_y() + 30,
-                    width=300,
-                )
-
-                for i, suggestion in enumerate(suggestions):
-                    btn = ctk.CTkButton(
-                        self.autocomplete_listbox,
-                        text=suggestion["nazwa"],
-                        command=lambda s=suggestion: self.select_suggestion(s),
-                        anchor="w",
-                        fg_color="transparent",
-                        hover_color=AppColors.PRIMARY,
-                    )
-                    btn.pack(fill="x", padx=2, pady=1)
-
-        except Exception:
-            pass  # Ignoruj błędy autocomplete
-
-    def select_suggestion(self, suggestion):
-        """Wybiera sugestię z autocomplete"""
-        self.name_entry.delete(0, "end")
-        self.name_entry.insert(0, suggestion["nazwa"])
-        if self.autocomplete_listbox:
-            self.autocomplete_listbox.destroy()
-            self.autocomplete_listbox = None
-        self.quantity_entry.focus_set()
-
-    def quick_add(self):
-        """Szybko dodaje produkt"""
-        nazwa = self.name_entry.get().strip()
-        if not nazwa:
-            messagebox.showerror("Błąd", "Nazwa produktu nie może być pusta")
-            return
-
-        try:
-            ilosc = Decimal(self.quantity_entry.get().replace(",", "."))
-            if ilosc <= 0:
-                messagebox.showerror("Błąd", "Ilość musi być większa od zera")
-                return
-        except ValueError:
-            messagebox.showerror("Błąd", "Nieprawidłowa ilość")
-            return
-
-        jednostka = self.unit_entry.get().strip() or "szt"
-
-        data_waznosci = None
-        expiry_str = self.expiry_entry.get().strip()
-        if expiry_str:
-            try:
-                data_waznosci = datetime.strptime(expiry_str, "%Y-%m-%d")
-            except ValueError:
-                messagebox.showerror(
-                    "Błąd", "Nieprawidłowy format daty. Użyj YYYY-MM-DD"
-                )
-                return
-
-        try:
-            with QuickAddHelper() as helper:
-                result = helper.quick_add_product(nazwa, ilosc, jednostka, data_waznosci)
-                messagebox.showinfo(
-                    "Sukces",
-                    f"⚡ Produkt '{result['nazwa']}' dodany w trybie Quick Add!",
-                )
-                self.result = result
-                self.destroy()
-        except Exception as e:
-            messagebox.showerror("Błąd", f"Nie udało się dodać produktu: {str(e)}")
-
-    def on_cancel(self):
-        """Anuluje dodawanie"""
-        if self.autocomplete_listbox:
-            self.autocomplete_listbox.destroy()
-        self.destroy()
-
-
-class AddProductDialog(ctk.CTkToplevel):
-    """Okno do ręcznego dodawania produktów"""
-
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.title("Dodaj produkt ręcznie")
-        self.geometry("500x400")
-        self.result = None
-
-        SessionLocal = sessionmaker(bind=engine)
-        self.session = SessionLocal()
-
-        # Form fields
-        form_frame = ctk.CTkFrame(self)
-        form_frame.pack(fill="both", expand=True, padx=AppSpacing.LG, pady=AppSpacing.LG)
-
-        ctk.CTkLabel(form_frame, text="Nazwa produktu:", font=("Arial", 14)).grid(
-            row=0, column=0, sticky="w", pady=AppSpacing.SM
-        )
-        self.name_entry = ctk.CTkEntry(form_frame, width=300)
-        self.name_entry.grid(row=0, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM)
-
-        ctk.CTkLabel(form_frame, text="Ilość:", font=("Arial", 14)).grid(
-            row=1, column=0, sticky="w", pady=AppSpacing.SM
-        )
-        self.quantity_entry = ctk.CTkEntry(form_frame, width=300)
-        self.quantity_entry.insert(0, "1.0")
-        self.quantity_entry.grid(row=1, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM)
-
-        ctk.CTkLabel(form_frame, text="Jednostka:", font=("Arial", 14)).grid(
-            row=2, column=0, sticky="w", pady=AppSpacing.SM
-        )
-        self.unit_entry = ctk.CTkEntry(form_frame, width=300)
-        self.unit_entry.insert(0, "szt")
-        self.unit_entry.grid(row=2, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM)
-
-        ctk.CTkLabel(
-            form_frame, text="Data ważności (YYYY-MM-DD):", font=("Arial", 14)
-        ).grid(row=3, column=0, sticky="w", pady=AppSpacing.SM)
-        self.expiry_entry = ctk.CTkEntry(
-            form_frame, width=300, placeholder_text="YYYY-MM-DD"
-        )
-        default_expiry = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
-        self.expiry_entry.insert(0, default_expiry)
-        self.expiry_entry.grid(row=3, column=1, pady=AppSpacing.SM, padx=AppSpacing.SM)
-
-        # Buttons
-        button_frame = ctk.CTkFrame(self)
-        button_frame.pack(fill="x", padx=AppSpacing.LG, pady=AppSpacing.SM)
-
-        btn_add = ctk.CTkButton(
-            button_frame,
-            text="Dodaj",
-            command=self.add_product,
-            fg_color=AppColors.SUCCESS,
-            hover_color=App._adjust_color(AppColors.SUCCESS, -15),
-            width=200,
-        )
-        btn_add.pack(side="right", padx=AppSpacing.SM)
-        ToolTip(btn_add, "Zapisz produkt w magazynie")
-
-        btn_cancel = ctk.CTkButton(
-            button_frame, text="Anuluj", command=self.on_cancel, width=200
-        )
-        btn_cancel.pack(side="left", padx=AppSpacing.SM)
-        ToolTip(btn_cancel, "Anuluj i zamknij")
-
-        self.protocol("WM_DELETE_WINDOW", self.on_cancel)
-        # Użyj after() aby upewnić się, że okno jest widoczne przed grab_set
-        self.after(100, self.grab_set)
-
-    def add_product(self):
-        """Dodaje produkt do bazy"""
-        nazwa = self.name_entry.get().strip()
-        if not nazwa:
-            messagebox.showerror("Błąd", "Nazwa produktu nie może być pusta")
-            return
-
-        try:
-            ilosc = Decimal(self.quantity_entry.get().replace(",", "."))
-            if ilosc <= 0:
-                messagebox.showerror("Błąd", "Ilość musi być większa od zera")
-                return
-        except ValueError:
-            messagebox.showerror("Błąd", "Nieprawidłowa ilość")
-            return
-
-        jednostka = self.unit_entry.get().strip() or "szt"
-
-        data_waznosci_str = self.expiry_entry.get().strip()
-        data_waznosci = None
-        if data_waznosci_str:
-            try:
-                data_waznosci = datetime.strptime(data_waznosci_str, "%Y-%m-%d").date()
-            except ValueError:
-                messagebox.showerror(
-                    "Błąd", "Nieprawidłowy format daty. Użyj YYYY-MM-DD"
-                )
-                return
-
-        # Znajdź lub utwórz produkt
-        produkt = (
-            self.session.query(Produkt).filter_by(znormalizowana_nazwa=nazwa).first()
-        )
-        if not produkt:
-            # Utwórz nowy produkt (bez kategorii na razie)
-            produkt = Produkt(znormalizowana_nazwa=nazwa)
-            self.session.add(produkt)
-            self.session.flush()
-
-        # Dodaj do magazynu
-        stan = StanMagazynowy(
-            produkt_id=produkt.produkt_id,
-            ilosc=ilosc,
-            jednostka_miary=jednostka,
-            data_waznosci=data_waznosci,
-        )
-        self.session.add(stan)
-        self.session.commit()
-
-        messagebox.showinfo("Sukces", f"Dodano produkt '{nazwa}' do magazynu")
-        self.result = True
-        self.destroy()
-
-    def on_cancel(self):
-        self.session.close()
-        self.destroy()
-
-
-class BielikChatDialog(ctk.CTkToplevel):
-    """Okno czatu z asystentem Bielik"""
-
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.title("🦅 Bielik - Asystent Kulinarny")
-        self.geometry("800x600")
-        self.assistant = None
-
-        # Header
-        header_frame = ctk.CTkFrame(self)
-        header_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
-        ctk.CTkLabel(
-            header_frame,
-            text="🦅 Bielik - Asystent Kulinarny",
-            font=("Arial", 18, "bold"),
-        ).pack(pady=AppSpacing.SM)
-
-        # Chat area (scrollable)
-        self.chat_frame = ctk.CTkScrollableFrame(self)
-        self.chat_frame.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.XS)
-
-        # Input area
-        input_frame = ctk.CTkFrame(self)
-        input_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
-
-        self.input_entry = ctk.CTkEntry(
-            input_frame,
-            placeholder_text="Zadaj pytanie Bielikowi...",
-            font=("Arial", 14),
-        )
-        self.input_entry.pack(side="left", fill="x", expand=True, padx=AppSpacing.XS)
-        self.input_entry.bind("<Return>", lambda e: self.send_message())
-
-        self.send_button = ctk.CTkButton(
-            input_frame, text="Wyślij", command=self.send_message, width=100
-        )
-        self.send_button.pack(side="right", padx=AppSpacing.XS)
-        ToolTip(self.send_button, "Wyślij wiadomość do asystenta")
-
-        # Status label
-        self.status_label = ctk.CTkLabel(self, text="Gotowy", font=("Arial", 10))
-        self.status_label.pack(pady=AppSpacing.XS)
-
-        # Inicjalizuj asystenta
-        self.init_assistant()
-
-        # Dodaj powitanie
-        self.add_message(
-            "Bielik",
-            "Cześć! Jestem Bielik, twój asystent kulinarny. Jak mogę Ci pomóc?",
-        )
-
-        self.protocol("WM_DELETE_WINDOW", self.on_close)
-
-    def init_assistant(self):
-        """Inicjalizuje asystenta Bielik"""
-        try:
-            self.assistant = BielikAssistant()
-            self.status_label.configure(text="Gotowy", text_color=AppColors.SUCCESS)
-        except Exception as e:
-            self.status_label.configure(text=f"Błąd: {e}", text_color=AppColors.ERROR)
-            messagebox.showerror("Błąd", f"Nie udało się połączyć z bazą danych: {e}")
-
-    def add_message(self, sender: str, message: str):
-        """Dodaje wiadomość do czatu"""
-        # Ramka dla wiadomości
-        msg_frame = ctk.CTkFrame(self.chat_frame)
-        msg_frame.pack(fill="x", padx=AppSpacing.XS, pady=AppSpacing.XS)
-
-        # Kolor w zależności od nadawcy
-        if sender == "Bielik":
-            msg_frame.configure(fg_color=AppColors.CHAT_BOT)
-            sender_text = f"{Icons.BEAR} Bielik:"
-        else:
-            msg_frame.configure(fg_color=AppColors.CHAT_USER)
-            sender_text = "Ty:"
-
-        # Label z wiadomością
-        msg_label = ctk.CTkLabel(
-            msg_frame,
-            text=f"{sender_text} {message}",
-            font=("Arial", 12),
-            wraplength=700,
-            justify="left",
-            anchor="w",
-        )
-        msg_label.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.XS)
-
-        # Przewiń do dołu
-        self.chat_frame.update()
-        self.chat_frame._parent_canvas.yview_moveto(1.0)
-
-    def send_message(self):
-        """Wysyła wiadomość do Bielika"""
-        question = self.input_entry.get().strip()
-        if not question:
-            return
-
-        # Wyczyść pole wejściowe
-        self.input_entry.delete(0, "end")
-
-        # Dodaj wiadomość użytkownika
-        self.add_message("User", question)
-
-        # Wyłącz przycisk podczas przetwarzania
-        self.send_button.configure(state="disabled")
-        self.status_label.configure(text="Bielik myśli...", text_color=AppColors.WARNING)
-
-        # Uruchom w osobnym wątku, żeby nie blokować GUI
-        import threading
-
-        thread = threading.Thread(target=self.process_question, args=(question,))
-        thread.daemon = True
-        thread.start()
-
-    def process_question(self, question: str):
-        """Przetwarza pytanie w osobnym wątku"""
-        try:
-            if not self.assistant:
-                self.init_assistant()
-
-            answer = self.assistant.answer_question(question)
-
-            # Aktualizuj GUI w głównym wątku
-            self.after(0, lambda: self.add_message("Bielik", answer))
-            self.after(
-                0,
-                lambda: self.status_label.configure(text="Gotowy", text_color=AppColors.SUCCESS),
-            )
-            self.after(0, lambda: self.send_button.configure(state="normal"))
-        except Exception as e:
-            error_msg = f"Przepraszam, wystąpił błąd: {str(e)}"
-            self.after(0, lambda: self.add_message("Bielik", error_msg))
-            self.after(
-                0, lambda: self.status_label.configure(text="Błąd", text_color=AppColors.ERROR)
-            )
-            self.after(0, lambda: self.send_button.configure(state="normal"))
-
-    def on_close(self):
-        """Zamyka okno i zwalnia zasoby"""
-        if self.assistant:
-            self.assistant.close()
-        self.destroy()
-
-
-class SettingsDialog(ctk.CTkToplevel):
-    """Okno ustawień - edycja promptów systemowych"""
-
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.title("⚙️ Ustawienia - Prompty Systemowe")
-        self.geometry("900x700")
-
-        # Header
-        header_frame = ctk.CTkFrame(self)
-        header_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
-        ctk.CTkLabel(
-            header_frame,
-            text="⚙️ Ustawienia Promptów Systemowych Bielika",
-            font=("Arial", 18, "bold"),
-        ).pack(pady=AppSpacing.SM)
-
-        # Scrollable frame dla promptów
-        scrollable = ctk.CTkScrollableFrame(self)
-        scrollable.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.XS)
-
-        # --- Sekcja OCR ---
-        ocr_frame = ctk.CTkFrame(scrollable)
-        ocr_frame.grid(row=0, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
-        ocr_frame.grid_columnconfigure(1, weight=1)
-
-        ctk.CTkLabel(ocr_frame, text="Silnik OCR:", font=("Arial", 12, "bold")).grid(
-            row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w"
-        )
-        self.ocr_engine_var = ctk.StringVar(value=Config.OCR_ENGINE)
-        self.ocr_engine_combo = ctk.CTkComboBox(
-            ocr_frame,
-            values=["tesseract", "easyocr"],
-            variable=self.ocr_engine_var,
-            width=200,
-        )
-        self.ocr_engine_combo.grid(row=0, column=1, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w")
-
-        self.use_gpu_var = ctk.BooleanVar(value=Config.USE_GPU_OCR)
-        self.use_gpu_check = ctk.CTkCheckBox(
-            ocr_frame,
-            text="Użyj GPU dla EasyOCR (jeśli dostępne)",
-            variable=self.use_gpu_var,
-        )
-        self.use_gpu_check.grid(
-            row=1, column=0, columnspan=2, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w"
-        )
-
-        # --- Sekcja Promptów ---
-        ctk.CTkLabel(
-            scrollable, text="Prompty Systemowe", font=("Arial", 16, "bold")
-        ).grid(row=1, column=0, sticky="w", padx=AppSpacing.SM, pady=(20, 5))
-
-        # Wczytaj prompty
-        self.prompts = load_prompts()
-        self.text_boxes = {}
-
-        # Opisy promptów
-        prompt_descriptions = {
-            "answer_question": "Prompt dla odpowiadania na pytania użytkownika",
-            "suggest_dishes": "Prompt dla proponowania potraw",
-            "shopping_list": "Prompt dla generowania list zakupów",
-        }
-
-        # Utwórz pola tekstowe dla każdego promptu
-        for i, (key, value) in enumerate(self.prompts.items()):
-            row_idx = i * 2 + 2  # Offset for OCR section
-
-            # Label z opisem
-            label = ctk.CTkLabel(
-                scrollable,
-                text=prompt_descriptions.get(key, key),
-                font=("Arial", 14, "bold"),
-            )
-            label.grid(row=row_idx, column=0, sticky="w", padx=AppSpacing.SM, pady=(10, 5))
-
-            # Textbox dla promptu
-            textbox = ctk.CTkTextbox(scrollable, height=150, font=("Arial", 11))
-            textbox.insert("1.0", value)
-            textbox.grid(row=row_idx + 1, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.XS)
-            scrollable.grid_columnconfigure(0, weight=1)
-
-            self.text_boxes[key] = textbox
-
-        # Footer z przyciskami
-        footer_frame = ctk.CTkFrame(self)
-        footer_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
-
-        btn_save = ctk.CTkButton(
-            footer_frame,
-            text=f"{Icons.SAVE} Zapisz",
-            command=self.save_prompts,
-            fg_color=AppColors.SUCCESS,
-            hover_color=App._adjust_color(AppColors.SUCCESS, -15),
-            width=150,
-        )
-        btn_save.pack(side="left", padx=AppSpacing.XS)
-        ToolTip(btn_save, "Zapisz zmiany w ustawieniach")
-
-        btn_reset = ctk.CTkButton(
-            footer_frame,
-            text=f"{Icons.REFRESH} Resetuj do domyślnych",
-            command=self.reset_prompts,
-            fg_color=AppColors.WARNING,
-            hover_color=App._adjust_color(AppColors.WARNING, -15),
-            width=200,
-        )
-        btn_reset.pack(side="left", padx=AppSpacing.XS)
-        ToolTip(btn_reset, "Przywróć domyślne prompty i ustawienia")
-
-        btn_cancel = ctk.CTkButton(
-            footer_frame,
-            text="Anuluj",
-            command=self.destroy,
-            fg_color=AppColors.ERROR,
-            hover_color=App._adjust_color(AppColors.ERROR, -15),
-            width=150,
-        )
-        btn_cancel.pack(side="right", padx=AppSpacing.XS)
-        ToolTip(btn_cancel, "Zamknij bez zapisywania")
-        self.protocol("WM_DELETE_WINDOW", self.destroy)
-        self.after(100, self.grab_set)
-
-    def save_prompts(self):
-        """Zapisuje ustawienia i prompty"""
-        try:
-            # 1. Zapisz ustawienia OCR do .env
-            import os
-
-            env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
-
-            # Wczytaj obecną zawartość .env
-            env_lines = []
-            if os.path.exists(env_path):
-                with open(env_path, "r") as f:
-                    env_lines = f.readlines()
-
-            # Aktualizuj lub dodaj zmienne
-            new_ocr_engine = self.ocr_engine_var.get()
-            new_use_gpu = str(self.use_gpu_var.get()).lower()
-
-            updated_engine = False
-            updated_gpu = False
-
-            new_lines = []
-            for line in env_lines:
-                if line.startswith("OCR_ENGINE="):
-                    new_lines.append(f"OCR_ENGINE={new_ocr_engine}\n")
-                    updated_engine = True
-                elif line.startswith("USE_GPU_OCR="):
-                    new_lines.append(f"USE_GPU_OCR={new_use_gpu}\n")
-                    updated_gpu = True
-                else:
-                    new_lines.append(line)
-
-            if not updated_engine:
-                new_lines.append(f"OCR_ENGINE={new_ocr_engine}\n")
-            if not updated_gpu:
-                new_lines.append(f"USE_GPU_OCR={new_use_gpu}\n")
-
-            with open(env_path, "w") as f:
-                f.writelines(new_lines)
-
-            # Aktualizuj Config w pamięci
-            Config.OCR_ENGINE = new_ocr_engine
-            Config.USE_GPU_OCR = self.use_gpu_var.get()
-
-            # 2. Zapisz prompty
-            new_prompts = {}
-            for key, textbox in self.text_boxes.items():
-                new_prompts[key] = textbox.get("1.0", "end-1c").strip()
-
-            if save_prompts(new_prompts):
-                messagebox.showinfo(
-                    "Sukces",
-                    "Ustawienia i prompty zostały zapisane!\nZmiana silnika OCR może wymagać restartu aplikacji.",
-                )
-                self.destroy()
-            else:
-                messagebox.showerror("Błąd", "Nie udało się zapisać promptów.")
-        except Exception as e:
-            messagebox.showerror("Błąd", f"Wystąpił błąd podczas zapisywania: {e}")
-
-    def reset_prompts(self):
-        """Resetuje prompty do wartości domyślnych"""
-        if messagebox.askyesno(
-            "Potwierdzenie",
-            "Czy na pewno chcesz zresetować wszystkie prompty do wartości domyślnych?",
-        ):
-            try:
-                reset_prompts_to_default()
-                # Odśwież okno
-                self.destroy()
-                # Otwórz ponownie
-                SettingsDialog(self.master)
-            except Exception as e:
-                messagebox.showerror("Błąd", f"Nie udało się zresetować promptów: {e}")
 
 
 class App(ctk.CTk):
-    @staticmethod
-    def _adjust_color(color, amount):
-        """Przyciemnia lub rozjaśnia kolor o określoną wartość"""
-        # Prosta implementacja - można użyć biblioteki colorsys dla lepszej kontroli
-        try:
-            # Konwertuj hex na RGB
-            color = color.lstrip("#")
-            rgb = tuple(int(color[i : i + 2], 16) for i in (0, 2, 4))
-            # Dostosuj jasność
-            new_rgb = tuple(max(0, min(255, c + amount)) for c in rgb)
-            # Konwertuj z powrotem na hex
-            return "#%02x%02x%02x" % new_rgb
-        except Exception as e:
-            logger.warning(f"Error adjusting color {color}: {e}")
-            return color
+
 
     def __init__(self):
         super().__init__()
@@ -1341,7 +143,12 @@ class App(ctk.CTk):
         self.processing_lock = threading.Lock()
         self.is_processing = False
         self.inventory_sort = ("data_waznosci", False) # (column, desc)
-        
+        self.history_sort = ("date", True) # (column, desc)
+    
+        # Notifications
+        self.notifications = NotificationToast(self)
+        self.notifications_dialog = NotificationDialog(self)
+    
         # Register dialogs for lazy loading
         dialog_manager.register_dialog("cooking", CookingDialog)
         dialog_manager.register_dialog("add_product", AddProductDialog)
@@ -1375,7 +182,7 @@ class App(ctk.CTk):
             command=self.show_receipts_tab,
             width=120,
             fg_color=AppColors.PRIMARY,
-            hover_color=App._adjust_color(AppColors.PRIMARY, -15),
+            hover_color=adjust_color(AppColors.PRIMARY, -15),
         )
         btn_receipts.pack(side="left", padx=AppSpacing.XS)
         ToolTip(btn_receipts, "Wyświetl analitykę zakupów i paragony")
@@ -1386,7 +193,7 @@ class App(ctk.CTk):
             command=self.show_cooking_dialog,
             width=120,
             fg_color=AppColors.PRIMARY,
-            hover_color=App._adjust_color(AppColors.PRIMARY, -15),
+            hover_color=adjust_color(AppColors.PRIMARY, -15),
         )
         btn_cooking.pack(side="left", padx=AppSpacing.XS)
         ToolTip(btn_cooking, "Zaznacz produkty do zużycia podczas gotowania")
@@ -1397,7 +204,7 @@ class App(ctk.CTk):
             command=self.show_add_product_dialog,
             width=120,
             fg_color=AppColors.PRIMARY,
-            hover_color=App._adjust_color(AppColors.PRIMARY, -15),
+            hover_color=adjust_color(AppColors.PRIMARY, -15),
         )
         btn_add.pack(side="left", padx=AppSpacing.XS)
         ToolTip(btn_add, "Dodaj produkt ręcznie do magazynu")
@@ -1408,7 +215,7 @@ class App(ctk.CTk):
             command=self.show_inventory,
             width=120,
             fg_color=AppColors.PRIMARY,
-            hover_color=App._adjust_color(AppColors.PRIMARY, -15),
+            hover_color=adjust_color(AppColors.PRIMARY, -15),
         )
         btn_inventory.pack(side="left", padx=AppSpacing.XS)
         ToolTip(btn_inventory, "Przeglądaj i edytuj stan magazynu")
@@ -1419,7 +226,7 @@ class App(ctk.CTk):
             command=self.show_bielik_chat,
             width=120,
             fg_color=AppColors.PRIMARY,
-            hover_color=App._adjust_color(AppColors.PRIMARY, -15),
+            hover_color=adjust_color(AppColors.PRIMARY, -15),
         )
         btn_bielik.pack(side="left", padx=AppSpacing.XS)
         ToolTip(btn_bielik, "Otwórz czat z asystentem kulinarnym Bielik")
@@ -1430,7 +237,7 @@ class App(ctk.CTk):
             command=self.show_meal_planner,
             width=120,
             fg_color=AppColors.PRIMARY,
-            hover_color=App._adjust_color(AppColors.PRIMARY, -15),
+            hover_color=adjust_color(AppColors.PRIMARY, -15),
         )
         btn_meal_planner.pack(side="left", padx=AppSpacing.XS)
         ToolTip(btn_meal_planner, "Tygodniowy planer posiłków")
@@ -1441,7 +248,7 @@ class App(ctk.CTk):
             command=self.show_settings,
             width=120,
             fg_color=AppColors.PRIMARY,
-            hover_color=App._adjust_color(AppColors.PRIMARY, -15),
+            hover_color=adjust_color(AppColors.PRIMARY, -15),
         )
         btn_settings.pack(side="left", padx=AppSpacing.XS)
         ToolTip(btn_settings, "Ustawienia i konfiguracja promptów")
@@ -1487,7 +294,7 @@ class App(ctk.CTk):
             command=self.show_add_receipt_dialog,
             width=150,
             fg_color=AppColors.SUCCESS,
-            hover_color=self._adjust_color(AppColors.SUCCESS, -15),
+            hover_color=adjust_color(AppColors.SUCCESS, -15),
         )
         btn_add_receipt.pack(side="left", padx=AppSpacing.XS)
         ToolTip(btn_add_receipt, "Dodaj nowy paragon do przetworzenia")
@@ -1498,7 +305,7 @@ class App(ctk.CTk):
             command=self.refresh_analytics,
             width=100,
             fg_color=AppColors.INFO,
-            hover_color=self._adjust_color(AppColors.INFO, -15),
+            hover_color=adjust_color(AppColors.INFO, -15),
         )
         btn_refresh.pack(side="left", padx=AppSpacing.XS)
         ToolTip(btn_refresh, "Odśwież dane analityki")
@@ -1623,7 +430,7 @@ class App(ctk.CTk):
             height=60,
             font=("Arial", 24, "bold"),
             fg_color=AppColors.SUCCESS,
-            hover_color=self._adjust_color(AppColors.SUCCESS, -20),
+            hover_color=adjust_color(AppColors.SUCCESS, -20),
             corner_radius=30,
             command=self.show_quick_add_dialog,
         )
@@ -1633,6 +440,9 @@ class App(ctk.CTk):
 
         # Show receipts tab by default
         self.show_receipts_tab()
+        
+        # --- HOTKEYS ---
+        self.bind("<Control-n>", lambda event: self.show_quick_add_dialog())
 
     def show_receipts_tab(self):
         """Pokazuje zakładkę paragonów z analityką"""
@@ -1681,6 +491,17 @@ class App(ctk.CTk):
             self.log("INFO: Produkt został dodany do magazynu")
         dialog_manager.cleanup()
         force_garbage_collection()
+
+    def toggle_history_sort(self, column):
+        """Przełącza sortowanie historii paragonów"""
+        current_col, current_desc = self.history_sort
+        if current_col == column:
+            # Toggle desc
+            self.history_sort = (column, not current_desc)
+        else:
+            # New col, default asc
+            self.history_sort = (column, False)
+        self.refresh_analytics()
 
     def toggle_inventory_sort(self, inv_window, session, column):
         current_col, current_desc = self.inventory_sort
@@ -1736,7 +557,7 @@ class App(ctk.CTk):
                 inv_window, session, inventory_items
             ),
             fg_color=AppColors.SUCCESS,
-            hover_color=App._adjust_color(AppColors.SUCCESS, -15),
+            hover_color=adjust_color(AppColors.SUCCESS, -15),
             width=150,
         )
         save_btn.pack(side="left", padx=AppSpacing.XS)
@@ -1746,7 +567,7 @@ class App(ctk.CTk):
             text=f"{Icons.REFRESH} Odśwież",
             command=lambda: self.refresh_inventory_window(inv_window, session),
             fg_color=AppColors.INFO,
-            hover_color=App._adjust_color(AppColors.INFO, -15),
+            hover_color=adjust_color(AppColors.INFO, -15),
             width=150,
         ).pack(side="left", padx=AppSpacing.XS)
 
@@ -1875,7 +696,7 @@ class App(ctk.CTk):
                         inv_window, session, s
                     ),
                     fg_color=AppColors.ERROR,
-                    hover_color=App._adjust_color(AppColors.ERROR, -15),
+                    hover_color=adjust_color(AppColors.ERROR, -15),
                     width=80,
                     height=25,
                 )
@@ -2017,7 +838,7 @@ class App(ctk.CTk):
                     text="🗑️",
                     command=lambda s=stan: self.mark_as_waste(inv_window, session, s),
                     fg_color=AppColors.WASTE,
-                    hover_color=App._adjust_color(AppColors.WASTE, -15),
+                    hover_color=adjust_color(AppColors.WASTE, -15),
                     width=40,
                     height=25,
                 )
@@ -2032,7 +853,7 @@ class App(ctk.CTk):
                         inv_window, session, s
                     ),
                     fg_color=AppColors.ERROR,
-                    hover_color=App._adjust_color(AppColors.ERROR, -15),
+                    hover_color=adjust_color(AppColors.ERROR, -15),
                     width=80,
                     height=25,
                 )
@@ -2088,19 +909,13 @@ class App(ctk.CTk):
                 ilosc_str = item["ilosc_entry"].get().strip()
                 if not ilosc_str:
                     session.rollback()
-                    messagebox.showerror(
-                        "Błąd",
-                        f"Ilość nie może być pusta dla produktu {stan.produkt.znormalizowana_nazwa}",
-                    )
+                    self.notifications.show_error(f"Ilość nie może być pusta dla produktu {stan.produkt.znormalizowana_nazwa}")
                     return
                 try:
                     nowa_ilosc = Decimal(ilosc_str.replace(",", "."))
                     if nowa_ilosc < 0:
                         session.rollback()
-                        messagebox.showerror(
-                            "Błąd",
-                            f"Ilość nie może być ujemna dla produktu {stan.produkt.znormalizowana_nazwa}",
-                        )
+                        self.notifications.show_error(f"Ilość nie może być ujemna dla produktu {stan.produkt.znormalizowana_nazwa}")
                         return
                     if nowa_ilosc == 0:
                         # Usuń produkt z magazynu jeśli ilość = 0
@@ -2109,10 +924,7 @@ class App(ctk.CTk):
                     stan.ilosc = nowa_ilosc
                 except (ValueError, InvalidOperation) as e:
                     session.rollback()
-                    messagebox.showerror(
-                        "Błąd",
-                        f"Nieprawidłowa ilość '{ilosc_str}' dla produktu {stan.produkt.znormalizowana_nazwa}",
-                    )
+                    self.notifications.show_error(f"Nieprawidłowa ilość '{ilosc_str}' dla produktu {stan.produkt.znormalizowana_nazwa}")
                     return
 
                 # Aktualizuj jednostkę
@@ -2127,10 +939,7 @@ class App(ctk.CTk):
                         ).date()
                     except ValueError:
                         session.rollback()
-                        messagebox.showerror(
-                            "Błąd",
-                            f"Nieprawidłowy format daty dla produktu {stan.produkt.znormalizowana_nazwa}\nUżyj formatu YYYY-MM-DD",
-                        )
+                        self.notifications.show_error(f"Nieprawidłowy format daty dla produktu {stan.produkt.znormalizowana_nazwa}\nUżyj formatu YYYY-MM-DD")
                         return
                 else:
                     stan.data_waznosci = None
@@ -2139,19 +948,19 @@ class App(ctk.CTk):
                 stan.zamrozone = item["zamrozone_checkbox"].get()
 
             session.commit()
-            messagebox.showinfo("Sukces", "Zmiany zostały zapisane!")
+            self.notifications.show_success("Zmiany zostały zapisane!")
             # Odśwież okno
             self.refresh_inventory_window(inv_window, session)
         except Exception as e:
             session.rollback()
-            messagebox.showerror("Błąd", f"Nie udało się zapisać zmian: {e}")
+            self.notifications.show_error(f"Nie udało się zapisać zmian: {e}")
 
     def mark_as_waste(self, inv_window, session, stan):
         """Oznacza produkt jako zmarnowany"""
         import sqlite3
         from datetime import date
 
-        if messagebox.askyesno(
+        if self.notifications_dialog.confirm(
             "Potwierdzenie",
             f"Czy na pewno chcesz oznaczyć {stan.produkt.znormalizowana_nazwa} jako zmarnowany?",
         ):
@@ -2188,33 +997,28 @@ class App(ctk.CTk):
                 session.delete(stan)
                 session.commit()
 
-                messagebox.showinfo(
-                    "Sukces",
-                    f"Produkt '{stan.produkt.znormalizowana_nazwa}' został oznaczony jako zmarnowany",
-                )
+                self.notifications.show_success(f"Produkt '{stan.produkt.znormalizowana_nazwa}' został oznaczony jako zmarnowany")
                 # Odśwież okno
                 self.refresh_inventory_window(inv_window, session)
             except Exception as e:
                 session.rollback()
-                messagebox.showerror(
-                    "Błąd", f"Nie udało się oznaczyć produktu jako zmarnowany: {e}"
-                )
+                self.notifications.show_error(f"Nie udało się oznaczyć produktu jako zmarnowany: {e}")
 
     def delete_inventory_item(self, inv_window, session, stan):
         """Usuwa produkt z magazynu"""
-        if messagebox.askyesno(
+        if self.notifications_dialog.confirm(
             "Potwierdzenie",
             f"Czy na pewno chcesz usunąć {stan.produkt.znormalizowana_nazwa} z magazynu?",
         ):
             try:
                 session.delete(stan)
                 session.commit()
-                messagebox.showinfo("Sukces", "Produkt został usunięty z magazynu")
+                self.notifications.show_success("Produkt został usunięty z magazynu")
                 # Odśwież okno
                 self.refresh_inventory_window(inv_window, session)
             except Exception as e:
                 session.rollback()
-                messagebox.showerror("Błąd", f"Nie udało się usunąć produktu: {e}")
+                self.notifications.show_error(f"Nie udało się usunąć produktu: {e}")
 
     def refresh_inventory_window(self, inv_window, session):
         """Odświeża okno magazynu"""
@@ -2386,7 +1190,7 @@ class App(ctk.CTk):
                         text="📋 Zobacz wszystkie wygasające produkty",
                         command=self.show_expiring_products_details,
                         fg_color=AppColors.INFO,
-                        hover_color=self._adjust_color(AppColors.INFO, -15),
+                        hover_color=adjust_color(AppColors.INFO, -15),
                     )
                     btn_details.pack(side="left", padx=AppSpacing.XS)
 
@@ -2395,7 +1199,7 @@ class App(ctk.CTk):
                         text="🦅 Zapytaj Bielika: Co zrobić z wygasającymi?",
                         command=self.ask_bielik_about_expiring,
                         fg_color=AppColors.PRIMARY,
-                        hover_color=self._adjust_color(AppColors.PRIMARY, -15),
+                        hover_color=adjust_color(AppColors.PRIMARY, -15),
                     )
                     btn_bielik_suggest.pack(side="left", padx=AppSpacing.XS)
 
@@ -2447,10 +1251,7 @@ class App(ctk.CTk):
                 ).pack(pady=AppSpacing.SM)
 
         except Exception as e:
-            messagebox.showerror(
-                "Błąd",
-                f"Nie udało się uzyskać sugestii od Bielika: {str(e)}",
-            )
+            self.notifications.show_error(f"Nie udało się uzyskać sugestii od Bielika: {str(e)}")
 
     def show_expiring_products_details(self):
         """Pokazuje szczegółowy widok wygasających produktów"""
@@ -2774,38 +1575,76 @@ class App(ctk.CTk):
                 separator5.grid(row=9, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.XS)
                 
                 # Ostatnie paragony (card-based)
-                recent_frame = ctk.CTkFrame(
+                # --- Historia Paragonów (Tabela z sortowaniem) ---
+                history_frame = ctk.CTkFrame(
                     self.analytics_scrollable,
                     border_width=1,
                     border_color=AppColors.BORDER_DARK
                 )
-                recent_frame.grid(row=10, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
-                recent_frame.grid_columnconfigure(0, weight=1)
+                history_frame.grid(row=10, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
+                history_frame.grid_columnconfigure(0, weight=1)
 
                 ctk.CTkLabel(
-                    recent_frame,
-                    text="📄 Ostatnie Paragony",
+                    history_frame,
+                    text=f"{Icons.RECEIPT} Historia Paragonów",
                     font=("Arial", 16, "bold"),
-                ).grid(row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w")
+                ).pack(padx=AppSpacing.SM, pady=AppSpacing.SM, anchor="w")
 
-                recent = analytics.get_recent_receipts(limit=10)
-                if recent:
-                    recent_text = "\n".join(
-                        [
-                            f"{i+1}. {rec['date']} - {rec['store']}: {rec['total']:.2f} PLN ({rec['items_count']} pozycji)"
-                            for i, rec in enumerate(recent)
-                        ]
+                # Headers
+                h_cols = [
+                    ("Data", "date", 120),
+                    ("Sklep", "store", 200),
+                    ("Suma", "total", 100),
+                    ("Pozycje", "items", 80),
+                ]
+                
+                header_row = ctk.CTkFrame(history_frame, fg_color="transparent")
+                header_row.pack(fill="x", padx=AppSpacing.SM, pady=(0, 5))
+                
+                current_sort, is_desc = self.history_sort
+                
+                for title, key, width in h_cols:
+                    marker = ""
+                    if current_sort == key:
+                        marker = " ▼" if is_desc else " ▲"
+                    
+                    btn = ctk.CTkButton(
+                        header_row,
+                        text=f"{title}{marker}",
+                        font=("Arial", 12, "bold"),
+                        command=lambda k=key: self.toggle_history_sort(k),
+                        fg_color="transparent",
+                        hover_color=AppColors.BG_DARK,
+                        width=width,
+                        anchor="w"
                     )
-                else:
-                    recent_text = "Brak danych"
+                    btn.pack(side="left", padx=2)
 
-                ctk.CTkLabel(
-                    recent_frame,
-                    text=recent_text,
-                    font=("Arial", 12),
-                    justify="left",
-                    anchor="w",
-                ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.SM, sticky="w")
+                # Content - używamy get_receipts z sortowaniem
+                receipts = analytics.get_receipts(
+                    limit=50, 
+                    sort_by=current_sort, 
+                    sort_desc=is_desc
+                )
+                
+                if not receipts:
+                    ctk.CTkLabel(history_frame, text="Brak paragonów", font=("Arial", 12)).pack(pady=10)
+                
+                for i, r in enumerate(receipts):
+                    row = ctk.CTkFrame(
+                        history_frame, 
+                        fg_color=AppColors.SURFACE_DARK if i % 2 == 0 else "transparent"
+                    )
+                    row.pack(fill="x", padx=AppSpacing.SM, pady=1)
+                    
+                    # Data
+                    ctk.CTkLabel(row, text=r["date"], width=120, anchor="w").pack(side="left", padx=2)
+                    # Sklep
+                    ctk.CTkLabel(row, text=r["store"], width=200, anchor="w").pack(side="left", padx=2)
+                    # Suma
+                    ctk.CTkLabel(row, text=f"{r['total']:.2f} PLN", width=100, anchor="w").pack(side="left", padx=2)
+                    # Pozycje
+                    ctk.CTkLabel(row, text=f"{r['items_count']} poz.", width=80, anchor="w").pack(side="left", padx=2)
 
         except Exception as e:
             ctk.CTkLabel(
@@ -2843,7 +1682,7 @@ class App(ctk.CTk):
             command=self.generate_meal_plan,
             width=150,
             fg_color=AppColors.SUCCESS,
-            hover_color=self._adjust_color(AppColors.SUCCESS, -15),
+            hover_color=adjust_color(AppColors.SUCCESS, -15),
         )
         btn_generate.pack(side="left", padx=AppSpacing.XS)
         ToolTip(btn_generate, "Wygeneruj nowy plan posiłków na 7 dni")
@@ -3180,7 +2019,7 @@ class App(ctk.CTk):
 
         # Acquire lock to prevent concurrent processing
         if not self.processing_lock.acquire(blocking=False):
-            messagebox.showwarning("Uwaga", "Przetwarzanie już trwa. Proszę poczekać na zakończenie.")
+            self.notifications.show_warning("Przetwarzanie już trwa. Proszę poczekać na zakończenie.")
             return
         
         try:
@@ -3192,6 +2031,7 @@ class App(ctk.CTk):
 
             self.set_ui_state("disabled")
             self.process_button.configure(text="⏳ Przetwarzanie...")
+            self.update_status("🔄 Inicjalizacja przetwarzania...", -1)  # Indeterminate progress
             self.log_textbox.configure(state="normal")
             self.log_textbox.delete("1.0", "end")
             self.log_textbox.configure(state="disabled")
@@ -3216,7 +2056,7 @@ class App(ctk.CTk):
             self.is_processing = False
             self.processing_lock.release()
             logger.error(f"Error starting processing: {e}")
-            messagebox.showerror("Błąd", f"Nie udało się rozpocząć przetwarzania: {e}")
+            self.notifications.show_error(f"Nie udało się rozpocząć przetwarzania: {e}")
     
     def _run_processing_with_cleanup(self, file_path, llm_model):
         """Wrapper for processing pipeline that ensures lock is released."""
