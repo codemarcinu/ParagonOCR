@@ -31,3 +31,4 @@ class ParsedData(TypedDict):
     sklep_info: ParsedStoreInfo
     paragon_info: ParsedReceiptInfo
     pozycje: List[ParsedItem]
+    file_path: Optional[str]  # Ścieżka do pliku (obrazu) paragonu

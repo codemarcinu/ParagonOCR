@@ -1,6 +1,5 @@
 import customtkinter as ctk
 from tkinter import filedialog, messagebox, Toplevel
-from PIL import Image
 import threading
 import queue
 import os
@@ -9,7 +8,6 @@ from datetime import datetime, date, timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Dict
 from sqlalchemy.orm import sessionmaker, joinedload
-from sqlalchemy import desc, asc
 
 # Lokalne importy - gui.py jest w folderze głównym projektu, src jest w ReceiptParser/src
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "ReceiptParser"))
@@ -191,50 +189,9 @@ class ReviewDialog(ctk.CTkToplevel):
         self.total_entry.grid(row=0, column=5, padx=AppSpacing.XS, pady=AppSpacing.XS)
         self.total_entry.insert(0, str(parsed_data["paragon_info"]["suma_calkowita"]))
 
-
-
         # --- Body (Items) ---
-        # Kontener główny
-        self.main_container = ctk.CTkFrame(self, fg_color="transparent")
-        self.main_container.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.XS)
-
-        # Sprawdź czy mamy podgląd obrazu
-        file_path = parsed_data.get("file_path")
-        if file_path and os.path.exists(file_path):
-            # Poszerz okno dla podglądu
-            self.geometry("1400x800")
-            
-            self.main_container.grid_columnconfigure(0, weight=1) # Preview
-            self.main_container.grid_columnconfigure(1, weight=2) # Form
-            
-            # --- Left: Preview ---
-            self.preview_frame = ctk.CTkScrollableFrame(self.main_container, label_text="Podgląd Paragonu")
-            self.preview_frame.grid(row=0, column=0, sticky="nsew", padx=(0, AppSpacing.SM), pady=0)
-            
-            try:
-                img = Image.open(file_path)
-                # Resize for display (width ~400px, keep aspect ratio)
-                target_width = 450
-                aspect_ratio = img.height / img.width
-                target_height = int(target_width * aspect_ratio)
-                
-                ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=(target_width, target_height))
-                
-                self.img_label = ctk.CTkLabel(self.preview_frame, text="", image=ctk_img)
-                self.img_label.pack(fill="both", expand=True)
-            except Exception as e:
-                ctk.CTkLabel(self.preview_frame, text=f"Błąd ładowania obrazu:\n{e}").pack()
-
-            # --- Right: Form ---
-            self.form_container = ctk.CTkFrame(self.main_container, fg_color="transparent")
-            self.form_container.grid(row=0, column=1, sticky="nsew")
-            
-            self.scrollable_frame = ctk.CTkScrollableFrame(self.form_container)
-            self.scrollable_frame.pack(fill="both", expand=True)
-        else:
-            # Brak obrazu - standardowy widok
-            self.scrollable_frame = ctk.CTkScrollableFrame(self.main_container)
-            self.scrollable_frame.pack(fill="both", expand=True)
+        self.scrollable_frame = ctk.CTkScrollableFrame(self)
+        self.scrollable_frame.pack(fill="both", expand=True, padx=AppSpacing.SM, pady=AppSpacing.XS)
 
         # Headers - dodano kolumnę "Znormalizowana nazwa" i "Data ważności"
         headers = [
@@ -719,22 +676,18 @@ class QuickAddDialog(ctk.CTkToplevel):
         button_frame = ctk.CTkFrame(self)
         button_frame.pack(fill="x", padx=AppSpacing.LG, pady=AppSpacing.SM)
 
-        btn_add = ctk.CTkButton(
+        ctk.CTkButton(
             button_frame,
             text="⚡ Dodaj (Enter)",
             command=self.quick_add,
             fg_color=AppColors.SUCCESS,
             hover_color=App._adjust_color(AppColors.SUCCESS, -15),
             width=200,
-        )
-        btn_add.pack(side="right", padx=AppSpacing.SM)
-        ToolTip(btn_add, "Zatwierdź i dodaj produkt")
+        ).pack(side="right", padx=AppSpacing.SM)
 
-        btn_cancel = ctk.CTkButton(
+        ctk.CTkButton(
             button_frame, text="Anuluj (Esc)", command=self.on_cancel, width=200
-        )
-        btn_cancel.pack(side="left", padx=AppSpacing.SM)
-        ToolTip(btn_cancel, "Anuluj dodawanie")
+        ).pack(side="left", padx=AppSpacing.SM)
 
         self.bind("<Return>", lambda event: self.quick_add())
         self.bind("<Escape>", lambda event: self.on_cancel())
@@ -888,22 +841,18 @@ class AddProductDialog(ctk.CTkToplevel):
         button_frame = ctk.CTkFrame(self)
         button_frame.pack(fill="x", padx=AppSpacing.LG, pady=AppSpacing.SM)
 
-        btn_add = ctk.CTkButton(
+        ctk.CTkButton(
             button_frame,
             text="Dodaj",
             command=self.add_product,
             fg_color=AppColors.SUCCESS,
             hover_color=App._adjust_color(AppColors.SUCCESS, -15),
             width=200,
-        )
-        btn_add.pack(side="right", padx=AppSpacing.SM)
-        ToolTip(btn_add, "Zapisz produkt w magazynie")
+        ).pack(side="right", padx=AppSpacing.SM)
 
-        btn_cancel = ctk.CTkButton(
+        ctk.CTkButton(
             button_frame, text="Anuluj", command=self.on_cancel, width=200
-        )
-        btn_cancel.pack(side="left", padx=AppSpacing.SM)
-        ToolTip(btn_cancel, "Anuluj i zamknij")
+        ).pack(side="left", padx=AppSpacing.SM)
 
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
         # Użyj after() aby upewnić się, że okno jest widoczne przed grab_set
@@ -1005,7 +954,6 @@ class BielikChatDialog(ctk.CTkToplevel):
             input_frame, text="Wyślij", command=self.send_message, width=100
         )
         self.send_button.pack(side="right", padx=AppSpacing.XS)
-        ToolTip(self.send_button, "Wyślij wiadomość do asystenta")
 
         # Status label
         self.status_label = ctk.CTkLabel(self, text="Gotowy", font=("Arial", 10))
@@ -1026,9 +974,9 @@ class BielikChatDialog(ctk.CTkToplevel):
         """Inicjalizuje asystenta Bielik"""
         try:
             self.assistant = BielikAssistant()
-            self.status_label.configure(text="Gotowy", text_color=AppColors.SUCCESS)
+            self.status_label.configure(text="Gotowy", text_color="green")
         except Exception as e:
-            self.status_label.configure(text=f"Błąd: {e}", text_color=AppColors.ERROR)
+            self.status_label.configure(text=f"Błąd: {e}", text_color="red")
             messagebox.showerror("Błąd", f"Nie udało się połączyć z bazą danych: {e}")
 
     def add_message(self, sender: str, message: str):
@@ -1074,7 +1022,7 @@ class BielikChatDialog(ctk.CTkToplevel):
 
         # Wyłącz przycisk podczas przetwarzania
         self.send_button.configure(state="disabled")
-        self.status_label.configure(text="Bielik myśli...", text_color=AppColors.WARNING)
+        self.status_label.configure(text="Bielik myśli...", text_color="orange")
 
         # Uruchom w osobnym wątku, żeby nie blokować GUI
         import threading
@@ -1095,14 +1043,14 @@ class BielikChatDialog(ctk.CTkToplevel):
             self.after(0, lambda: self.add_message("Bielik", answer))
             self.after(
                 0,
-                lambda: self.status_label.configure(text="Gotowy", text_color=AppColors.SUCCESS),
+                lambda: self.status_label.configure(text="Gotowy", text_color="green"),
             )
             self.after(0, lambda: self.send_button.configure(state="normal"))
         except Exception as e:
             error_msg = f"Przepraszam, wystąpił błąd: {str(e)}"
             self.after(0, lambda: self.add_message("Bielik", error_msg))
             self.after(
-                0, lambda: self.status_label.configure(text="Błąd", text_color=AppColors.ERROR)
+                0, lambda: self.status_label.configure(text="Błąd", text_color="red")
             )
             self.after(0, lambda: self.send_button.configure(state="normal"))
 
@@ -1201,38 +1149,32 @@ class SettingsDialog(ctk.CTkToplevel):
         footer_frame = ctk.CTkFrame(self)
         footer_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.SM)
 
-        btn_save = ctk.CTkButton(
+        ctk.CTkButton(
             footer_frame,
             text=f"{Icons.SAVE} Zapisz",
             command=self.save_prompts,
             fg_color=AppColors.SUCCESS,
             hover_color=App._adjust_color(AppColors.SUCCESS, -15),
             width=150,
-        )
-        btn_save.pack(side="left", padx=AppSpacing.XS)
-        ToolTip(btn_save, "Zapisz zmiany w ustawieniach")
+        ).pack(side="left", padx=AppSpacing.XS)
 
-        btn_reset = ctk.CTkButton(
+        ctk.CTkButton(
             footer_frame,
             text=f"{Icons.REFRESH} Resetuj do domyślnych",
             command=self.reset_prompts,
             fg_color=AppColors.WARNING,
             hover_color=App._adjust_color(AppColors.WARNING, -15),
             width=200,
-        )
-        btn_reset.pack(side="left", padx=AppSpacing.XS)
-        ToolTip(btn_reset, "Przywróć domyślne prompty i ustawienia")
+        ).pack(side="left", padx=AppSpacing.XS)
 
-        btn_cancel = ctk.CTkButton(
+        ctk.CTkButton(
             footer_frame,
             text="Anuluj",
             command=self.destroy,
             fg_color=AppColors.ERROR,
             hover_color=App._adjust_color(AppColors.ERROR, -15),
             width=150,
-        )
-        btn_cancel.pack(side="right", padx=AppSpacing.XS)
-        ToolTip(btn_cancel, "Zamknij bez zapisywania")
+        ).pack(side="right", padx=AppSpacing.XS)
         self.protocol("WM_DELETE_WINDOW", self.destroy)
         self.after(100, self.grab_set)
 
@@ -1340,7 +1282,6 @@ class App(ctk.CTk):
         # Thread safety for processing
         self.processing_lock = threading.Lock()
         self.is_processing = False
-        self.inventory_sort = ("data_waznosci", False) # (column, desc)
         
         # Register dialogs for lazy loading
         dialog_manager.register_dialog("cooking", CookingDialog)
@@ -1675,17 +1616,6 @@ class App(ctk.CTk):
         dialog_manager.cleanup()
         force_garbage_collection()
 
-    def toggle_inventory_sort(self, inv_window, session, column):
-        current_col, current_desc = self.inventory_sort
-        if current_col == column:
-            # Toggle desc
-            self.inventory_sort = (column, not current_desc)
-        else:
-            # New col, default asc
-            self.inventory_sort = (column, False)
-        
-        self.refresh_inventory_window(inv_window, session)
-
     def show_inventory(self):
         """Pokazuje stan magazynu z możliwością edycji"""
         SessionLocal = sessionmaker(bind=engine)
@@ -1701,24 +1631,13 @@ class App(ctk.CTk):
         action_frame.pack(fill="x", padx=AppSpacing.SM, pady=AppSpacing.XS)
 
         # Get data first
-        query = (
+        stany = (
             session.query(StanMagazynowy)
             .join(Produkt)
             .filter(StanMagazynowy.ilosc > 0)
+            .order_by(StanMagazynowy.data_waznosci)
+            .all()
         )
-        
-        # Sortowanie
-        sort_col, sort_desc = self.inventory_sort
-        order_func = desc if sort_desc else asc
-        
-        if sort_col == "produkt":
-            query = query.order_by(order_func(Produkt.znormalizowana_nazwa))
-        elif sort_col == "ilosc":
-            query = query.order_by(order_func(StanMagazynowy.ilosc))
-        else: # data_waznosci default
-            query = query.order_by(order_func(StanMagazynowy.data_waznosci))
-            
-        stany = query.all()
 
         inventory_items = []
         
@@ -1761,31 +1680,9 @@ class App(ctk.CTk):
                 "Akcje",
             ]
             for col, text in enumerate(headers):
-                key = None
-                if text == "Produkt": key = "produkt"
-                elif text == "Ilość": key = "ilosc"
-                elif text == "Data ważności": key = "data_waznosci"
-                elif text == "Status": key = "data_waznosci"
-                
-                if key:
-                    marker = ""
-                    if self.inventory_sort[0] == key:
-                        marker = " ▼" if self.inventory_sort[1] else " ▲"
-                    
-                    ctk.CTkButton(
-                        headers_frame, 
-                        text=f"{text}{marker}", 
-                        font=("Arial", 12, "bold"),
-                        command=lambda k=key: self.toggle_inventory_sort(inv_window, session, k),
-                        fg_color="transparent",
-                        hover_color=AppColors.BG_DARK,
-                        anchor="w",
-                        width=100
-                    ).grid(row=0, column=col, padx=AppSpacing.XS, pady=AppSpacing.XS)
-                else:
-                    ctk.CTkLabel(headers_frame, text=text, font=("Arial", 12, "bold")).grid(
-                        row=0, column=col, padx=AppSpacing.XS, pady=AppSpacing.XS
-                    )
+                ctk.CTkLabel(headers_frame, text=text, font=("Arial", 12, "bold")).grid(
+                    row=0, column=col, padx=AppSpacing.XS, pady=AppSpacing.XS
+                )
             
             # Virtual scrollable frame
             def render_row(index, stan_data, row_frame):
@@ -1912,31 +1809,9 @@ class App(ctk.CTk):
                 "Akcje",
             ]
             for col, text in enumerate(headers):
-                key = None
-                if text == "Produkt": key = "produkt"
-                elif text == "Ilość": key = "ilosc"
-                elif text == "Data ważności": key = "data_waznosci"
-                elif text == "Status": key = "data_waznosci"
-                
-                if key:
-                    marker = ""
-                    if self.inventory_sort[0] == key:
-                        marker = " ▼" if self.inventory_sort[1] else " ▲"
-                        
-                    ctk.CTkButton(
-                        scrollable, 
-                        text=f"{text}{marker}", 
-                        font=("Arial", 12, "bold"),
-                        command=lambda k=key: self.toggle_inventory_sort(inv_window, session, k),
-                        fg_color="transparent",
-                        hover_color=AppColors.BG_DARK,
-                        anchor="w",
-                        width=100
-                    ).grid(row=0, column=col, padx=AppSpacing.XS, pady=AppSpacing.XS)
-                else:
-                    ctk.CTkLabel(scrollable, text=text, font=("Arial", 12, "bold")).grid(
-                        row=0, column=col, padx=AppSpacing.XS, pady=AppSpacing.XS
-                    )
+                ctk.CTkLabel(scrollable, text=text, font=("Arial", 12, "bold")).grid(
+                    row=0, column=col, padx=AppSpacing.XS, pady=AppSpacing.XS
+                )
 
             for i, stan in enumerate(stany):
                 row = i + 1
@@ -1983,16 +1858,16 @@ class App(ctk.CTk):
                 # Status (tylko do odczytu)
                 if stan.data_waznosci:
                     if stan.data_waznosci < date.today():
-                        status = f"{Icons.STATUS_DOT} Przeterminowany"
+                        status = "⚠️ Przeterminowany"
                         color = AppColors.EXPIRED
                     elif stan.data_waznosci <= date.today() + timedelta(days=3):
-                        status = f"{Icons.STATUS_DOT} Wkrótce"
+                        status = "🔴 Wkrótce przeterminowany"
                         color = AppColors.EXPIRING_SOON
                     else:
-                        status = f"{Icons.STATUS_DOT} OK"
+                        status = "✅ OK"
                         color = AppColors.OK
                 else:
-                    status = f"{Icons.STATUS_DOT} Brak daty"
+                    status = "❓ Brak daty"
                     color = AppColors.UNKNOWN
 
                 status_label = ctk.CTkLabel(
@@ -2009,13 +1884,12 @@ class App(ctk.CTk):
                     actions_frame,
                     text="🗑️",
                     command=lambda s=stan: self.mark_as_waste(inv_window, session, s),
-                    fg_color=AppColors.WASTE,
-                    hover_color=App._adjust_color(AppColors.WASTE, -15),
+                    fg_color="#8b4513",
+                    hover_color="#654321",
                     width=40,
                     height=25,
                 )
-                waste_btn.pack(side="left", padx=AppSpacing.XS)
-                ToolTip(waste_btn, "Oznacz jako zmarnowany")
+                waste_btn.pack(side="left", padx=2)
 
                 # Przycisk usuwania
                 delete_btn = ctk.CTkButton(
@@ -2029,8 +1903,7 @@ class App(ctk.CTk):
                     width=80,
                     height=25,
                 )
-                delete_btn.pack(side="left", padx=AppSpacing.XS)
-                ToolTip(delete_btn, "Usuń z magazynu")
+                delete_btn.pack(side="left", padx=2)
 
                 inventory_items.append(
                     {
@@ -2397,7 +2270,7 @@ class App(ctk.CTk):
                 self.expiry_alert_frame,
                 text=f"Błąd podczas ładowania alertów: {str(e)}",
                 font=("Arial", 12),
-                text_color=AppColors.ERROR,
+                text_color="red",
             )
             error_label.pack(pady=AppSpacing.SM, padx=AppSpacing.SM)
 
@@ -2529,7 +2402,7 @@ class App(ctk.CTk):
                 scrollable,
                 text=f"Błąd: {str(e)}",
                 font=("Arial", 12),
-                text_color=AppColors.ERROR,
+                text_color="red",
             ).pack(pady=AppSpacing.LG)
 
     def refresh_analytics(self):
@@ -2616,21 +2489,21 @@ class App(ctk.CTk):
                     row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w"
                 )
 
-                stores = analytics.get_spending_by_store(limit=5)
-                if stores:
-                    max_val = max(s[1] for s in stores)
-                    for i, store in enumerate(stores):
-                        row = ctk.CTkFrame(stores_frame, fg_color="transparent")
-                        row.grid(row=i+1, column=0, sticky="ew", padx=AppSpacing.LG, pady=2)
-                        row.grid_columnconfigure(0, weight=1)
-                        
-                        ctk.CTkLabel(row, text=f"{i+1}. {store[0]} ({store[1]:.2f} PLN)", font=("Arial", 12)).pack(anchor="w")
-                        
-                        progress = ctk.CTkProgressBar(row, height=8, progress_color=AppColors.PRIMARY)
-                        progress.pack(fill="x", pady=(0, 5))
-                        progress.set(store[1] / max_val if max_val > 0 else 0)
-                else:
-                    ctk.CTkLabel(stores_frame, text="Brak danych", font=("Arial", 12)).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.SM, sticky="w")
+                stores = analytics.get_spending_by_store(limit=10)
+                stores_text = "\n".join(
+                    [
+                        f"{i+1}. {store[0]}: {store[1]:.2f} PLN"
+                        for i, store in enumerate(stores)
+                    ]
+                )
+
+                ctk.CTkLabel(
+                    stores_frame,
+                    text=stores_text if stores_text else "Brak danych",
+                    font=("Arial", 12),
+                    justify="left",
+                    anchor="w",
+                ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.SM, sticky="w")
 
                 # Separator
                 separator2 = ctk.CTkFrame(
@@ -2657,21 +2530,21 @@ class App(ctk.CTk):
                     row=0, column=0, padx=AppSpacing.SM, pady=AppSpacing.SM, sticky="w"
                 )
 
-                categories = analytics.get_spending_by_category(limit=5)
-                if categories:
-                    max_val = max(c[1] for c in categories)
-                    for i, cat in enumerate(categories):
-                        row = ctk.CTkFrame(categories_frame, fg_color="transparent")
-                        row.grid(row=i+1, column=0, sticky="ew", padx=AppSpacing.LG, pady=2)
-                        row.grid_columnconfigure(0, weight=1)
-                        
-                        ctk.CTkLabel(row, text=f"{i+1}. {cat[0]} ({cat[1]:.2f} PLN)", font=("Arial", 12)).pack(anchor="w")
-                        
-                        progress = ctk.CTkProgressBar(row, height=8, progress_color=AppColors.INFO)
-                        progress.pack(fill="x", pady=(0, 5))
-                        progress.set(cat[1] / max_val if max_val > 0 else 0)
-                else:
-                    ctk.CTkLabel(categories_frame, text="Brak danych", font=("Arial", 12)).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.SM, sticky="w")
+                categories = analytics.get_spending_by_category(limit=10)
+                categories_text = "\n".join(
+                    [
+                        f"{i+1}. {cat[0]}: {cat[1]:.2f} PLN"
+                        for i, cat in enumerate(categories)
+                    ]
+                )
+
+                ctk.CTkLabel(
+                    categories_frame,
+                    text=categories_text if categories_text else "Brak danych",
+                    font=("Arial", 12),
+                    justify="left",
+                    anchor="w",
+                ).grid(row=1, column=0, padx=AppSpacing.LG, pady=AppSpacing.SM, sticky="w")
 
                 # Separator
                 separator3 = ctk.CTkFrame(
@@ -2805,7 +2678,7 @@ class App(ctk.CTk):
                 self.analytics_scrollable,
                 text=f"Błąd podczas ładowania analityki: {str(e)}",
                 font=("Arial", 12),
-                text_color=AppColors.ERROR,
+                text_color="red",
             ).grid(row=0, column=0, padx=AppSpacing.LG, pady=AppSpacing.LG)
 
     def refresh_meal_planner(self):
@@ -2902,7 +2775,7 @@ class App(ctk.CTk):
                 self.meal_planner_scrollable,
                 text="Nie udało się wygenerować planu",
                 font=("Arial", 14),
-                text_color=AppColors.ERROR,
+                text_color="red",
             ).pack(pady=AppSpacing.LG)
             return
 
@@ -2970,7 +2843,7 @@ class App(ctk.CTk):
             self.meal_planner_scrollable,
             text=error_msg,
             font=("Arial", 14),
-            text_color=AppColors.ERROR,
+            text_color="red",
         ).pack(pady=AppSpacing.LG)
 
     def refresh_history(self):

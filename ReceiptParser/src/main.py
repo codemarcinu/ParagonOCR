@@ -213,6 +213,9 @@ def run_processing_pipeline(
             status="Dane sparsowane",
         )
 
+        # Wstrzyknij ścieżkę do pliku, aby UI mogło wyświetlić podgląd
+        parsed_data["file_path"] = processing_file_path
+
         # Krok 1.7: Manualna weryfikacja przez użytkownika (jeśli dostępna)
         if review_callback:
             _call_log_callback(

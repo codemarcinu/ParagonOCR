@@ -44,6 +44,7 @@ class AppColors:
     WARNING: Final[str] = "#d97706"
     ERROR: Final[str] = "#dc2626"
     INFO: Final[str] = "#2563eb"
+    WASTE: Final[str] = "#8b4513"  # Brown for waste/compost
     
     # Status colors
     EXPIRED: Final[str] = "#dc2626"
@@ -64,8 +65,8 @@ class AppColors:
     BORDER_DARK: Final[str] = "#404040"
     
     # Chat colors
-    CHAT_BOT: Final[str] = "#e0f2fe"  # Light blue for bot messages
-    CHAT_USER: Final[str] = "#f0fdf4"  # Light green for user messages
+    CHAT_BOT: Final[tuple] = ("#e0f2fe", "#1e40af")  # (Light, Dark) - Light blue / Dark blue
+    CHAT_USER: Final[tuple] = ("#f0fdf4", "#166534")  # (Light, Dark) - Light green / Dark green
     
     # Row colors for alternating rows in tables/lists
     ROW_EVEN: Final[str] = "#2a2a2a"  # Even row color (dark mode)
@@ -196,4 +197,5 @@ class Icons:
     CATEGORY: Final[str] = "📂"  # Category icon
     PRODUCT: Final[str] = "🛒"  # Product/shopping icon
     CALENDAR: Final[str] = "📅"  # Calendar icon
+    STATUS_DOT: Final[str] = "●"  # Circle dot for status indicators
 
