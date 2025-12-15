@@ -1,6 +1,6 @@
 import os
 import customtkinter as ctk
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from decimal import Decimal
 from PIL import Image
 from sqlalchemy.orm import sessionmaker, joinedload
@@ -78,8 +78,8 @@ class ReviewDialog(ctk.CTkToplevel):
                 text=f"{Icons.SEARCH} Otwórz oryginał", 
                 command=lambda: self.open_image_external(file_path),
                 height=28,
-                fg_color=AppColors.SECONDARY,
-                hover_color=adjust_color(AppColors.SECONDARY, -15)
+                fg_color=AppColors.PRIMARY,
+                hover_color=adjust_color(AppColors.PRIMARY, -15)
             ).pack(side="left")
 
             # Scrollable Image

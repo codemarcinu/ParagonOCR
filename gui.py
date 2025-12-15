@@ -58,71 +58,14 @@ from src.gui_optimizations import (
     force_garbage_collection,
     dialog_manager,
     memory_profiler,
+    ToolTip,
 )
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class ToolTip:
-    """Prosta implementacja tooltipa dla CustomTkinter."""
 
-    def __init__(self, widget, text):
-        self.widget = widget
-        self.text = text
-        self.tipwindow = None
-        self.id = None
-        self.x = self.y = 0
-        self.widget.bind("<Enter>", self.enter)
-        self.widget.bind("<Leave>", self.leave)
-        self.widget.bind("<ButtonPress>", self.leave)
-
-    def enter(self, event=None):
-        self.schedule()
-
-    def leave(self, event=None):
-        self.unschedule()
-        self.hidetip()
-
-    def schedule(self):
-        self.unschedule()
-        self.id = self.widget.after(500, self.showtip)
-
-    def unschedule(self):
-        id = self.id
-        self.id = None
-        if id:
-            self.widget.after_cancel(id)
-
-    def showtip(self):
-        x, y, cx, cy = (
-            self.widget.bbox("insert") if hasattr(self.widget, "bbox") else (0, 0, 0, 0)
-        )
-        x += self.widget.winfo_rootx() + 25
-        y += self.widget.winfo_rooty() + 20
-        self.tipwindow = tw = Toplevel(self.widget)
-        tw.wm_overrideredirect(True)
-        tw.wm_geometry("+%d+%d" % (x, y))
-        # Użyj standardowego tkinter Label zamiast CTkLabel dla tooltipa
-        from tkinter import Label
-
-        label = Label(
-            tw,
-            text=self.text,
-            justify="left",
-            bg=AppColors.BG_DARK,
-            fg="white",
-            font=("Arial", 10),
-            padx=AppSpacing.XS,
-            pady=AppSpacing.XS,
-        )
-        label.pack()
-
-    def hidetip(self):
-        tw = self.tipwindow
-        self.tipwindow = None
-        if tw:
-            tw.destroy()
 
 
 
