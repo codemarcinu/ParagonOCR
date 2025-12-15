@@ -575,11 +575,26 @@ def resolve_product_with_suggestion(
                 f"   -> Zaktualizowano kategorię produktu na: '{kategoria_nazwa}'",
             )
     
-    _call_log_callback(
-        log_callback, f"   -> Tworzę nowy alias: '{raw_name}' -> '{normalized_name}'"
-    )
-    new_alias = AliasProduktu(nazwa_z_paragonu=raw_name, produkt_id=product.produkt_id)
-    session.add(new_alias)
+    # Sprawdź czy alias już istnieje, zanim spróbujesz go dodać (fix UNIQUE constraint)
+    existing_alias = session.query(AliasProduktu).filter_by(nazwa_z_paragonu=raw_name).first()
+    if existing_alias:
+        # Jeśli alias już istnieje, ewentualnie zaktualizuj produkt_id
+        if existing_alias.produkt_id != product.produkt_id:
+            old_prod_id = existing_alias.produkt_id
+            existing_alias.produkt_id = product.produkt_id
+            _call_log_callback(
+                log_callback, f"   -> Zaktualizowano istniejący alias: '{raw_name}' (ID: {old_prod_id} -> {product.produkt_id})"
+            )
+        else:
+             _call_log_callback(
+                log_callback, f"   -> Alias już istnieje: '{raw_name}' -> '{normalized_name}'"
+            )
+    else:
+        _call_log_callback(
+            log_callback, f"   -> Tworzę nowy alias: '{raw_name}' -> '{normalized_name}'"
+        )
+        new_alias = AliasProduktu(nazwa_z_paragonu=raw_name, produkt_id=product.produkt_id)
+        session.add(new_alias)
     return product.produkt_id
 
 
