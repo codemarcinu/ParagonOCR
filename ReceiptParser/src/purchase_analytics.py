@@ -105,6 +105,7 @@ class PurchaseAnalytics:
                 KategoriaProduktu.nazwa_kategorii,
                 func.sum(PozycjaParagonu.cena_po_rabacie).label("total")
             )
+            .select_from(KategoriaProduktu)
             .join(Produkt)
             .join(PozycjaParagonu)
             .group_by(KategoriaProduktu.nazwa_kategorii)

@@ -1458,6 +1458,13 @@ class App(ctk.CTk):
         self.receipts_frame.grid_columnconfigure(0, weight=1)
         self.receipts_frame.grid_rowconfigure(2, weight=1)  # Zmieniono z 1 na 2 dla alertów
 
+        # --- MEAL PLANNER FRAME ---
+        self.meal_planner_frame = ctk.CTkFrame(self.content_frame)
+        self.meal_planner_frame.grid(row=0, column=0, sticky="nsew")
+        self.meal_planner_frame.grid_columnconfigure(0, weight=1)
+        self.meal_planner_frame.grid_rowconfigure(1, weight=1)
+        self.meal_planner_frame.grid_remove()  # Hide by default
+
         # Header z przyciskami
         header_frame = ctk.CTkFrame(self.receipts_frame)
         header_frame.grid(row=0, column=0, sticky="ew", padx=AppSpacing.SM, pady=AppSpacing.SM)
