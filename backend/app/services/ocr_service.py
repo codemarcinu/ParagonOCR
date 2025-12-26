@@ -76,8 +76,14 @@ def extract_from_pdf(file_path: str) -> OCRResult:
     """
     temp_image_path = None
     try:
+        # Set tesseract command
+        pytesseract.pytesseract.tesseract_cmd = settings.TESSERACT_CMD
+        
         # Convert PDF to image(s)
-        images = convert_from_path(file_path)
+        images = convert_from_path(
+            file_path,
+            poppler_path=settings.POPPLER_PATH
+        )
         
         if not images:
             return OCRResult(
@@ -166,6 +172,9 @@ def _extract_with_tesseract(img: Image.Image) -> OCRResult:
         OCRResult with extracted text
     """
     try:
+        # Set tesseract command
+        pytesseract.pytesseract.tesseract_cmd = settings.TESSERACT_CMD
+        
         # Extract text with Polish and English language support
         text = pytesseract.image_to_string(img, lang="pol+eng")
         

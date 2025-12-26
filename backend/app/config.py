@@ -47,6 +47,9 @@ class Settings(BaseSettings):
     TESSERACT_CMD: str = Field(
         default="tesseract", description="Path to tesseract executable"
     )
+    POPPLER_PATH: str | None = Field(
+        default=None, description="Path to poppler bin directory (for PDF conversion)"
+    )
 
     # LLM Configuration (Ollama)
     OLLAMA_HOST: str = Field(

@@ -132,7 +132,7 @@ export function Dashboard() {
                             : '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                          {receipt.shop || '-'}
+                          {receipt.shop?.name || '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                           {receipt.items_count}

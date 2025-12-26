@@ -18,12 +18,19 @@
 git clone <repo-url>
 cd ParagonOCR
 
-# Run setup script
+# Linux/macOS
 chmod +x scripts/setup.sh
 ./scripts/setup.sh
 
+# Windows (PowerShell)
+.\scripts\setup.ps1
+
 # Start development servers
+# Linux/macOS
 ./scripts/dev.sh
+
+# Windows (PowerShell)
+.\scripts\dev.ps1
 ```
 
 **Access:**
@@ -36,7 +43,14 @@ chmod +x scripts/setup.sh
 - **Python 3.10+**
 - **Node.js 18+**
 - **Ollama** ([install](https://ollama.ai))
-- **Tesseract OCR** (`apt-get install tesseract-ocr` or `brew install tesseract`)
+- **Tesseract OCR**
+  - Linux: `apt-get install tesseract-ocr`
+  - macOS: `brew install tesseract`
+  - Windows: Install from [UB-Mannheim](https://github.com/UB-Mannheim/tesseract/wiki) and add to PATH
+- **Poppler** (for PDF)
+  - Linux: `apt-get install poppler-utils`
+  - macOS: `brew install poppler`
+  - Windows: Download binary, add `bin` to PATH or set `POPPLER_PATH` in `.env`
 
 **Download Ollama Model:**
 ```bash
