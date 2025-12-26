@@ -1,6 +1,6 @@
 # 🧾 ParagonOCR Web Edition
 
-**ParagonOCR Web Edition** is a modern full-stack web application for receipt processing, expense tracking, and AI-powered meal planning. Built with FastAPI, React, and local AI services (Ollama + Tesseract).
+**ParagonOCR Web Edition** to nowoczesna, pełnowymiarowa aplikacja webowa typu full-stack, stworzona do cyfryzacji paragonów, zarządzania domowym budżetem oraz inteligentnego planowania posiłków (AI Meal Planning). System wykorzystuje zaawansowane technologie: FastAPI, React 19 oraz lokalne modele sztucznej inteligencji (Ollama + Tesseract), zapewniając prywatność i niezależność od chmury.
 
 [![Version](https://img.shields.io/badge/version-1.0.0--beta-blue)](https://github.com/codemarcinu/paragonocr)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://python.org)
@@ -9,368 +9,139 @@
 
 ---
 
-## 🚀 Quick Start
+## 🎯 Przeznaczenie Aplikacji
 
-### 5-Minute Setup
+Głównym celem ParagonOCR jest **automatyzacja i optymalizacja zarządzania domowymi zasobami**. Aplikacja rozwiązuje codzienne problemy związane z:
+1.  **Gromadzeniem papierowych paragonów** – cyfryzacja i łatwe wyszukiwanie.
+2.  **Śledzeniem wydatków** – automatyczna kategoryzacja i analiza kosztów.
+3.  **Marnowaniem żywności** – monitorowanie terminów ważności i sugerowanie przepisów z posiadanych produktów (Zero Waste).
+4.  **Planowaniem zakupów** – inteligentne listy zakupów oparte na rzeczywistym zużyciu i planowanych posiłkach.
+
+Dzięki wykorzystaniu **lokalnych modeli LLM (np. Bielik)**, Twoje dane finansowe i osobiste nigdy nie opuszczają Twojego komputera, gwarantując **100% prywatności**.
+
+---
+
+## ✨ Kluczowe Funkcjonalności
+
+### 📄 Przetwarzanie Paragonów (OCR & AI)
+- **Wieloczęściowy Pipeline:** Upload (PDF/IMG) -> OCR (Tesseract) -> Normalizacja -> AI Parsing (Ollama).
+- **Czyszczenie Danych:** Automatyczna korekta błędów OCR, mapowanie nazw produktów (np. "MLEKO 3.2%" -> "Mleko") i rozpoznawanie sklepów.
+- **Czas Rzeczywisty:** Podgląd postępu przetwarzania dzięki WebSocket.
+
+### 🤖 Inteligentny Asystent AI (RAG)
+Wbudowany czat z modelem językowym, który ma dostęp do Twojej bazy produktów ("Retrieval-Augmented Generation"):
+- **Zapytania o zapasy:** "Co mam w lodówce?", "Czy mam składniki na pizzę?".
+- **Kulinarny Doradca:** "Co ugotować z produktów, które zaraz się przeterminują?".
+- **Kontekstowa Pamięć:** Historia rozmów i inteligentne podpowiedzi.
+
+### 🛒 Smart Shopping & Zero Waste
+- **Dynamiczne Listy Zakupów:** Generowanie list na podstawie zaplanowanych posiłków i brakujących składników.
+- **Warianty Sklepowe:** System rozpoznaje, że "Lidl Mleko" i "Biedronka Mleko" to ten sam produkt, pozwalając na porównywanie cen między marketami.
+- **Alerty Ważności:** Powiadomienia o kończącej się dacie ważności produktów.
+
+### 📊 Analityka i Zdrowie
+- **Dashboard Finansowy:** Wykresy wydatków (dzienne, miesięczne), trendy zakupowe i podział na kategorie.
+- **Analiza Żywieniowa:** Śledzenie wartości odżywczych kupowanych produktów (kalorie, makroskładniki) – *funkcja w wersji beta*.
+
+### ⚡ Wydajność i Technologia
+- **Full-Stack Architektura:** Nowoczesny frontend React 19 + wydajny backend FastAPI.
+- **Optymlizacja:** Wirtualne przewijanie dla dużych list (tysiące pozycji), lazy loading dialogów, cache bazy danych i odpowiedzi LLM.
+
+---
+
+## 🚀 Szybki Start (Quick Start)
+
+### Wymagania Wstępne
+- **Python 3.10+**
+- **Node.js 18+**
+- **Ollama** z modelem `SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M` (lub innym)
+- **Tesseract OCR** (zainstalowany w systemie)
+
+### Instalacja (5 minut)
 
 ```bash
-# Clone repository
+# Sklonuj repozytorium
 git clone <repo-url>
 cd ParagonOCR
 
-# Linux/macOS
-chmod +x scripts/setup.sh
-./scripts/setup.sh
-
-# Windows (PowerShell)
+# Windows (PowerShell) - Automatyczna konfiguracja
 .\scripts\setup.ps1
 
-# Start development servers
-# Linux/macOS
-./scripts/dev.sh
-
-# Windows (PowerShell)
+# Uruchomienie serwerów deweloperskich (Backend + Frontend)
 .\scripts\dev.ps1
 ```
 
-**Access:**
+**Dostęp:**
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:8000
-- API Docs: http://localhost:8000/docs
-
-### Prerequisites
-
-- **Python 3.10+**
-- **Node.js 18+**
-- **Ollama** ([install](https://ollama.ai))
-- **Tesseract OCR**
-  - Linux: `apt-get install tesseract-ocr`
-  - macOS: `brew install tesseract`
-  - Windows: Install from [UB-Mannheim](https://github.com/UB-Mannheim/tesseract/wiki) and add to PATH
-- **Poppler** (for PDF)
-  - Linux: `apt-get install poppler-utils`
-  - macOS: `brew install poppler`
-  - Windows: Download binary, add `bin` to PATH or set `POPPLER_PATH` in `.env`
-
-**Download Ollama Model:**
-```bash
-ollama pull SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M
-```
+- Dokumentacja API: http://localhost:8000/docs
 
 ---
 
-## ✨ Key Features
+## 🏗️ Architektura Systemu
 
-### 📄 Receipt Processing
-- **Upload receipts** (PDF, PNG, JPG, TIFF)
-- **Automatic OCR** (Tesseract)
-- **AI parsing** (Ollama/Bielik LLM)
-- **Product extraction** & normalization
-- **Real-time processing** with WebSocket updates
+```mermaid
+graph TD
+    User[Użytkownik] --> Front[Frontend (React 19)]
+    Front --> API[Backend API (FastAPI)]
+    
+    subgraph Data Layer
+        API --> DB[(SQLite)]
+        API --> Cache[LRU Cache]
+    end
+    
+    subgraph AI Services
+        API --> OCR[Tesseract OCR]
+        API --> LLM[Ollama (Bielik LLM)]
+        LLM --> RAG[RAG Engine]
+    end
+```
 
-### 📊 Analytics Dashboard
-- **Spending overview** (daily, monthly, yearly)
-- **Category breakdown** with charts
-- **Shop comparison** and trends
-- **Budget tracking** and insights
-
-### 🤖 AI Assistant
-- **Local RAG-powered chat** (no cloud required)
-- **Meal suggestions** based on available products
-- **Recipe recommendations** from your pantry
-- **Shopping list generation** with optimization
-- **Food waste reduction** tips
-
-### 🛒 Smart Shopping
-- **Product search** with fuzzy matching
-- **Price history** tracking
-- **Auto-generated lists** from meal plans
-- **Category management**
+**Stos Technologiczny:**
+- **Backend:** FastAPI, SQLAlchemy, Alembic, Pydantic
+- **Frontend:** React, TypeScript, Vite, TailwindCSS, Zustand, Recharts
+- **AI/ML:** LangChain (konceptualnie), SentenceTransformers (RAG/Embeddings), Tesseract
+- **Inne:** WebAuthn (Logowanie kluczami Passkeys)
 
 ---
 
-## 🏗️ Architecture
-
-**Tech Stack:**
-- **Backend:** FastAPI + SQLAlchemy + SQLite
-- **Frontend:** React 19 + TypeScript + Vite + TailwindCSS
-- **AI:** Ollama (local LLM) + Tesseract OCR
-- **State:** Zustand
-- **Charts:** Recharts
-
-**Architecture Diagram:**
-```
-Frontend (React) → REST API (FastAPI) → Database (SQLite)
-                          ↓
-                    Ollama (LLM) + Tesseract (OCR)
-```
-
-📖 **Full Architecture:** [docs/architecture/ARCHITECTURE.md](docs/architecture/ARCHITECTURE.md)
-
----
-
-## 📁 Project Structure
+## 📁 Struktura Projektu
 
 ```
 ParagonOCR/
-├── backend/              # FastAPI backend
-│   ├── app/
-│   │   ├── main.py      # FastAPI entry point
-│   │   ├── routers/     # API endpoints
-│   │   ├── services/    # Business logic
-│   │   └── models/      # Database models
-│   ├── requirements.txt
-│   └── README.md
-│
-├── frontend/            # React frontend
-│   ├── src/
-│   │   ├── pages/       # Page components
-│   │   ├── components/  # Reusable components
-│   │   ├── store/       # Zustand stores
-│   │   └── lib/         # Utilities
-│   ├── package.json
-│   └── README.md
-│
-├── docs/                # Documentation
-│   ├── architecture/    # System design
-│   ├── api/             # API reference
-│   ├── guides/          # Setup guides
-│   ├── analysis/        # Analysis reports
-│   └── progress/        # Progress tracking
-│
-├── archive/             # Legacy desktop code
-│   └── desktop/         # Old GUI application
-│
-├── scripts/             # Helper scripts
-│   ├── setup.sh         # One-command setup
-│   ├── dev.sh           # Start dev servers
-│   └── cleanup.sh       # Clean build artifacts
-│
-└── README.md            # This file
+├── backend/              # Logika biznesowa, API, obsługa AI
+├── frontend/             # Interfejs użytkownika, komponenty React
+├── docs/                 # Dokumentacja techniczna i projektowa
+├── data/                 # Lokalne bazy danych i pliki konfiguracyjne AI
+├── scripts/              # Skrypty automatyzujące (setup, dev, cleanup)
+└── archive/              # Archiwum starszych wersji (desktop GUI)
 ```
 
 ---
 
-## 📚 Documentation
+## 📊 Status Projektu
 
-### Quick Links
-- **[Development Setup](docs/guides/SETUP_DEV.md)** - Get started developing
-- **[API Reference](docs/api/API_REFERENCE.md)** - Complete API documentation
-- **[Architecture](docs/architecture/ARCHITECTURE.md)** - System design & components
-- **[Database Schema](docs/architecture/DATABASE_SCHEMA.md)** - ER diagrams & tables
-- **[Deployment Guide](docs/architecture/DEPLOYMENT.md)** - Production deployment
-- **[Contributing](docs/guides/CONTRIBUTING.md)** - How to contribute
+**Wersja:** 1.0.0-beta
+**Data aktualizacji:** 2025-12-26
+**Status:** ✅ Aktywny Rozwój (Active Development)
 
-### Documentation Index
-See [docs/README.md](docs/README.md) for complete documentation index.
-
----
-
-## 🛠️ Development
-
-### Setup Development Environment
-
-See [docs/guides/SETUP_DEV.md](docs/guides/SETUP_DEV.md) for detailed instructions.
-
-**Quick Start:**
-```bash
-# Backend
-cd backend
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-
-# Frontend (new terminal)
-cd frontend
-npm install
-npm run dev
-```
-
-### Running Tests
-
-```bash
-# Backend tests
-cd backend
-pytest tests/ -v
-
-# Frontend tests
-cd frontend
-npm run test
-```
-
-### Code Quality
-
-```bash
-# Backend formatting
-black app/
-isort app/
-
-# Frontend formatting
-npm run format
-npm run lint
-```
+**Ostatnio wdrożone:**
+- ✅ Pełna obsługa RAG (Rozmowa z własnymi danymi).
+- ✅ System Smart Shopping i redukcji marnowania żywności.
+- ✅ Optymalizacja wydajności GUI i zapytań bazodanowych.
+- ✅ Logowanie biometryczne (Passkeys/FIDO2).
 
 ---
 
-## 🚀 Deployment
+## 🤝 Wsparcie i Kontakt
 
-### Docker Compose (Recommended)
-
-```bash
-docker-compose up -d --build
-```
-
-### Manual Deployment
-
-See [docs/architecture/DEPLOYMENT.md](docs/architecture/DEPLOYMENT.md) for:
-- Production configuration
-- Nginx setup
-- Systemd services
-- Cloud platform guides (Heroku, AWS, DigitalOcean)
+Jeśli masz pytania, sugestie lub znalazłeś błąd:
+- **Issues:** Zgłoś problem na GitHubie.
+- **Discussions:** Dołącz do dyskusji o rozwoju projektu.
+- **Autor:** [CodeMarcinu](https://github.com/codemarcinu)
 
 ---
 
-## 🔧 Configuration
+## 📝 Licencja
 
-### Backend (.env)
-
-```ini
-# Database
-DATABASE_URL=sqlite:///./data/receipts.db
-
-# Ollama
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M
-
-# Security
-SECRET_KEY=your-secret-key-here
-CORS_ORIGINS=http://localhost:5173
-
-# File Upload
-MAX_UPLOAD_SIZE=10485760  # 10MB
-```
-
-### Frontend (.env.local)
-
-```ini
-VITE_API_URL=http://localhost:8000
-VITE_WS_URL=ws://localhost:8000
-```
-
----
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Ollama not found:**
-```bash
-# Check if running
-curl http://localhost:11434/api/tags
-
-# Start Ollama
-ollama serve
-```
-
-**Tesseract not found:**
-```bash
-# Linux
-sudo apt-get install tesseract-ocr
-
-# macOS
-brew install tesseract
-```
-
-**Port already in use:**
-```bash
-# Use different ports
-uvicorn app.main:app --reload --port 8001
-npm run dev -- --port 5174
-```
-
-📖 **More troubleshooting:** [docs/guides/SETUP_DEV.md#common-issues](docs/guides/SETUP_DEV.md#common-issues)
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! See [docs/guides/CONTRIBUTING.md](docs/guides/CONTRIBUTING.md) for:
-- Development guidelines
-- Code style requirements
-- Pull request process
-- Testing requirements
-
----
-
-## 📊 Project Status
-
-**Current Version:** 1.0.0-beta
-
-**Status:** ✅ Active Development
-
-**Completed:**
-- ✅ Backend API (FastAPI)
-- ✅ Frontend UI (React)
-- ✅ OCR integration (Tesseract)
-- ✅ LLM integration (Ollama)
-- ✅ Receipt processing pipeline
-- ✅ Analytics dashboard
-- ✅ AI chat with RAG
-
-**In Progress:**
-- 🔄 RAG service optimization
-- 🔄 WebSocket real-time updates
-- 🔄 Comprehensive testing
-
-**Recently Added:**
-- ✅ FIDO2 WebAuthn Passkeys authentication
-
-**Planned:**
-- 📋 WebSocket support for real-time chat
-- 📋 Analytics dashboard enhancements
-- 📋 Performance optimizations
-- 📋 CI/CD pipeline
-- 📋 Mobile app (future)
-
-📖 **Progress Tracking:** [docs/progress/](docs/progress/)
-
----
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- **Ollama** - Local LLM inference
-- **Tesseract OCR** - Text extraction
-- **FastAPI** - Modern Python web framework
-- **React** - UI framework
-- **SpeakLeash** - Bielik Polish language model
-
----
-
-## 📞 Support
-
-- **Documentation:** [docs/](docs/)
-- **Issues:** [GitHub Issues](https://github.com/codemarcinu/paragonocr/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/codemarcinu/paragonocr/discussions)
-
----
-
-## 🔗 Related Projects
-
-- **Legacy Desktop Version:** See [archive/desktop/](archive/desktop/) for the old GUI application
-- **ReceiptParser:** Legacy parsing library (archived)
-
----
-
-**Last Updated:** 2025-12-07  
-**Maintained by:** [CodeMarcinu](https://github.com/codemarcinu)
-
----
-
-> **Note:** This is the **Web Edition** of ParagonOCR. For the legacy desktop version, see [archive/desktop/](archive/desktop/).
+Projekt udostępniany na licencji MIT. Zobacz plik [LICENSE](LICENSE) po więcej szczegółów.
