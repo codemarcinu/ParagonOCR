@@ -1,6 +1,8 @@
 # ParagonOCR Web Edition - Development Server Script (Windows PowerShell)
 
-Write-Host "🚀 Starting ParagonOCR Web Edition development servers..." -ForegroundColor Cyan
+$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+Write-Host "Starting ParagonOCR Web Edition development servers..." -ForegroundColor Cyan
 Write-Host ""
 
 # Check if Ollama is running
@@ -8,24 +10,26 @@ try {
     Invoke-WebRequest -Uri "http://localhost:11434/api/tags" -UseBasicParsing -ErrorAction Stop | Out-Null
 }
 catch {
-    Write-Host "⚠️  Ollama doesn't seem to be running" -ForegroundColor Yellow
+    Write-Host "Ollama doesn't seem to be running" -ForegroundColor Yellow
     Write-Host "   Start it with: ollama serve" -ForegroundColor Blue
     Write-Host ""
 }
 
 # Start backend
-Write-Host "🔧 Starting backend server..."
-$backendProcess = Start-Process -FilePath "powershell" -ArgumentList "-Command & {cd backend; .\venv\Scripts\activate; uvicorn app.main:app --reload --host 0.0.0.0 --port 8000}" -PassThru -NoNewWindow
+Write-Host "Starting backend server..."
+$backendArgs = '-Command "cd backend; .\venv\Scripts\activate; uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"'
+$backendProcess = Start-Process -FilePath "powershell" -ArgumentList $backendArgs -PassThru -NoNewWindow
 
 # Wait a moment for backend to start
 Start-Sleep -Seconds 2
 
 # Start frontend
-Write-Host "🎨 Starting frontend server..."
-$frontendProcess = Start-Process -FilePath "powershell" -ArgumentList "-Command & {cd frontend; npm run dev}" -PassThru -NoNewWindow
+Write-Host "Starting frontend server..."
+$frontendArgs = '-Command "cd frontend; npm run dev"'
+$frontendProcess = Start-Process -FilePath "powershell" -ArgumentList $frontendArgs -PassThru -NoNewWindow
 
 Write-Host ""
-Write-Host "✅ Servers started!" -ForegroundColor Green
+Write-Host "Servers started!" -ForegroundColor Green
 Write-Host ""
 Write-Host "Backend PID: $($backendProcess.Id)"
 Write-Host "Frontend PID: $($frontendProcess.Id)"
@@ -49,7 +53,7 @@ try {
 }
 finally {
     Write-Host ""
-    Write-Host "🛑 Stopping servers..."
+    Write-Host "Stopping servers..."
     Stop-Process -Id $backendProcess.Id -ErrorAction SilentlyContinue
     Stop-Process -Id $frontendProcess.Id -ErrorAction SilentlyContinue
 }
