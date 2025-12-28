@@ -40,9 +40,12 @@ class OCRResult:
         }
 
 
+import cv2
+import numpy as np
+
 def preprocess_image(image_path: str) -> Image.Image:
     """
-    Preprocess image for better OCR accuracy.
+    Preprocess image for better OCR accuracy using OpenCV.
     
     Args:
         image_path: Path to image file
@@ -50,18 +53,33 @@ def preprocess_image(image_path: str) -> Image.Image:
     Returns:
         Preprocessed PIL Image
     """
-    img = Image.open(image_path)
+    # Read image using OpenCV
+    img = cv2.imread(image_path)
     
-    # Convert to RGB if necessary
-    if img.mode != "RGB":
-        img = img.convert("RGB")
+    # Check if image was loaded successfully
+    if img is None:
+        # Fallback to PIL loading if OpenCV fails
+        return Image.open(image_path)
+        
+    # Convert to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     
-    # Optional: Add more preprocessing here
-    # - Deskewing
-    # - Denoising
-    # - Contrast enhancement
+    # Apply Gaussian blur to reduce noise
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     
-    return img
+    # Apply adaptive thresholding to handle different lighting conditions
+    # This creates a binary image (black and white) which is better for Tesseract
+    thresh = cv2.adaptiveThreshold(
+        blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
+    )
+    
+    # Optional: Dilate/Erode to remove small noise artifacts if needed
+    # kernel = np.ones((1, 1), np.uint8)
+    # thresh = cv2.dilate(thresh, kernel, iterations=1)
+    # thresh = cv2.erode(thresh, kernel, iterations=1)
+    
+    # Convert back to PIL Image (Tesseract expects PIL Image or file path)
+    return Image.fromarray(thresh)
 
 
 def extract_from_pdf(file_path: str) -> OCRResult:

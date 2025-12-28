@@ -31,6 +31,7 @@ from app.models.shop import Shop
 from app.dependencies import get_current_user
 from app.services.ocr_service import extract_from_pdf, extract_from_image, OCRResult
 from app.services.llm_service import parse_receipt_text, ParsedReceipt
+from app.services.normalization import normalize_product_name, classify_product_category, normalize_unit
 from app.config import settings
 from app.schemas import ReceiptResponse, ReceiptListResponse
 
@@ -198,92 +199,135 @@ async def process_receipt_async(receipt_id: int, file_path: str):
                 await send_update("error", 0, "OCR Failed", error="No text extracted from receipt")
                 return
 
-            # Step 2: LLM Parsing
-            await send_update("llm", 60, "Analyzing with AI (Bielik)...")
-            logger.info(f"Receipt {receipt_id}: Starting LLM parsing...")
-            parsed_receipt = parse_receipt_text(ocr_result.text)
+            # Step 2: Hybrid Parsing (Regex + LLM)
+            await send_update("llm", 60, "Analyzing with AI & Normalizers...")
+            logger.info(f"Receipt {receipt_id}: Starting Hybrid parsing...")
 
-            if parsed_receipt.error:
-                error_msg = f"LLM Error: {parsed_receipt.error}"
+            # 2a. Run Regex Parser for precision (Dates, Totals, Normalized Items)
+            from app.services.receipt_parser import ReceiptParser
+            parser = ReceiptParser()
+            # Pass 0 as dummy shop_id, we'll confirm it with LLM
+            parsed_regex = parser.parse(ocr_result.text, shop_id=0)
+
+            # 2b. Run LLM for semantic understanding (Shop Name, Categories, tricky layouts)
+            parsed_llm = parse_receipt_text(ocr_result.text)
+
+            if parsed_llm.error and not parsed_regex.items:
+                 # Both failed
+                error_msg = f"Analysis Error: {parsed_llm.error}"
                 logger.error(f"Receipt {receipt_id}: {error_msg}")
                 receipt.ocr_text = f"{receipt.ocr_text}\n\n{error_msg}"
                 receipt.status = "error"
                 db.commit()
-                await send_update(
-                    "error", 0, "AI Analysis Failed", error=parsed_receipt.error
-                )
+                await send_update("error", 0, "AI Analysis Failed", error=parsed_llm.error)
                 return
 
-            await send_update("llm", 80, "AI analysis complete")
-            logger.info(f"Receipt {receipt_id}: LLM parsing successful. Shop: {parsed_receipt.shop}, Items: {len(parsed_receipt.items)}")
+            await send_update("llm", 80, "Analysis complete, merging results...")
+            
+            # Step 3: Save to database (Merge Strategy)
+            await send_update("saving", 90, "Saving normalized data...")
 
-            # Step 3: Save to database
-            await send_update("saving", 90, "Saving data...")
-
+            # Shop: Trust LLM first (Regex can't catch "Biedronka" easily from logo text), fallback to default
+            shop_name = parsed_llm.shop if parsed_llm.shop else "Nieznany Sklep"
+            
             # Get or create shop
-            shop = db.query(Shop).filter(Shop.name == parsed_receipt.shop).first()
+            shop = db.query(Shop).filter(Shop.name == shop_name).first()
             if not shop:
-                shop = Shop(name=parsed_receipt.shop)
+                shop = Shop(name=shop_name)
                 db.add(shop)
                 db.flush()
                 logger.info(f"Receipt {receipt_id}: Created new shop: {shop.name}")
 
             # Update receipt
             receipt.shop_id = shop.id
-            try:
-                receipt.purchase_date = datetime.strptime(
-                    parsed_receipt.date, "%Y-%m-%d"
-                ).date()
-            except (ValueError, TypeError) as e:
-                logger.warning(f"Receipt {receipt_id}: Invalid date format '{parsed_receipt.date}', using today's date. Error: {e}")
-                receipt.purchase_date = date.today()
             
-            receipt.purchase_time = parsed_receipt.time
-            # Ensure total_amount is not None (required field)
-            receipt.total_amount = parsed_receipt.total if parsed_receipt.total is not None else 0.0
-            receipt.subtotal = parsed_receipt.subtotal
-            receipt.tax = parsed_receipt.tax
+            # Date: Trust Regex (Precise) > LLM > Today
+            if parsed_regex.purchase_date and parsed_regex.purchase_date != date.today():
+                 receipt.purchase_date = parsed_regex.purchase_date
+            else:
+                try:
+                    receipt.purchase_date = datetime.strptime(parsed_llm.date, "%Y-%m-%d").date()
+                except (ValueError, TypeError):
+                    receipt.purchase_date = date.today()
+
+            receipt.purchase_time = parsed_llm.time
+            
+            # Total: Trust Regex (Precise) > LLM
+            if parsed_regex.total_amount > 0:
+                receipt.total_amount = parsed_regex.total_amount
+            else:
+                receipt.total_amount = parsed_llm.total if parsed_llm.total is not None else 0.0
+                
+            receipt.subtotal = parsed_llm.subtotal # Regex simplified this, check if we want parser's
+            receipt.tax = parsed_llm.tax
             receipt.status = "completed"
 
+            # Items: Prefer Regex items if they captured a good list (checking count/quality)
+            # Otherwise fall back to LLM items
+            items_source = []
+            
+            # Simple heuristic: If regex found items with prices that sum up close to total, use them.
+            regex_total = sum(i.total_price for i in parsed_regex.items)
+            
+            if parsed_regex.items and abs(regex_total - receipt.total_amount) < 5.0:
+                 # Regex list seems valid and validates against total
+                 logger.info(f"Receipt {receipt_id}: Using Regex items (checksum valid)")
+                 items_to_process = parsed_regex.items
+                 source_type = "regex"
+            else:
+                 # Fallback to LLM items
+                 logger.info(f"Receipt {receipt_id}: Using LLM items (Regex checksum gap: {abs(regex_total - receipt.total_amount)})")
+                 # Convert LLM dicts to objects for uniform processing loop below would be nice,
+                 # but for now let's just use the LLM dict structure and adapt the loop.
+                 items_to_process = parsed_llm.items
+                 source_type = "llm"
+
             # Save items
-            for item_data in parsed_receipt.items:
+            for item_data in items_to_process:
+                # Handle different data structures (Object vs Dict)
+                if source_type == "regex":
+                    name = item_data.raw_name
+                    qty = item_data.quantity
+                    unit = item_data.unit
+                    unit_price = item_data.unit_price
+                    total_price = item_data.total_price
+                else:
+                    name = item_data.get("name", "")
+                    qty = item_data.get("quantity", 1.0)
+                    unit = item_data.get("unit")
+                    unit_price = item_data.get("unit_price")
+                    total_price = item_data.get("total_price", 0.0)
+
                 # Get or create product
                 product = None
-                if item_data.get("name"):
-                    # Try to find by alias first
-                    alias = (
-                        db.query(ProductAlias)
-                        .filter(ProductAlias.raw_name == item_data["name"])
-                        .first()
-                    )
-
-                    if alias:
-                        product = alias.product
-                    else:
-                        # Create new product (simplified - in production, use normalization)
-                        product = Product(normalized_name=item_data["name"])
-                        db.add(product)
-                        db.flush()
-
-                        # Create alias
-                        alias = ProductAlias(
-                            product_id=product.id,
-                            raw_name=item_data["name"],
-                        )
-                        db.add(alias)
+                if name:
+                    # Normalize unit
+                    unit = normalize_unit(unit)
+                    
+                    # Find or create product using fuzzy matching
+                    product, is_new = normalize_product_name(db, name)
+                    
+                    if is_new:
+                        # Auto-classify category for new products
+                        cat_id = classify_product_category(db, product)
+                        if cat_id:
+                            product.category_id = cat_id
+                            db.add(product)
+                        
+                        logger.info(f"Classified new product '{product.normalized_name}' -> Category ID: {cat_id}")
 
                 # Create receipt item
                 receipt_item = ReceiptItem(
                     receipt_id=receipt.id,
                     product_id=product.id if product else None,
-                    raw_name=item_data.get("name", ""),
-                    quantity=item_data.get("quantity", 1.0),
-                    unit=item_data.get("unit"),
-                    unit_price=item_data.get("unit_price"),
-                    total_price=item_data.get("total_price", 0.0),
+                    raw_name=name,
+                    quantity=qty,
+                    unit=unit,
+                    unit_price=unit_price,
+                    total_price=total_price,
                 )
                 db.add(receipt_item)
-
+            
             db.commit()
 
             await send_update("completed", 100, "Processing successfully completed!")

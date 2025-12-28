@@ -59,7 +59,7 @@ class Settings(BaseSettings):
         default=300, description="Ollama request timeout in seconds"
     )
     TEXT_MODEL: str = Field(
-        default="bielik-4.5b-v3.0-instruct:Q4_K_M",
+        default="SpeakLeash/bielik-11b-v2.3-instruct:Q5_K_M",
         description="Ollama text model for receipt parsing",
     )
     VISION_MODEL: str = Field(

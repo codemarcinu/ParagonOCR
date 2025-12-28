@@ -151,7 +151,7 @@ def parse_receipt_text(ocr_text: str) -> ParsedReceipt:
             ],
             options={
                 "temperature": 0.1,  # Low temperature for structured output
-                "num_predict": 2000,  # Max tokens for response
+                "num_predict": 4000,  # Max tokens for response
             },
             format="json",  # Force JSON output format
         )
@@ -295,6 +295,22 @@ def extract_json_from_response(response_text: str) -> Optional[Dict[str, Any]]:
             # Remove trailing commas
             json_str = re.sub(r',\s*}', '}', json_str)
             json_str = re.sub(r',\s*]', ']', json_str)
+            
+            # Simple truncation repair: close open brackets/braces
+            open_braces = json_str.count('{') - json_str.count('}')
+            open_brackets = json_str.count('[') - json_str.count(']')
+            
+            if open_braces > 0 or open_brackets > 0:
+                # Append missing closing characters
+                # This is a heuristic: usually we differ items list or the main object
+                # Attempt to close quotes first if needed
+                if json_str.count('"') % 2 != 0:
+                     json_str += '"'
+                     
+                json_str += ']' * open_brackets
+                json_str += '}' * open_braces
+                logger.info(f"Attempted to close truncated JSON: {json_str[-50:]}")
+
             parsed = json.loads(json_str)
             logger.info("Successfully parsed JSON after repair")
             return parsed if isinstance(parsed, dict) else None
