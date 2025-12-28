@@ -1,0 +1,42 @@
+OV
+DIN
+
+Kaufland
+
+Podsumowanie zakupow
+
+Kaufland Legionowo
+ul. Zegrzyhska 115
+
+Legionowo
+
+Cena PLN
+UHT bezLaktozy1.... 4,29
+TorbaZakupowaP... 0,99
+K.TwarozekKrem... 4,69
+JamarPomidory4... 3,99
+SerKrolewPlastry... 4,99
+SerGoudaPlastry... 4,99
+K.SpoddoPizzy40... 4,54
+CiastoFrancuskie... 4,99
+SzynkaPierskKure... 5,79
+KLC.MozzarellaMi... 4,32
+KLC.MozzarellaMi... 4,32
+HariboMisieKwas... 5,49
+HariboFresasCon... 1,79
+Ciabatta 75g 1,14
+Ciabatta 75g 1,14
+LaysSalty130g 5,26
+OvenBakGrillPapr... 6,16
+LaysOvenBakSolo... 5,26
+Ogdtem 74,14
+
+Podat... Brutto Netto Podatek
+C 5% 65,87 62,73 3,14
+A 23% 8,27 6,72 1,55
+
+Podsumowanie zakupow: 24026
+
+MMO
+
+9261622589635622320757842804
