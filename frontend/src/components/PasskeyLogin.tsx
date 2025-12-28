@@ -36,7 +36,7 @@ const PasskeyLogin: React.FC<PasskeyLoginProps> = ({
       const options = await getPasskeyAuthenticationOptions(username);
 
       // Start authentication using SimpleWebAuthn
-      const credential = await startAuthentication(options);
+      const credential = await startAuthentication(options as any);
 
       // Verify authentication with server
       const tokenData = await verifyPasskeyAuthentication({
@@ -54,7 +54,7 @@ const PasskeyLogin: React.FC<PasskeyLoginProps> = ({
       onSuccess?.();
     } catch (err: any) {
       let errorMessage = 'Nie udało się uwierzytelnić za pomocą klucza dostępu';
-      
+
       if (err.name === 'NotSupportedError') {
         errorMessage = 'Klucze dostępu nie są obsługiwane na tym urządzeniu. Użyj innej metody uwierzytelniania.';
       } else if (err.name === 'NotAllowedError' || err.message?.includes('timeout') || err.message?.includes('not allowed')) {
@@ -62,10 +62,10 @@ const PasskeyLogin: React.FC<PasskeyLoginProps> = ({
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       setError(errorMessage);
       onError?.(errorMessage);
-      
+
       console.error('Passkey authentication error:', err);
     } finally {
       setLoading(false);

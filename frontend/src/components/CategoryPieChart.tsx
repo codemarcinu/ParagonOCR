@@ -51,7 +51,7 @@ export function CategoryPieChart({ data }: CategoryPieChartProps) {
                             ))}
                         </Pie>
                         <Tooltip
-                            formatter={(value: number) => [`${value.toFixed(2)} PLN`, 'Kwota']}
+                            formatter={(value: number | undefined) => [`${(value || 0).toFixed(2)} PLN`, 'Kwota']}
                             contentStyle={{ backgroundColor: '#fff', borderRadius: '0.5rem', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
                         />
                         <Legend layout="vertical" align="right" verticalAlign="middle" />

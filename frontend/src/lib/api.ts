@@ -97,6 +97,13 @@ export const getReceipt = async (id: number): Promise<ReceiptDetailsResponse> =>
   return response.data;
 };
 
+export const updateReceipt = async (id: number, data: Partial<ReceiptDetailsResponse>): Promise<ReceiptDetailsResponse> => {
+  // Use PUT or PATCH depending on backend implementation. Assuming PUT for full update or PATCH for partial.
+  // Given the usage passes the whole object, generic PUT is likely what is intended or supported.
+  const response = await api.put(`/receipts/${id}`, data);
+  return response.data;
+};
+
 // Auth
 export interface RegisterData {
   email: string;

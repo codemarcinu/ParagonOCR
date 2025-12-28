@@ -6,7 +6,7 @@ import PasskeyRegistration from '../components/PasskeyRegistration';
 
 const Register: React.FC = () => {
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
+
     const [passkeyRegistered, setPasskeyRegistered] = useState(false);
 
     const navigate = useNavigate();
@@ -18,12 +18,12 @@ const Register: React.FC = () => {
             if (!token) {
                 throw new Error('No token received');
             }
-            
+
             // Set token and fetch user
             useAuthStore.getState().setToken(token);
             const user = await fetchMe();
             loginAction(token, user);
-            
+
             setPasskeyRegistered(true);
             setTimeout(() => {
                 navigate('/');

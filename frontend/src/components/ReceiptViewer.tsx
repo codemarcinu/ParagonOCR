@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import { getReceipt, updateReceipt } from '@/lib/api';
+import type { ReceiptDetailsResponse } from '@/types/api';
 import { Button, Input } from './ui';
 import { Pencil, Save, X } from 'lucide-react';
 
@@ -12,41 +13,12 @@ interface ReceiptViewerProps {
   onClose?: () => void;
 }
 
-interface ReceiptDetails {
-  id: number;
-  shop: {
-    id: number | null;
-    name: string | null;
-    location: string | null;
-  };
-  purchase_date: string | null;
-  purchase_time: string | null;
-  total_amount: number;
-  subtotal: number | null;
-  tax: number | null;
-  items: Array<{
-    id: number;
-    product: {
-      id: number | null;
-      name: string | null;
-    };
-    raw_name: string;
-    quantity: number;
-    unit: string | null;
-    unit_price: number | null;
-    total_price: number;
-    discount: number | null;
-  }>;
-  source_file: string;
-  created_at: string | null;
-}
-
 export function ReceiptViewer({ receiptId, onClose }: ReceiptViewerProps) {
-  const [receipt, setReceipt] = useState<ReceiptDetails | null>(null);
+  const [receipt, setReceipt] = useState<ReceiptDetailsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedReceipt, setEditedReceipt] = useState<ReceiptDetails | null>(null);
+  const [editedReceipt, setEditedReceipt] = useState<ReceiptDetailsResponse | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {

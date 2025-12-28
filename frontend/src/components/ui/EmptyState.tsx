@@ -1,4 +1,4 @@
-import { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils'; // Assuming this utility exists, if not standard class string
 
 interface EmptyStateProps {

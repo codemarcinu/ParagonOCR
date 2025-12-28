@@ -33,7 +33,7 @@ const PasskeyRegistration: React.FC<PasskeyRegistrationProps> = ({
       const options = await getPasskeyRegistrationOptions(deviceName);
 
       // Start registration using SimpleWebAuthn
-      const credential = await startRegistration(options);
+      const credential = await startRegistration(options as any);
 
       // Verify registration with server
       const result = await verifyPasskeyRegistration({
@@ -49,7 +49,7 @@ const PasskeyRegistration: React.FC<PasskeyRegistrationProps> = ({
       }
     } catch (err: any) {
       let errorMessage = 'Nie udało się zarejestrować klucza dostępu';
-      
+
       if (err.name === 'NotSupportedError') {
         errorMessage = 'Klucze dostępu nie są obsługiwane na tym urządzeniu. Użyj innej metody uwierzytelniania.';
       } else if (err.name === 'NotAllowedError' || err.message?.includes('timeout') || err.message?.includes('not allowed')) {
@@ -57,10 +57,10 @@ const PasskeyRegistration: React.FC<PasskeyRegistrationProps> = ({
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       setError(errorMessage);
       onError?.(errorMessage);
-      
+
       console.error('Passkey registration error:', err);
     } finally {
       setLoading(false);

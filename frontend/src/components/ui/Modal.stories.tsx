@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import { useState } from 'react';
 import { Modal } from './Modal';
@@ -17,6 +17,7 @@ const meta = {
       options: ['sm', 'md', 'lg', 'xl'],
     },
   },
+  args: { isOpen: false, onClose: fn() },
 } satisfies Meta<typeof Modal>;
 
 export default meta;
@@ -24,7 +25,7 @@ type Story = StoryObj<typeof meta>;
 
 const ModalWrapper = ({ isOpen: initialOpen = false, ...args }: { isOpen?: boolean } & Story['args']) => {
   const [isOpen, setIsOpen] = useState(initialOpen);
-  
+
   return (
     <>
       <Button onClick={() => setIsOpen(true)}>Open Modal</Button>
@@ -101,8 +102,8 @@ export const WithForm: Story = {
             />
           </div>
           <div className="flex gap-2 justify-end">
-            <Button variant="secondary" onClick={() => {}}>Cancel</Button>
-            <Button onClick={() => {}}>Submit</Button>
+            <Button variant="secondary" onClick={() => { }}>Cancel</Button>
+            <Button onClick={() => { }}>Submit</Button>
           </div>
         </div>
       </form>

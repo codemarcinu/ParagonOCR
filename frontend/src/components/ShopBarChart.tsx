@@ -53,7 +53,7 @@ export function ShopBarChart({ data }: ShopBarChartProps) {
                         <Tooltip
                             cursor={{ fill: 'transparent' }}
                             contentStyle={{ backgroundColor: '#fff', borderRadius: '0.5rem', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                            formatter={(value: number) => [`${value.toFixed(2)} PLN`, 'Suma']}
+                            formatter={(value: number | undefined) => [`${(value || 0).toFixed(2)} PLN`, 'Suma']}
                         />
                         <Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]}>
                             {sortedData.map((_, index) => (
