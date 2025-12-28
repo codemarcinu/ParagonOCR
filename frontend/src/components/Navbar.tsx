@@ -1,14 +1,20 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  Receipt, 
-  ShoppingBasket, 
-  MessageSquare, 
-  TrendingUp, 
+import {
+  Receipt,
+  ShoppingBasket,
+  MessageSquare,
+  TrendingUp,
   ListChecks,
   Home,
-  LogOut
+  LogOut,
+  Sun,
+  Moon,
+  Menu,
+  X
 } from 'lucide-react';
+import { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
+import { useThemeStore } from '../store/themeStore';
 import { Button } from './ui';
 
 const navigation = [
@@ -24,6 +30,8 @@ export function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, isAuthenticated } = useAuthStore();
+  const { theme, setTheme } = useThemeStore();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -40,8 +48,8 @@ export function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo / Home Link */}
           <div className="flex-shrink-0">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="flex items-center space-x-2 text-xl font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
             >
               <Receipt className="h-6 w-6 text-blue-600 dark:text-blue-400" />
@@ -76,35 +84,84 @@ export function Navbar() {
 
           {/* Mobile Menu Button & Logout */}
           <div className="flex items-center space-x-2">
-            {/* Mobile Menu - simplified, just show active page */}
-            <div className="md:hidden">
-              <select
-                value={location.pathname}
-                onChange={(e) => navigate(e.target.value)}
-                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-              >
-                {navigation.map((item) => (
-                  <option key={item.href} value={item.href}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Logout Button */}
+            {/* Theme Toggle (Mobile & Desktop) */}
             <Button
-              onClick={handleLogout}
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               variant="ghost"
               size="sm"
-              className="text-gray-600 hover:text-red-600 dark:text-gray-300 dark:hover:text-red-400"
-              title="Wyloguj się"
+              className="text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
+              title={theme === 'dark' ? 'Przełącz na tryb jasny' : 'Przełącz na tryb ciemny'}
             >
-              <LogOut className="h-5 w-5" />
-              <span className="hidden sm:inline ml-2">Wyloguj</span>
+              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
+
+            {/* Logout Button (Desktop only, Mobile inside menu) */}
+            <div className="hidden md:block">
+              <Button
+                onClick={handleLogout}
+                variant="ghost"
+                size="sm"
+                className="text-gray-600 hover:text-red-600 dark:text-gray-300 dark:hover:text-red-400"
+                title="Wyloguj się"
+              >
+                <LogOut className="h-5 w-5" />
+                <span className="ml-2">Wyloguj</span>
+              </Button>
+            </div>
+
+            {/* Mobile Menu Toggle */}
+            <div className="md:hidden">
+              <Button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                variant="ghost"
+                size="sm"
+                className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+              >
+                {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            {navigation.map((item) => {
+              const isActive = location.pathname === item.href;
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`
+                    flex items-center space-x-2 px-3 py-3 rounded-md text-base font-medium
+                    ${isActive
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white'
+                    }
+                  `}
+                >
+                  <Icon className="h-5 w-5" />
+                  <span>{item.name}</span>
+                </Link>
+              );
+            })}
+            <button
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                handleLogout();
+              }}
+              className="w-full flex items-center space-x-2 px-3 py-3 rounded-md text-base font-medium text-gray-600 hover:bg-gray-100 hover:text-red-600 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-red-400"
+            >
+              <LogOut className="h-5 w-5" />
+              <span>Wyloguj się</span>
+            </button>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

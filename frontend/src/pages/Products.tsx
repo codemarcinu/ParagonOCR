@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useProductStore } from '@/store/productStore';
-import { Plus, Search, Edit2, TrendingUp, AlertCircle, Home } from 'lucide-react';
+import { Plus, Search, Edit2, TrendingUp, AlertCircle, Home, ShoppingBag } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Skeleton, Button, Input, Modal } from '@/components/ui';
+import { Skeleton, Button, Input, Modal, EmptyState } from '@/components/ui';
 import type { ProductResponse } from '@/types/api';
 
 export function Products() {
@@ -70,8 +70,8 @@ export function Products() {
             <div className="max-w-7xl mx-auto">
                 <div className="flex justify-between items-center mb-8">
                     <div className="flex items-center space-x-4">
-                        <Link 
-                            to="/" 
+                        <Link
+                            to="/"
                             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                             title="Powrót do strony głównej"
                         >
@@ -148,8 +148,12 @@ export function Products() {
                                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                     {products.length === 0 ? (
                                         <tr>
-                                            <td colSpan={4} className="px-6 py-12 text-center text-gray-500">
-                                                Nie znaleziono produktów spełniających kryteria.
+                                            <td colSpan={4} className="px-6 py-12">
+                                                <EmptyState
+                                                    icon={ShoppingBag}
+                                                    title="Brak produktów"
+                                                    description="Nie znaleziono produktów spełniających kryteria."
+                                                />
                                             </td>
                                         </tr>
                                     ) : products.map((product) => {

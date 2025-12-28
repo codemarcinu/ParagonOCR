@@ -1,9 +1,10 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoadingSpinner } from './components/ui';
+import { useThemeStore } from './store/themeStore';
 import './App.css';
 
 // Lazy load pages for code splitting
@@ -25,6 +26,22 @@ const PageLoader = () => (
 );
 
 function App() {
+  const { theme } = useThemeStore();
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
+      root.classList.add(systemTheme);
+    } else {
+      root.classList.add(theme);
+    }
+  }, [theme]);
+
   return (
     <ErrorBoundary>
       <Router>

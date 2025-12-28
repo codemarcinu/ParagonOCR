@@ -4,10 +4,10 @@
 
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Home } from 'lucide-react';
+import { Home, Receipt } from 'lucide-react';
 import { useReceiptStore } from '@/store/receiptStore';
 import { ReceiptUploader } from '@/components/ReceiptUploader';
-import { Skeleton } from '@/components/ui';
+import { Skeleton, EmptyState } from '@/components/ui';
 
 export function Dashboard() {
   const { receipts, loading, error, fetchReceipts } = useReceiptStore();
@@ -24,8 +24,8 @@ export function Dashboard() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center space-x-4 mb-8">
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
             title="Powrót do strony głównej"
           >
@@ -97,11 +97,20 @@ export function Dashboard() {
             )}
 
             {!loading && !error && receipts.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Brak paragonów. Prześlij swój pierwszy paragon powyżej!
-                </p>
-              </div>
+              <EmptyState
+                icon={Receipt}
+                title="Brak paragonów"
+                description="Nie dodałeś jeszcze żadnych paragonów. Prześlij pierwszy, aby zobaczyć statystyki!"
+                action={
+                  <div className="mt-4">
+                    {/* The uploader is already prominent above, so maybe just a pointer or scroll? 
+                        For now, let's keep it simple or maybe scroll to top? 
+                        The uploader IS above, so no action needed, or maybe focus input? 
+                        Let's just leave action empty or point up.
+                    */}
+                  </div>
+                }
+              />
             )}
 
             {!loading && !error && receipts.length > 0 && (

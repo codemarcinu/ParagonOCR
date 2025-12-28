@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Home, Plus } from 'lucide-react';
+import { Home, Plus, Receipt, Filter } from 'lucide-react';
 import { useReceiptStore } from '@/store/receiptStore';
 import { ReceiptViewer } from '@/components/ReceiptViewer';
-import { Skeleton, Button, Input, Modal } from '@/components/ui';
+import { FilterSidebar } from '@/components/FilterSidebar';
+import { Skeleton, Button, Input, Modal, EmptyState } from '@/components/ui';
 
 export function Receipts() {
     const navigate = useNavigate();
@@ -30,11 +31,15 @@ export function Receipts() {
     };
 
     const [modalOpen, setModalOpen] = useState(false);
+    const [filterSidebarOpen, setFilterSidebarOpen] = useState(false);
     const [selectedReceiptId, setSelectedReceiptId] = useState<number | null>(null);
 
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'start_date' | 'end_date') => {
         setFilters({ [field]: e.target.value || undefined });
     };
+
+    // In future, adding shop/category filters here would map to:
+    // const handleShopChange = (id: number) => setFilters({ shop_id: id });
 
     const openModal = (id: number) => {
         setSelectedReceiptId(id);
@@ -48,14 +53,15 @@ export function Receipts() {
 
     const currentPage = Math.floor(skip / limit) + 1;
     const totalPages = Math.ceil(total / limit);
+    const activeFiltersCount = Object.keys(filters).length;
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8 relative">
             <div className="max-w-7xl mx-auto">
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
                     <div className="flex items-center space-x-4">
-                        <Link 
-                            to="/" 
+                        <Link
+                            to="/"
                             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                             title="Powrót do strony głównej"
                         >
@@ -67,43 +73,18 @@ export function Receipts() {
                     </div>
                     <div className="mt-4 md:mt-0 flex space-x-2">
                         <Button
+                            onClick={() => setFilterSidebarOpen(true)}
+                            variant="secondary"
+                            leftIcon={<Filter className="h-4 w-4" />}
+                        >
+                            Filtry {activeFiltersCount > 0 && `(${activeFiltersCount})`}
+                        </Button>
+                        <Button
                             onClick={() => navigate('/receipts/upload')}
                             leftIcon={<Plus className="h-4 w-4" />}
                         >
                             Dodaj Paragon
                         </Button>
-                        <Button
-                            onClick={resetFilters}
-                            variant="secondary"
-                        >
-                            Resetuj Filtry
-                        </Button>
-                    </div>
-                </div>
-
-                {/* Filters */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Zakres Dat</label>
-                        <div className="flex space-x-2">
-                            <Input
-                                type="date"
-                                value={filters.start_date || ''}
-                                onChange={(e) => handleDateChange(e, 'start_date')}
-                                className="flex-1"
-                            />
-                            <span className="text-gray-500 self-center">-</span>
-                            <Input
-                                type="date"
-                                value={filters.end_date || ''}
-                                onChange={(e) => handleDateChange(e, 'end_date')}
-                                className="flex-1"
-                            />
-                        </div>
-                    </div>
-                    {/* Placeholder for Shop Filter */}
-                    <div className="flex items-end">
-                        <span className="text-xs text-gray-500 italic">Filtrowanie sklepów po ID dostępne w backendzie, wyszukiwanie po nazwie TODO.</span>
                     </div>
                 </div>
 
@@ -123,7 +104,26 @@ export function Receipts() {
                     ) : error ? (
                         <div className="p-8 text-center text-red-500">{error}</div>
                     ) : receipts.length === 0 ? (
-                        <div className="p-8 text-center text-gray-500">Nie znaleziono paragonów.</div>
+                        <EmptyState
+                            icon={Receipt}
+                            title="Brak paragonów"
+                            description={
+                                activeFiltersCount > 0
+                                    ? "Nie znaleziono paragonów spełniających kryteria filtrowania."
+                                    : "Twoja lista paragonów jest pusta."
+                            }
+                            action={
+                                activeFiltersCount > 0 ? (
+                                    <Button
+                                        onClick={resetFilters}
+                                        variant="secondary"
+                                        className="mt-4"
+                                    >
+                                        Wyczyść Filtry
+                                    </Button>
+                                ) : undefined
+                            }
+                        />
                     ) : (
                         <>
                             <div className="overflow-x-auto">
@@ -228,6 +228,49 @@ export function Receipts() {
             >
                 {selectedReceiptId && <ReceiptViewer receiptId={selectedReceiptId} onClose={closeModal} />}
             </Modal>
+
+            {/* Filter Sidebar */}
+            <FilterSidebar
+                isOpen={filterSidebarOpen}
+                onClose={() => setFilterSidebarOpen(false)}
+                onReset={() => {
+                    resetFilters();
+                    setFilterSidebarOpen(false);
+                }}
+                onApply={() => setFilterSidebarOpen(false)}
+            >
+                <div className="space-y-6">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Zakres Dat</label>
+                        <div className="space-y-4">
+                            <div>
+                                <span className="text-xs text-gray-500 uppercase">Od</span>
+                                <Input
+                                    type="date"
+                                    value={filters.start_date || ''}
+                                    onChange={(e) => handleDateChange(e, 'start_date')}
+                                    className="w-full"
+                                />
+                            </div>
+                            <div>
+                                <span className="text-xs text-gray-500 uppercase">Do</span>
+                                <Input
+                                    type="date"
+                                    value={filters.end_date || ''}
+                                    onChange={(e) => handleDateChange(e, 'end_date')}
+                                    className="w-full"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    {/* Placeholder for future specific filters */}
+                    <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <p className="text-sm text-gray-400">
+                            Więcej filtrów (Sklep, Kategoria) wkrótce...
+                        </p>
+                    </div>
+                </div>
+            </FilterSidebar>
         </div>
     );
 }

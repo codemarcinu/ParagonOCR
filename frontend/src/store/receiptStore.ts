@@ -43,6 +43,7 @@ interface ReceiptStore {
   resetFilters: () => void;
   setPage: (page: number) => void;
   uploadReceipt: (file: File) => Promise<{ receipt_id: number; status: string }>;
+  updateReceipt: (id: number, data: Partial<any>) => Promise<void>;
   clearError: () => void;
 }
 
@@ -131,6 +132,29 @@ export const useReceiptStore = create<ReceiptStore>((set) => ({
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to upload receipt';
       set({ error: errorMessage, loading: false });
+      showError(errorMessage);
+      throw error;
+    }
+  },
+
+  updateReceipt: async (id, data) => {
+    try {
+      // Optimistic update could go here, but for safety let's wait for API
+      await api.put(`/receipts/${id}`, data);
+
+      // Update local state
+      set((state) => ({
+        receipts: state.receipts.map((r) =>
+          r.id === id ? { ...r, ...data } : r
+        )
+      }));
+
+      showSuccess('Paragon zaktualizowany pomyślnie');
+
+      // Refresh list to ensure consistency
+      await useReceiptStore.getState().fetchReceipts();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update receipt';
       showError(errorMessage);
       throw error;
     }
