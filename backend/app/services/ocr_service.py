@@ -46,6 +46,7 @@ import numpy as np
 def preprocess_image(image_path: str) -> Image.Image:
     """
     Preprocess image for better OCR accuracy using OpenCV.
+    Includes CLAHE, Bilateral Filter, and Deskewing.
     
     Args:
         image_path: Path to image file
@@ -61,24 +62,54 @@ def preprocess_image(image_path: str) -> Image.Image:
         # Fallback to PIL loading if OpenCV fails
         return Image.open(image_path)
         
-    # Convert to grayscale
+    # 1. Convert to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     
-    # Apply Gaussian blur to reduce noise
-    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    # 2. CLAHE (Contrast Limited Adaptive Histogram Equalization)
+    # Better than global histogram equalization for receipts with shadows
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    gray = clahe.apply(gray)
     
-    # Apply adaptive thresholding to handle different lighting conditions
-    # This creates a binary image (black and white) which is better for Tesseract
-    thresh = cv2.adaptiveThreshold(
-        blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
-    )
+    # 3. Bilateral Filter (Denoising while preserving edges)
+    # Better than GaussianBlur for text
+    denoised = cv2.bilateralFilter(gray, 9, 75, 75)
     
-    # Optional: Dilate/Erode to remove small noise artifacts if needed
-    # kernel = np.ones((1, 1), np.uint8)
-    # thresh = cv2.dilate(thresh, kernel, iterations=1)
-    # thresh = cv2.erode(thresh, kernel, iterations=1)
+    # 4. Thresholding
+    # Use Otsu's binarization after Gaussian blur (if needed) or simple binary
+    # For receipts, simple binary after CLAHE is often good, or adaptive
+    # We'll use a mix: thresholding helps detect rotation, but sometimes grayscale is better for Tesseract
+    # deeper in the engine. However, we return binary/processed image.
+    _, thresh = cv2.threshold(denoised, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     
-    # Convert back to PIL Image (Tesseract expects PIL Image or file path)
+    # 5. Deskewing
+    try:
+        # invert for contour detection (white text on black background)
+        coords = np.column_stack(np.where(thresh > 0)) # Note: this assumes white text? 
+        # Actually Otsu typically gives black text on white for receipts. 
+        # Let's invert to find black pixels (text)
+        thresh_inv = cv2.bitwise_not(thresh)
+        coords = np.column_stack(np.where(thresh_inv > 0))
+        
+        if len(coords) > 0:
+            angle = cv2.minAreaRect(coords)[-1]
+            
+            # minAreaRect returns values in range [-90, 0)
+            if angle < -45:
+                angle = -(90 + angle)
+            else:
+                angle = -angle
+                
+            # Rotate if angle is significant (> 0.5 degrees)
+            if abs(angle) > 0.5:
+                (h, w) = img.shape[:2]
+                center = (w // 2, h // 2)
+                M = cv2.getRotationMatrix2D(center, angle, 1.0)
+                thresh = cv2.warpAffine(thresh, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+    except Exception as e:
+        print(f"Deskewing failed: {e}") # Non-critical
+        pass
+    
+    # Convert back to PIL Image
     return Image.fromarray(thresh)
 
 
@@ -181,7 +212,7 @@ def extract_from_image(file_path: str) -> OCRResult:
 
 def _extract_with_tesseract(img: Image.Image) -> OCRResult:
     """
-    Extract text using Tesseract OCR.
+    Extract text using Tesseract OCR with layout preservation.
     
     Args:
         img: PIL Image object
@@ -193,16 +224,53 @@ def _extract_with_tesseract(img: Image.Image) -> OCRResult:
         # Set tesseract command
         pytesseract.pytesseract.tesseract_cmd = settings.TESSERACT_CMD
         
-        # Extract text with Polish and English language support
-        text = pytesseract.image_to_string(img, lang="pol+eng")
+        # Use --psm 6 (Assume a single uniform block of text) - often better for receipts
+        custom_config = r'--psm 6'
         
-        # Try to get confidence scores (if available)
-        try:
-            data = pytesseract.image_to_data(img, lang="pol+eng", output_type=pytesseract.Output.DICT)
-            confidences = [int(conf) for conf in data["conf"] if int(conf) > 0]
-            avg_confidence = sum(confidences) / len(confidences) if confidences else 0.0
-        except Exception:
-            avg_confidence = 0.0
+        # Get verbose data (boxes, confidences, line numbers)
+        data = pytesseract.image_to_data(img, lang="pol+eng", config=custom_config, output_type=pytesseract.Output.DICT)
+        
+        # Debug Tesseract output
+        # print(f"DEBUG: Found {len(data['text'])} items")
+        # print(f"DEBUG: Sample texts: {data['text'][:20]}")
+        
+        # Reconstruct text line by line
+        # data keys: level, page_num, block_num, par_num, line_num, word_num, left, top, width, height, conf, text
+        
+        lines = {}
+        confidences = []
+        
+        num_boxes = len(data['text'])
+        for i in range(num_boxes):
+            if int(data['conf'][i]) > -1:
+                # Store confidence
+                confidences.append(int(data['conf'][i]))
+                
+                # Group by (block, paragraph, line)
+                # However, for receipts, simple Y-coordinate clustering might be better if PSM 4 fails,
+                # but let's trust Tesseract's line detection first.
+                key = (data['block_num'][i], data['par_num'][i], data['line_num'][i])
+                
+                if key not in lines:
+                    lines[key] = []
+                    
+                text_val = data['text'][i].strip()
+                if text_val:
+                    lines[key].append(text_val)
+        
+        # Sort lines by vertical position (block/par/line numbers mostly usually sequential)
+        # But let's verify visual order if needed. Tesseract output is usually in reading order.
+        sorted_keys = sorted(lines.keys())
+        
+        final_text_parts = []
+        for key in sorted_keys:
+            line_text = " ".join(lines[key])
+            if line_text:
+                final_text_parts.append(line_text)
+                
+        text = "\n".join(final_text_parts)
+        
+        avg_confidence = sum(confidences) / len(confidences) if confidences else 0.0
         
         return OCRResult(
             text=text.strip(),

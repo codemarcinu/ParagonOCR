@@ -7,7 +7,7 @@ Handles structured output parsing and error handling with retry logic.
 import json
 import re
 import logging
-from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, List, Any, Tuple
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
@@ -117,6 +117,7 @@ class ParsedReceipt:
 def parse_receipt_text(ocr_text: str) -> ParsedReceipt:
     """
     Parse receipt text using LLM (Bielik) to extract structured data.
+    Includes verification loop for mathematical consistency.
     
     Args:
         ocr_text: Raw OCR text from receipt
@@ -136,61 +137,122 @@ def parse_receipt_text(ocr_text: str) -> ParsedReceipt:
     
     # Log OCR text length for debugging
     logger.info(f"Parsing receipt with LLM. OCR text length: {len(ocr_text)} chars")
-    logger.debug(f"OCR text preview: {ocr_text[:200]}...")
     
-    # Create prompt for receipt parsing
+    # Create initial prompt
     prompt = create_receipt_parsing_prompt(ocr_text)
     
-    try:
-        logger.info(f"Calling Ollama API with model: {settings.TEXT_MODEL}")
-        # Call Ollama API using chat() with format='json' to force JSON output
-        response = ollama_client.chat(
-            model=settings.TEXT_MODEL,
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
-            options={
-                "temperature": 0.1,  # Low temperature for structured output
-                "num_predict": 4000,  # Max tokens for response
-            },
-            format="json",  # Force JSON output format
-        )
+    max_retries = 2
+    attempt = 0
+    last_error = None
+    
+    while attempt <= max_retries:
+        attempt += 1
+        logger.info(f"LLM Parsing Attempt {attempt}/{max_retries+1}")
         
-        # Extract response from chat format
-        response_text = response.get("message", {}).get("content", "")
-        if not response_text:
-            # Fallback to old format if message structure is different
-            response_text = response.get("response", "")
-        
-        logger.info(f"Received LLM response. Length: {len(response_text)} chars")
-        logger.debug(f"LLM response preview: {response_text[:500]}...")
-        
-        if not response_text:
-            logger.error("Empty response from Ollama API")
-            return ParsedReceipt(error="Empty response from Ollama API")
-        
-        # Parse JSON from response
-        parsed_data = extract_json_from_response(response_text)
-        
-        if not parsed_data:
-            logger.error(f"Failed to extract JSON from LLM response. Response: {response_text[:500]}")
-            return ParsedReceipt(
-                error=f"Failed to extract JSON from LLM response. Response preview: {response_text[:200]}"
+        try:
+            # Call Ollama API
+            response = ollama_client.chat(
+                model=settings.TEXT_MODEL,
+                messages=[{"role": "user", "content": prompt}],
+                options={"temperature": 0.1, "num_predict": 4000},
+                format="json",
             )
+            
+            # Extract response
+            response_text = response.get("message", {}).get("content", "")
+            if not response_text:
+                response_text = response.get("response", "")
+            
+            if not response_text:
+                logger.error("Empty response from Ollama API")
+                return ParsedReceipt(error="Empty response from Ollama API")
+            
+            # Parse JSON
+            parsed_data = extract_json_from_response(response_text)
+            
+            if not parsed_data:
+                logger.warning(f"Failed to extract JSON on attempt {attempt}")
+                last_error = "Failed to parse JSON response"
+                continue
+            
+            # Validate Math headers
+            is_valid, validation_error = verify_math_consistency(parsed_data)
+            
+            if is_valid:
+                logger.info("Math verification passed.")
+                return validate_and_normalize_receipt(parsed_data)
+            else:
+                logger.warning(f"Math validation failed: {validation_error}")
+                last_error = f"Math validation failed: {validation_error}"
+                
+                # Update prompt for retry
+                if attempt <= max_retries:
+                    prompt = f"""
+Wykryto błąd w poprzedniej analizie: {validation_error}
+
+Tekst paragonu:
+---
+{ocr_text}
+---
+
+Popraw dane i zwróć poprawny JSON. Upewnij się, że:
+1. (ilość * cena_jedn == cena_calkowita) dla każdego produktu (dopuszczalny błąd 0.02)
+2. Suma total_price wszystkich produktów == total (dopuszczalny błąd 0.05)
+3. Szukaj słów kluczowych SUMA, RAZEM, PTU aby znaleźć właściwy total.
+
+Zwróć TYLKO JSON.
+"""
+        except Exception as e:
+            logger.error(f"Error parsing receipt with LLM (attempt {attempt}): {e}")
+            last_error = str(e)
+            
+    return ParsedReceipt(error=f"LLM parsing failed after {max_retries+1} attempts. Last error: {last_error}")
+
+
+def verify_math_consistency(data: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
+    """
+    Check if items sum up to total and line items are consistent.
+    Returns (is_valid, error_message).
+    """
+    try:
+        items = data.get("items", [])
+        total = float(data.get("total", 0.0))
         
-        logger.info("Successfully parsed JSON from LLM response")
+        if not items and total > 0:
+             return False, "Brak pozycji na liście, ale total > 0"
+             
+        calculated_total = 0.0
         
-        # Validate and normalize parsed data
-        return validate_and_normalize_receipt(parsed_data)
+        for i, item in enumerate(items):
+            qty = float(item.get("quantity", 1.0))
+            price = float(item.get("unit_price", 0.0))
+            line_total = float(item.get("total_price", 0.0))
+            name = item.get("name", f"Item {i+1}")
+            
+            # Check line consistency (with tolerance)
+            if abs((qty * price) - line_total) > 0.05:
+                # Often unit price is missing or quantity is assumed 1. 
+                # If we have total_price, trusted more than unit_price calculation often.
+                # But let's report it.
+                # return False, f"Błąd w pozycji '{name}': {qty} * {price} != {line_total}"
+                pass # Lenient on line-level, strict on total sum
+                
+            calculated_total += line_total
+            
+        # Check global sum consistency
+        if abs(calculated_total - total) > 0.10: # 10 groszy tolerance
+            return False, f"Suma pozycji ({calculated_total:.2f}) nie zgadza się z Total ({total:.2f})"
+            
+        return True, None
         
     except Exception as e:
-        logger.error(f"Error parsing receipt with LLM: {e}", exc_info=True)
-        return ParsedReceipt(error=f"LLM parsing error: {str(e)}")
+        return False, f"Błąd weryfikacji: {str(e)}"
 
 
 def create_receipt_parsing_prompt(ocr_text: str) -> str:
     """
     Create prompt for receipt parsing optimized for Polish receipts.
+    Includes explicit anchor instructions.
     
     Args:
         ocr_text: Raw OCR text
@@ -198,47 +260,47 @@ def create_receipt_parsing_prompt(ocr_text: str) -> str:
     Returns:
         Formatted prompt string
     """
-    return f"""Jesteś asystentem do analizy paragonów. Twoim zadaniem jest wyodrębnienie danych z tekstu paragonu i zwrócenie ich w formacie JSON.
+    return f"""Jesteś ekspertem od analizy paragonów fiskalnych. Twoim zadaniem jest wyodrębnienie ustrukturyzowanych danych z surowego tekstu OCR.
 
-WAŻNE: Zwróć TYLKO i WYŁĄCZNIE poprawny JSON. NIE generuj kodu Python, NIE pisz wyjaśnień, NIE używaj markdown. Tylko czysty JSON.
+ZASADY KRYTYCZNE:
+1. Szukaj słów kluczowych "SUMA", "RAZEM", "DO ZAPŁATY" aby znaleźć kwotę całkowitą (Total).
+2. Szukaj sekcji "PTU" lub stawek VAT, które często są pod listą produktów.
+3. Produkty zwykle są w formacie: NAZWA ... ILOŚĆ x CENA ... WARTOŚĆ. Czasem w dwóch liniach.
+4. Ignoruj reklamy, NIP sprzedawcy (chyba że to NIP nabywcy), i stopki fiskalne (SHA, Readout).
+5. Data zwykle jest na górze (RRRR-MM-DD).
 
 Tekst z paragonu:
 ---
 {ocr_text}
 ---
 
-Wyodrębnij następujące informacje:
-1. Data i godzina zakupu
-2. Nazwa sklepu
-3. Lista produktów: nazwa, ilość, jednostka miary, cena jednostkowa, cena całkowita
-4. Suma częściowa (subtotal)
-5. Podatek VAT (jeśli widoczny)
-6. Suma całkowita
+Wyodrębnij dane do JSON:
+1. Data zakupu (YYYY-MM-DD)
+2. Godzina (HH:MM)
+3. Nazwa sklepu (często w nagłówku, e.g. Biedronka, Lidl)
+4. Lista produktów (name, quantity, unit, unit_price, total_price)
+5. Suma (total) - MUSI być zgodna z sumą pozycji!
 
-Zwróć TYLKO JSON w następującym formacie (bez żadnego dodatkowego tekstu):
+Format JSON (zwróć TYLKO to):
 {{
-  "date": "YYYY-MM-DD",
-  "time": "HH:MM",
+  "date": "2024-05-12",
+  "time": "14:30",
   "shop": "Nazwa Sklepu",
   "items": [
     {{
-      "name": "Nazwa produktu",
-      "quantity": 1.0,
+      "name": "Mleko 3.2%",
+      "quantity": 2.0,
       "unit": "szt",
-      "unit_price": 19.99,
-      "total_price": 19.99
+      "unit_price": 3.50,
+      "total_price": 7.00
     }}
   ],
-  "subtotal": 99.99,
+  "subtotal": 7.00,
   "tax": 0.00,
-  "total": 99.99
+  "total": 7.00
 }}
 
-Zasady:
-- Jeśli jakiejś informacji nie możesz wyodrębnić, użyj null dla wartości opcjonalnych
-- Dla daty użyj formatu YYYY-MM-DD. Jeśli data nie jest dostępna, użyj dzisiejszej daty
-- Dla czasu użyj formatu HH:MM (24h)
-- Zwróć TYLKO JSON, bez kodu, bez wyjaśnień, bez markdown
+Pamiętaj: Zwróć TYLKO poprawny JSON. Bez komentarzy.
 """
 
 

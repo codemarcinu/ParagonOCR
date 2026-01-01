@@ -61,6 +61,34 @@ def normalize_unit(raw_unit: Optional[str]) -> Optional[str]:
     return NORMALIZED_UNITS.get(clean, raw_unit) # Return raw if no match
 
 
+def simple_polish_stemmer(word: str) -> str:
+    """
+    Very basic Polish stemmer to unify word forms.
+    Removes common suffixes.
+    """
+    word = word.lower().strip()
+    if len(word) < 4:
+        return word
+        
+    suffixes = ["ego", "emu", "ym", "ych", "ymi", "iem", "ami", "ach", "om", "ow", "ów", "owie", "rzy", "rzy", "szy", "szy", "sze", "sze", "sza"]
+    # Single char suffixes (check last)
+    simple_suffixes = ["a", "e", "i", "o", "y", "ą", "ę", "ł"]
+    
+    for s in suffixes:
+        if word.endswith(s):
+            return word[:-len(s)]
+            
+    for s in simple_suffixes:
+        if word.endswith(s):
+            return word[:-len(s)]
+            
+    return word
+
+def stem_sentence(sentence: str) -> str:
+    """Apply stemming to all words in a sentence."""
+    return " ".join([simple_polish_stemmer(w) for w in sentence.split()])
+
+
 def normalize_product_name(db: Session, raw_name: str, create_threshold: int = 88) -> Tuple[Product, bool]:
     """
     Find or create a normalized product based on raw name.
@@ -77,6 +105,7 @@ def normalize_product_name(db: Session, raw_name: str, create_threshold: int = 8
     # 1. Exact match on Alias
     alias = db.query(ProductAlias).filter(ProductAlias.raw_name == raw_name_clean).first()
     if alias:
+        logger.info(f"Alias match: '{raw_name_clean}' -> '{alias.product.normalized_name}'")
         return alias.product, False
 
     # 2. Fuzzy match against existing Aliases (expensive if many, but we catch duplicates)
@@ -89,21 +118,42 @@ def normalize_product_name(db: Session, raw_name: str, create_threshold: int = 8
     if fuzz: # Only if installed
         # Get all normalized names (caching this in mem would be better for prod)
         existing_products = db.query(Product).all()
-        choices = [p.normalized_name for p in existing_products]
         
+        # Prepare choices: list of (orig_name, stemmed_name, product_obj)
+        # This is n^2 complexity effectively if we scan everything, but for small DB ok.
+        # Let's map normalized names.
+        
+        # Apply stemming to query
+        query_stemmed = stem_sentence(raw_name_clean)
+        
+        choices = {p.normalized_name: p for p in existing_products}
+        choices_stemmed = {stem_sentence(name): name for name in choices.keys()}
+        
+        # 2a. Try stemming match first (exact match on stemmed)
+        if query_stemmed in choices_stemmed:
+            original_match = choices_stemmed[query_stemmed]
+            matched_product = choices[original_match]
+            logger.info(f"Stemming match: '{raw_name_clean}' ({query_stemmed}) -> '{original_match}'")
+            
+            # Create alias
+            _create_alias(db, matched_product, raw_name_clean)
+            return matched_product, False
+            
+        # 2b. Fuzzy match
         if choices:
-            # extractOne returns (match, score)
-            match, score = process.extractOne(raw_name_clean, choices, scorer=fuzz.token_sort_ratio)
+            # Match against stemmed versions for better results? Or original?
+            # Let's match against original normalized names for now to keep it simple,
+            # or stemmed if original fails.
+            
+            match, score = process.extractOne(raw_name_clean, list(choices.keys()), scorer=fuzz.token_sort_ratio)
             
             if score >= create_threshold:
                 logger.info(f"Fuzzy match found: '{raw_name_clean}' ~= '{match}' (score: {score})")
                 # Found a close match, allow it but create a NEW ALIAS for the existing product
-                matched_product = next(p for p in existing_products if p.normalized_name == match)
+                matched_product = choices[match]
                 
                 # Create alias linking this raw name to existing product
-                new_alias = ProductAlias(product_id=matched_product.id, raw_name=raw_name_clean)
-                db.add(new_alias)
-                db.flush() # distinct flush to get ID if needed, though mostly for commit
+                _create_alias(db, matched_product, raw_name_clean)
                 return matched_product, False
 
     # 3. No match -> Create New Product
@@ -113,12 +163,36 @@ def normalize_product_name(db: Session, raw_name: str, create_threshold: int = 8
     db.flush() # Get ID
     
     # Create Alias
-    new_alias = ProductAlias(product_id=new_product.id, raw_name=raw_name_clean)
-    db.add(new_alias)
-    db.flush()
+    _create_alias(db, new_product, raw_name_clean)
     
     logger.info(f"Created new product: '{raw_name_clean}'")
     return new_product, True
+
+
+def _create_alias(db: Session, product: Product, raw_name: str):
+    """Helper to create alias if it doesn't exist."""
+    exists = db.query(ProductAlias).filter(
+        ProductAlias.product_id == product.id,
+        ProductAlias.raw_name == raw_name
+    ).first()
+    
+    if not exists:
+        new_alias = ProductAlias(product_id=product.id, raw_name=raw_name)
+        db.add(new_alias)
+        db.flush()
+
+
+def learn_product_alias(db: Session, raw_name: str, correct_product_id: int):
+    """
+    Explicitly learn a new alias for a product (e.g. from UI correction).
+    """
+    product = db.query(Product).filter(Product.id == correct_product_id).first()
+    if not product:
+        logger.error(f"Cannot learn alias: Product {correct_product_id} not found")
+        return
+        
+    _create_alias(db, product, raw_name)
+    logger.info(f"Learned alias: '{raw_name}' -> '{product.normalized_name}'")
 
 
 def classify_product_category(db: Session, product: Product) -> Optional[int]:
