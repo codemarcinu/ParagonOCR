@@ -104,6 +104,11 @@ export const updateReceipt = async (id: number, data: Partial<ReceiptDetailsResp
   return response.data;
 };
 
+export const ingestReceiptText = async (text: string): Promise<{ receipt_id: number; status: string }> => {
+  const response = await api.post('/receipts/ingest-text', { text });
+  return response.data;
+};
+
 // Auth
 export interface RegisterData {
   email: string;

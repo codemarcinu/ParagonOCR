@@ -267,7 +267,7 @@ ZASADY KRYTYCZNE:
 2. Szukaj sekcji "PTU" lub stawek VAT, które często są pod listą produktów.
 3. Produkty zwykle są w formacie: NAZWA ... ILOŚĆ x CENA ... WARTOŚĆ. Czasem w dwóch liniach.
 4. Ignoruj reklamy, NIP sprzedawcy (chyba że to NIP nabywcy), i stopki fiskalne (SHA, Readout).
-5. Data zwykle jest na górze (RRRR-MM-DD).
+5. Dla każdego produktu oceń pewność (confidence) od 0.0 do 1.0, na podstawie tego jak czytelny był tekst.
 
 Tekst z paragonu:
 ---
@@ -278,7 +278,7 @@ Wyodrębnij dane do JSON:
 1. Data zakupu (YYYY-MM-DD)
 2. Godzina (HH:MM)
 3. Nazwa sklepu (często w nagłówku, e.g. Biedronka, Lidl)
-4. Lista produktów (name, quantity, unit, unit_price, total_price)
+4. Lista produktów (name, quantity, unit, unit_price, total_price, confidence)
 5. Suma (total) - MUSI być zgodna z sumą pozycji!
 
 Format JSON (zwróć TYLKO to):
@@ -292,7 +292,8 @@ Format JSON (zwróć TYLKO to):
       "quantity": 2.0,
       "unit": "szt",
       "unit_price": 3.50,
-      "total_price": 7.00
+      "total_price": 7.00,
+      "confidence": 0.95
     }}
   ],
   "subtotal": 7.00,
@@ -413,6 +414,7 @@ def validate_and_normalize_receipt(data: Dict[str, Any]) -> ParsedReceipt:
                     "unit": item.get("unit", "szt"),
                     "unit_price": float(item.get("unit_price", 0.0)) if item.get("unit_price") else None,
                     "total_price": float(item.get("total_price", 0.0)),
+                    "confidence": float(item.get("confidence", 1.0)),
                 }
                 if normalized_item["name"]:  # Only add items with names
                     items.append(normalized_item)

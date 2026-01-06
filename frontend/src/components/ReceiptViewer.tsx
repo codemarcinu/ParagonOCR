@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { getReceipt, updateReceipt } from '@/lib/api';
 import type { ReceiptDetailsResponse } from '@/types/api';
 import { Button, Input } from './ui';
-import { Pencil, Save, X } from 'lucide-react';
+import { Pencil, Save, X, TriangleAlert } from 'lucide-react';
 
 interface ReceiptViewerProps {
   receiptId: number;
@@ -19,7 +19,6 @@ export function ReceiptViewer({ receiptId, onClose }: ReceiptViewerProps) {
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedReceipt, setEditedReceipt] = useState<ReceiptDetailsResponse | null>(null);
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetchReceipt = async () => {
@@ -41,17 +40,23 @@ export function ReceiptViewer({ receiptId, onClose }: ReceiptViewerProps) {
 
   const handleSave = async () => {
     if (!editedReceipt) return;
-    setSaving(true);
+
+    // Optimistic Update
+    const previousReceipt = receipt;
+    setReceipt(editedReceipt);
+    setIsEditing(false);
+
+    // Background Save
     try {
-      // Prepare data for update (simplified for now)
-      // In a real scenario, we'd only send changed fields or specific DTO
       await updateReceipt(receiptId, editedReceipt);
-      setReceipt(editedReceipt);
-      setIsEditing(false);
+      // Success - no action needed as state is already updated
     } catch (err) {
+      // Rollback on error
       setError(err instanceof Error ? err.message : 'Błąd zapisu');
-    } finally {
-      setSaving(false);
+      setReceipt(previousReceipt);
+      // Re-open edit mode so user doesn't lose changes? 
+      // Or just show error. Let's show error and revert, user can try again if they modify.
+      // Better: keep editedReceipt as is, just revert display receipt.
     }
   };
 
@@ -95,11 +100,11 @@ export function ReceiptViewer({ receiptId, onClose }: ReceiptViewerProps) {
             </Button>
           ) : (
             <>
-              <Button onClick={cancelEdit} variant="ghost" size="sm" disabled={saving}>
+              <Button onClick={cancelEdit} variant="ghost" size="sm">
                 Anuluj
               </Button>
-              <Button onClick={handleSave} size="sm" disabled={saving} leftIcon={<Save className="w-4 h-4" />}>
-                {saving ? 'Zapisywanie...' : 'Zapisz'}
+              <Button onClick={handleSave} size="sm" leftIcon={<Save className="w-4 h-4" />}>
+                Zapisz
               </Button>
             </>
           )}
@@ -176,7 +181,13 @@ export function ReceiptViewer({ receiptId, onClose }: ReceiptViewerProps) {
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {(isEditing ? editedReceipt.items : receipt.items).map((item, index) => (
-                <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <tr
+                  key={item.id}
+                  className={`
+                    hover:bg-gray-50 dark:hover:bg-gray-700 
+                    ${!isEditing && item.confidence !== undefined && item.confidence < 0.8 ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}
+                  `}
+                >
                   <td className="px-4 py-2 text-sm text-gray-900 dark:text-gray-100">
                     {isEditing ? (
                       <div className="space-y-1">
@@ -192,14 +203,21 @@ export function ReceiptViewer({ receiptId, onClose }: ReceiptViewerProps) {
                         />
                       </div>
                     ) : (
-                      <div>
-                        <p className="font-medium">
-                          {item.product.name || item.raw_name}
-                        </p>
-                        {item.product.name && item.raw_name !== item.product.name && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            Oryginalna nazwa: {item.raw_name}
+                      <div className="flex items-center">
+                        <div className="flex-1">
+                          <p className="font-medium">
+                            {item.product.name || item.raw_name}
                           </p>
+                          {item.product.name && item.raw_name !== item.product.name && (
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              Oryginalna nazwa: {item.raw_name}
+                            </p>
+                          )}
+                        </div>
+                        {item.confidence !== undefined && item.confidence < 0.8 && (
+                          <div className="ml-2 text-yellow-600 dark:text-yellow-500" title={`Niska pewność OCR: ${(item.confidence * 100).toFixed(0)}%`}>
+                            <TriangleAlert className="w-4 h-4" />
+                          </div>
                         )}
                       </div>
                     )}

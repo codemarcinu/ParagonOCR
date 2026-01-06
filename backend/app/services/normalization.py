@@ -9,12 +9,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 try:
-    from thefuzz import fuzz, process
+    from sentence_transformers import SentenceTransformer, util
 except ImportError:
-    import warnings
-    warnings.warn("thefuzz not installed, fuzzy matching will be disabled")
-    fuzz = None
-    process = None
+    SentenceTransformer = None
+    util = None
 
 from app.models.product import Product, ProductAlias
 from app.models.category import Category
@@ -22,6 +20,21 @@ from app.services.llm_service import ollama_client
 from app.config import settings
 
 logger = logging.getLogger(__name__)
+
+# Global Embedding Model
+_embedding_model = None
+
+def get_embedding_model():
+    global _embedding_model
+    if _embedding_model is None and SentenceTransformer:
+        try:
+            logger.info("Loading sentence-transformers model...")
+            # Using a lightweight multilingual model good for Polish
+            _embedding_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+            logger.info("Model loaded.")
+        except Exception as e:
+            logger.error(f"Failed to load embedding model: {e}")
+    return _embedding_model
 
 # Standard Unit Map (Polish)
 UNIT_MAP = {
@@ -89,11 +102,17 @@ def stem_sentence(sentence: str) -> str:
     return " ".join([simple_polish_stemmer(w) for w in sentence.split()])
 
 
-def normalize_product_name(db: Session, raw_name: str, create_threshold: int = 88) -> Tuple[Product, bool]:
+def normalize_product_name(db: Session, raw_name: str, shop_id: Optional[int] = None, create_threshold: float = 0.85) -> Tuple[Product, bool]:
     """
     Find or create a normalized product based on raw name.
-    Uses fuzzy matching to avoid duplicates.
+    Uses Semantic Search (Embeddings) + LLM Verification.
     
+    Args:
+        db: Database session
+        raw_name: Input product name from OCR
+        shop_id: Optional shop ID for context
+        create_threshold: Cosine similarity threshold to consider a match
+        
     Returns:
         (Product, is_new): The product object and a boolean indicating if it was newly created.
     """
@@ -108,53 +127,47 @@ def normalize_product_name(db: Session, raw_name: str, create_threshold: int = 8
         logger.info(f"Alias match: '{raw_name_clean}' -> '{alias.product.normalized_name}'")
         return alias.product, False
 
-    # 2. Fuzzy match against existing Aliases (expensive if many, but we catch duplicates)
-    # Optimization: Loading all aliases might be heavy. For now, we'll try a simpler approach 
-    # or rely on exact match if DB gets huge.
-    # To be safe/fast, let's skip full DB fuzzy scan for now and rely on exact match,
-    # UNLESS the user explicitly wants full dedupe.
-    # Implementation Plan requested fuzzy matching. We can do it on 'normalized_name' of Products.
-    
-    if fuzz: # Only if installed
-        # Get all normalized names (caching this in mem would be better for prod)
+    # 2. Semantic Search (Embeddings)
+    model = get_embedding_model()
+    if model:
+        # Fetch all normalized product names (caching recommended for prod)
         existing_products = db.query(Product).all()
         
-        # Prepare choices: list of (orig_name, stemmed_name, product_obj)
-        # This is n^2 complexity effectively if we scan everything, but for small DB ok.
-        # Let's map normalized names.
-        
-        # Apply stemming to query
-        query_stemmed = stem_sentence(raw_name_clean)
-        
-        choices = {p.normalized_name: p for p in existing_products}
-        choices_stemmed = {stem_sentence(name): name for name in choices.keys()}
-        
-        # 2a. Try stemming match first (exact match on stemmed)
-        if query_stemmed in choices_stemmed:
-            original_match = choices_stemmed[query_stemmed]
-            matched_product = choices[original_match]
-            logger.info(f"Stemming match: '{raw_name_clean}' ({query_stemmed}) -> '{original_match}'")
+        if existing_products:
+            # Prepare corpus
+            corpus_names = [p.normalized_name for p in existing_products]
+            corpus_embeddings = model.encode(corpus_names, convert_to_tensor=True)
             
-            # Create alias
-            _create_alias(db, matched_product, raw_name_clean)
-            return matched_product, False
+            # Encode query
+            query_embedding = model.encode(raw_name_clean, convert_to_tensor=True)
             
-        # 2b. Fuzzy match
-        if choices:
-            # Match against stemmed versions for better results? Or original?
-            # Let's match against original normalized names for now to keep it simple,
-            # or stemmed if original fails.
+            # Find closest match
+            # util.cos_sim returns query x corpus matrix
+            hits = util.semantic_search(query_embedding, corpus_embeddings, top_k=1)
             
-            match, score = process.extractOne(raw_name_clean, list(choices.keys()), scorer=fuzz.token_sort_ratio)
-            
-            if score >= create_threshold:
-                logger.info(f"Fuzzy match found: '{raw_name_clean}' ~= '{match}' (score: {score})")
-                # Found a close match, allow it but create a NEW ALIAS for the existing product
-                matched_product = choices[match]
+            if hits and hits[0]:
+                top_hit = hits[0][0] # {corpus_id, score}
+                score = top_hit['score']
+                match_name = corpus_names[top_hit['corpus_id']]
+                matched_product = existing_products[top_hit['corpus_id']]
                 
-                # Create alias linking this raw name to existing product
-                _create_alias(db, matched_product, raw_name_clean)
-                return matched_product, False
+                logger.info(f"Semantic match: '{raw_name_clean}' ~= '{match_name}' (score: {score:.4f})")
+                
+                # Decision Logic
+                is_match = False
+                
+                if score > 0.92:
+                    # High confidence -> Auto-match
+                    is_match = True
+                elif score > 0.65 and ollama_client:
+                    # Ambiguous -> Ask LLM Judge
+                    is_match = _llm_verify_match(raw_name_clean, match_name)
+                    
+                if is_match:
+                    _create_alias(db, matched_product, raw_name_clean)
+                    return matched_product, False
+
+    # 3. No match -> Create New Product
 
     # 3. No match -> Create New Product
     # Create Product
@@ -267,3 +280,49 @@ def _assign_category_by_name(db: Session, product: Product, category_name: str) 
         
     product.category_id = category.id
     return category.id
+
+def _llm_verify_match(raw_name: str, candidate_name: str) -> bool:
+    "Ask LLM if two products are the same type."
+    try:
+        prompt = f"
+        Czy te dwie nazwy produktów z paragonów oznaczaj¹ ten sam rodzaj produktu?
+        1. "{raw_name}"
+        2. "{candidate_name}"
+        
+        Odpowiedz TYLKO s³owem TAK lub NIE.
+        "
+        response = ollama_client.generate(
+             model=settings.TEXT_MODEL,
+             prompt=prompt,
+             options={"temperature": 0.0}
+        )
+        answer = response.get("response", "").strip().upper()
+        logger.info(f"LLM verification: '{raw_name}' vs '{candidate_name}' -> {answer}")
+        return "TAK" in answer
+    except Exception as e:
+        logger.error(f"LLM verification failed: {e}")
+        return False
+
+
+def _llm_verify_match(raw_name: str, candidate_name: str) -> bool:
+    "Ask LLM if two products are the same type."
+    try:
+        prompt = f"
+        Czy te dwie nazwy produktów z paragonów oznaczaj¹ ten sam rodzaj produktu?
+        1. "{raw_name}"
+        2. "{candidate_name}"
+        
+        Odpowiedz TYLKO s³owem TAK lub NIE.
+        "
+        response = ollama_client.generate(
+             model=settings.TEXT_MODEL,
+             prompt=prompt,
+             options={"temperature": 0.0}
+        )
+        answer = response.get("response", "").strip().upper()
+        logger.info(f"LLM verification: '{raw_name}' vs '{candidate_name}' -> {answer}")
+        return "TAK" in answer
+    except Exception as e:
+        logger.error(f"LLM verification failed: {e}")
+        return False
+

@@ -41,6 +41,13 @@ export interface ReceiptItemResponse {
   unit_price: number | null;
   total_price: number;
   discount: number | null;
+  confidence?: number;
+}
+
+export interface IngestReceiptRequest {
+  text: string;
+  date?: string;
+  shop_name?: string;
 }
 
 // Product types

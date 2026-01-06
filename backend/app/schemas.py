@@ -98,6 +98,7 @@ class ReceiptItemBase(BaseModel):
     unit_price: Optional[float] = Field(None, ge=0)
     total_price: float = Field(..., ge=0)
     discount: Optional[float] = Field(0.0, ge=0)
+    confidence: Optional[float] = Field(None, ge=0.0, le=1.0)
 
 
 class ReceiptItemCreate(ReceiptItemBase):
@@ -139,6 +140,12 @@ class ReceiptResponse(ReceiptBase):
 
 class ReceiptListResponse(PaginatedResponse):
     receipts: List[ReceiptResponse]
+
+
+class IngestReceiptRequest(BaseModel):
+    text: str = Field(..., min_length=1)
+    date: Optional[date] = None
+    shop_name: Optional[str] = None
 
 
 # --- Chat ---

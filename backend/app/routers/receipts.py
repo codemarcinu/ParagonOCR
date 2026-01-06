@@ -33,7 +33,7 @@ from app.services.ocr_service import extract_from_pdf, extract_from_image, OCRRe
 from app.services.llm_service import parse_receipt_text, ParsedReceipt
 from app.services.normalization import normalize_product_name, classify_product_category, normalize_unit
 from app.config import settings
-from app.schemas import ReceiptResponse, ReceiptListResponse
+from app.schemas import ReceiptResponse, ReceiptListResponse, IngestReceiptRequest
 
 logger = logging.getLogger(__name__)
 
@@ -135,7 +135,40 @@ async def upload_receipt(
     }
 
 
-async def process_receipt_async(receipt_id: int, file_path: str):
+@router.post("/ingest-text")
+async def ingest_text_receipt(
+    request: IngestReceiptRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """
+    Ingest raw text receipt from client (e.g. from PDF text layer).
+    Skips OCR and goes directly to LLM processing.
+    """
+    # Create receipt
+    receipt = Receipt(
+        shop_id=1,  # Temporary
+        purchase_date=request.date or date.today(),
+        total_amount=0.0,
+        source_file="client-side-text",
+        status="processing",
+        ocr_text=request.text
+    )
+    db.add(receipt)
+    db.flush()
+    db.commit()
+
+    # Process in background
+    asyncio.create_task(process_receipt_async(receipt.id, "", text_content=request.text))
+
+    return {
+        "receipt_id": receipt.id,
+        "status": "processing",
+        "message": "Text receipt ingested, processing in background",
+    }
+
+
+async def process_receipt_async(receipt_id: int, file_path: str, text_content: Optional[str] = None):
     """
     Async task to process receipt: OCR → LLM → Save to database.
     Sends updates via WebSocket.
@@ -175,22 +208,27 @@ async def process_receipt_async(receipt_id: int, file_path: str):
                 return
 
             # Step 1: OCR
-            await send_update("ocr", 30, "Extracting text with OCR...")
-
-            if file_path.lower().endswith(".pdf"):
-                ocr_result = extract_from_pdf(file_path)
+            if text_content:
+                await send_update("ocr", 50, "Using text from client...")
+                from app.services.ocr_service import OCRResult
+                ocr_result = OCRResult(text=text_content, confidence=1.0, engine="client-side")
             else:
-                ocr_result = extract_from_image(file_path)
-
-            if ocr_result.error:
-                receipt.ocr_text = f"OCR Error: {ocr_result.error}"
-                db.commit()
-                await send_update("error", 0, "OCR Failed", error=ocr_result.error)
-                return
-
-            receipt.ocr_text = ocr_result.text
-            db.commit()  # Save OCR text to database
-            await send_update("ocr", 50, "OCR completed, text extracted")
+                await send_update("ocr", 30, "Extracting text with OCR...")
+    
+                if file_path.lower().endswith(".pdf"):
+                    ocr_result = extract_from_pdf(file_path)
+                else:
+                    ocr_result = extract_from_image(file_path)
+    
+                if ocr_result.error:
+                    receipt.ocr_text = f"OCR Error: {ocr_result.error}"
+                    db.commit()
+                    await send_update("error", 0, "OCR Failed", error=ocr_result.error)
+                    return
+    
+                receipt.ocr_text = ocr_result.text
+                db.commit()  # Save OCR text to database
+                await send_update("ocr", 50, "OCR completed, text extracted")
             
             # Log OCR result for debugging
             logger.info(f"Receipt {receipt_id}: OCR extracted {len(ocr_result.text)} characters")
@@ -305,7 +343,7 @@ async def process_receipt_async(receipt_id: int, file_path: str):
                     unit = normalize_unit(unit)
                     
                     # Find or create product using fuzzy matching
-                    product, is_new = normalize_product_name(db, name)
+                    product, is_new = normalize_product_name(db, name, shop_id=shop.id)
                     
                     if is_new:
                         # Auto-classify category for new products
@@ -325,6 +363,7 @@ async def process_receipt_async(receipt_id: int, file_path: str):
                     unit=unit,
                     unit_price=unit_price,
                     total_price=total_price,
+                    confidence=item_data.get("confidence", 1.0)
                 )
                 db.add(receipt_item)
             

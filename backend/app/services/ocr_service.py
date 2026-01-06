@@ -11,6 +11,7 @@ from pathlib import Path
 from PIL import Image
 import pytesseract
 from pdf2image import convert_from_path
+import pypdf
 
 from app.config import settings
 
@@ -65,21 +66,30 @@ def preprocess_image(image_path: str) -> Image.Image:
     # 1. Convert to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     
-    # 2. CLAHE (Contrast Limited Adaptive Histogram Equalization)
-    # Better than global histogram equalization for receipts with shadows
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-    gray = clahe.apply(gray)
+    # Optimization for Digital Screens / Screenshots
+    # Check if image has few unique colors (typical for screenshots/digital generated)
+    # or if it's already high constrast.
+    unique_colors = np.unique(gray)
+    is_digital = len(unique_colors) < 100 # Threshold: regular photos have 256 or many noise values
     
-    # 3. Bilateral Filter (Denoising while preserving edges)
-    # Better than GaussianBlur for text
-    denoised = cv2.bilateralFilter(gray, 9, 75, 75)
-    
-    # 4. Thresholding
-    # Use Otsu's binarization after Gaussian blur (if needed) or simple binary
-    # For receipts, simple binary after CLAHE is often good, or adaptive
-    # We'll use a mix: thresholding helps detect rotation, but sometimes grayscale is better for Tesseract
-    # deeper in the engine. However, we return binary/processed image.
-    _, thresh = cv2.threshold(denoised, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    if is_digital:
+        # For digital sources, skips CLAHE and Denoising which can degrade sharp fonts
+        # Just simple thresholding
+        _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    else:
+        # Standard processing for Photos
+        
+        # 2. CLAHE (Contrast Limited Adaptive Histogram Equalization)
+        # Better than global histogram equalization for receipts with shadows
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+        gray = clahe.apply(gray)
+        
+        # 3. Bilateral Filter (Denoising while preserving edges)
+        # Better than GaussianBlur for text
+        denoised = cv2.bilateralFilter(gray, 9, 75, 75)
+        
+        # 4. Thresholding
+        _, thresh = cv2.threshold(denoised, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     
     # 5. Deskewing
     try:
@@ -127,6 +137,26 @@ def extract_from_pdf(file_path: str) -> OCRResult:
     try:
         # Set tesseract command
         pytesseract.pytesseract.tesseract_cmd = settings.TESSERACT_CMD
+
+        # OPTIMIZATION: Try native PDF extraction first
+        try:
+            reader = pypdf.PdfReader(file_path)
+            text_content = ""
+            for page in reader.pages:
+                extracted = page.extract_text()
+                if extracted:
+                    text_content += extracted + "\n"
+            
+            # If we got meaningful text, return it immediately
+            if len(text_content.strip()) > 20:
+                return OCRResult(
+                    text=text_content.strip(),
+                    confidence=1.0, # Native text is exact
+                    engine="pypdf",
+                )
+        except Exception as e:
+            # Fallback to OCR if pypdf fails
+            pass
         
         # Convert PDF to image(s)
         images = convert_from_path(

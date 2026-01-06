@@ -58,6 +58,7 @@ class ReceiptItem(Base):
     total_price = Column(Numeric(10, 2), nullable=False)
     discount = Column(Numeric(10, 2), nullable=True, default=0.0)
     price_after_discount = Column(Numeric(10, 2), nullable=True)
+    confidence = Column(Numeric(3, 2), nullable=True, default=1.0)
     
     # Relationships
     receipt = relationship("Receipt", back_populates="items")

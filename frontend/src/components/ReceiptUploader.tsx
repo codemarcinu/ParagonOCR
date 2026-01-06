@@ -93,64 +93,46 @@ export function ReceiptUploader() {
     }
 
     try {
+      setStage({ stage: 'uploading', progress: 10, message: 'Analizowanie pliku...' });
+
+      // Client-Side PDF Text Extraction
+      if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+        try {
+          const pdfjsLib = await import('pdfjs-dist');
+          // Set worker src
+          pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
+          const arrayBuffer = await file.arrayBuffer();
+          const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+          const pdf = await loadingTask.promise;
+          let fullText = '';
+
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items.map((item: any) => item.str).join(' ');
+            fullText += pageText + '\n';
+          }
+
+          if (fullText.length > 50) {
+            console.log("PDF Text extracted client-side:", fullText.length, "chars");
+            setStage({ stage: 'uploading', progress: 30, message: 'Wysyłanie tekstu...' });
+            const { ingestReceiptText } = await import('@/lib/api');
+            const result = await ingestReceiptText(fullText);
+            await monitorProcessing(result.receipt_id);
+            return;
+          }
+        } catch (pdfError) {
+          console.warn("Client-side PDF extraction failed, falling back to server OCR:", pdfError);
+          // Fallback to normal upload
+        }
+      }
+
       setStage({ stage: 'uploading', progress: 10, message: 'Przesyłanie pliku...' });
 
       // Upload file
       const result = await uploadReceipt(file);
-      const receiptId = result.receipt_id;
-
-      // Connect to WebSocket for real-time updates
-      const wsUrl = `${WS_BASE_URL}/api/receipts/ws/processing/${receiptId}`;
-      const ws = new WebSocket(wsUrl);
-
-      ws.onopen = () => {
-        console.log('Connected to processing WebSocket');
-      };
-
-      ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-
-        if (data.type === 'update') {
-          setStage({
-            stage: data.stage as any, // Cast to stage type
-            progress: data.progress,
-            message: data.message,
-          });
-
-          if (data.stage === 'completed') {
-            ws.close();
-            // Redirect to receipts list after successful upload
-            setTimeout(() => {
-              setStage({ stage: 'idle', progress: 0, message: '' });
-              if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-              }
-              // Trigger refresh if needed (e.g. reload receipts list)
-              window.dispatchEvent(new Event('receipt-uploaded'));
-              // Navigate to receipts list after 2 seconds
-              setTimeout(() => {
-                navigate('/receipts');
-              }, 2000);
-            }, 3000);
-          }
-        } else if (data.status === 'error') {
-          setStage({
-            stage: 'error',
-            progress: 0,
-            message: data.message || data.error || 'Unknown error',
-          });
-          ws.close();
-        }
-      };
-
-      ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        // Don't necessarily fail UI if WS fails, might just lose progress updates
-      };
-
-      ws.onclose = () => {
-        console.log('WebSocket connection closed');
-      };
+      await monitorProcessing(result.receipt_id);
 
     } catch (err) {
       setStage({
@@ -159,6 +141,61 @@ export function ReceiptUploader() {
         message: err instanceof Error ? err.message : 'Nie udało się przesłać paragonu',
       });
     }
+  };
+
+  const monitorProcessing = async (receiptId: number) => {
+    // Connect to WebSocket for real-time updates
+    const wsUrl = `${WS_BASE_URL}/api/receipts/ws/processing/${receiptId}`;
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      console.log('Connected to processing WebSocket');
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      if (data.type === 'update') {
+        setStage({
+          stage: data.stage as any, // Cast to stage type
+          progress: data.progress,
+          message: data.message,
+        });
+
+        if (data.stage === 'completed') {
+          ws.close();
+          // Redirect to receipts list after successful upload
+          setTimeout(() => {
+            setStage({ stage: 'idle', progress: 0, message: '' });
+            if (fileInputRef.current) {
+              fileInputRef.current.value = '';
+            }
+            // Trigger refresh if needed (e.g. reload receipts list)
+            window.dispatchEvent(new Event('receipt-uploaded'));
+            // Navigate to receipts list after 2 seconds
+            setTimeout(() => {
+              navigate('/receipts');
+            }, 2000);
+          }, 3000);
+        }
+      } else if (data.status === 'error') {
+        setStage({
+          stage: 'error',
+          progress: 0,
+          message: data.message || data.error || 'Unknown error',
+        });
+        ws.close();
+      }
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      // Don't necessarily fail UI if WS fails, might just lose progress updates
+    };
+
+    ws.onclose = () => {
+      console.log('WebSocket connection closed');
+    };
   };
 
   const handleRetry = () => {
@@ -170,8 +207,8 @@ export function ReceiptUploader() {
     <div className="w-full max-w-2xl mx-auto p-6">
       <div
         className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${isDragging
-            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+          : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
           }`}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
@@ -235,7 +272,7 @@ export function ReceiptUploader() {
                     {stage.progress}%
                   </span>
                 </div>
-                <div 
+                <div
                   className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700"
                   role="progressbar"
                   aria-valuenow={stage.progress}

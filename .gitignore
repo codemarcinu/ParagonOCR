@@ -15,7 +15,7 @@ backend/.env
 backend/__pycache__/
 backend/**/__pycache__/
 backend/**/*.pyc
-backend/alembic/versions/*.py
+# backend/alembic/versions/*.py
 !backend/alembic/versions/.gitkeep
 
 # Frontend
