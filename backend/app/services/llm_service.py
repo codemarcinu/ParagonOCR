@@ -216,41 +216,41 @@ def verify_math_consistency(data: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
 
 
 def create_receipt_parsing_prompt(ocr_text: str) -> str:
-    """
-    Create prompt for receipt parsing optimized for Polish receipts.
-    Simplified to focus on pattern recognition rather than verification.
-    """
-    return f"""Jesteś asystentem AI specjalizującym się w analizie polskich paragonów sklepowych (OCR). 
-Twoim zadaniem jest wyciągnięcie ustrukturyzowanych danych z surowego tekstu paragonu.
+    return """
+Jesteś ekspertem od analizy polskich paragonów fiskalnych (OCR).
+Twoim zadaniem jest wyciągnięcie danych strukturalnych z brudnego tekstu OCR.
 
-Zasady krytyczne:
-1. Wyjście MUSI być poprawnym formatem JSON.
-2. Pola wymagane: "shop_name" (string), "date" (YYYY-MM-DD), "total_amount" (float), "items" (list).
-3. Dla każdego produktu w liście "items": {{"name": string, "quantity": float, "price": float, "total_price": float}}.
-4. OBSŁUGA RABATÓW (Ważne dla Biedronka/Lidl):
-   - Jeśli widzisz linię "Rabat", "Upust" lub ujemną kwotę pod produktem, odejmij ją od ceny produktu powyżej LUB zapisz jako osobny produkt z ujemną ceną, jeśli nie jesteś pewien przypisania.
-   - Ignoruj linie typu "Sprzedaż opodatkowana", "Suma PLN", "PTU".
-5. Zamień wszystkie przecinki w liczbach na kropki (np. "4,99" -> 4.99).
-6. Nazwa sklepu: Jeśli nie jest jasna, szukaj słów kluczowych: "Biedronka", "Jeronimo Martins", "Lidl", "Kaufland", "Auchan".
+### ZASADY KRYTYCZNE:
+1.  **Format:** Zwróć TYLKO poprawny JSON. Żadnego markdowna (```json), żadnego gadania.
+2.  **Sklep:** Rozpoznaj sklep (Biedronka, Lidl, Auchan, Kaufland, Żabka). Jeśli nie ma nazwy, zgadnij po adresie (np. "Jeronimo Martins" -> Biedronka).
+3.  **Produkty (Lista 'items'):**
+    - Ignoruj linie: "Sprzedaż opodatkowana", "SUMA", "PTU", "Suma PLN", "Rozliczenie płatności".
+    - Jeśli nazwa produktu jest ucięta lub dziwna, spróbuj ją naprawić (np. "SerGouda" -> "Ser Gouda").
+4.  **RABATY (Ważne!):**
+    - W sklepach jak Biedronka, rabat często jest w nowej linii pod produktem, np. "Rabat -4,00".
+    - Jeśli widzisz ujemną kwotę, odejmij ją od ceny *poprzedniego* produktu w polu `total_price` (cena końcowa) LUB `price` (cena jednostkowa).
+    - NIE dodawaj rabatu jako osobnego produktu z ujemną ceną, chyba że nie wiesz do czego go przypisać.
+5.  **Liczby:** Zamień przecinki na kropki (np. "5,99" -> 5.99).
 
-Tekst do analizy:
-{ocr_text}
-
-WYJŚCIE JSON:
-{{
-  "shop": "Nazwa sklepu",
-  "date": "2025-01-01",
+### OCZEKIWANA STRUKTURA JSON:
+{
+  "shop_name": "Nazwa Sklepu",
+  "date": "YYYY-MM-DD",
+  "nip": "0000000000" (lub null),
+  "total_amount": 0.00,
   "items": [
-    {{
-      "name": "Mleko",
+    {
+      "name": "Pełna nazwa produktu",
       "quantity": 1.0,
-      "unit_price": 3.99,
-      "total_price": 3.99
-    }}
-  ],
-  "total": 3.99
-}}
-"""
+      "price": 0.00,     // cena jednostkowa (przed rabatem, jeśli możliwy do wyliczenia)
+      "total_price": 0.00, // cena końcowa za pozycję (PO RABACIE)
+      "category": "inne" // sugerowana kategoria (spożywcze, chemia, warzywa, alkohol)
+    }
+  ]
+}
+
+### TEKST PARAGONU:
+""" + ocr_text
 
 
 def extract_json_from_response(response_text: str) -> Optional[Dict[str, Any]]:
