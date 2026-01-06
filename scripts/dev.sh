@@ -1,4 +1,11 @@
 #!/bin/bash
+
+# --- AUTO-CLEANUP START ---
+echo "🧹 Sprzątam wiszące procesy Node.js..."
+pkill -f node || true  # "|| true" żeby skrypt nie stanął, jak nie ma co zabijać
+sleep 1
+echo "✅ Procesy wyczyszczone."
+# --- AUTO-CLEANUP END ---
 # ParagonOCR Web Edition - Development server startup script
 # Starts both backend and frontend development servers
 

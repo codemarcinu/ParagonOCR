@@ -25,12 +25,17 @@ engine = create_engine(
 )
 
 # Enable WAL mode for SQLite (better concurrency)
-@event.listens_for(engine, "connect")
-def set_sqlite_pragma(dbapi_conn, connection_record):
-    """Enable WAL mode for SQLite database."""
-    cursor = dbapi_conn.cursor()
-    cursor.execute("PRAGMA journal_mode=WAL")
-    cursor.close()
+# @event.listens_for(engine, "connect")
+# def set_sqlite_pragma(dbapi_conn, connection_record):
+#     """Enable WAL mode for SQLite database."""
+#     cursor = dbapi_conn.cursor()
+#     try:
+#         cursor.execute("PRAGMA journal_mode=WAL")
+#         cursor.close()
+#     except Exception as e:
+#         # Fallback for systems where WAL is not supported (e.g. WSL mounted drives)
+#         print(f"WARNING: Could not enable WAL mode: {e}")
+#         pass
 
 # Base class for declarative models
 Base = declarative_base()

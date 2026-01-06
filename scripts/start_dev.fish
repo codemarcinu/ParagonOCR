@@ -114,7 +114,14 @@ end
 # Funkcja czyszcząca stare procesy
 function cleanup_old_processes
     # Sprawdź czy porty są zajęte - użyj dostępnego narzędzia
-    # Priorytet: lsof > ss > netstat
+    # Priorytet: fuser > lsof > ss > netstat
+    if command -v fuser > /dev/null 2>&1
+        if fuser -k 5173/tcp > /dev/null 2>&1
+            echo "♻️  Zwolniono port 5173"
+            sleep 1
+        end
+    end
+
     if command -v lsof > /dev/null 2>&1
         # Użyj lsof - może zabić procesy
         if lsof -ti:8000 > /dev/null 2>&1

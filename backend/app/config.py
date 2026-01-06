@@ -17,15 +17,11 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
     CORS_ORIGINS: List[str] = Field(
         # Dodajemy port 5174, 5176 (i kolejne na zapas)
-        default=[
-            "http://localhost:5173", 
-            "http://localhost:3000", 
-            "http://localhost:5174", 
-            "http://localhost:5175",
-            "http://localhost:5176",
-            "http://localhost:5177"
-        ],
-        description="Allowed CORS origins",
+        default_factory=lambda: os.getenv(
+            "CORS_ORIGINS", 
+            "http://localhost:3000,http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5179,http://127.0.0.1:5173,http://127.0.0.1:5179"
+        ).split(","),
+        description="Allowed CORS origins (comma-separated)",
     )
 
     # Security Configuration
@@ -39,7 +35,12 @@ class Settings(BaseSettings):
 
     # Database Configuration
     DATABASE_URL: str = Field(
-        default="sqlite:///./data/receipts.db", description="SQLite database URL"
+        default_factory=lambda: (
+            f"sqlite:///{os.path.expanduser('~')}/.paragonocr/receipts.db"
+            if os.path.exists("/proc/version") and "microsoft" in open("/proc/version").read().lower() and os.getcwd().startswith("/mnt/")
+            else "sqlite:///./data/receipts.db"
+        ),
+        description="SQLite database URL (auto-adjusts for WSL to avoid locking issues)"
     )
     DATABASE_ECHO: bool = Field(
         default=False, description="Echo SQL queries (for debugging)"
