@@ -64,11 +64,13 @@ Wbudowany czat z modelem językowym, który ma dostęp do Twojej bazy produktów
 git clone <repo-url>
 cd ParagonOCR
 
-# Windows (PowerShell) - Automatyczna konfiguracja
-.\scripts\setup.ps1
+# Windows
+1. Uruchom `setup.bat` (zainstaluje zależności i naprawi środowisko)
+2. Uruchom `run_app.bat` (start serwerów)
 
-# Uruchomienie serwerów deweloperskich (Backend + Frontend)
-.\scripts\dev.ps1
+# Linux / WSL
+1. ./scripts/setup.sh
+2. ./scripts/dev.sh
 ```
 
 **Dostęp:**

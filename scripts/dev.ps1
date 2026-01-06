@@ -17,7 +17,7 @@ catch {
 
 # Start backend
 Write-Host "Starting backend server..."
-$backendArgs = '-Command "cd backend; .\venv\Scripts\activate; uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"'
+$backendArgs = '-Command "cd backend; if (Test-Path venv\Scripts\Activate.ps1) { . venv\Scripts\Activate.ps1 } else { Write-Error ''Venv missing!''; exit 1 }; uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"'
 $backendProcess = Start-Process -FilePath "powershell" -ArgumentList $backendArgs -PassThru -NoNewWindow
 
 # Wait a moment for backend to start

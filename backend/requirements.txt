@@ -217,3 +217,5 @@ webauthn
 pypdf
 python-multipart
 google-cloud-vision
+opencv-python-headless
+numpy

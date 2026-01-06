@@ -54,7 +54,19 @@ Write-Host "========================"
 Set-Location "backend"
 
 # Create virtual environment if it doesn't exist
-if (-not (Test-Path "venv")) {
+# Check if venv exists
+if (Test-Path "venv") {
+    # Check if it's a valid Windows venv (has Scripts folder)
+    if (-not (Test-Path "venv\Scripts")) {
+        Write-Host "⚠️  Detected invalid or non-Windows virtual environment (likely from WSL/Linux)." -ForegroundColor Yellow
+        Write-Host "   Removing old environment and recreating..."
+        Remove-Item -Recurse -Force "venv"
+        Write-Host "Creating Python virtual environment..."
+        python -m venv venv
+    } else {
+        Write-Host "✅ Virtual environment found"
+    }
+} else {
     Write-Host "Creating Python virtual environment..."
     python -m venv venv
 }

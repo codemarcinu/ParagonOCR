@@ -1,13 +1,19 @@
 @echo off
-echo Starting ParagonOCR...
+cd /d "%~dp0"
+echo Starting startup script...
 
-:: Start Backend
-start "ParagonOCR Backend" cmd /k "cd backend && call venv\Scripts\activate && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+:: Check if Windows venv exists
+if not exist "backend\venv\Scripts\activate.bat" (
+    echo [WARNING] Virtual environment missing or invalid (Linux style?).
+    echo [INFO] Automatically running setup.bat to fix environment...
+    call setup.bat
+    if errorlevel 1 (
+        echo [ERROR] Setup failed! Cannot start application.
+        pause
+        exit /b 1
+    )
+    echo [INFO] Setup complete. Proceeding to launch...
+)
 
-:: Start Frontend
-start "ParagonOCR Frontend" cmd /k "cd frontend && npm run dev"
-
-echo Application started!
-echo Frontend: http://localhost:5173
-echo Backend: http://localhost:8000
+powershell -ExecutionPolicy Bypass -File scripts\dev.ps1
 pause

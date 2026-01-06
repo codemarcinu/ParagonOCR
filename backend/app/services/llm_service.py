@@ -211,3 +211,18 @@ class OllamaClient:
             return {"response": ""}
 
 ollama_client = OllamaClient(settings.OLLAMA_HOST)
+
+def chat(query: str, context: Dict = None) -> str:
+    """
+    Simple chat interface for the RAG system.
+    """
+    prompt = query
+    if context and context.get("retrieved_info"):
+        prompt = f"Kontekst:\n{context['retrieved_info']}\n\nPytanie: {query}"
+    
+    response = ollama_client.generate(
+        model=settings.OLLAMA_MODEL,
+        prompt=prompt,
+        options={"temperature": 0.7}
+    )
+    return response.get("response", "Błąd komunikacji z modelem.")
