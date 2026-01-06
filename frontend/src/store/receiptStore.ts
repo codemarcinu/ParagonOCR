@@ -43,7 +43,7 @@ interface ReceiptStore {
   resetFilters: () => void;
   setPage: (page: number) => void;
   uploadReceipt: (file: File) => Promise<{ receipt_id: number; status: string }>;
-  updateReceipt: (id: number, data: Partial<any>) => Promise<void>;
+  updateReceipt: (id: number, data: Partial<Receipt>) => Promise<void>;
   clearError: () => void;
 }
 

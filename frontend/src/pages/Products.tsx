@@ -43,9 +43,9 @@ export function Products() {
         e.preventDefault();
         const formData = new FormData(e.target as HTMLFormElement);
         const data = {
-            name: formData.get('name'),
+            name: (formData.get('name') as string) || '',
             category_id: Number(formData.get('category_id')),
-            unit: formData.get('unit'),
+            unit: (formData.get('unit') as string) || '',
         };
 
         if (editingProduct) {
@@ -165,7 +165,7 @@ export function Products() {
                                                 <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 group transition-colors">
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                                                         {product.name}
-                                                        {Math.random() > 0.8 && (
+                                                        {product.id % 5 === 0 && (
                                                             <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
                                                                 <AlertCircle className="w-3 h-3 mr-1" /> Dostępna alternatywa
                                                             </span>

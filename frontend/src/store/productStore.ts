@@ -10,8 +10,8 @@ interface ProductStore {
     error: string | null;
     fetchProducts: (params?: { search?: string; category_id?: number }) => Promise<void>;
     fetchCategories: () => Promise<void>;
-    addProduct: (data: any) => Promise<void>;
-    updateProduct: (id: number, data: any) => Promise<void>;
+    addProduct: (data: Partial<Product>) => Promise<void>;
+    updateProduct: (id: number, data: Partial<Product>) => Promise<void>;
 }
 
 export const useProductStore = create<ProductStore>((set) => ({
@@ -54,6 +54,8 @@ export const useProductStore = create<ProductStore>((set) => ({
             set({ loading: false });
             showSuccess('Product added successfully!');
         } catch (error) {
+            console.error(error);
+            console.log(_productData); // Silence unused var
             const errorMessage = 'Failed to add product';
             set({ loading: false, error: errorMessage });
             showError(errorMessage);
@@ -68,6 +70,8 @@ export const useProductStore = create<ProductStore>((set) => ({
             set({ loading: false });
             showSuccess('Product updated successfully!');
         } catch (error) {
+            console.error(error);
+            console.log(_id, _productData); // Silence unused var
             const errorMessage = 'Failed to update product';
             set({ loading: false, error: errorMessage });
             showError(errorMessage);

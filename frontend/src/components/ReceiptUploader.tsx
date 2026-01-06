@@ -25,50 +25,63 @@ export function ReceiptUploader() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploadReceipt, error, clearError } = useReceiptStore();
 
-  const handleDragEnter = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  }, []);
+  const monitorProcessing = useCallback((receiptId: number) => {
+    // Connect to WebSocket for real-time updates
+    const wsUrl = `${WS_BASE_URL}/api/receipts/ws/processing/${receiptId}`;
+    const ws = new WebSocket(wsUrl);
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  }, []);
+    ws.onopen = () => {
+      console.log('Connected to processing WebSocket');
+    };
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }, []);
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
 
-  const handleDrop = useCallback(
-    async (e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDragging(false);
-      clearError();
+      if (data.type === 'update') {
+        setStage({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          stage: data.stage as any, // Cast to stage type
+          progress: data.progress,
+          message: data.message,
+        });
 
-      const files = Array.from(e.dataTransfer.files);
-      if (files.length > 0) {
-        await handleFileUpload(files[0]);
+        if (data.stage === 'completed') {
+          ws.close();
+          // Redirect to receipts list after successful upload
+          setTimeout(() => {
+            setStage({ stage: 'idle', progress: 0, message: '' });
+            if (fileInputRef.current) {
+              fileInputRef.current.value = '';
+            }
+            // Trigger refresh if needed (e.g. reload receipts list)
+            window.dispatchEvent(new Event('receipt-uploaded'));
+            // Navigate to receipts list after 2 seconds
+            setTimeout(() => {
+              navigate('/receipts');
+            }, 2000);
+          }, 3000);
+        }
+      } else if (data.status === 'error') {
+        setStage({
+          stage: 'error',
+          progress: 0,
+          message: data.message || data.error || 'Unknown error',
+        });
+        ws.close();
       }
-    },
-    [clearError]
-  );
+    };
 
-  const handleFileSelect = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
-      if (files && files.length > 0) {
-        clearError();
-        await handleFileUpload(files[0]);
-      }
-    },
-    [clearError]
-  );
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      // Don't necessarily fail UI if WS fails, might just lose progress updates
+    };
 
-  const handleFileUpload = async (file: File) => {
+    ws.onclose = () => {
+      console.log('WebSocket connection closed');
+    };
+  }, [navigate]);
+
+  const handleFileUpload = useCallback(async (file: File) => {
     // Validate file type
     const allowedExtensions = ['.pdf', '.png', '.jpg', '.jpeg', '.tiff', '.tif'];
     const fileExt = '.' + file.name.split('.').pop()?.toLowerCase();
@@ -110,6 +123,7 @@ export function ReceiptUploader() {
           for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const textContent = await page.getTextContent();
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const pageText = textContent.items.map((item: any) => item.str).join(' ');
             fullText += pageText + '\n';
           }
@@ -141,62 +155,50 @@ export function ReceiptUploader() {
         message: err instanceof Error ? err.message : 'Nie udało się przesłać paragonu',
       });
     }
-  };
+  }, [monitorProcessing, uploadReceipt]);
 
-  const monitorProcessing = async (receiptId: number) => {
-    // Connect to WebSocket for real-time updates
-    const wsUrl = `${WS_BASE_URL}/api/receipts/ws/processing/${receiptId}`;
-    const ws = new WebSocket(wsUrl);
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
 
-    ws.onopen = () => {
-      console.log('Connected to processing WebSocket');
-    };
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  }, []);
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
 
-      if (data.type === 'update') {
-        setStage({
-          stage: data.stage as any, // Cast to stage type
-          progress: data.progress,
-          message: data.message,
-        });
+  const handleDrop = useCallback(
+    async (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(false);
+      clearError();
 
-        if (data.stage === 'completed') {
-          ws.close();
-          // Redirect to receipts list after successful upload
-          setTimeout(() => {
-            setStage({ stage: 'idle', progress: 0, message: '' });
-            if (fileInputRef.current) {
-              fileInputRef.current.value = '';
-            }
-            // Trigger refresh if needed (e.g. reload receipts list)
-            window.dispatchEvent(new Event('receipt-uploaded'));
-            // Navigate to receipts list after 2 seconds
-            setTimeout(() => {
-              navigate('/receipts');
-            }, 2000);
-          }, 3000);
-        }
-      } else if (data.status === 'error') {
-        setStage({
-          stage: 'error',
-          progress: 0,
-          message: data.message || data.error || 'Unknown error',
-        });
-        ws.close();
+      const files = Array.from(e.dataTransfer.files);
+      if (files.length > 0) {
+        await handleFileUpload(files[0]);
       }
-    };
+    },
+    [clearError, handleFileUpload]
+  );
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      // Don't necessarily fail UI if WS fails, might just lose progress updates
-    };
-
-    ws.onclose = () => {
-      console.log('WebSocket connection closed');
-    };
-  };
+  const handleFileSelect = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (files && files.length > 0) {
+        clearError();
+        await handleFileUpload(files[0]);
+      }
+    },
+    [clearError, handleFileUpload]
+  );
 
   const handleRetry = () => {
     setStage({ stage: 'idle', progress: 0, message: '' });
@@ -351,4 +353,3 @@ export function ReceiptUploader() {
     </div>
   );
 }
-

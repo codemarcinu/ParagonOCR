@@ -52,6 +52,7 @@ export const useShoppingListStore = create<ShoppingListStore>()(
           const response = await apiClient.get('/shopping-lists');
           set({ lists: response.data, loading: false });
         } catch (error) {
+          console.error(error);
           set({ loading: false, error: 'Failed to fetch shopping lists' });
         }
       },
@@ -68,6 +69,7 @@ export const useShoppingListStore = create<ShoppingListStore>()(
           }));
           showSuccess('Shopping list created successfully!');
         } catch (error) {
+          console.error(error);
           const errorMessage = 'Failed to create list';
           set({ loading: false, error: errorMessage });
           showError(errorMessage);
@@ -80,6 +82,7 @@ export const useShoppingListStore = create<ShoppingListStore>()(
           const response = await apiClient.get(`/shopping-lists/${id}`);
           set({ currentList: response.data, loading: false });
         } catch (error) {
+          console.error(error);
           set({ loading: false, error: 'Failed to load list' });
         }
       },
@@ -101,6 +104,7 @@ export const useShoppingListStore = create<ShoppingListStore>()(
           }));
           showSuccess('Item added to list!');
         } catch (error) {
+          console.error(error);
           const errorMessage = 'Failed to add item';
           set({ loading: false, error: errorMessage });
           showError(errorMessage);
@@ -129,6 +133,7 @@ export const useShoppingListStore = create<ShoppingListStore>()(
             checked: !item.checked
           });
         } catch (error) {
+          console.error(error);
           // Revert on error
           set((state) => ({
             currentList: {
@@ -158,6 +163,7 @@ export const useShoppingListStore = create<ShoppingListStore>()(
         try {
           await apiClient.delete(`/shopping-lists/${currentList.id}/items/${itemId}`);
         } catch (error) {
+          console.error(error);
           // Revert
           set((state) => ({
             currentList: {
@@ -185,6 +191,7 @@ export const useShoppingListStore = create<ShoppingListStore>()(
           }));
           showSuccess('Shopping list completed!');
         } catch (error) {
+          console.error(error);
           const errorMessage = 'Failed to complete list';
           set({ error: errorMessage });
           showError(errorMessage);

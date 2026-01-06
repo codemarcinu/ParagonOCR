@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, type KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import * as ReactWindow from 'react-window';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const VariableSizeList = (ReactWindow as any).VariableSizeList || (ReactWindow as any).default?.VariableSizeList;
 import { Home } from 'lucide-react';
 import { useChatStore } from '@/store/chatStore';
@@ -19,6 +20,7 @@ export function Chat() {
     } = useChatStore();
 
     const [input, setInput] = useState('');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const listRef = useRef<any>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -136,8 +138,8 @@ export function Chat() {
                 {/* Header */}
                 <div className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6">
                     <div className="flex items-center space-x-4">
-                        <Link 
-                            to="/" 
+                        <Link
+                            to="/"
                             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                             title="Powrót do strony głównej"
                         >

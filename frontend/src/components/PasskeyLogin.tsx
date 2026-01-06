@@ -36,6 +36,7 @@ const PasskeyLogin: React.FC<PasskeyLoginProps> = ({
       const options = await getPasskeyAuthenticationOptions(username);
 
       // Start authentication using SimpleWebAuthn
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const credential = await startAuthentication(options as any);
 
       // Verify authentication with server
@@ -52,15 +53,16 @@ const PasskeyLogin: React.FC<PasskeyLoginProps> = ({
       loginAction(token, user);
 
       onSuccess?.();
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as Error;
       let errorMessage = 'Nie udało się uwierzytelnić za pomocą klucza dostępu';
 
-      if (err.name === 'NotSupportedError') {
+      if (error.name === 'NotSupportedError') {
         errorMessage = 'Klucze dostępu nie są obsługiwane na tym urządzeniu. Użyj innej metody uwierzytelniania.';
-      } else if (err.name === 'NotAllowedError' || err.message?.includes('timeout') || err.message?.includes('not allowed')) {
+      } else if (error.name === 'NotAllowedError' || error.message?.includes('timeout') || error.message?.includes('not allowed')) {
         errorMessage = 'Operacja została anulowana, przekroczono limit czasu lub nie została dozwolona. Spróbuj ponownie i upewnij się, że ukończysz monit biometryczny.';
-      } else if (err.message) {
-        errorMessage = err.message;
+      } else if (error.message) {
+        errorMessage = error.message;
       }
 
       setError(errorMessage);

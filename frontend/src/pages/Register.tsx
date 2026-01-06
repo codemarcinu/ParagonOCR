@@ -12,6 +12,7 @@ const Register: React.FC = () => {
     const navigate = useNavigate();
     const { login: loginAction } = useAuthStore();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handlePasskeySuccess = async (tokenData: any) => {
         try {
             const token = tokenData.access_token || tokenData.token?.access_token;
@@ -28,9 +29,10 @@ const Register: React.FC = () => {
             setTimeout(() => {
                 navigate('/');
             }, 1500);
-        } catch (err: any) {
-            console.error('Error after passkey registration:', err);
-            setError(err.message || 'Failed to complete registration');
+        } catch (err: unknown) {
+            const error = err as Error;
+            console.error('Error after passkey registration:', error);
+            setError(error.message || 'Failed to complete registration');
         }
     };
 

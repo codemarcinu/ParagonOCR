@@ -51,6 +51,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             const response = await apiClient.get('/chat/conversations');
             set({ conversations: response.data, loading: false });
         } catch (error) {
+            console.error('Failed to fetch conversations', error);
             set({ loading: false, error: 'Failed to fetch conversations' });
         }
     },
@@ -63,6 +64,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             set({ messages: response.data, loading: false });
             get().connectWebSocket(id);
         } catch (error) {
+            console.error('Failed to fetch messages', error);
             set({ loading: false, error: 'Failed to fetch messages' });
         }
     },
@@ -80,6 +82,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             }));
             return newConv.id;
         } catch (error) {
+            console.error('Failed to create conversation', error);
             set({ loading: false, error: 'Failed to create conversation' });
             return '';
         }
@@ -90,28 +93,28 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
             return; // Already connected
         }
-        
+
         if (wsConnection) {
             wsConnection.close();
         }
-        
+
         const ws = new WebSocket(`${WS_BASE_URL}/api/chat/conversations/${conversationId}/stream`);
-        
+
         ws.onopen = () => {
             console.log('Chat WebSocket connected');
             set({ wsConnection: ws });
         };
-        
+
         ws.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
-                
+
                 if (data.type === 'chunk') {
                     // Append chunk to buffer
                     set((state) => ({
                         currentMessageBuffer: state.currentMessageBuffer + data.content
                     }));
-                    
+
                     // Update last message in real-time
                     set((state) => {
                         const newMessages = [...state.messages];
@@ -151,18 +154,18 @@ export const useChatStore = create<ChatStore>((set, get) => ({
                 console.error('Error parsing WebSocket message:', error);
             }
         };
-        
+
         ws.onerror = (error) => {
             console.error('Chat WebSocket error:', error);
             set({ streaming: false, error: 'WebSocket connection error' });
         };
-        
+
         ws.onclose = () => {
             console.log('Chat WebSocket closed');
             set({ wsConnection: null, streaming: false });
         };
     },
-    
+
     disconnectWebSocket: () => {
         const { wsConnection } = get();
         if (wsConnection) {
@@ -170,11 +173,11 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             set({ wsConnection: null });
         }
     },
-    
+
     sendMessageStreaming: async (content: string) => {
         const { currentConversationId, messages, wsConnection } = get();
         if (!currentConversationId) return;
-        
+
         // Add user message
         const userMsg: Message = {
             id: Date.now().toString(),
@@ -182,13 +185,13 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             content,
             timestamp: new Date().toISOString()
         };
-        
-        set({ 
+
+        set({
             messages: [...messages, userMsg],
             streaming: true,
             currentMessageBuffer: ''
         });
-        
+
         // Connect WebSocket if not connected
         if (!wsConnection || wsConnection.readyState !== WebSocket.OPEN) {
             get().connectWebSocket(currentConversationId);
@@ -205,7 +208,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
                 checkConnection();
             });
         }
-        
+
         // Send message through WebSocket
         const ws = get().wsConnection;
         if (ws && ws.readyState === WebSocket.OPEN) {

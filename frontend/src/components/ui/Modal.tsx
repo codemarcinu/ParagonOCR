@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useId } from 'react';
 import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
 
@@ -13,8 +13,9 @@ interface ModalProps {
 export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const titleId = title ? `modal-title-${Math.random().toString(36).substr(2, 9)}` : undefined;
-  
+  const uniqueId = useId();
+  const titleId = title ? `modal-title-${uniqueId}` : undefined;
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -36,14 +37,14 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
       document.body.style.overflow = '';
     };
   }, [isOpen]);
-  
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
         onClose();
       }
     };
-    
+
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
       return () => {
@@ -51,18 +52,18 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
       };
     }
   }, [isOpen, onClose]);
-  
+
   if (!isOpen) return null;
-  
+
   const sizeClasses = {
     sm: 'max-w-md',
     md: 'max-w-lg',
     lg: 'max-w-2xl',
     xl: 'max-w-4xl'
   };
-  
+
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 overflow-y-auto"
       aria-modal="true"
       role="dialog"
@@ -103,4 +104,3 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
     </div>
   );
 }
-
