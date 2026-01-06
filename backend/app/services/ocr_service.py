@@ -47,7 +47,7 @@ import numpy as np
 def preprocess_image(image_path: str) -> Image.Image:
     """
     Preprocess image for better OCR accuracy using OpenCV.
-    Includes CLAHE, Bilateral Filter, and Deskewing.
+    Includes Rescaling, CLAHE/Thresholding, and Deskewing.
     
     Args:
         image_path: Path to image file
@@ -60,66 +60,73 @@ def preprocess_image(image_path: str) -> Image.Image:
     
     # Check if image was loaded successfully
     if img is None:
-        # Fallback to PIL loading if OpenCV fails
         return Image.open(image_path)
+    
+    # 1. Resize/Upscale if too small (Tesseract needs ~300 DPI)
+    # Receipts are often long but narrow. Width is key.
+    target_width = 1600
+    h, w = img.shape[:2]
+    
+    if w < target_width:
+        scale = target_width / w
+        new_w = target_width
+        new_h = int(h * scale)
+        img = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_CUBIC)
         
-    # 1. Convert to grayscale
+    # 2. Convert to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     
     # Optimization for Digital Screens / Screenshots
-    # Check if image has few unique colors (typical for screenshots/digital generated)
-    # or if it's already high constrast.
     unique_colors = np.unique(gray)
-    is_digital = len(unique_colors) < 100 # Threshold: regular photos have 256 or many noise values
+    is_digital = len(unique_colors) < 100 
     
     if is_digital:
-        # For digital sources, skips CLAHE and Denoising which can degrade sharp fonts
-        # Just simple thresholding
+        # Simple thresholding for clean digital images
         _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     else:
-        # Standard processing for Photos
+        # Standard processing for Photos/Scans
         
-        # 2. CLAHE (Contrast Limited Adaptive Histogram Equalization)
-        # Better than global histogram equalization for receipts with shadows
-        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-        gray = clahe.apply(gray)
+        # Denoise first
+        gray = cv2.bilateralFilter(gray, 9, 75, 75)
         
-        # 3. Bilateral Filter (Denoising while preserving edges)
-        # Better than GaussianBlur for text
-        denoised = cv2.bilateralFilter(gray, 9, 75, 75)
+        # Adaptive Thresholding is often better for receipts with shadows/uneven light
+        # Block size 31, C=10 seems robust for documents
+        thresh = cv2.adaptiveThreshold(
+            gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+            cv2.THRESH_BINARY, 31, 12
+        )
         
-        # 4. Thresholding
-        _, thresh = cv2.threshold(denoised, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    
-    # 5. Deskewing
+    # 3. Deskewing
     try:
-        # invert for contour detection (white text on black background)
-        coords = np.column_stack(np.where(thresh > 0)) # Note: this assumes white text? 
-        # Actually Otsu typically gives black text on white for receipts. 
-        # Let's invert to find black pixels (text)
-        thresh_inv = cv2.bitwise_not(thresh)
-        coords = np.column_stack(np.where(thresh_inv > 0))
-        
+        coords = np.column_stack(np.where(thresh > 0)) # White text on black? Adaptive gives Black text on White usually.
+        # Check background color - usually receipts are white (255)
+        # If mean pixel value > 127, it's black text on white bg (normal)
+        if np.mean(thresh) > 127:
+            # Invert for contour detection
+            coords = np.column_stack(np.where(thresh == 0))
+        else:
+             coords = np.column_stack(np.where(thresh > 0))
+             
         if len(coords) > 0:
             angle = cv2.minAreaRect(coords)[-1]
-            
-            # minAreaRect returns values in range [-90, 0)
             if angle < -45:
                 angle = -(90 + angle)
             else:
                 angle = -angle
                 
-            # Rotate if angle is significant (> 0.5 degrees)
-            if abs(angle) > 0.5:
+            if abs(angle) > 0.5 and abs(angle) < 45: # Limit rotation to avoid flipping
                 (h, w) = img.shape[:2]
                 center = (w // 2, h // 2)
                 M = cv2.getRotationMatrix2D(center, angle, 1.0)
-                thresh = cv2.warpAffine(thresh, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+                # Fill border with white (255)
+                thresh = cv2.warpAffine(thresh, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_CONSTANT, borderValue=255)
     except Exception as e:
-        print(f"Deskewing failed: {e}") # Non-critical
         pass
     
-    # Convert back to PIL Image
+    # Save debug image if needed
+    if settings.DEBUG:
+         cv2.imwrite("last_preprocessed.jpg", thresh)
+
     return Image.fromarray(thresh)
 
 
@@ -254,8 +261,8 @@ def _extract_with_tesseract(img: Image.Image) -> OCRResult:
         # Set tesseract command
         pytesseract.pytesseract.tesseract_cmd = settings.TESSERACT_CMD
         
-        # Use --psm 6 (Assume a single uniform block of text) - often better for receipts
-        custom_config = r'--psm 6'
+        # Use --psm 4 (Assume a single column of text of variable sizes) - best for receipts
+        custom_config = r'--psm 4'
         
         # Get verbose data (boxes, confidences, line numbers)
         data = pytesseract.image_to_data(img, lang="pol+eng", config=custom_config, output_type=pytesseract.Output.DICT)

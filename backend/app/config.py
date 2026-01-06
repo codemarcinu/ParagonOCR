@@ -84,6 +84,9 @@ class Settings(BaseSettings):
     ENABLE_FILE_LOGGING: bool = Field(
         default=False, description="Enable logging to file"
     )
+    DEBUG: bool = Field(
+        default=False, description="Enable debug mode (e.g. save intermediate images)"
+    )
 
     class Config:
         env_file = ".env"

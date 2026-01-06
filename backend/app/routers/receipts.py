@@ -246,6 +246,7 @@ async def process_receipt_async(receipt_id: int, file_path: str, text_content: O
             parser = ReceiptParser()
             # Pass 0 as dummy shop_id, we'll confirm it with LLM
             parsed_regex = parser.parse(ocr_result.text, shop_id=0)
+            logger.info(f"Receipt {receipt_id}: Regex parser found {len(parsed_regex.items)} items")
 
             # 2b. Run LLM for semantic understanding (Shop Name, Categories, tricky layouts)
             parsed_llm = parse_receipt_text(ocr_result.text)
