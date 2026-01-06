@@ -15,7 +15,7 @@ sys.path.append(str(backend_dir))
 # --- IMPORTY Z TWOJEGO PROJEKTU ---
 try:
     from app.services.ocr_service import OCRService
-    from app.services.llm_service import parse_receipt_text
+    from app.services.llm_service import LLMService
 except ImportError as e:
     print(f"BŁĄD IMPORTU: Nie znaleziono modułów backendu. Upewnij się, że jesteś w katalogu głównym projektu.\nSzczegóły: {e}")
     sys.exit(1)
@@ -25,14 +25,17 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # --- PLIKI DO TESTÓW ---
-TEST_FILES = [
-    "20250121_063301.pdf",      # Kaufland/Inny PDF
-    "Biedra20251118.pdf",       # Biedronka PDF (Test rabatów)
-    "auchan.pdf",               # Auchan PDF (Test niefiskalnych)
-    "kaufland.pdf",             # Kaufland PDF
-    "20250125lidl.png",         # Lidl PNG (Test obrazu)
-    "lidl.png"                  # Lidl PNG
-]
+# Automatycznie pobieramy pliki z katalogu samples
+supported_extensions = {'.pdf', '.png', '.jpg', '.jpeg'}
+# Pobieramy pliki, jeśli katalog istnieje
+if Path("data/samples").exists():
+    TEST_FILES = [f.name for f in Path("data/samples").iterdir() if f.suffix.lower() in supported_extensions]
+    TEST_FILES.sort()
+else:
+    TEST_FILES = []
+
+if not TEST_FILES:
+    print(f"⚠️ OSTRZEŻENIE: Brak plików (PDF/PNG/JPG) w katalogu data/samples!")
 
 SAMPLES_DIR = Path("data/samples")
 
@@ -45,7 +48,7 @@ async def run_test():
     # Inicjalizacja serwisów
     try:
         ocr_service = OCRService()
-        # LLM service is functional, no init needed beyond module load
+        llm_service = LLMService()
         print("✅ Serwisy zainicjowane poprawnie.\n")
     except Exception as e:
         print(f"❌ Błąd inicjalizacji serwisów: {e}")
@@ -92,15 +95,16 @@ async def run_test():
             
             # Wywołanie Twojego serwisu LLM - Sync call inside async wrapper often needs run_in_executor if blocking, 
             # but for this script we can just call it blocking.
-            parsed_data = parse_receipt_text(raw_text)
+            parsed_data = await llm_service.process_receipt(raw_text)
             
             llm_time = time() - llm_start
             print(f" OK ({llm_time:.2f}s)")
 
             # Weryfikacja kluczowych pól
-            shop = parsed_data.shop or 'NIEZNANY'
-            total = parsed_data.total or 0
-            items_count = len(parsed_data.items)
+            shop = parsed_data.get("shop_name", "NIEZNANY")
+            total = parsed_data.get("total_amount", 0.0)
+            items = parsed_data.get("items", [])
+            items_count = len(items)
             
             print(f"      🛒 Sklep: {shop}")
             print(f"      💰 Kwota: {total} PLN")
