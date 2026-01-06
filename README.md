@@ -113,7 +113,9 @@ ParagonOCR/
 ├── frontend/             # Interfejs użytkownika, komponenty React
 ├── docs/                 # Dokumentacja techniczna i projektowa
 ├── data/                 # Lokalne bazy danych i pliki konfiguracyjne AI
-├── scripts/              # Skrypty automatyzujące (setup, dev, cleanup)
+├── scripts/              # Skrypty automatyzujące i weryfikacyjne
+│   ├── verification/     # Skrypty testujące pipeline i modele
+│   └── utils/            # Narzędzia pomocnicze
 └── archive/              # Archiwum starszych wersji (desktop GUI)
 ```
 
