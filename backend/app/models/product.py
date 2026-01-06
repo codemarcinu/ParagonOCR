@@ -21,10 +21,15 @@ class Product(Base):
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
     unit = Column(String, nullable=True)  # e.g., "szt", "kg", "l" - zgodnie z przewodnikiem
     
+    # [NEW] Domyślny czas życia produktu w dniach (np. 7 dla mleka)
+    typical_shelf_life = Column(Integer, nullable=True)
+
     # Relationships
     category = relationship("Category", back_populates="products")
     aliases = relationship("ProductAlias", back_populates="product", cascade="all, delete-orphan")
     receipt_items = relationship("ReceiptItem", back_populates="product")
+    # [NEW] Relacja do spiżarni
+    pantry_items = relationship("PantryItem", back_populates="product")
 
 
 class ProductAlias(Base):

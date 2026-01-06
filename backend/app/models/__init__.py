@@ -13,6 +13,7 @@ from app.models.chat_history import Conversation, Message
 from app.models.chat_history import Conversation, Message
 from app.models.webauthn_key import WebAuthnKey
 from app.models.user import User
+from app.models.pantry import PantryItem, PantryStatus
 
 __all__ = [
     "Receipt",
@@ -26,5 +27,7 @@ __all__ = [
     "Message",
     "WebAuthnKey",
     "User",
+    "PantryItem",
+    "PantryStatus",
 ]
 

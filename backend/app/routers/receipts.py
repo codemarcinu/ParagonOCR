@@ -9,6 +9,7 @@ from app.models.user import User
 from app.schemas import ReceiptCreate, ReceiptResponse
 from app.services.ocr_service import OCRService
 from app.services.llm_service import LLMService
+from app.services.inventory_service import InventoryService
 from app.dependencies import get_current_user
 
 # Konfiguracja loggera
@@ -22,6 +23,7 @@ router = APIRouter(
 # Instancje serwisów
 ocr_service = OCRService()
 llm_service = LLMService()
+inventory_service = InventoryService()
 
 @router.post("/analyze", response_model=ReceiptResponse)
 async def analyze_receipt(
@@ -69,18 +71,9 @@ async def analyze_receipt(
         db.commit()
         db.refresh(new_receipt)
 
-        # Tworzenie pozycji (items)
+        # Tworzenie pozycji (items) i aktualizacja spiżarni
         items_data = parsed_data.get("items", [])
-        for item in items_data:
-            new_item = ReceiptItem(
-                receipt_id=new_receipt.id,
-                name=item.get("name", "Produkt"),
-                quantity=item.get("quantity", 1.0),
-                price=item.get("price", 0.0),
-                total_price=item.get("total_price", 0.0),
-                category=item.get("category", "inne")
-            )
-            db.add(new_item)
+        inventory_service.process_receipt_items(db, new_receipt, items_data)
         
         db.commit()
         

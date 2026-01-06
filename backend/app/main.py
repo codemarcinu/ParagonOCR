@@ -22,7 +22,7 @@ from app.database import init_db, engine
 
 # Initialize Limiter
 limiter = Limiter(key_func=get_remote_address)
-from app.routers import receipts, products, chat, analytics, auth
+from app.routers import receipts, products, chat, analytics, auth, pantry
 
 # Configure logging
 logging.basicConfig(
@@ -85,6 +85,7 @@ app.include_router(products.router, prefix="/api/products", tags=["products"])
 app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
+app.include_router(pantry.router, prefix="/api/pantry", tags=["pantry"])
 
 
 def custom_openapi():

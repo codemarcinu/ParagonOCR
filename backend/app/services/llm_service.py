@@ -3,6 +3,7 @@ import logging
 import re
 from typing import Dict, Any
 import aiohttp
+import requests
 from app.config import settings
 
 logger = logging.getLogger(__name__)
@@ -185,3 +186,28 @@ class LLMService:
             "total_amount": 0.0,
             "items": []
         }
+
+# --- Sync Client for Normalization Service ---
+class OllamaClient:
+    def __init__(self, host: str):
+        self.host = host
+
+    def generate(self, model: str, prompt: str, options: Dict = None) -> Dict:
+        url = f"{self.host}/api/generate"
+        payload = {
+            "model": model,
+            "prompt": prompt,
+            "stream": False,
+            "options": options or {}
+        }
+        try:
+            resp = requests.post(url, json=payload)
+            if resp.status_code != 200:
+                logger.error(f"Ollama error: {resp.status_code} - {resp.text}")
+                return {"response": ""}
+            return resp.json()
+        except Exception as e:
+            logger.error(f"Ollama generate error: {e}")
+            return {"response": ""}
+
+ollama_client = OllamaClient(settings.OLLAMA_HOST)
