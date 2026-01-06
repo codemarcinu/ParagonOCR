@@ -1,61 +1,32 @@
 import json
 import logging
 import re
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any
 import aiohttp
 from app.config import settings
 
-# --- Backward Compatibility Imports ---
-try:
-    from ollama import Client
-    ollama_client = Client(host=settings.OLLAMA_HOST)
-except ImportError:
-    ollama_client = None
-
-def chat(query: str, context: Dict = None) -> str:
-    """
-    Simple chat wrapper for RAG/Chat service.
-    """
-    if not ollama_client:
-        return "Error: Ollama client not available."
-    
-    try:
-        # Build prompt from context
-        system_msg = "You are a helpful assistant."
-        if context and "retrieved_info" in context:
-            system_msg += f"\nContext:\n{context['retrieved_info']}"
-            
-        response = ollama_client.chat(
-            model=settings.TEXT_MODEL,
-            messages=[
-                {"role": "system", "content": system_msg},
-                {"role": "user", "content": query}
-            ]
-        )
-        return response['message']['content']
-    except Exception as e:
-        logger.error(f"Chat error: {e}")
-        return "I encountered an error."
-
 logger = logging.getLogger(__name__)
 
-# --- NOWY, LEPSZY PROMPT ---
+# Prompt zoptymalizowany pod Bielika i polskie realia
 SYSTEM_PROMPT = """
-Jesteś analitykiem paragonów (OCR). Masz wyciągnąć dane w formacie JSON.
+Jesteś analitykiem paragonów (OCR). Twoim celem jest wyciągnięcie danych JSON.
 
-ZASADY EKSTRAKCJI:
-1. NAZWA SKLEPU (Krytyczne!):
-   - Szukaj w nagłówku. Jeśli widzisz "Jeronimo Martins" -> wpisz "Biedronka".
-   - Jeśli widzisz "Lidl" -> wpisz "Lidl".
-   - Jeśli widzisz "Kaufland" -> wpisz "Kaufland".
-   - Jeśli widzisz "Auchan" -> wpisz "Auchan".
+### INSTRUKCJE DLA SKLEPÓW:
+1. SZUKANIE NAZWY:
+   - "Jeronimo Martins" -> Zapisz jako "Biedronka"
+   - "Lidl" -> Zapisz jako "Lidl"
+   - "Kaufland" -> Zapisz jako "Kaufland"
+   - "Auchan" -> Zapisz jako "Auchan"
+   - "Żabka" -> Zapisz jako "Żabka"
+   - "Carrefour" -> Zapisz jako "Carrefour"
+
 2. POZYCJE (items):
-   - Wyciągnij listę zakupów. Ignoruj linie "Suma", "PTU", "Sprzedaż opodatkowana".
-   - RABATY: Jeśli pod produktem jest linia z minusem (np. "-4.00"), ODEJMIJ to od ceny produktu powyżej.
-3. KWOTY:
-   - Używaj kropki (np. 4.50).
+   - Wyciągnij nazwę, ilość i cenę KOŃCOWĄ (po rabacie).
+   - RABATY (Biedronka/Lidl): Jeśli pod produktem jest linia "Rabat" lub kwota z minusem (np. -4.00), ODEJMIJ ją od ceny produktu powyżej. Nie dodawaj rabatu jako osobnej pozycji.
 
-FORMAT JSON (zwróć TYLKO to):
+3. DATA: Format YYYY-MM-DD.
+
+Format wyjściowy (JSON Only):
 {
   "shop_name": "String",
   "date": "YYYY-MM-DD",
@@ -71,15 +42,14 @@ Paragon:
 class LLMService:
     def __init__(self):
         self.api_url = f"{settings.OLLAMA_HOST}/api/chat"
-        self.model = settings.TEXT_MODEL  # np. "bielik"
+        self.model = settings.OLLAMA_MODEL
 
     async def process_receipt(self, raw_text: str) -> Dict[str, Any]:
         """
-        Wysyła tekst OCR do Ollamy i naprawia niedoskonałości modelu lokalnego.
+        Wysyła OCR do LLM, a potem Python naprawia błędy modelu.
         """
-        logger.info(f"Parsing receipt with LLM. OCR text length: {len(raw_text)} chars")
+        logger.info(f"LLM: Analiza tekstu ({len(raw_text)} znaków)...")
         
-        # 1. Budowanie zapytania do Ollamy
         payload = {
             "model": self.model,
             "messages": [
@@ -87,10 +57,13 @@ class LLMService:
                 {"role": "user", "content": raw_text}
             ],
             "stream": False,
-            "format": "json",  # Wymuszenie JSON mode w Ollamie
+            "format": "json",
             "options": {
-                "temperature": 0.1,  # Bardzo nisja temperatura dla precyzji
-                "num_ctx": 4096
+                "temperature": 0.1,
+                "num_ctx": 2048,
+                "num_predict": 1000, # Limit tokenów wyjściowych
+                "num_gpu": 99,       # <--- KLUCZOWE: Wymuś 99 warstw na GPU (wszystkie)
+                "num_thread": 4      # Ogranicz wątki CPU, żeby nie dławić systemu
             }
         }
 
@@ -101,96 +74,106 @@ class LLMService:
                         raise Exception(f"Ollama Error: {response.status}")
                     
                     result = await response.json()
-                    response_content = result['message']['content']
+                    content = result['message']['content']
                     
-                    # 2. Parsowanie JSON
+                    # Parsowanie JSON (z obsługą błędów formatowania)
                     try:
-                        parsed_data = json.loads(response_content)
+                        parsed_data = json.loads(content)
                     except json.JSONDecodeError:
-                        # Fallback: próba wycięcia JSON z markdowna ```json ... ```
-                        match = re.search(r'\{.*\}', response_content, re.DOTALL)
+                        # Ratunek regexem jeśli model dodał tekst przed klamrą
+                        match = re.search(r'\{.*\}', content, re.DOTALL)
                         if match:
                             parsed_data = json.loads(match.group())
                         else:
-                            raise ValueError("Model nie zwrócił poprawnego JSON.")
+                            # Ostateczny fallback - pusty paragon
+                            parsed_data = {}
 
-                    # 3. --- SEKCJA NAPRAWCZA (HARD FIX) ---
+                    # --- LOGIKA NAPRAWCZA (PYTHON GLUE) ---
+                    # To naprawia błędy, których model AI nie widzi
                     parsed_data = self._fix_shop_name(parsed_data, raw_text)
-                    parsed_data = self._fix_total_amount(parsed_data)
-                    parsed_data = self._normalize_items(parsed_data)
-
+                    parsed_data = self._fix_financials(parsed_data)
+                    
                     return parsed_data
 
         except Exception as e:
             logger.error(f"LLM processing failed: {e}")
-            # Zwracamy pustą strukturę w razie awarii, żeby frontend nie padł
-            return {
-                "shop_name": "Błąd odczytu",
-                "date": None,
-                "total_amount": 0.0,
-                "items": []
-            }
+            return self._get_empty_structure()
 
     def _fix_shop_name(self, data: Dict, raw_text: str) -> Dict:
         """
-        Naprawia nazwę sklepu na podstawie słów kluczowych w surowym tekście.
-        Python ma tu wyższy priorytet niż halucynacje LLM.
+        Autorytatywna naprawa nazwy sklepu na podstawie słów kluczowych OCR.
+        Rozwiązuje problem: Auchan -> ZNUCHAM, Biedronka -> Jeronimo.
         """
         text_lower = raw_text.lower()
-        shop_current = data.get("shop_name", "").lower()
-
-        # Lista reguł (Słowo kluczowe w OCR -> Prawidłowa nazwa)
-        # Kolejność ma znaczenie! Specyficzne błędy OCR dajemy na górę.
-        if "znucham" in text_lower or "auchan" in text_lower or "emchanfl" in text_lower:
+        
+        # Lista priorytetowa (Specyficzne błędy OCR na górze)
+        if any(x in text_lower for x in ["znucham", "auchan", "emchanfl", "ruchan"]):
             data["shop_name"] = "Auchan"
-        elif "kaufland" in text_lower:
-            data["shop_name"] = "Kaufland"
+        elif any(x in text_lower for x in ["biedronka", "jeronimo", "jemp"]):
+            data["shop_name"] = "Biedronka"
         elif "lidl" in text_lower:
             data["shop_name"] = "Lidl"
-        elif "zabka" in text_lower or "żabka" in text_lower:
+        elif "kaufland" in text_lower:
+            data["shop_name"] = "Kaufland"
+        elif any(x in text_lower for x in ["zabka", "żabka"]):
             data["shop_name"] = "Żabka"
         elif "carrefour" in text_lower:
             data["shop_name"] = "Carrefour"
         elif "rossmann" in text_lower:
             data["shop_name"] = "Rossmann"
-        elif "biedronka" in text_lower or "jeronimo" in text_lower:
-            data["shop_name"] = "Biedronka"
-        
-        # Jeśli nic nie znaleźliśmy w tekście, a LLM zwrócił "Nieznany", zostawiamy lub wpisujemy domyślny
-        if data.get("shop_name") in ["Nieznany sklep", "Unknown", None, ""]:
-             data["shop_name"] = "Inny sklep"
-
+        elif "stokrotka" in text_lower:
+            data["shop_name"] = "Stokrotka"
+            
+        # Domyślna wartość
+        if not data.get("shop_name"):
+            data["shop_name"] = "Inny sklep"
+            
         return data
 
-    def _fix_total_amount(self, data: Dict) -> Dict:
+    def _fix_financials(self, data: Dict) -> Dict:
         """
-        Jeśli Total jest 0.00, obliczamy go z sumy pozycji.
+        Naprawia formatowanie liczb i przelicza sumę całkowitą, 
+        jeśli LLM zwrócił 0.00.
         """
-        total = data.get("total_amount", 0.0)
         items = data.get("items", [])
+        calculated_total = 0.0
         
-        # Oblicz sumę z pozycji
-        calculated_sum = sum(item.get("total_price", 0.0) for item in items)
-        calculated_sum = round(calculated_sum, 2)
-
-        # Jeśli LLM dał 0 albo null, bierzemy sumę wyliczoną
-        if not total or float(total) == 0.0:
-            data["total_amount"] = calculated_sum
-            logger.info(f"Naprawiono Total Amount: 0.0 -> {calculated_sum}")
-        
-        return data
-
-    def _normalize_items(self, data: Dict) -> Dict:
-        """
-        Czyści formatowanie liczb w pozycjach.
-        """
-        if "items" in data:
-            for item in data["items"]:
-                # Upewnij się, że liczby to float
+        if items:
+            for item in items:
+                # Konwersja na float i zaokrąglenie
                 try:
-                    item["quantity"] = float(item.get("quantity", 1.0))
-                    item["price"] = float(item.get("price", 0.0))
-                    item["total_price"] = float(item.get("total_price", 0.0))
+                    price = float(item.get("price", 0))
+                    qty = float(item.get("quantity", 1))
+                    
+                    # Jeśli total_price jest pusty, wylicz go
+                    if not item.get("total_price"):
+                        item["total_price"] = price * qty
+                    
+                    item["total_price"] = round(float(item["total_price"]), 2)
+                    item["price"] = round(price, 2)
+                    calculated_total += item["total_price"]
                 except (ValueError, TypeError):
-                    pass
+                    continue
+        
+        # Nadpisz Total Amount jeśli jest błędny/pusty
+        current_total = data.get("total_amount")
+        try:
+             current_total = float(current_total)
+        except (ValueError, TypeError):
+            current_total = 0.0
+
+        if current_total == 0.0 and calculated_total > 0:
+            data["total_amount"] = round(calculated_total, 2)
+            logger.info(f"Naprawiono Total Amount (z sumy pozycji): {data['total_amount']}")
+        else:
+            data["total_amount"] = round(current_total, 2)
+            
         return data
+
+    def _get_empty_structure(self):
+        return {
+            "shop_name": "Błąd przetwarzania",
+            "date": None,
+            "total_amount": 0.0,
+            "items": []
+        }

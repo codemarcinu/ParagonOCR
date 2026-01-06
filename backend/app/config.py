@@ -59,6 +59,9 @@ class Settings(BaseSettings):
     OLLAMA_TIMEOUT: int = Field(
         default=300, description="Ollama request timeout in seconds"
     )
+    OLLAMA_MODEL: str = Field(
+        default="bielik", description="Ollama model name"
+    )
     TEXT_MODEL: str = Field(
         default="bielik:latest",
         description="Ollama text model for receipt parsing",
