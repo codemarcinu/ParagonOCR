@@ -112,11 +112,13 @@ ParagonOCR/
 ├── backend/              # Logika biznesowa, API, obsługa AI
 ├── frontend/             # Interfejs użytkownika, komponenty React
 ├── docs/                 # Dokumentacja techniczna i projektowa
-├── data/                 # Lokalne bazy danych i pliki konfiguracyjne AI
+├── data/                 # Dane lokalne
+│   ├── samples/          # Przykładowe paragony
+│   └── uploads/          # Przetwarzane pliki
 ├── scripts/              # Skrypty automatyzujące i weryfikacyjne
 │   ├── verification/     # Skrypty testujące pipeline i modele
 │   └── utils/            # Narzędzia pomocnicze
-└── archive/              # Archiwum starszych wersji (desktop GUI)
+└── archive/              # Archiwum starszych wersji
 ```
 
 ---

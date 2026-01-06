@@ -26,7 +26,7 @@ ParagonOCR is a full-stack web application designed for receipt digitization, ex
 ## Data Flow
 
 1. **Upload**: User uploads an image/PDF.
-2. **Preprocessing**: Image is corrected (deskew, thresholding).
+2. **Preprocessing**: Image is corrected (Upscaling, Adaptive Thresholding, Deskewing).
 3. **OCR**: Tesseract extracts raw text.
 4. **Parsing**:
    - Helper scripts parse date/total.
