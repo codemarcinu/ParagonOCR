@@ -10,7 +10,9 @@ from app.models.category import Category
 from app.models.shop import Shop
 from app.models.shopping_list import ShoppingList
 from app.models.chat_history import Conversation, Message
+from app.models.chat_history import Conversation, Message
 from app.models.webauthn_key import WebAuthnKey
+from app.models.user import User
 
 __all__ = [
     "Receipt",
@@ -23,5 +25,6 @@ __all__ = [
     "Conversation",
     "Message",
     "WebAuthnKey",
+    "User",
 ]
 

@@ -254,22 +254,9 @@ def classify_product_category(db: Session, product: Product) -> Optional[int]:
             
             # Cleanup response (remove quotes, dots)
             cat_name = cat_name.replace('"', '').replace('.', '').strip()
-
-            # Strict validation against allowed categories
-            allowed_categories = list(CATEGORY_KEYWORDS.keys()) + ["Inne"]
             
-            # Check for exact match (case-insensitive)
-            matched_cat = None
-            for allowed in allowed_categories:
-                if allowed.lower() == cat_name.lower():
-                    matched_cat = allowed
-                    break
-            
-            if matched_cat:
-                return _assign_category_by_name(db, product, matched_cat)
-            else:
-                logger.warning(f"LLM returned invalid category '{cat_name}' for '{product.normalized_name}'. Fallback to 'Inne'.")
-                return _assign_category_by_name(db, product, "Inne")
+            # Validate against our list (optional, but safer to match DB)
+            return _assign_category_by_name(db, product, cat_name)
             
         except Exception as e:
             logger.error(f"LLM Categorization failed: {e}")
@@ -295,16 +282,15 @@ def _assign_category_by_name(db: Session, product: Product, category_name: str) 
     return category.id
 
 def _llm_verify_match(raw_name: str, candidate_name: str) -> bool:
-    """Ask LLM if two products are the same type."""
+    "Ask LLM if two products are the same type."
     try:
-        prompt = f"""
-        Czy te dwie nazwy produktÃ³w z paragonÃ³w oznaczajÄ… ten sam rodzaj produktu?
+        prompt = f"
+        Czy te dwie nazwy produktów z paragonów oznaczaj¹ ten sam rodzaj produktu?
         1. "{raw_name}"
         2. "{candidate_name}"
         
-        Odpowiedz TYLKO sÅ‚owem TAK lub NIE.
-        """
-        
+        Odpowiedz TYLKO s³owem TAK lub NIE.
+        "
         response = ollama_client.generate(
              model=settings.TEXT_MODEL,
              prompt=prompt,
@@ -316,3 +302,27 @@ def _llm_verify_match(raw_name: str, candidate_name: str) -> bool:
     except Exception as e:
         logger.error(f"LLM verification failed: {e}")
         return False
+
+
+def _llm_verify_match(raw_name: str, candidate_name: str) -> bool:
+    "Ask LLM if two products are the same type."
+    try:
+        prompt = f"
+        Czy te dwie nazwy produktów z paragonów oznaczaj¹ ten sam rodzaj produktu?
+        1. "{raw_name}"
+        2. "{candidate_name}"
+        
+        Odpowiedz TYLKO s³owem TAK lub NIE.
+        "
+        response = ollama_client.generate(
+             model=settings.TEXT_MODEL,
+             prompt=prompt,
+             options={"temperature": 0.0}
+        )
+        answer = response.get("response", "").strip().upper()
+        logger.info(f"LLM verification: '{raw_name}' vs '{candidate_name}' -> {answer}")
+        return "TAK" in answer
+    except Exception as e:
+        logger.error(f"LLM verification failed: {e}")
+        return False
+

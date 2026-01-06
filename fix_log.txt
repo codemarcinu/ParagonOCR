@@ -1,0 +1,222 @@
+2026-01-06 10:47:27,072 - __main__ - INFO - Starting category cleanup...
+2026-01-06 10:47:27,110 - __main__ - INFO - Found 49 invalid categories.
+2026-01-06 10:47:27,110 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 2)
+2026-01-06 10:47:27,111 - __main__ - INFO -   Reassigning product 'TorbaZakupowaP' to 'Inne'
+2026-01-06 10:47:27,111 - __main__ - INFO -   Deleting category 2
+2026-01-06 10:47:27,112 - __main__ - INFO - Processing invalid category: '```python
+# Dostêpne kategorie i ich odpowiedniki...' (ID: 5)
+2026-01-06 10:47:27,112 - __main__ - INFO -   Reassigning product 'K.SpoddoPizzy40' to 'Inne'
+2026-01-06 10:47:27,113 - __main__ - INFO -   Deleting category 5
+2026-01-06 10:47:27,113 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 6)
+2026-01-06 10:47:27,113 - __main__ - INFO -   Reassigning product 'CiastoFrancuskie' to 'Inne'
+2026-01-06 10:47:27,113 - __main__ - INFO -   Deleting category 6
+2026-01-06 10:47:27,114 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 8)
+2026-01-06 10:47:27,114 - __main__ - INFO -   Reassigning product 'HariboMisieKwas' to 'Inne'
+2026-01-06 10:47:27,114 - __main__ - INFO -   Deleting category 8
+2026-01-06 10:47:27,114 - __main__ - INFO - Processing invalid category: '```python
+# Przyk³adowy s³ownik z produktami i ic...' (ID: 9)
+2026-01-06 10:47:27,114 - __main__ - INFO -   Reassigning product 'HariboFresasCon' to 'Inne'
+2026-01-06 10:47:27,114 - __main__ - INFO -   Deleting category 9
+2026-01-06 10:47:27,114 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 11)
+2026-01-06 10:47:27,115 - __main__ - INFO -   Reassigning product 'LaysSalty130g' to 'Inne'
+2026-01-06 10:47:27,115 - __main__ - INFO -   Deleting category 11
+2026-01-06 10:47:27,115 - __main__ - INFO - Processing invalid category: '```python
+# Definicja s³ownika z produktami i ich...' (ID: 12)
+2026-01-06 10:47:27,115 - __main__ - INFO -   Reassigning product 'OvenBakGrillPapr' to 'Inne'
+2026-01-06 10:47:27,115 - __main__ - INFO -   Deleting category 12
+2026-01-06 10:47:27,115 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 13)
+2026-01-06 10:47:27,115 - __main__ - INFO -   Reassigning product 'LaysOvenBakSolo' to 'Inne'
+2026-01-06 10:47:27,115 - __main__ - INFO -   Deleting category 13
+2026-01-06 10:47:27,115 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 17)
+2026-01-06 10:47:27,117 - __main__ - INFO -   Reassigning product 'Lech Free 0% L&M 20%' to 'Inne'
+2026-01-06 10:47:27,117 - __main__ - INFO -   Deleting category 17
+2026-01-06 10:47:27,117 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 18)
+2026-01-06 10:47:27,117 - __main__ - INFO -   Reassigning product 'Kamis Musztarda' to 'Inne'
+2026-01-06 10:47:27,117 - __main__ - INFO -   Deleting category 18
+2026-01-06 10:47:27,117 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 19)
+2026-01-06 10:47:27,117 - __main__ - INFO -   Reassigning product 'Mazurski Smak Masto' to 'Inne'
+2026-01-06 10:47:27,118 - __main__ - INFO -   Deleting category 19
+2026-01-06 10:47:27,118 - __main__ - INFO - Processing invalid category: 'Pierogi Gyoza s¹ klasyfikowane jako Inne S¹ to ma³...' (ID: 20)
+2026-01-06 10:47:27,118 - __main__ - INFO -   Reassigning product 'Pierozki Gyoza' to 'Inne'
+2026-01-06 10:47:27,118 - __main__ - INFO -   Deleting category 20
+2026-01-06 10:47:27,118 - __main__ - INFO - Processing invalid category: 'Pieczywo
+
+---
+Zaklasyfikowanie produktu Krakers...' (ID: 22)
+2026-01-06 10:47:27,120 - __main__ - INFO -   Reassigning product 'Krakersy Dobry Chrup' to 'Inne'
+2026-01-06 10:47:27,120 - __main__ - INFO -   Deleting category 22
+2026-01-06 10:47:27,120 - __main__ - INFO - Processing invalid category: '```python
+# Dostêpne kategorie produktów
+categor...' (ID: 23)
+2026-01-06 10:47:27,120 - __main__ - INFO -   Reassigning product 'RewWeymOplRecsS' to 'Inne'
+2026-01-06 10:47:27,120 - __main__ - INFO -   Deleting category 23
+2026-01-06 10:47:27,120 - __main__ - INFO - Processing invalid category: '```python
+# Dostêpne kategorie produktów
+categor...' (ID: 24)
+2026-01-06 10:47:27,121 - __main__ - INFO -   Reassigning product 'EAROKG: Gh SAOne' to 'Inne'
+2026-01-06 10:47:27,121 - __main__ - INFO -   Deleting category 24
+2026-01-06 10:47:27,121 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 25)
+2026-01-06 10:47:27,121 - __main__ - INFO -   Reassigning product 'TOAD' to 'Inne'
+2026-01-06 10:47:27,121 - __main__ - INFO -   Deleting category 25
+2026-01-06 10:47:27,121 - __main__ - INFO - Processing invalid category: '```python
+# Dostêpne kategorie i ich odpowiedniki...' (ID: 26)
+2026-01-06 10:47:27,121 - __main__ - INFO -   Reassigning product 'S7AgSoOS' to 'Inne'
+2026-01-06 10:47:27,122 - __main__ - INFO -   Deleting category 26
+2026-01-06 10:47:27,122 - __main__ - INFO - Processing invalid category: '```python
+# B³êdne zapytanie u¿ytkownika - brakuj...' (ID: 27)
+2026-01-06 10:47:27,122 - __main__ - INFO -   Reassigning product 'iP)' to 'Inne'
+2026-01-06 10:47:27,122 - __main__ - INFO -   Deleting category 27
+2026-01-06 10:47:27,122 - __main__ - INFO - Processing invalid category: '```python
+# Dostêpne kategorie produktów
+categor...' (ID: 28)
+2026-01-06 10:47:27,122 - __main__ - INFO -   Reassigning product 'ORZES ZK WIE4.92359C)' to 'Inne'
+2026-01-06 10:47:27,122 - __main__ - INFO -   Deleting category 28
+2026-01-06 10:47:27,122 - __main__ - INFO - Processing invalid category: '```python
+# B³¹d: CIASTO a si nie jest poprawnym ...' (ID: 29)
+2026-01-06 10:47:27,124 - __main__ - INFO -   Reassigning product 'CIASTO a si' to 'Inne'
+2026-01-06 10:47:27,124 - __main__ - INFO -   Deleting category 29
+2026-01-06 10:47:27,124 - __main__ - INFO - Processing invalid category: '```python
+# Dostêpne kategorie produktów
+categor...' (ID: 30)
+2026-01-06 10:47:27,124 - __main__ - INFO -   Reassigning product 'IPAS TABMAX@ Eg' to 'Inne'
+2026-01-06 10:47:27,124 - __main__ - INFO -   Deleting category 30
+2026-01-06 10:47:27,124 - __main__ - INFO - Processing invalid category: 'SAOBICS nie jest powszechnie znanym produktem spo¿...' (ID: 31)
+2026-01-06 10:47:27,124 - __main__ - INFO -   Reassigning product 'SAOBICS' to 'Inne'
+2026-01-06 10:47:27,125 - __main__ - INFO -   Deleting category 31
+2026-01-06 10:47:27,125 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 32)
+2026-01-06 10:47:27,126 - __main__ - INFO -   Reassigning product 'CHIPS YKE Ta' to 'Inne'
+2026-01-06 10:47:27,126 - __main__ - INFO -   Deleting category 32
+2026-01-06 10:47:27,126 - __main__ - INFO - Processing invalid category: '```python
+# Dostêpne kategorie
+categories = {
+ ...' (ID: 33)
+2026-01-06 10:47:27,126 - __main__ - INFO -   Reassigning product ') RRA EGOROGIA ad' to 'Inne'
+2026-01-06 10:47:27,126 - __main__ - INFO -   Deleting category 33
+2026-01-06 10:47:27,126 - __main__ - INFO - Processing invalid category: '```python
+# Dostêpne kategorie
+categories = {
+ ...' (ID: 34)
+2026-01-06 10:47:27,127 - __main__ - INFO -   Reassigning product '7.TEMN TARMD ED G:2-247C)' to 'Inne'
+2026-01-06 10:47:27,127 - __main__ - INFO -   Deleting category 34
+2026-01-06 10:47:27,127 - __main__ - INFO - Processing invalid category: '```python
+# Przyk³adowy s³ownik z produktami i ic...' (ID: 35)
+2026-01-06 10:47:27,127 - __main__ - INFO -   Reassigning product 'Wim4'5' to 'Inne'
+2026-01-06 10:47:27,127 - __main__ - INFO -   Deleting category 35
+2026-01-06 10:47:27,127 - __main__ - INFO - Processing invalid category: '```python
+# Dostêpne kategorie produktów
+categor...' (ID: 36)
+2026-01-06 10:47:27,128 - __main__ - INFO -   Reassigning product 'BB IOSTZ QL Ip ToG8' to 'Inne'
+2026-01-06 10:47:27,128 - __main__ - INFO -   Deleting category 36
+2026-01-06 10:47:27,128 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 37)
+2026-01-06 10:47:27,128 - __main__ - INFO -   Reassigning product 'ORZES ZKWEA' to 'Inne'
+2026-01-06 10:47:27,128 - __main__ - INFO -   Deleting category 37
+2026-01-06 10:47:27,128 - __main__ - INFO - Processing invalid category: '```python
+# Przyk³adowy s³ownik z produktami i ic...' (ID: 38)
+2026-01-06 10:47:27,129 - __main__ - INFO -   Reassigning product 'FaU A' to 'Inne'
+2026-01-06 10:47:27,129 - __main__ - INFO -   Deleting category 38
+2026-01-06 10:47:27,129 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 39)
+2026-01-06 10:47:27,130 - __main__ - INFO -   Reassigning product 'Reklaméwka maza.' to 'Inne'
+2026-01-06 10:47:27,130 - __main__ - INFO -   Deleting category 39
+2026-01-06 10:47:27,130 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 40)
+2026-01-06 10:47:27,130 - __main__ - INFO -   Reassigning product 'Passata pomid.' to 'Inne'
+2026-01-06 10:47:27,131 - __main__ - INFO -   Deleting category 40
+2026-01-06 10:47:27,131 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 41)
+2026-01-06 10:47:27,131 - __main__ - INFO -   Reassigning product 'Tortilla Chipsy 1' to 'Inne'
+2026-01-06 10:47:27,131 - __main__ - INFO -   Deleting category 41
+2026-01-06 10:47:27,131 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 42)
+2026-01-06 10:47:27,132 - __main__ - INFO -   Reassigning product 'Reeva Zupa blysk.' to 'Inne'
+2026-01-06 10:47:27,132 - __main__ - INFO -   Deleting category 42
+2026-01-06 10:47:27,132 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 44)
+2026-01-06 10:47:27,133 - __main__ - INFO -   Reassigning product 'MMMAX czekolad.' to 'Inne'
+2026-01-06 10:47:27,133 - __main__ - INFO -   Deleting category 44
+2026-01-06 10:47:27,133 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 45)
+2026-01-06 10:47:27,133 - __main__ - INFO -   Reassigning product 'MMMAX Czekolad.' to 'Inne'
+2026-01-06 10:47:27,134 - __main__ - INFO -   Deleting category 45
+2026-01-06 10:47:27,134 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 47)
+2026-01-06 10:47:27,134 - __main__ - INFO -   Reassigning product 'Poétagietka 2' to 'Inne'
+2026-01-06 10:47:27,134 - __main__ - INFO -   Deleting category 47
+2026-01-06 10:47:27,134 - __main__ - INFO - Processing invalid category: '```python
+# Dane wejœciowe
+produkt = C 5%
+kateg...' (ID: 48)
+2026-01-06 10:47:27,135 - __main__ - INFO -   Reassigning product 'C 5%' to 'Inne'
+2026-01-06 10:47:27,135 - __main__ - INFO -   Deleting category 48
+2026-01-06 10:47:27,135 - __main__ - INFO - Processing invalid category: '```python
+# Dane wejœciowe
+produkt = B 8%
+kateg...' (ID: 49)
+2026-01-06 10:47:27,135 - __main__ - INFO -   Reassigning product 'B 8%' to 'Inne'
+2026-01-06 10:47:27,135 - __main__ - INFO -   Deleting category 49
+2026-01-06 10:47:27,135 - __main__ - INFO - Processing invalid category: '```python
+# Dane wejœciowe
+produkt = A 23%
+kate...' (ID: 50)
+2026-01-06 10:47:27,136 - __main__ - INFO -   Reassigning product 'A 23%' to 'Inne'
+2026-01-06 10:47:27,136 - __main__ - INFO -   Deleting category 50
+2026-01-06 10:47:27,136 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 51)
+2026-01-06 10:47:27,136 - __main__ - INFO -   Reassigning product 'Tortilla Chipsy 1 1 3,89' to 'Inne'
+2026-01-06 10:47:27,136 - __main__ - INFO -   Deleting category 51
+2026-01-06 10:47:27,136 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 52)
+2026-01-06 10:47:27,136 - __main__ - INFO -   Reassigning product 'Ciecierzyca 548g' to 'Inne'
+2026-01-06 10:47:27,137 - __main__ - INFO -   Deleting category 52
+2026-01-06 10:47:27,137 - __main__ - INFO - Processing invalid category: '```python
+# Definicja funkcji klasyfikuj¹cej prod...' (ID: 53)
+2026-01-06 10:47:27,137 - __main__ - INFO -   Reassigning product 'Przyprawa w miynkach 1%' to 'Inne'
+2026-01-06 10:47:27,137 - __main__ - INFO -   Deleting category 53
+2026-01-06 10:47:27,137 - __main__ - INFO - Processing invalid category: 'Pieczywo
+
+### Wyjaœnienie:
+- Butka grahamka to ...' (ID: 54)
+2026-01-06 10:47:27,138 - __main__ - INFO -   Reassigning product 'Butka grahamka' to 'Inne'
+2026-01-06 10:47:27,138 - __main__ - INFO -   Deleting category 54
+2026-01-06 10:47:27,138 - __main__ - INFO - Processing invalid category: 'Owoce i Warzywa
+
+### Wyjaœnienie:
+- Kiwi to owo...' (ID: 55)
+2026-01-06 10:47:27,139 - __main__ - INFO -   Reassigning product 'Kiwi szt.' to 'Inne'
+2026-01-06 10:47:27,139 - __main__ - INFO -   Deleting category 55
+2026-01-06 10:47:27,139 - __main__ - INFO - Processing invalid category: '```python
+# Dostêpne kategorie produktów
+categor...' (ID: 56)
+2026-01-06 10:47:27,139 - __main__ - INFO -   Reassigning product '95@_chipsy_mix -' to 'Inne'
+2026-01-06 10:47:27,139 - __main__ - INFO -   Deleting category 56
+2026-01-06 10:47:27,140 - __main__ - INFO - Processing invalid category: '```python
+# Dane wejœciowe
+produkt = PomKroNaszS...' (ID: 57)
+2026-01-06 10:47:27,140 - __main__ - INFO -   Reassigning product 'PomKroNaszSpiz240g Cc' to 'Inne'
+2026-01-06 10:47:27,140 - __main__ - INFO -   Deleting category 57
+2026-01-06 10:47:27,140 - __main__ - INFO - Processing invalid category: '```python
+# Definicja s³ownika z produktami i ich...' (ID: 58)
+2026-01-06 10:47:27,140 - __main__ - INFO -   Reassigning product 'PaprykaOstraKamis16 B' to 'Inne'
+2026-01-06 10:47:27,140 - __main__ - INFO -   Deleting category 58
+2026-01-06 10:47:27,141 - __main__ - INFO - Processing invalid category: '```python
+# Dostêpne kategorie i ich odpowiedniki...' (ID: 59)
+2026-01-06 10:47:27,141 - __main__ - INFO -   Reassigning product 'SoczewicaPloNa500g Cc' to 'Inne'
+2026-01-06 10:47:27,141 - __main__ - INFO -   Deleting category 59
+2026-01-06 10:47:27,141 - __main__ - INFO - Processing invalid category: '```python
+# Dostêpne kategorie
+categories = {
+ ...' (ID: 60)
+2026-01-06 10:47:27,142 - __main__ - INFO -   Reassigning product 'PapryKa Stodka apm! C' to 'Inne'
+2026-01-06 10:47:27,142 - __main__ - INFO -   Deleting category 60
+2026-01-06 10:47:27,160 - __main__ - INFO - Category cleanup completed successfully.
