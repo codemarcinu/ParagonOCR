@@ -10,7 +10,8 @@ import {
   Sun,
   Moon,
   Menu,
-  X
+  X,
+  PackageOpen
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
@@ -24,6 +25,7 @@ const navigation = [
   { name: 'Czat AI', href: '/chat', icon: MessageSquare },
   { name: 'Analityka', href: '/analytics', icon: TrendingUp },
   { name: 'Listy Zakupów', href: '/shopping-list', icon: ListChecks },
+  { name: 'Spiżarnia', href: '/pantry', icon: PackageOpen },
 ];
 
 export function Navbar() {

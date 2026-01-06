@@ -17,6 +17,7 @@ const Products = lazy(() => import('./pages/Products').then(m => ({ default: m.P
 const Chat = lazy(() => import('./pages/Chat').then(m => ({ default: m.Chat })));
 const Analytics = lazy(() => import('./pages/Analytics').then(m => ({ default: m.Analytics })));
 const ShoppingList = lazy(() => import('./pages/ShoppingList').then(m => ({ default: m.ShoppingList })));
+const Pantry = lazy(() => import('./pages/Pantry').then(m => ({ default: m.Pantry })));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -59,6 +60,7 @@ function App() {
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/shopping-list" element={<ShoppingList />} />
+                <Route path="/pantry" element={<Pantry />} />
               </Route>
             </Route>
           </Routes>

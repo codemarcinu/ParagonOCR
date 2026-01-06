@@ -125,3 +125,22 @@ export interface UserResponse {
   created_at: string;
 }
 
+
+// Pantry types
+export type PantryStatus = 'IN_STOCK' | 'CONSUMED' | 'WASTED';
+
+export interface PantryItemResponse {
+  id: number;
+  product: {
+    id: number;
+    name: string;
+    normalized_name: string;
+    unit: string | null;
+  };
+  quantity: number;
+  unit: string | null;
+  purchase_date: string;
+  expiration_date: string | null; // Data w formacie YYYY-MM-DD
+  status: PantryStatus;
+  days_until_expiration?: number; // Opcjonalnie, jeśli backend to wylicza, lub policzymy na froncie
+}

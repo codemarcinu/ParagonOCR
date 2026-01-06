@@ -9,7 +9,9 @@ import type {
   CategoryResponse,
   SpendingSummaryResponse,
   LoginResponse,
-  UserResponse
+  UserResponse,
+  PantryItemResponse,
+  PantryStatus
 } from '../types/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -159,6 +161,7 @@ export interface PasskeyRegistrationOptionsResponse {
 }
 
 export interface PasskeyRegistrationVerifyRequest {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   credential: any; // WebAuthn credential object
   challenge: string;
 }
@@ -180,6 +183,7 @@ export interface PasskeyAuthenticationOptionsResponse {
 }
 
 export interface PasskeyAuthenticationVerifyRequest {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   credential: any; // WebAuthn credential object
   challenge: string;
 }
@@ -229,6 +233,31 @@ export const listPasskeys = async (): Promise<WebAuthnKeyResponse[]> => {
 
 export const deletePasskey = async (credentialId: number): Promise<void> => {
   await api.delete(`/auth/passkey/credentials/${credentialId}`);
+};
+
+// --- PANTRY / SPIŻARNIA API ---
+
+export const fetchPantryItems = async (): Promise<PantryItemResponse[]> => {
+  const response = await api.get('/pantry');
+  return response.data;
+};
+
+export const updatePantryItem = async (
+  id: number,
+  data: { quantity?: number; status?: PantryStatus }
+): Promise<PantryItemResponse> => {
+  const response = await api.patch(`/pantry/${id}`, data);
+  return response.data;
+};
+
+// Funkcja pomocnicza "Zjedz to"
+export const consumeItem = async (id: number): Promise<PantryItemResponse> => {
+  return updatePantryItem(id, { status: 'CONSUMED', quantity: 0 });
+};
+
+// Funkcja pomocnicza "Wyrzuć to" (zmarnowane)
+export const wasteItem = async (id: number): Promise<PantryItemResponse> => {
+  return updatePantryItem(id, { status: 'WASTED', quantity: 0 });
 };
 
 export default api;
