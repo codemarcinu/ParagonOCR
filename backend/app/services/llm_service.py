@@ -220,25 +220,25 @@ def create_receipt_parsing_prompt(ocr_text: str) -> str:
     Create prompt for receipt parsing optimized for Polish receipts.
     Simplified to focus on pattern recognition rather than verification.
     """
-    return f"""Jesteś wyspecjalizowanym parserem paragonów. Twoim jedynym zadaniem jest konwersja tekstu OCR na JSON.
+    return f"""Jesteś asystentem AI specjalizującym się w analizie polskich paragonów sklepowych (OCR). 
+Twoim zadaniem jest wyciągnięcie ustrukturyzowanych danych z surowego tekstu paragonu.
 
-ZASADY:
-1. Szukaj OSTATECZNEJ ceny (po rabatach). Często na paragonach (np. Lidl/Biedronka) podana jest najpierw cena regularna, a potem rabat.
-2. Jeśli widzisz rabat w osobnej linii (np. "Rabat", "Upust", "Promocja"), potraktuj go jako osobny produkt z UJEMNĄ ceną.
-3. Jeśli cena jest podana w wielu miejscach, wybierz tę, która jest składową "DO ZAPŁATY".
-4. Ignoruj "gazetkowe" ceny promocyjne "przy zakupie 2 sztuk", jeśli nie zostały naliczone.
-5. Jeśli widzisz pozycję z ceną, ale bez nazwy - pomiń ją.
-6. Nazwa Sklepu - wyodrębnij ją z nagłówka.
-7. Data - format YYYY-MM-DD.
+Zasady krytyczne:
+1. Wyjście MUSI być poprawnym formatem JSON.
+2. Pola wymagane: "shop_name" (string), "date" (YYYY-MM-DD), "total_amount" (float), "items" (list).
+3. Dla każdego produktu w liście "items": {{"name": string, "quantity": float, "price": float, "total_price": float}}.
+4. OBSŁUGA RABATÓW (Ważne dla Biedronka/Lidl):
+   - Jeśli widzisz linię "Rabat", "Upust" lub ujemną kwotę pod produktem, odejmij ją od ceny produktu powyżej LUB zapisz jako osobny produkt z ujemną ceną, jeśli nie jesteś pewien przypisania.
+   - Ignoruj linie typu "Sprzedaż opodatkowana", "Suma PLN", "PTU".
+5. Zamień wszystkie przecinki w liczbach na kropki (np. "4,99" -> 4.99).
+6. Nazwa sklepu: Jeśli nie jest jasna, szukaj słów kluczowych: "Biedronka", "Jeronimo Martins", "Lidl", "Kaufland", "Auchan".
 
-WEJŚCIE OCR:
----
+Tekst do analizy:
 {ocr_text}
----
 
 WYJŚCIE JSON:
 {{
-  "shop": "Nazwa sklepu (lub null)",
+  "shop": "Nazwa sklepu",
   "date": "2025-01-01",
   "items": [
     {{
@@ -246,15 +246,9 @@ WYJŚCIE JSON:
       "quantity": 1.0,
       "unit_price": 3.99,
       "total_price": 3.99
-    }},
-    {{
-      "name": "Rabat spec.",
-      "quantity": 1.0,
-      "unit_price": -0.50,
-      "total_price": -0.50
     }}
   ],
-  "total": 123.45 (musi być sumą total_price wszystkich pozycji)
+  "total": 3.99
 }}
 """
 

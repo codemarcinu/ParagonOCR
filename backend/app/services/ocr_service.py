@@ -90,10 +90,10 @@ def preprocess_image(image_path: str) -> Image.Image:
         gray = cv2.bilateralFilter(gray, 9, 75, 75)
         
         # Adaptive Thresholding is often better for receipts with shadows/uneven light
-        # Block size 31, C=10 seems robust for documents
+        # User suggested Block size 11, C=2 for Lidl receipts
         thresh = cv2.adaptiveThreshold(
             gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
-            cv2.THRESH_BINARY, 31, 12
+            cv2.THRESH_BINARY, 11, 2
         )
         
     # 3. Deskewing
@@ -155,7 +155,8 @@ def extract_from_pdf(file_path: str) -> OCRResult:
                     text_content += extracted + "\n"
             
             # If we got meaningful text, return it immediately
-            if len(text_content.strip()) > 20:
+            if len(text_content.strip()) > 50:
+                print("DEBUG: Wykryto e-paragon, używam ekstrakcji tekstu zamiast OCR.")
                 return OCRResult(
                     text=text_content.strip(),
                     confidence=1.0, # Native text is exact
