@@ -1,7 +1,7 @@
 import logging
 import pytesseract
 from PIL import Image, ImageEnhance, ImageFilter
-from pdf2image import convert_from_path
+from pdf2image import convert_from_path, convert_from_bytes
 import pypdf
 import io
 import cv2
@@ -11,9 +11,10 @@ logger = logging.getLogger(__name__)
 
 class OCRService:
     def __init__(self):
-        # Upewnij się, że ścieżka do tesseract jest poprawna w kontenerze/systemie
-        # pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract' 
-        pass
+        from app.config import settings
+        # Set tesseract command from config
+        if settings.TESSERACT_CMD:
+            pytesseract.pytesseract.tesseract_cmd = settings.TESSERACT_CMD
 
     async def extract_text(self, file_content: bytes, filename: str) -> str:
         """
@@ -60,7 +61,7 @@ class OCRService:
         # Krok 2: Fallback do renderowania obrazów i OCR (dla skanów)
         logger.info("Uruchamiam pełny OCR (renderowanie obrazu z PDF)...")
         try:
-            images = convert_from_path(io.BytesIO(file_content)) # Wymaga poppler-utils w systemie
+            images = convert_from_bytes(file_content) # Wymaga poppler-utils w systemie
             full_text = ""
             for i, image in enumerate(images):
                 # Preprocessing dla każdej strony
