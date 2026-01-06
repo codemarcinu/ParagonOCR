@@ -1,6 +1,7 @@
 import os
 import io
-from google.cloud import vision
+# [LAZY LOAD] Removed top-level import
+# from google.cloud import vision
 from app.config import settings
 
 # Setup Google Cloud Credential path
@@ -15,6 +16,9 @@ class OCRService:
         Obsługuje JPG/PNG bezpośrednio.
         PDF konwertuje w locie na obraz (pierwszą stronę).
         """
+        # [LAZY LOAD] Import here
+        from google.cloud import vision
+
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"File not found: {file_path}")
 

@@ -121,7 +121,7 @@ export const useReceiptStore = create<ReceiptStore>((set) => ({
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const response = await api.post('/receipts/upload', formData, {
+      const response = await api.post('/receipts/analyze', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         }

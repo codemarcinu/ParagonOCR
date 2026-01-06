@@ -7,8 +7,9 @@ import logging
 import json
 from typing import List, Dict, Any, Optional
 from pathlib import Path
-import numpy as np
-from sentence_transformers import SentenceTransformer
+# [LAZY LOAD] Removed top-level import of numpy and sentence_transformers
+# import numpy as np
+# from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
 
 from app.models.receipt import Receipt, ReceiptItem
@@ -28,23 +29,34 @@ class RAGService:
         return cls._instance
 
     def __init__(self):
-        if self.initialized:
+        self.model = None
+        # Don't load on init, load on first use or explicitly
+        pass
+
+    def _ensure_model_loaded(self):
+        """Lazy load the model only when needed."""
+        if self.initialized and self.model is not None:
             return
 
-        logger.info("Initializing RAG Service...")
+        logger.info("Lazy loading RAG Model (SentenceTransformer)...")
         try:
+            # [LAZY LOAD] Import here
+            from sentence_transformers import SentenceTransformer
+            
             # Load model - localized for Polish if possible, otherwise multilingual
-            # 'paraphrase-multilingual-MiniLM-L12-v2' is good for multi-language
             self.model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
             self.initialized = True
             logger.info("RAG Service initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize RAG Service: {e}")
             self.initialized = False
+            self.model = None
 
     def generate_embedding(self, text: str) -> List[float]:
         """Generate embedding for a given text."""
-        if not self.initialized:
+        self._ensure_model_loaded()
+        
+        if not self.initialized or self.model is None:
             return []
 
         try:
@@ -59,11 +71,6 @@ class RAGService:
     ) -> List[Dict[str, Any]]:
         """
         Semantic search over receipts.
-        Note: In a production env, use a vector DB (Chroma, Qdrant).
-        For this MVP/Local version, checking receipt text content + simple keyword match
-        enhanced with basic semantic understanding if we implement vector storage.
-
-        For now, implementing advanced text search as placeholder for full vector search.
         """
         # TODO: Implement vector storage for receipts
         # Current implementation: Improved SQL search

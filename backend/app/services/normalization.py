@@ -8,11 +8,8 @@ from typing import Optional, Tuple
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
-try:
-    from sentence_transformers import SentenceTransformer, util
-except ImportError:
-    SentenceTransformer = None
-    util = None
+# Lazy imports used instead to prevent startup blockage
+# from sentence_transformers import SentenceTransformer, util
 
 from app.models.product import Product, ProductAlias
 from app.models.category import Category
@@ -26,14 +23,16 @@ _embedding_model = None
 
 def get_embedding_model():
     global _embedding_model
-    if _embedding_model is None and SentenceTransformer:
+    if _embedding_model is None:
         try:
             logger.info("Loading sentence-transformers model...")
+            from sentence_transformers import SentenceTransformer
             # Using a lightweight multilingual model good for Polish
             _embedding_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
             logger.info("Model loaded.")
         except Exception as e:
             logger.error(f"Failed to load embedding model: {e}")
+            return None
     return _embedding_model
 
 # Standard Unit Map (Polish)
@@ -143,6 +142,7 @@ def normalize_product_name(db: Session, raw_name: str, shop_id: Optional[int] = 
             
             # Find closest match
             # util.cos_sim returns query x corpus matrix
+            from sentence_transformers import util
             hits = util.semantic_search(query_embedding, corpus_embeddings, top_k=1)
             
             if hits and hits[0]:
