@@ -16,14 +16,15 @@ class Settings(BaseSettings):
     # API Configuration
     API_V1_PREFIX: str = "/api/v1"
     CORS_ORIGINS: List[str] = Field(
-        # Dodajemy port 5174, 5176 (i kolejne na zapas)
+        # Vite dev server ports and common development ports
         default=[
+            "http://localhost:3000",
             "http://localhost:5173", 
-            "http://localhost:3000", 
             "http://localhost:5174", 
             "http://localhost:5175",
             "http://localhost:5176",
-            "http://localhost:5177"
+            "http://localhost:5177",
+            "http://localhost:5179",  # Current Vite port
         ],
         description="Allowed CORS origins",
     )
