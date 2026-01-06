@@ -1,105 +1,40 @@
-import logging
-import pytesseract
-from PIL import Image
-from pdf2image import convert_from_path
-import pypdf
+import os
 import io
-import cv2
-import numpy as np
+from google.cloud import vision
+from app.config import settings
 
-logger = logging.getLogger(__name__)
+# Setup Google Cloud Credential path
+KEY_PATH = os.path.join(os.getcwd(), "gcp_key.json")
+if os.path.exists(KEY_PATH):
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = KEY_PATH
 
 class OCRService:
-    def __init__(self):
-        # Na WSL/Linux ścieżki są zazwyczaj standardowe, nie trzeba definiować tesseract_cmd
-        pass
+    def parse_receipt(self, file_path: str) -> str:
+        """
+        Sends image to Google Cloud Vision and returns detected text.
+        """
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
 
-    async def extract_text(self, file_content: bytes, filename: str) -> str:
-        """
-        Główna metoda orkiestrująca OCR.
-        """
+        # Check for credentials
+        if "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ and not os.path.exists(KEY_PATH):
+             print("WARNING: GOOGLE_APPLICATION_CREDENTIALS not set and gcp_key.json not found.")
+
         try:
-            filename = filename.lower()
-            
-            if filename.endswith('.pdf'):
-                return await self._process_pdf_hybrid(file_content)
-            elif filename.endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.heic')):
-                return await self._process_image(file_content)
-            else:
-                logger.warning(f"Nieznany format pliku: {filename}, próba potraktowania jako obraz.")
-                return await self._process_image(file_content)
-
+            client = vision.ImageAnnotatorClient()
         except Exception as e:
-            logger.error(f"Krytyczny błąd OCR dla {filename}: {str(e)}")
-            raise
+            raise RuntimeError(f"Failed to initialize Google Cloud Vision client. Ensure 'gcp_key.json' is present. Error: {str(e)}")
 
-    async def _process_pdf_hybrid(self, file_content: bytes) -> str:
-        """
-        Strategia: Najpierw tekst cyfrowy (pypdf). Jak go mało -> renderowanie obrazu (OCR).
-        """
-        # 1. Próba Text Extraction (Idealne dla e-paragonów Biedronka/Kaufland)
-        try:
-            with io.BytesIO(file_content) as pdf_file:
-                reader = pypdf.PdfReader(pdf_file)
-                text_content = ""
-                for page in reader.pages:
-                    extracted = page.extract_text()
-                    if extracted:
-                        text_content += extracted + "\n"
-                
-                # Heurystyka: Jeśli mamy > 50 znaków sensownego tekstu, ufamy PDF-owi.
-                # To eliminuje potrzebę wolnego OCR dla czystych plików.
-                if len(text_content.strip()) > 50:
-                    logger.info("OCR: Wykryto warstwę tekstową PDF (e-paragon). Pomijam Tesseract.")
-                    return text_content
-        except Exception as e:
-            logger.warning(f"OCR: Błąd pypdf: {e}. Przechodzę do renderowania obrazu.")
+        with io.open(file_path, 'rb') as image_file:
+            content = image_file.read()
 
-        # 2. Fallback: Renderowanie do obrazka (Dla skanów np. Auchan)
-        logger.info("OCR: Uruchamiam renderowanie PDF do obrazów (skan)...")
-        try:
-            # convert_from_bytes wymaga poppler-utils zainstalowanego w systemie (apt install poppler-utils)
-            images = convert_from_path(io.BytesIO(file_content)) 
-            full_text = ""
-            for image in images:
-                processed_img = self._preprocess_image_cv2(image)
-                # config psm 4 = Assume a single column of text of variable sizes (dobre dla paragonów)
-                text = pytesseract.image_to_string(processed_img, lang='pol+eng', config='--psm 4')
-                full_text += text + "\n"
-            return full_text
-        except Exception as e:
-            logger.error(f"OCR: Błąd przetwarzania obrazów PDF: {e}")
-            raise ValueError("Nie udało się przetworzyć PDF ani jako tekstu, ani jako obrazu.")
+        image = vision.Image(content=content)
 
-    async def _process_image(self, file_content: bytes) -> str:
-        """
-        Obsługa plików graficznych (Lidl).
-        """
-        image = Image.open(io.BytesIO(file_content))
-        processed_image = self._preprocess_image_cv2(image)
-        return pytesseract.image_to_string(processed_image, lang='pol+eng', config='--psm 4')
-
-    def _preprocess_image_cv2(self, pil_image):
-        """
-        CV2 Magic: Naprawia oświetlenie, cienie i zagięcia (Adaptive Threshold).
-        Kluczowe dla zdjęć z telefonu.
-        """
-        img_np = np.array(pil_image)
+        # DOCUMENT_TEXT_DETECTION is optimized for dense text (receipts, documents)
+        response = client.document_text_detection(image=image)
         
-        # Konwersja kolorów
-        if len(img_np.shape) == 3:
-            if img_np.shape[2] == 4: # RGBA
-                img_np = cv2.cvtColor(img_np, cv2.COLOR_RGBA2RGB)
-            gray = cv2.cvtColor(img_np, cv2.COLOR_RGB2GRAY)
-        else:
-            gray = img_np
+        if response.error.message:
+            raise Exception(f'GCP Vision Error: {response.error.message}')
 
-        # Odszumianie (zachowuje krawędzie liter, usuwa ziarno)
-        denoised = cv2.fastNlMeansDenoising(gray, None, 10, 7, 21)
-
-        # Progowanie adaptacyjne - zamienia na czarno-białe (binarne), radzi sobie z cieniami
-        binary = cv2.adaptiveThreshold(
-            denoised, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
-        )
-
-        return Image.fromarray(binary)
+        full_text = response.full_text_annotation.text
+        return full_text

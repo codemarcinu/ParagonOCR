@@ -69,12 +69,10 @@ async def run_test():
         
         # 1. ETAP OCR
         try:
-            print("   1️⃣  OCR / Ekstrakcja tekstu...", end="", flush=True)
-            with open(file_path, "rb") as f:
-                content = f.read()
-            
             # Wywołanie Twojego serwisu OCR
-            raw_text = await ocr_service.extract_text(content, filename)
+            # Google Cloud Vision Client is synchronous and takes a file path
+            print("   1️⃣  OCR / Ekstrakcja tekstu...", end="", flush=True)
+            raw_text = ocr_service.parse_receipt(str(file_path))
             
             ocr_time = time() - start_time
             print(f" OK ({ocr_time:.2f}s)")

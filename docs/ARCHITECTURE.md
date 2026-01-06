@@ -16,8 +16,8 @@ ParagonOCR is a full-stack web application designed for receipt digitization, ex
 - **Database**: SQLite (with SQLAlchemy & Alembic)
 - **Task Processing**: Background tasks for OCR and LLM processing
 
-### AI Services (Local)
-- **OCR Engine**: Tesseract OCR (with specialized image preprocessing)
+### AI Services (Hybrid)
+- **OCR Engine**: Google Cloud Vision API (Enterprise-grade text detection)
 - **LLM**: Ollama (running 'Bielik' or similar models) for:
   - Product normalization
   - Category classification
@@ -26,12 +26,10 @@ ParagonOCR is a full-stack web application designed for receipt digitization, ex
 ## Data Flow
 
 1. **Upload**: User uploads an image/PDF.
-2. **Preprocessing**: Image is corrected (Upscaling, Adaptive Thresholding, Deskewing).
-3. **OCR**: Tesseract extracts raw text.
-4. **Parsing**:
-   - Helper scripts parse date/total.
-   - LLM extracts structured items (Name, Quantity, Price).
-5. **Normalization**:
+2. **OCR**: Google Cloud Vision extracts raw text (via API).
+3. **Parsing**:
+   - LLM extracts structured items (Name, Quantity, Price) from the text.
+4. **Normalization**:
    - Product names are normalized (e.g., "MLEKO" -> "Mleko").
    - Categories are assigned.
 6. **Storage**: Data is saved to SQLite.

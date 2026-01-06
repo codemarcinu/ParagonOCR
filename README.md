@@ -1,6 +1,6 @@
 # 🧾 ParagonOCR Web Edition
 
-**ParagonOCR Web Edition** to nowoczesna, pełnowymiarowa aplikacja webowa typu full-stack, stworzona do cyfryzacji paragonów, zarządzania domowym budżetem oraz inteligentnego planowania posiłków (AI Meal Planning). System wykorzystuje zaawansowane technologie: FastAPI, React 19 oraz lokalne modele sztucznej inteligencji (Ollama + Tesseract), zapewniając prywatność i niezależność od chmury.
+**ParagonOCR Web Edition** to nowoczesna, pełnowymiarowa aplikacja webowa typu full-stack, stworzona do cyfryzacji paragonów, zarządzania domowym budżetem oraz inteligentnego planowania posiłków (AI Meal Planning). System wykorzystuje zaawansowane technologie: FastAPI, React 19 oraz model hybrydowy AI (Google Cloud Vision OCR + lokalny Ollama/Bielik), zapewniając wysoką skuteczność i prywatność analizy danych.
 
 [![Version](https://img.shields.io/badge/version-1.0.0--beta-blue)](https://github.com/codemarcinu/paragonocr)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://python.org)
@@ -24,7 +24,7 @@ Dzięki wykorzystaniu **lokalnych modeli LLM (np. Bielik)**, Twoje dane finansow
 ## ✨ Kluczowe Funkcjonalności
 
 ### 📄 Przetwarzanie Paragonów (OCR & AI)
-- **Wieloczęściowy Pipeline:** Upload (PDF/IMG) -> OCR (Tesseract) -> Normalizacja -> AI Parsing (Ollama).
+- **Wieloczęściowy Pipeline:** Upload (JPG/PDF) -> Cloud OCR (Google Vision) -> AI Parsing (Ollama/Bielik).
 - **Czyszczenie Danych:** Automatyczna korekta błędów OCR, mapowanie nazw produktów (np. "MLEKO 3.2%" -> "Mleko") i rozpoznawanie sklepów.
 - **Czas Rzeczywisty:** Podgląd postępu przetwarzania dzięki WebSocket.
 
@@ -55,7 +55,7 @@ Wbudowany czat z modelem językowym, który ma dostęp do Twojej bazy produktów
 - **Python 3.10+**
 - **Node.js 18+**
 - **Ollama** z modelem `SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M` (lub innym)
-- **Tesseract OCR** (zainstalowany w systemie)
+- **Google Cloud Platform Project** (z włączonym Vision API i plikiem `gcp_key.json`)
 
 ### Instalacja (5 minut)
 
@@ -100,8 +100,7 @@ graph TD
 **Stos Technologiczny:**
 - **Backend:** FastAPI, SQLAlchemy, Alembic, Pydantic
 - **Frontend:** React, TypeScript, Vite, TailwindCSS, Zustand, Recharts
-- **AI/ML:** LangChain (konceptualnie), SentenceTransformers (RAG/Embeddings), Tesseract
-- **Inne:** WebAuthn (Logowanie kluczami Passkeys)
+- **AI/ML:** LangChain (konceptualnie), SentenceTransformers (RAG/Embeddings), Google Cloud Vision (OCR)
 
 ---
 

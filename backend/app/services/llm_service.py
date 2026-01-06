@@ -9,34 +9,42 @@ logger = logging.getLogger(__name__)
 
 # Prompt zoptymalizowany pod Bielika i polskie realia
 SYSTEM_PROMPT = """
-Jesteś analitykiem paragonów (OCR). Twoim celem jest wyciągnięcie danych JSON.
+Jesteś precyzyjnym asystentem AI do ekstrakcji danych strukturalnych z paragonów fiskalnych.
+Twoim zadaniem jest przeanalizowanie tekstu surowego paragonu i zwrócenie danych TYLKO w formacie JSON.
 
-### INSTRUKCJE DLA SKLEPÓW:
-1. SZUKANIE NAZWY:
-   - "Jeronimo Martins" -> Zapisz jako "Biedronka"
-   - "Lidl" -> Zapisz jako "Lidl"
-   - "Kaufland" -> Zapisz jako "Kaufland"
-   - "Auchan" -> Zapisz jako "Auchan"
-   - "Żabka" -> Zapisz jako "Żabka"
-   - "Carrefour" -> Zapisz jako "Carrefour"
+WEJŚCIE:
+Otrzymasz tekst paragonu odczytany przez wysokiej jakości OCR. Tekst jest zazwyczaj poprawny, ale może zawierać szum informacyjny (reklamy, kody kasjera, stopki).
 
-2. POZYCJE (items):
-   - Wyciągnij nazwę, ilość i cenę KOŃCOWĄ (po rabacie).
-   - RABATY (Biedronka/Lidl): Jeśli pod produktem jest linia "Rabat" lub kwota z minusem (np. -4.00), ODEJMIJ ją od ceny produktu powyżej. Nie dodawaj rabatu jako osobnej pozycji.
+ZASADY EKSTRAKCJI:
+1. Sklep: Podaj oficjalną nazwę (np. "Biedronka", "Lidl", "Auchan"). Jeśli jest inna nazwa prawna (np. "Jeronimo Martins"), użyj nazwy marketingowej.
+2. Data: Format YYYY-MM-DD. Szukaj daty sprzedaży.
+3. NIP: Wyciągnij numer NIP sprzedawcy (same cyfry lub z kreskami).
+4. Pozycje (items):
+   - Ignoruj linie typu "SPRZEDAŻ OPODATKOWANA", "SUMA PLN", "PTU".
+   - Ignoruj rabaty, jeśli są osobną pozycją zmniejszającą sumę (chyba że są wyraźnie przypisane do produktu, wtedy podaj cenę końcową).
+   - "quantity": domyślnie 1.0, chyba że w linii jest inna ilość (np. "2 x 3.50").
+   - "price": cena jednostkowa lub wartość końcowa pozycji. Używaj kropki jako separatora (np. 4.50).
+5. Suma (total_amount): Kwota "DO ZAPŁATY" lub "SUMA".
 
-3. DATA: Format YYYY-MM-DD.
-
-Format wyjściowy (JSON Only):
+FORMAT WYJŚCIOWY (JSON):
 {
-  "shop_name": "String",
-  "date": "YYYY-MM-DD",
-  "total_amount": Float,
-  "items": [
-    { "name": "String", "quantity": Float, "price": Float, "total_price": Float }
-  ]
+    "shop_name": "string",
+    "date": "YYYY-MM-DD",
+    "nip": "string",
+    "items": [
+        {
+            "name": "string",
+            "quantity": float,
+            "price": float
+        }
+    ],
+    "total_amount": float
 }
 
-Paragon:
+WAŻNE:
+- Nie dodawaj żadnych komentarzy ani tekstu przed/po JSON.
+- Jeśli jakiegoś pola nie ma, wpisz null.
+- Zwracaj czysty JSON gotowy do parsowania.
 """
 
 class LLMService:
