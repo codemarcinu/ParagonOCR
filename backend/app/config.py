@@ -45,7 +45,8 @@ class Settings(BaseSettings):
         default=False, description="Use GPU for OCR (if available)"
     )
     TESSERACT_CMD: str = Field(
-        default="tesseract", description="Path to tesseract executable"
+        default="tesseract",
+        description="Path to tesseract executable (default 'tesseract' for system PATH)"
     )
     POPPLER_PATH: str | None = Field(
         default=None, description="Path to poppler bin directory (for PDF conversion)"
@@ -59,7 +60,7 @@ class Settings(BaseSettings):
         default=300, description="Ollama request timeout in seconds"
     )
     TEXT_MODEL: str = Field(
-        default="SpeakLeash/bielik-11b-v2.3-instruct:Q5_K_M",
+        default="bielik:latest",
         description="Ollama text model for receipt parsing",
     )
     VISION_MODEL: str = Field(
