@@ -15,6 +15,8 @@ from urllib.parse import urlparse
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status, Request
 
+logger = logging.getLogger(__name__)
+
 try:
     # Try py_webauthn first (more common)
     from webauthn import (
@@ -44,8 +46,6 @@ except ImportError:
 from app.models.user import User
 from app.models.webauthn_key import WebAuthnKey
 from app.config import settings
-
-logger = logging.getLogger(__name__)
 
 # Challenge storage (in production, use Redis or database)
 _challenge_store: Dict[str, Dict[str, Any]] = {}

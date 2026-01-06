@@ -242,7 +242,9 @@ def classify_product_category(db: Session, product: Product) -> Optional[int]:
             - Alkohol
             - Inne
             
-            Zwróć TYLKO nazwę kategorii, nic więcej.
+            Zwróć TYLKO nazwę kategorii.
+            NIE zwracaj kodu Python.
+            NIE zwracaj definicji funkcji.
             """
             
             response = ollama_client.generate(
@@ -252,8 +254,8 @@ def classify_product_category(db: Session, product: Product) -> Optional[int]:
             )
             cat_name = response.get("response", "").strip()
             
-            # Cleanup response (remove quotes, dots)
-            cat_name = cat_name.replace('"', '').replace('.', '').strip()
+            # Cleanup response (remove quotes, dots, code blocks)
+            cat_name = cat_name.replace('"', '').replace('.', '').replace('```python', '').replace('```', '').strip()
 
             # Strict validation against allowed categories
             allowed_categories = list(CATEGORY_KEYWORDS.keys()) + ["Inne"]

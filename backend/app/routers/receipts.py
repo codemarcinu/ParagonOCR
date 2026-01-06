@@ -355,6 +355,12 @@ async def process_receipt_async(receipt_id: int, file_path: str, text_content: O
                         
                         logger.info(f"Classified new product '{product.normalized_name}' -> Category ID: {cat_id}")
 
+                # Get confidence safely
+                if source_type == "regex":
+                    conf = getattr(item_data, "confidence", 1.0) or 1.0
+                else:
+                    conf = item_data.get("confidence", 0.9)
+
                 # Create receipt item
                 receipt_item = ReceiptItem(
                     receipt_id=receipt.id,
@@ -364,7 +370,7 @@ async def process_receipt_async(receipt_id: int, file_path: str, text_content: O
                     unit=unit,
                     unit_price=unit_price,
                     total_price=total_price,
-                    confidence=item_data.get("confidence", 1.0)
+                    confidence=conf
                 )
                 db.add(receipt_item)
             
