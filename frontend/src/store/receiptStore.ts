@@ -5,20 +5,10 @@
 import { create } from 'zustand';
 import api from '@/lib/api';
 import { showSuccess, showError } from '@/lib/toast';
+import type { ReceiptResponse } from '@/types/api';
 
-export interface Receipt {
-  id: number;
-  shop: {
-    id: number;
-    name: string;
-    location: string | null;
-  } | null;
-  purchase_date: string | null;
-  purchase_time: string | null;
-  total_amount: number;
-  items_count: number;
-  created_at: string | null;
-}
+// Use shared type
+export type Receipt = ReceiptResponse;
 
 interface ReceiptStore {
   receipts: Receipt[];
@@ -42,7 +32,7 @@ interface ReceiptStore {
   setFilters: (filters: { shop_id?: number; start_date?: string; end_date?: string }) => void;
   resetFilters: () => void;
   setPage: (page: number) => void;
-  uploadReceipt: (file: File) => Promise<{ receipt_id: number; status: string }>;
+  uploadReceipt: (file: File) => Promise<Receipt>;
   updateReceipt: (id: number, data: Partial<Receipt>) => Promise<void>;
   clearError: () => void;
 }

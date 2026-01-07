@@ -27,6 +27,7 @@ def test_pantry_logic():
         # 1. Create Mock Receipt
         print("1. Creating Mock Receipt...")
         receipt = Receipt(
+            user_id=1,
             shop_id=1, # Assuming shop 1 exists or is created
             purchase_date=date.today(),
             total_amount=10.0,

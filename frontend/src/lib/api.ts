@@ -60,8 +60,8 @@ export const fetchSummary = async (): Promise<SpendingSummaryResponse> => {
 
 export const fetchRecentReceipts = async (limit: number = 5): Promise<ReceiptResponse[]> => {
   const response = await api.get(`/receipts?limit=${limit}`);
-  // Backend returns { receipts: [...], total: ... }
-  return response.data.receipts;
+  // Backend returns List[ReceiptResponse] directly
+  return response.data;
 };
 
 export interface ReceiptListParams {

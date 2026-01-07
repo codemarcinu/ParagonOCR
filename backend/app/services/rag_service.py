@@ -109,6 +109,33 @@ class RAGService:
             )
             seen_receipts.add(receipt.receipt_id)
 
+        # 2. Search in Shops (Receipts)
+        # Find receipts where shop name matches query
+        from app.models.shop import Shop
+        
+        receipts_by_shop = (
+            db.query(Receipt)
+            .join(Shop)
+            .filter(Shop.name.ilike(f"%{query}%"))
+            .order_by(Receipt.purchase_date.desc())
+            .limit(limit)
+            .all()
+        )
+        
+        for receipt in receipts_by_shop:
+             if receipt.id in seen_receipts: continue
+             results.append({
+                 "type": "receipt",
+                 "score": 0.85,
+                 "content": f"Receipt from {receipt.shop.name} on {receipt.purchase_date}. Total: {receipt.total_amount}",
+                 "metadata": {
+                        "receipt_id": receipt.id,
+                        "date": receipt.purchase_date,
+                        "price": receipt.total_amount,
+                 }
+             })
+             seen_receipts.add(receipt.id)
+
         return results[:limit]
 
     def get_context_for_chat(self, query: str, db: Session) -> str:
