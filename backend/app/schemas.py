@@ -128,11 +128,24 @@ class ReceiptCreate(ReceiptBase):
 
 class ReceiptResponse(ReceiptBase):
     id: int
+    status: str
     shop: Optional[ShopResponse] = None
     items: List[ReceiptItemResponse] = []
     source_file: str
     created_at: datetime
     ocr_text: Optional[str] = None
+    items_count: int = 0
+
+    @model_validator(mode='before')
+    @classmethod
+    def calculate_items_count(cls, data):
+        if hasattr(data, 'items'):
+             if isinstance(data, dict):
+                 data['items_count'] = len(data.get('items', []))
+             else:
+                 # SQLAlchemy object
+                 setattr(data, 'items_count', len(data.items))
+        return data
 
     class Config:
         from_attributes = True

@@ -146,7 +146,18 @@ export function ReceiptUploader() {
 
       // Upload file
       const result = await uploadReceipt(file);
-      await monitorProcessing(result.receipt_id);
+      console.log('Upload result:', result);
+      
+      if (result && result.id) {
+          await monitorProcessing(result.id);
+      } else {
+          console.error('Upload result missing ID:', result);
+          setStage({
+              stage: 'error',
+              progress: 0,
+              message: 'Błąd: Serwer nie zwrócił ID paragonu.'
+          });
+      }
 
     } catch (err) {
       setStage({

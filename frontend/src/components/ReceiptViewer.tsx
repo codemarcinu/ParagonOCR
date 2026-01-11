@@ -87,6 +87,22 @@ export function ReceiptViewer({ receiptId, onClose }: ReceiptViewerProps) {
     return null;
   }
 
+  if (receipt.status === 'processing') {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 flex flex-col items-center justify-center text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4" />
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Paragon w trakcie analizy</h3>
+        <p className="text-gray-600 dark:text-gray-400">
+          Proszę czekać, AI wyodrębnia dane z Twojego paragonu. 
+          Możesz zamknąć to okno, status zmieni się automatycznie na liście.
+        </p>
+        <Button onClick={onClose} variant="secondary" className="mt-6">
+          Zamknij
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-h-[90vh] overflow-y-auto">
       <div className="flex items-center justify-between mb-6">
@@ -125,10 +141,12 @@ export function ReceiptViewer({ receiptId, onClose }: ReceiptViewerProps) {
           <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Sklep</p>
           {isEditing ? (
             <Input
-              value={editedReceipt.shop.name || ''}
+              value={editedReceipt.shop?.name || ''}
               onChange={(e) => setEditedReceipt({
                 ...editedReceipt,
-                shop: { ...editedReceipt.shop, name: e.target.value }
+                shop: editedReceipt.shop 
+                  ? { ...editedReceipt.shop, name: e.target.value }
+                  : { id: 0, name: e.target.value, location: '' }
               })}
             />
           ) : (
@@ -192,10 +210,15 @@ export function ReceiptViewer({ receiptId, onClose }: ReceiptViewerProps) {
                     {isEditing ? (
                       <div className="space-y-1">
                         <Input
-                          value={item.product?.name || item.raw_name}
+                          value={item.product?.name || item.raw_name || ''}
                           onChange={(e) => {
                             const newItems = [...editedReceipt.items];
-                            newItems[index] = { ...item, product: { ...item.product, name: e.target.value } };
+                            newItems[index] = { 
+                              ...item, 
+                              product: item.product 
+                                ? { ...item.product, name: e.target.value }
+                                : { id: 0, name: e.target.value, normalized_name: e.target.value } // Fallback for null product
+                            };
                             setEditedReceipt({ ...editedReceipt, items: newItems });
                           }}
                           className="h-8 text-sm"
@@ -206,9 +229,9 @@ export function ReceiptViewer({ receiptId, onClose }: ReceiptViewerProps) {
                       <div className="flex items-center">
                         <div className="flex-1">
                           <p className="font-medium">
-                            {item.product.name || item.raw_name}
+                            {item.product?.name || item.raw_name}
                           </p>
-                          {item.product.name && item.raw_name !== item.product.name && (
+                          {item.product?.name && item.raw_name !== item.product.name && (
                             <p className="text-xs text-gray-500 dark:text-gray-400">
                               Oryginalna nazwa: {item.raw_name}
                             </p>

@@ -5,9 +5,9 @@ Loads environment variables from .env file and provides typed configuration.
 """
 
 import os
-from typing import List
+from typing import List, Union, Any
 from pydantic_settings import BaseSettings
-from pydantic import Field
+from pydantic import Field, field_validator
 
 
 class Settings(BaseSettings):
@@ -71,10 +71,10 @@ class Settings(BaseSettings):
         default=300, description="Ollama request timeout in seconds"
     )
     OLLAMA_MODEL: str = Field(
-        default="bielik", description="Ollama model name"
+        default="SpeakLeash/bielik-11b-v2.3-instruct:Q5_K_M", description="Ollama model name"
     )
     TEXT_MODEL: str = Field(
-        default="bielik:latest",
+        default="SpeakLeash/bielik-11b-v2.3-instruct:Q5_K_M",
         description="Ollama text model for receipt parsing",
     )
     VISION_MODEL: str = Field(
@@ -103,10 +103,20 @@ class Settings(BaseSettings):
         default=False, description="Enable debug mode (e.g. save intermediate images)"
     )
 
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+        if isinstance(v, str) and not v.startswith("["):
+            return [i.strip() for i in v.split(",")]
+        elif isinstance(v, list):
+            return v
+        return v
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = False
+        extra = "ignore"
 
 
 # Global settings instance

@@ -8,7 +8,6 @@ from datetime import datetime
 
 from app.database import Base
 
-
 class Receipt(Base):
     """Receipt model representing a processed receipt."""
     
@@ -20,6 +19,9 @@ class Receipt(Base):
     )
     
     id = Column(Integer, primary_key=True, index=True)
+    # --- DODANO user_id ---
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    # ----------------------
     shop_id = Column(Integer, ForeignKey("shops.id"), nullable=False, index=True)
     purchase_date = Column(Date, nullable=False, index=True)
     purchase_time = Column(String, nullable=True)  # HH:MM format
@@ -27,13 +29,16 @@ class Receipt(Base):
     subtotal = Column(Numeric(10, 2), nullable=True)
     tax = Column(Numeric(10, 2), nullable=True)
     source_file = Column(String, nullable=False)  # Path to uploaded file
-    image_path = Column(String, nullable=True)  # Path to receipt image (zgodnie z przewodnikiem)
-    ocr_text = Column(String, nullable=True)  # Raw OCR text
-    status = Column(String, nullable=False, default="pending")  # pending, processing, completed, error (zgodnie z przewodnikiem)
+    image_path = Column(String, nullable=True)
+    ocr_text = Column(String, nullable=True)
+    status = Column(String, nullable=False, default="pending")
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     
     # Relationships
+    # --- DODANO relację do User (opcjonalnie, dla kompletności) ---
+    user = relationship("User", back_populates="receipts")
+    # -------------------------------------------------------------
     shop = relationship("Shop", back_populates="receipts")
     items = relationship("ReceiptItem", back_populates="receipt", cascade="all, delete-orphan")
 
@@ -51,9 +56,9 @@ class ReceiptItem(Base):
     id = Column(Integer, primary_key=True, index=True)
     receipt_id = Column(Integer, ForeignKey("receipts.id"), nullable=False, index=True)
     product_id = Column(Integer, ForeignKey("products.id"), nullable=True, index=True)
-    raw_name = Column(String, nullable=False)  # Original name from receipt
+    raw_name = Column(String, nullable=False)
     quantity = Column(Numeric(10, 2), nullable=False, default=1.0)
-    unit = Column(String, nullable=True)  # e.g., "szt", "kg", "l"
+    unit = Column(String, nullable=True)
     unit_price = Column(Numeric(10, 2), nullable=True)
     total_price = Column(Numeric(10, 2), nullable=False)
     discount = Column(Numeric(10, 2), nullable=True, default=0.0)
@@ -63,4 +68,3 @@ class ReceiptItem(Base):
     # Relationships
     receipt = relationship("Receipt", back_populates="items")
     product = relationship("Product", back_populates="receipt_items")
-

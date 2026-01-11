@@ -36,7 +36,13 @@ def mock_ollama():
 @pytest.fixture
 def test_db() -> Generator[Session, None, None]:
     """Create in-memory SQLite database for testing"""
-    engine = create_engine("sqlite:///:memory:", echo=False, connect_args={"check_same_thread": False})
+    from sqlalchemy.pool import StaticPool
+    engine = create_engine(
+        "sqlite:///:memory:", 
+        echo=False, 
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool
+    )
     Base.metadata.create_all(engine)
     SessionLocal = sessionmaker(bind=engine)
     session = SessionLocal()

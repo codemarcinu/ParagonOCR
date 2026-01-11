@@ -11,7 +11,6 @@ from app.models.user import User # Assuming user auth needed eventually
 from app.dependencies import get_current_user
 
 router = APIRouter(
-    prefix="/pantry",
     tags=["pantry"]
 )
 

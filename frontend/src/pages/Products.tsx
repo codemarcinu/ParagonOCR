@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useProductStore } from '@/store/productStore';
 import { Plus, Search, Edit2, TrendingUp, AlertCircle, Home, ShoppingBag } from 'lucide-react';
@@ -161,7 +161,7 @@ export function Products() {
                                         const isExpanded = showPriceHistory === product.id;
 
                                         return (
-                                            <div key={product.id} style={{ display: 'contents' }}>
+                                            <React.Fragment key={product.id}>
                                                 <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 group transition-colors">
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                                                         {product.name}
@@ -219,7 +219,7 @@ export function Products() {
                                                         </td>
                                                     </tr>
                                                 )}
-                                            </div>
+                                            </React.Fragment>
                                         );
                                     })}
                                 </tbody>
