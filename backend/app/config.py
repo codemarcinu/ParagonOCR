@@ -37,12 +37,15 @@ class Settings(BaseSettings):
 
     # Database Configuration
     DATABASE_URL: str = Field(
-        default_factory=lambda: (
-            f"sqlite:///{os.path.expanduser('~')}/.paragonocr/receipts.db"
-            if os.path.exists("/proc/version") and "microsoft" in open("/proc/version").read().lower() and os.getcwd().startswith("/mnt/")
-            else "sqlite:///./data/receipts.db"
+        default_factory=lambda: os.getenv(
+            "DATABASE_URL",
+            (
+                f"sqlite:///{os.path.expanduser('~')}/.paragonocr/receipts.db"
+                if os.path.exists("/proc/version") and "microsoft" in open("/proc/version").read().lower() and os.getcwd().startswith("/mnt/")
+                else "sqlite:///./data/receipts.db"
+            )
         ),
-        description="SQLite database URL (auto-adjusts for WSL to avoid locking issues)"
+        description="Database URL (PostgreSQL or SQLite)"
     )
     DATABASE_ECHO: bool = Field(
         default=False, description="Echo SQL queries (for debugging)"

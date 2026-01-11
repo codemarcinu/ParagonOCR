@@ -17,11 +17,15 @@ db_dir = os.path.dirname(settings.DATABASE_URL.replace("sqlite:///", ""))
 if db_dir and not os.path.exists(db_dir):
     os.makedirs(db_dir, exist_ok=True)
 
-# Create SQLAlchemy engine with WAL mode for better concurrency
+# Create SQLAlchemy engine
+connect_args = {}
+if settings.DATABASE_URL.startswith("sqlite"):
+    connect_args["check_same_thread"] = False
+
 engine = create_engine(
     settings.DATABASE_URL,
     echo=settings.DATABASE_ECHO,
-    connect_args={"check_same_thread": False},  # Needed for SQLite
+    connect_args=connect_args,
 )
 
 # Enable WAL mode for SQLite (better concurrency)
