@@ -57,21 +57,27 @@ Wbudowany czat z modelem językowym, który ma dostęp do Twojej bazy produktów
 - **Ollama** z modelem `SpeakLeash/bielik-11b-v2.3-instruct:Q4_K_M` (lub innym)
 - **Google Cloud Platform Project** (z włączonym Vision API i plikiem `gcp_key.json`)
 
-### Instalacja (5 minut)
+### Instalacja i Uruchomienie (5 minut)
 
 ```bash
 # Sklonuj repozytorium
 git clone <repo-url>
 cd ParagonOCR
 
-# Windows
-1. Uruchom `setup.bat` (zainstaluje zależności i naprawi środowisko)
-2. Uruchom `run_app.bat` (start serwerów)
+# Windows (WSL lub Native)
+1. Uruchom `start_windows.bat`
+   - Automatycznie wykryje środowisko, zainstaluje zależności i uruchomi serwery.
+   - Frontend: http://localhost:5173
+   - Backend: http://localhost:8000
 
-# Linux / WSL
-1. ./scripts/setup.sh
-2. ./scripts/dev.sh
+# Linux / WSL (Terminal)
+1. `./scripts/setup_wsl.sh` (pierwsze uruchomienie)
+2. `./scripts/start_dev.sh` (uruchomienie serwerów)
 ```
+
+**Konfiguracja:**
+Projekt domyślnie korzysta z zewnętrznej bazy **PostgreSQL** (skonfigurowana w `.env`).
+Nie wymaga lokalnej instalacji bazy danych.
 
 **Dostęp:**
 - Frontend: http://localhost:5173
