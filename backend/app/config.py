@@ -16,10 +16,12 @@ class Settings(BaseSettings):
     # API Configuration
     API_V1_PREFIX: str = "/api/v1"
     CORS_ORIGINS: List[str] = Field(
-        # Dodajemy port 5174, 5176 (i kolejne na zapas)
+        # Merged configuration: includes new ports and environment variable support
         default_factory=lambda: os.getenv(
             "CORS_ORIGINS", 
-            "http://localhost:3000,http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5179,http://127.0.0.1:5173,http://127.0.0.1:5179"
+            "http://localhost:3000,http://localhost:5173,http://localhost:5174,http://localhost:5175,"
+            "http://localhost:5176,http://localhost:5177,http://localhost:5179,"
+            "http://127.0.0.1:5173,http://127.0.0.1:5179"
         ).split(","),
         description="Allowed CORS origins (comma-separated)",
     )
